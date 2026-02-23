@@ -11,6 +11,8 @@ const Settings = (() => {
     problemlosning: false,
     extraEnabled: false,
     extraType: 'uppstallning-add',
+    bildstod: false,
+    geometriTypes: ['area', 'perimeter'],
   };
 
   let state = { ...DEFAULTS };
@@ -35,26 +37,30 @@ const Settings = (() => {
   }
 
   // Getters – returnerar alltid kopior, aldrig referenser
-  function get()               { return { ...state, areas: [...state.areas] }; }
+  function get()               { return { ...state, areas: [...state.areas], geometriTypes: [...(state.geometriTypes || ['area','perimeter'])] }; }
   function getGrade()          { return state.grade; }
   function getAreas()          { return [...state.areas]; }
   function isExtraEnabled()    { return state.extraEnabled; }
   function getExtraType()      { return state.extraType; }
   function isProblemlosning()  { return state.problemlosning; }
+  function isBildstod()        { return state.bildstod; }
+  function getGeometriTypes()  { return [...(state.geometriTypes || ['area','perimeter'])]; }
 
   // Setters – sparar direkt
-  function setGrade(g)         { state.grade = parseInt(g, 10); save(); }
-  function setAreas(arr)       { state.areas = [...arr]; save(); }
-  function setExtraEnabled(b)  { state.extraEnabled = !!b; save(); }
-  function setExtraType(t)     { state.extraType = t; save(); }
-  function setProblemlosning(b){ state.problemlosning = !!b; save(); }
+  function setGrade(g)             { state.grade = parseInt(g, 10); save(); }
+  function setAreas(arr)           { state.areas = [...arr]; save(); }
+  function setExtraEnabled(b)      { state.extraEnabled = !!b; save(); }
+  function setExtraType(t)         { state.extraType = t; save(); }
+  function setProblemlosning(b)    { state.problemlosning = !!b; save(); }
+  function setBildstod(b)          { state.bildstod = !!b; save(); }
+  function setGeometriTypes(arr)   { state.geometriTypes = [...arr]; save(); }
 
   // Initiering
   load();
 
   return {
     get,
-    getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning,
-    setGrade, setAreas, setExtraEnabled, setExtraType, setProblemlosning,
+    getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning, isBildstod, getGeometriTypes,
+    setGrade, setAreas, setExtraEnabled, setExtraType, setProblemlosning, setBildstod, setGeometriTypes,
   };
 })();

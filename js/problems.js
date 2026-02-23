@@ -14,7 +14,7 @@ const Problems = (() => {
       multTables: [2],
       divTables: [],
       fractions: false,
-      geometry: false,
+      geometry: 'basic',
       decimals: false,
       clockMinuteStep: 30,  // hel och halv
     },
@@ -24,7 +24,7 @@ const Problems = (() => {
       multTables: [2, 3, 4, 5],
       divTables: [2, 3, 4, 5],
       fractions: false,
-      geometry: false,
+      geometry: 'basic',
       decimals: false,
       clockMinuteStep: 15,  // kvart i/över
     },
@@ -34,7 +34,7 @@ const Problems = (() => {
       multTables: [2, 3, 4, 5, 6, 7, 8, 9, 10],
       divTables: [2, 3, 4, 5, 6, 7, 8, 9, 10],
       fractions: 'intro',   // bara namnge
-      geometry: false,
+      geometry: 'basic',
       decimals: false,
       clockMinuteStep: 5,
     },
@@ -116,7 +116,7 @@ const Problems = (() => {
       area = pickRandom(areas);
     }
 
-    let problem = dispatchGenerate(area, settings.grade);
+    let problem = dispatchGenerate(area, settings);
 
     // Textuppgifter om aktiverat (bara för stöd­ba­ra typer)
     if (settings.problemlosning && Templates.canWrap(area)) {
@@ -145,15 +145,16 @@ const Problems = (() => {
     }
   }
 
-  function dispatchGenerate(area, grade) {
+  function dispatchGenerate(area, settings) {
+    const grade = settings.grade;
     const c = cfg(grade);
     switch (area) {
       case 'addition':       return genAddition(c);
       case 'subtraktion':    return genSubtraktion(c);
       case 'multiplikation': return genMultiplikation(c);
-      case 'division':       return genDivision(c);
+      case 'division':       return genDivision(c, grade);
       case 'brak':           return genBrak(grade);
-      case 'geometri':       return genGeometri(grade);
+      case 'geometri':       return genGeometri(grade, null, settings.geometriTypes);
       case 'klocka':         return genKlocka(c);
       case 'matt-langd':     return genMattLangd(grade);
       case 'matt-volym':     return genMattVolym(grade);
@@ -198,7 +199,7 @@ const Problems = (() => {
   // =========================================================
   //  Division
   // =========================================================
-  function genDivision(c) {
+  function genDivision(c, grade) {
     const tables = c.divTables;
     if (!tables || tables.length === 0) {
       // Fallback för åk 1
@@ -218,8 +219,10 @@ const Problems = (() => {
       b: divisor,        // nämnare (visas underst)
       operator: 'division',
       answer: quotient,
-      showCircles: dividend <= 30,
-      circleCount: dividend,
+      // bildstöd-grid visas bara för åk 1-4, styrs av inställning i app.js
+      bildstodEligible: (grade || 3) <= 4 && dividend <= 50,
+      rows: divisor,     // antal rader i rutnätet (= divisorn)
+      cols: quotient,    // antal per rad (= kvoten)
     };
   }
 
@@ -277,10 +280,9 @@ const Problems = (() => {
   // =========================================================
   //  Geometri
   // =========================================================
-  function genGeometri(grade, forceQuestion) {
+  function genGeometri(grade, forceQuestion, allowedTypes) {
     const level = cfg(grade).geometry;
     if (!level) {
-      // Fallback: generera addition istället
       return genAddition(cfg(grade));
     }
 
@@ -289,9 +291,19 @@ const Problems = (() => {
     if (level === 'with-triangle' || level === 'with-circle') shapePool.push('triangle');
     if (level === 'with-circle') shapePool.push('circle');
 
-    const shape    = pickRandom(shapePool);
-    const maxSide  = grade <= 4 ? 20 : 50;
-    const question = forceQuestion || pickRandom(['area', 'perimeter']);
+    const shape   = pickRandom(shapePool);
+    const maxSide = grade <= 2 ? 5 : grade <= 4 ? 20 : 50;
+
+    // Triangel kan bara ha area (inte omkrets utan hypotenusa)
+    const types = (allowedTypes && allowedTypes.length > 0) ? allowedTypes : ['area', 'perimeter'];
+    let question;
+    if (forceQuestion) {
+      question = forceQuestion;
+    } else if (shape === 'triangle') {
+      question = types.includes('area') ? 'area' : 'area'; // alltid area för triangel
+    } else {
+      question = pickRandom(types);
+    }
 
     let dimensions, area, perimeter;
 
