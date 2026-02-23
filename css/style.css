@@ -1,0 +1,535 @@
+/* ============================================================
+   Klassrummatte – Stilmall
+   Optimerad för projektor/storskärm i klassrum
+   ============================================================ */
+
+/* === Variabler === */
+:root {
+  --bg:             #f5f4f0;
+  --text:           #1a1a2e;
+  --text-muted:     #6b7280;
+  --accent:         #e63946;
+  --accent-2:       #457b9d;
+  --accent-3:       #2a9d8f;
+  --accent-warm:    #e9c46a;
+  --menu-bg:        #1a1a2e;
+  --menu-text:      #f0eeea;
+  --menu-border:    rgba(255,255,255,0.1);
+  --menu-hover:     rgba(255,255,255,0.08);
+  --menu-width:     300px;
+  --extra-width:    320px;
+  --problem-size:   clamp(2.8rem, 9vw, 7rem);
+  --problem-size-text: clamp(1.6rem, 4vw, 3rem);
+  --extra-size:     clamp(1.8rem, 3.5vw, 3rem);
+  --radius:         10px;
+  --shadow:         0 4px 24px rgba(0,0,0,0.12);
+  --transition:     0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === Reset & bas === */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === Hamburgarmeny-knapp === */
+#menu-toggle {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 300;
+  background: var(--menu-bg);
+  color: var(--menu-text);
+  border: none;
+  border-radius: var(--radius);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: background var(--transition), transform var(--transition);
+}
+
+#menu-toggle:hover {
+  background: #2d3563;
+  transform: scale(1.05);
+}
+
+.burger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--menu-text);
+  border-radius: 2px;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+/* Burger → X vid öppen meny */
+body.menu-open #menu-toggle .burger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+body.menu-open #menu-toggle .burger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+body.menu-open #menu-toggle .burger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* === Overlay (bakom meny) === */
+#menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+body.menu-open #menu-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* === Sidomeny === */
+#settings-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--menu-width);
+  background: var(--menu-bg);
+  color: var(--menu-text);
+  transform: translateX(calc(-1 * var(--menu-width)));
+  transition: transform var(--transition);
+  z-index: 200;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+body.menu-open #settings-menu {
+  transform: translateX(0);
+}
+
+#settings-menu h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  padding: 3.5rem 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--menu-border);
+  margin-bottom: 0.5rem;
+}
+
+.menu-section {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--menu-border);
+}
+
+.section-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 0.6rem;
+}
+
+/* Select */
+select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255,255,255,0.08);
+  color: var(--menu-text);
+  border: 1px solid var(--menu-border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+select:focus {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 1px;
+}
+
+select option {
+  background: #1a1a2e;
+  color: var(--menu-text);
+}
+
+/* Checkboxar */
+#area-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background var(--transition);
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.check-label:hover {
+  background: var(--menu-hover);
+}
+
+.check-label input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.check-label input[type="checkbox"]:checked {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
+.check-label input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 6px;
+  height: 10px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.check-label--mixed {
+  margin-top: 0.3rem;
+  border-top: 1px solid var(--menu-border);
+  padding-top: 0.6rem;
+  color: rgba(255,255,255,0.7);
+  font-style: italic;
+}
+
+.check-label--featured {
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.check-label small {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  font-style: normal;
+}
+
+#extra-task-options {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--menu-border);
+}
+
+/* === Hjälpklass === */
+.hidden { display: none !important; }
+
+/* === Huvudscen === */
+#stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  /* Ger plats åt extrauppgiftspanelen när den är synlig */
+  transition: padding-right var(--transition);
+}
+
+#stage:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--accent-2);
+}
+
+body.extra-visible #stage {
+  padding-right: var(--extra-width);
+}
+
+/* === Problemvisning === */
+#problem-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 3vw, 3rem);
+  flex-wrap: wrap;
+  padding: clamp(1rem, 4vw, 3rem);
+  font-size: var(--problem-size);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text);
+
+  opacity: 0;
+  transform: scale(0.88) translateY(12px);
+  transition: opacity 0.38s ease, transform 0.38s ease;
+}
+
+#problem-display.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Textuppgifter: lite mindre, med radbrytning */
+#problem-display .text-problem {
+  font-size: var(--problem-size-text);
+  font-weight: 600;
+  max-width: min(900px, 80vw);
+  line-height: 1.55;
+  text-align: center;
+}
+
+/* === Bråkvisning === */
+.fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  font-variant-numeric: lining-nums;
+}
+
+.fraction .numerator {
+  border-bottom: 0.07em solid currentColor;
+  padding: 0 0.15em 0.12em;
+  line-height: 1.1;
+  text-align: center;
+  min-width: 0.8em;
+}
+
+.fraction .denominator {
+  padding: 0.12em 0.15em 0;
+  line-height: 1.1;
+  text-align: center;
+  min-width: 0.8em;
+}
+
+/* === Division-cirklar === */
+.division-circles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.25rem, 0.8vw, 0.6rem);
+  max-width: 38vw;
+  align-content: center;
+  justify-content: center;
+}
+
+.division-circles .dot {
+  width: clamp(0.8rem, 2.2vw, 2rem);
+  height: clamp(0.8rem, 2.2vw, 2rem);
+  border-radius: 50%;
+  display: block;
+}
+
+/* === Klickhint === */
+#click-hint {
+  position: absolute;
+  bottom: 4vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  letter-spacing: 0.02em;
+}
+
+#click-hint.hidden-hint {
+  opacity: 0;
+}
+
+/* === Extrauppgiftspanel === */
+#extra-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: var(--extra-width);
+  background: white;
+  border-left: 4px solid var(--accent-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1.5rem;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.45s ease;
+  z-index: 50;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+}
+
+#extra-panel.visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.extra-label {
+  position: absolute;
+  top: 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+#extra-display {
+  font-size: var(--extra-size);
+  font-weight: 700;
+  color: var(--text);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* === Uppställning === */
+.uppstallning {
+  font-family: 'Courier New', 'Lucida Console', monospace;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1em;
+  font-size: var(--extra-size);
+}
+
+.uppstallning-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  white-space: pre;
+}
+
+.uppstallning-operator {
+  color: var(--accent);
+}
+
+.uppstallning-line {
+  width: 100%;
+  height: 3px;
+  background: var(--text);
+  border-radius: 2px;
+  margin: 0.15em 0;
+}
+
+.uppstallning-answer {
+  opacity: 0; /* Svaret är dolt */
+}
+
+/* === SVG-klocka === */
+.clock-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.clock-svg {
+  width: clamp(140px, 30vw, 280px);
+  height: clamp(140px, 30vw, 280px);
+}
+
+.clock-question {
+  font-size: clamp(1.4rem, 3.5vw, 2.8rem);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Extra-klocka (mindre) */
+#extra-display .clock-svg {
+  width: clamp(100px, 18vw, 180px);
+  height: clamp(100px, 18vw, 180px);
+}
+
+#extra-display .clock-question {
+  font-size: clamp(1rem, 2vw, 1.6rem);
+}
+
+/* === Geometri === */
+.geometry-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.geometry-shape {
+  font-size: 0.8em;
+  color: var(--accent-2);
+}
+
+.geometry-question {
+  font-size: 0.55em;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 0.3em;
+}
+
+/* === Mått === */
+.matt-display {
+  text-align: center;
+  line-height: 1.4;
+}
+
+.matt-unit {
+  color: var(--accent-2);
+}
+
+/* === Responsiv justering === */
+@media (max-width: 600px) {
+  :root {
+    --menu-width: 280px;
+    --extra-width: 240px;
+  }
+}
