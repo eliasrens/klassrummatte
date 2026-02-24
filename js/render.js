@@ -28,6 +28,13 @@ const Renderer = (() => {
       case 'oppna-utsaga': renderOppnaUtsaga(problem, container); break;
       case 'matt-langd':
       case 'matt-volym':   renderMatt(problem, container);        break;
+      case 'addition':
+      case 'subtraktion':
+        if      (problem.mode === 'uppstallning') renderUppstallning(problem, container);
+        else if (problem.mode === 'flersteg')     renderFlersteg(problem, container);
+        else if (problem.mode === 'decimaler')    renderDecimaler(problem, container);
+        else                                      renderArithmetic(problem, container);
+        break;
       default:             renderArithmetic(problem, container);  break;
     }
   }
@@ -52,6 +59,38 @@ const Renderer = (() => {
     const span = document.createElement('span');
     span.textContent = `${problem.a} ${problem.operator} ${problem.b} =`;
     container.appendChild(span);
+    const ans = document.createElement('span');
+    ans.className = 'answer-value answer-hidden';
+    ans.textContent = ` ${problem.answer}`;
+    container.appendChild(ans);
+  }
+
+  // =========================================================
+  //  Flerstegsaddition (a + b + c =)
+  // =========================================================
+  function renderFlersteg(problem, container) {
+    const span = document.createElement('span');
+    span.textContent = `${problem.a} + ${problem.b} + ${problem.c} =`;
+    container.appendChild(span);
+    const ans = document.createElement('span');
+    ans.className = 'answer-value answer-hidden';
+    ans.textContent = ` ${problem.answer}`;
+    container.appendChild(ans);
+  }
+
+  // =========================================================
+  //  Decimaler (komma-format)
+  // =========================================================
+  function renderDecimaler(problem, container) {
+    const d = problem.decimalDigits || 1;
+    function toComma(n) { return n.toFixed(d).replace('.', ','); }
+    const span = document.createElement('span');
+    span.textContent = `${toComma(problem.a)} ${problem.operator} ${toComma(problem.b)} =`;
+    container.appendChild(span);
+    const ans = document.createElement('span');
+    ans.className = 'answer-value answer-hidden';
+    ans.textContent = ` ${toComma(problem.answer)}`;
+    container.appendChild(ans);
   }
 
   // =========================================================
@@ -62,6 +101,10 @@ const Renderer = (() => {
     const eq = document.createElement('span');
     eq.textContent = '=';
     container.appendChild(eq);
+    const ans = document.createElement('span');
+    ans.className = 'answer-value answer-hidden';
+    ans.textContent = ` ${problem.answer}`;
+    container.appendChild(ans);
   }
 
   // =========================================================
@@ -74,6 +117,10 @@ const Renderer = (() => {
     expr.className = 'prioritet-expr';
     expr.textContent = `${problem.expression} =`;
     wrap.appendChild(expr);
+    const ans = document.createElement('span');
+    ans.className = 'answer-value answer-hidden';
+    ans.textContent = ` ${problem.answer}`;
+    wrap.appendChild(ans);
     container.appendChild(wrap);
   }
 
@@ -129,6 +176,10 @@ const Renderer = (() => {
       container.appendChild(buildFractionEl(problem.b.numerator, problem.b.denominator));
       appendText(container, ' =');
     }
+    const ans = document.createElement('span');
+    ans.className = 'answer-value answer-hidden';
+    ans.textContent = ` ${problem.answer}`;
+    container.appendChild(ans);
   }
 
   // =========================================================
@@ -208,7 +259,7 @@ const Renderer = (() => {
   }
 
   // =========================================================
-  //  Uppställning (extrauppgift)
+  //  Uppställning (huvud och extrauppgift)
   // =========================================================
   function renderUppstallning(problem, container) {
     const aStr   = String(problem.a);

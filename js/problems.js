@@ -24,18 +24,18 @@ const Problems = (() => {
       fractions: 'intro', geometry: 'basic', decimals: false, clockMinuteStep: 5,
     },
     4: {
-      addMax: 10000, subMax: 10000,
+      addMax: 1000, subMax: 1000,  // Capped – nya nivåer via addSubMode
       multTables: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], divTables: [2, 3, 4, 5, 6, 7, 8, 9, 10],
       fractions: 'same-den', geometry: 'basic', decimals: false, clockMinuteStep: 1,
     },
     5: {
-      addMax: 100000, subMax: 100000,
+      addMax: 1000, subMax: 1000,  // Capped – nya nivåer via addSubMode
       multTables: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       divTables: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       fractions: 'diff-den', geometry: 'with-triangle', decimals: true, clockMinuteStep: 1,
     },
     6: {
-      addMax: 1000000, subMax: 1000000,
+      addMax: 1000, subMax: 1000,  // Capped – nya nivåer via addSubMode
       multTables: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       divTables: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       fractions: 'full', geometry: 'with-circle', decimals: true, clockMinuteStep: 1,
@@ -54,6 +54,135 @@ const Problems = (() => {
   function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
   function lcm(a, b) { return (a * b) / gcd(a, b); }
   function cfg(grade) { return GRADE_CONFIG[grade] || GRADE_CONFIG[3]; }
+
+  // Kontrollerar om addition a + b kräver minnessiffra i något steg
+  function hasCarry(a, b) {
+    let carry = 0;
+    while (a > 0 || b > 0) {
+      const sum = (a % 10) + (b % 10) + carry;
+      carry = Math.floor(sum / 10);
+      if (carry > 0) return true;
+      a = Math.floor(a / 10);
+      b = Math.floor(b / 10);
+    }
+    return false;
+  }
+
+  // Kontrollerar om subtraktion a - b kräver lån i något steg
+  function hasBorrow(a, b) {
+    while (a > 0 || b > 0) {
+      if ((b % 10) > (a % 10)) return true;
+      a = Math.floor(a / 10);
+      b = Math.floor(b / 10);
+    }
+    return false;
+  }
+
+  // Genererar addition utan minnessiffra (varje sifferpar ≤ 9)
+  function genNoCarryAdd(digits) {
+    let a = 0, b = 0, mult = 1;
+    for (let i = 0; i < digits; i++) {
+      const isLeading = (i === digits - 1);
+      const aDigit = isLeading ? randInt(1, 9) : randInt(0, 9);
+      const bDigit = isLeading ? randInt(1, 9 - aDigit) : randInt(0, 9 - aDigit);
+      a += aDigit * mult;
+      b += bDigit * mult;
+      mult *= 10;
+    }
+    return { a, b };
+  }
+
+  // Genererar subtraktion utan lån (varje sifferpar bDigit ≤ aDigit)
+  function genNoCarrySub(digits) {
+    let a = 0, b = 0, mult = 1;
+    for (let i = 0; i < digits; i++) {
+      const isLeading = (i === digits - 1);
+      const aDigit = isLeading ? randInt(2, 9) : randInt(0, 9);
+      const bDigit = isLeading ? randInt(1, aDigit - 1) : randInt(0, aDigit);
+      a += aDigit * mult;
+      b += bDigit * mult;
+      mult *= 10;
+    }
+    return { a, b };
+  }
+
+  // Decimaler: 1 eller 2 decimaler, integer-aritmetik internt för precision
+  function genDecimaler(grade, operator) {
+    const decPlaces = grade >= 5 ? 2 : 1;
+    const mult      = Math.pow(10, decPlaces);
+    const maxRaw    = grade >= 5 ? 9999 : 999;
+
+    if (operator === '+') {
+      const aRaw   = randInt(mult, Math.floor(maxRaw * 0.6));
+      const bRaw   = randInt(mult, maxRaw - aRaw);
+      const a      = aRaw / mult;
+      const b      = bRaw / mult;
+      const answer = (aRaw + bRaw) / mult;
+      return { type: 'addition', a, b, operator: '+', answer, mode: 'decimaler', decimalDigits: decPlaces };
+    } else {
+      const aRaw   = randInt(mult * 2, maxRaw);
+      const bRaw   = randInt(mult, aRaw - mult);
+      const a      = aRaw / mult;
+      const b      = bRaw / mult;
+      const answer = (aRaw - bRaw) / mult;
+      return { type: 'subtraktion', a, b, operator: '−', answer, mode: 'decimaler', decimalDigits: decPlaces };
+    }
+  }
+
+  // Flerstegsaddition: 3 termer
+  function genFlersteg(grade) {
+    const max = grade >= 5 ? 499 : 199;
+    const a   = randInt(10, Math.floor(max * 0.4));
+    const b   = randInt(10, Math.floor(max * 0.4));
+    const c   = randInt(10, Math.max(10, max - a - b));
+    return { type: 'addition', a, b, c, operator: '+', answer: a + b + c, mode: 'flersteg' };
+  }
+
+  // Uppställning addition (med/utan växling)
+  function genUppstallningAdd(grade, addSubVaxling) {
+    const vaxlingar = addSubVaxling && addSubVaxling.length > 0 ? addSubVaxling : ['med'];
+    const vaxling   = pickRandom(vaxlingar);
+    const digits    = grade <= 2 ? 2 : grade <= 3 ? 3 : 4;
+
+    if (vaxling === 'utan') {
+      const { a, b } = genNoCarryAdd(digits);
+      return { type: 'addition', a, b, operator: '+', answer: a + b, mode: 'uppstallning', vaxling: false };
+    }
+
+    // Med växling – retry tills carry uppstår
+    const min = Math.pow(10, digits - 1);
+    const max = Math.pow(10, digits) - 1;
+    let a, b, attempts = 0;
+    do {
+      a = randInt(min, Math.floor(max * 0.7));
+      b = randInt(min, max - a);
+      attempts++;
+    } while (!hasCarry(a, b) && attempts < 20);
+    return { type: 'addition', a, b, operator: '+', answer: a + b, mode: 'uppstallning', vaxling: true };
+  }
+
+  // Uppställning subtraktion (med/utan växling)
+  function genUppstallningSub(grade, addSubVaxling) {
+    const vaxlingar = addSubVaxling && addSubVaxling.length > 0 ? addSubVaxling : ['med'];
+    const vaxling   = pickRandom(vaxlingar);
+    const digits    = grade <= 2 ? 2 : grade <= 3 ? 3 : 4;
+
+    if (vaxling === 'utan') {
+      const { a, b } = genNoCarrySub(digits);
+      return { type: 'subtraktion', a, b, operator: '−', answer: a - b, mode: 'uppstallning', vaxling: false };
+    }
+
+    // Med växling – retry tills borrow uppstår
+    const min = Math.pow(10, digits - 1);
+    const max = Math.pow(10, digits) - 1;
+    let a, b, attempts = 0;
+    do {
+      a = randInt(Math.floor(min * 1.5), max);
+      b = randInt(min, Math.max(min, a - min));
+      attempts++;
+    } while (!hasBorrow(a, b) && attempts < 20);
+    return { type: 'subtraktion', a, b, operator: '−', answer: a - b, mode: 'uppstallning', vaxling: true };
+  }
 
   // =========================================================
   //  Huvudfunktioner
@@ -94,15 +223,16 @@ const Problems = (() => {
   }
 
   function dispatchGenerate(area, settings) {
-    const grade       = settings.grade;
-    const c           = cfg(grade);
-    const multDivMode = settings.multDivMode || ['tables-basic'];
-
+    const grade          = settings.grade;
+    const c              = cfg(grade);
+    const multDivMode    = settings.multDivMode    || ['tables-basic'];
     const specificTables = settings.specificTables || [1,2,3,4,5,6,7,8,9];
+    const addSubMode     = settings.addSubMode     || ['standard'];
+    const addSubVaxling  = settings.addSubVaxling  || ['med'];
 
     switch (area) {
-      case 'addition':          return genAddition(c);
-      case 'subtraktion':       return genSubtraktion(c);
+      case 'addition':          return genAddition(c, grade, addSubMode, addSubVaxling);
+      case 'subtraktion':       return genSubtraktion(c, grade, addSubMode, addSubVaxling);
       case 'multiplikation':    return genMultiplikation(c, grade, multDivMode, specificTables);
       case 'division':          return genDivision(c, grade, multDivMode, settings.divisionRest || false, specificTables);
       case 'prioritet':         return genPrioritet(grade);
@@ -112,14 +242,30 @@ const Problems = (() => {
       case 'klocka':            return genKlocka(c);
       case 'matt-langd':        return genMattLangd(grade);
       case 'matt-volym':        return genMattVolym(grade);
-      default:                  return genAddition(c);
+      default:                  return genAddition(c, grade, addSubMode, addSubVaxling);
     }
   }
 
   // =========================================================
-  //  Addition
+  //  Addition – stödjer fyra nivåer via addSubMode
   // =========================================================
-  function genAddition(c) {
+  function genAddition(c, grade, addSubMode, addSubVaxling) {
+    const modes = addSubMode && addSubMode.length > 0 ? addSubMode : ['standard'];
+
+    // Filtrera bort modes som inte är tillämpliga för aktuell årskurs
+    const validModes = modes.filter(m => {
+      if (m === 'uppstallning' && grade < 2) return false;
+      if (m === 'decimaler'    && grade < 4) return false;
+      if (m === 'flersteg'     && grade < 3) return false;
+      return true;
+    });
+    const mode = validModes.length > 0 ? pickRandom(validModes) : 'standard';
+
+    if (mode === 'uppstallning') return genUppstallningAdd(grade, addSubVaxling);
+    if (mode === 'decimaler')    return genDecimaler(grade, '+');
+    if (mode === 'flersteg')     return genFlersteg(grade);
+
+    // Standard
     const max = c.addMax;
     const a = randInt(1, Math.floor(max * 0.6));
     const b = randInt(1, max - a);
@@ -127,9 +273,23 @@ const Problems = (() => {
   }
 
   // =========================================================
-  //  Subtraktion
+  //  Subtraktion – stödjer tre nivåer via addSubMode (ingen flersteg)
   // =========================================================
-  function genSubtraktion(c) {
+  function genSubtraktion(c, grade, addSubMode, addSubVaxling) {
+    const modes = addSubMode && addSubMode.length > 0 ? addSubMode : ['standard'];
+
+    const validModes = modes.filter(m => {
+      if (m === 'uppstallning' && grade < 2) return false;
+      if (m === 'decimaler'    && grade < 4) return false;
+      if (m === 'flersteg') return false;  // Ingen flerstegs-subtraktion
+      return true;
+    });
+    const mode = validModes.length > 0 ? pickRandom(validModes) : 'standard';
+
+    if (mode === 'uppstallning') return genUppstallningSub(grade, addSubVaxling);
+    if (mode === 'decimaler')    return genDecimaler(grade, '−');
+
+    // Standard
     const max = c.subMax;
     const a = randInt(1, max);
     const b = randInt(0, a);
@@ -165,7 +325,7 @@ const Problems = (() => {
     const allTables = (c.multTables === 'all'
       ? [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] : c.multTables).filter(t => t <= 9);
     let tables = specificTables ? allTables.filter(t => specificTables.includes(t)) : allTables;
-    if (tables.length === 0) tables = allTables; // fallback om inget matchar årsklassen
+    if (tables.length === 0) tables = allTables;
     if (tables.length === 0) return { type: 'multiplikation', a: 2, b: 2, operator: '·', answer: 4 };
     const table  = pickRandom(tables);
     const factor = randInt(1, 12);
@@ -178,13 +338,13 @@ const Problems = (() => {
   // =========================================================
   function genDivision(c, grade, multDivMode, withRest, specificTables) {
     const tables = c.divTables;
-    if (!tables || tables.length === 0) return genAddition(c);
+    if (!tables || tables.length === 0) return genAddition(cfg(grade), grade, ['standard'], ['med']);
 
     const modes = multDivMode && multDivMode.length > 0 ? multDivMode : ['tables-basic'];
     const mode  = pickRandom(modes);
 
     if (mode === 'tables-ten') {
-      const tenPow  = grade >= 5 ? pickRandom([10, 100]) : 10;
+      const tenPow   = grade >= 5 ? pickRandom([10, 100]) : 10;
       const quotient = randInt(2, grade <= 3 ? 9 : grade <= 5 ? 99 : 999);
       const dividend = quotient * tenPow;
       return {
@@ -205,12 +365,12 @@ const Problems = (() => {
       };
     }
 
-    // tables-basic (standard) – cap at 9 to match label "Tabeller 1–9"
+    // tables-basic (standard)
     const allRealTables = (tables === 'all' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : tables).filter(t => t <= 9);
     let realTables = specificTables ? allRealTables.filter(t => specificTables.includes(t)) : allRealTables;
-    if (realTables.length === 0) realTables = allRealTables; // fallback
-    if (realTables.length === 0) return genAddition(c);
-    const divisor  = pickRandom(realTables);
+    if (realTables.length === 0) realTables = allRealTables;
+    if (realTables.length === 0) return genAddition(cfg(grade), grade, ['standard'], ['med']);
+    const divisor = pickRandom(realTables);
 
     if (withRest && divisor >= 2) {
       const quotient  = randInt(1, 9);
@@ -237,8 +397,6 @@ const Problems = (() => {
   //  Prioriteringsregler (räkneordning)
   // =========================================================
   function genPrioritet(grade) {
-    // Åk 3-4: mult/div före add/sub, inga parenteser
-    // Åk 5+: hälften av uppgifterna med parenteser
     const useParens  = grade >= 5 && Math.random() < 0.5;
     const maxFactor  = grade <= 3 ? 9 : grade <= 5 ? 12 : 20;
 
@@ -265,7 +423,6 @@ const Problems = (() => {
         else if (t === 2 && a > b) { expr = `(${a} − ${b}) · ${c}`;   answer = (a - b) * c; }
         else if (t === 3 && a > b) { expr = `${c} · (${a} − ${b})`;   answer = c * (a - b); }
         else if (t === 4) {
-          // (da + db) ÷ c — alltid jämnt
           const mult = randInt(2, 9);
           const sum  = c * mult;
           const da   = randInt(1, sum - 1);
@@ -280,7 +437,6 @@ const Problems = (() => {
       }
     }
 
-    // Fallback
     return { type: 'prioritet', expression: '3 + 4 · 2', answer: 11, hasParentheses: false };
   }
 
@@ -327,7 +483,7 @@ const Problems = (() => {
     const allDivTables = (c.divTables === 'all' ? [2,3,4,5,6,7,8,9,10] : (c.divTables || [2,3,4,5])).filter(t => t <= 9);
     let divTables = specificTables ? allDivTables.filter(t => specificTables.includes(t)) : allDivTables;
     if (divTables.length === 0) divTables = allDivTables;
-    if (!divTables || divTables.length === 0) return genAddition(c);
+    if (!divTables || divTables.length === 0) return genAddition(c, grade, ['standard'], ['med']);
     const divisor  = pickRandom(divTables);
     const quotient = randInt(2, grade <= 3 ? 9 : 12);
     const dividend = divisor * quotient;
@@ -380,7 +536,7 @@ const Problems = (() => {
   // =========================================================
   function genGeometri(grade, forceQuestion, allowedTypes) {
     const level = cfg(grade).geometry;
-    if (!level) return genAddition(cfg(grade));
+    if (!level) return genAddition(cfg(grade), grade, ['standard'], ['med']);
 
     const shapePool = ['square', 'rectangle'];
     if (level === 'with-triangle' || level === 'with-circle') shapePool.push('triangle');
@@ -394,7 +550,6 @@ const Problems = (() => {
     if (forceQuestion) {
       question = forceQuestion;
     } else if (shape === 'triangle') {
-      // Triangel: omkrets kräver alla tre sidor – visa bara area
       question = 'area';
     } else {
       question = pickRandom(types);
@@ -414,7 +569,7 @@ const Problems = (() => {
       area       = w * h;
       perimeter  = 2 * (w + h);
     } else if (shape === 'triangle') {
-      const evenBase = randInt(2, 15) * 2; // jämnt tal → hel area
+      const evenBase = randInt(2, 15) * 2;
       const h        = randInt(3, 20);
       dimensions = { base: evenBase, height: h };
       area       = (evenBase * h) / 2;

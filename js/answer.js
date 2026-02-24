@@ -13,6 +13,7 @@ const Answer = (() => {
     switch (a.type) {
       case 'addition':
       case 'subtraktion':
+        return a.a === b.a && a.b === b.b && a.c === b.c;
       case 'multiplikation':
       case 'division':
         return a.a === b.a && a.b === b.b;
@@ -49,6 +50,17 @@ const Answer = (() => {
     }
 
     switch (problem.type) {
+      case 'addition':
+      case 'subtraktion': {
+        if (problem.mode === 'uppstallning') {
+          const ansRow = problemDisplay.querySelector('.uppstallning-answer');
+          if (ansRow) ansRow.classList.add('shown');
+        } else {
+          const ansEl = problemDisplay.querySelector('.answer-hidden');
+          if (ansEl) ansEl.classList.remove('answer-hidden');
+        }
+        break;
+      }
       case 'oppna-utsaga': {
         const blank = problemDisplay.querySelector('.open-blank');
         if (blank) {
@@ -80,10 +92,10 @@ const Answer = (() => {
         break;
       }
       default: {
-        const ansSpan = document.createElement('span');
-        ansSpan.className = 'answer-value';
-        ansSpan.textContent = ` ${problem.answer}`;
-        problemDisplay.appendChild(ansSpan);
+        const ansEl = problemDisplay.querySelector('.answer-hidden');
+        if (ansEl) {
+          ansEl.classList.remove('answer-hidden');
+        }
       }
     }
   }

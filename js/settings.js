@@ -17,6 +17,8 @@ const Settings = (() => {
     geometriTypes: ['area', 'perimeter'],
     multDivMode: ['tables-basic'],
     specificTables: [1,2,3,4,5,6,7,8,9],
+    addSubMode: ['standard'],
+    addSubVaxling: ['med'],
   };
 
   let state = { ...DEFAULTS };
@@ -41,15 +43,27 @@ const Settings = (() => {
   }
 
   // Getters – returnerar alltid kopior, aldrig referenser
-  function get()               { return { ...state, areas: [...state.areas], geometriTypes: [...(state.geometriTypes || ['area','perimeter'])], multDivMode: [...(state.multDivMode || ['tables-basic'])], specificTables: [...(state.specificTables || [1,2,3,4,5,6,7,8,9])] }; }
+  function get() {
+    return {
+      ...state,
+      areas:         [...state.areas],
+      geometriTypes: [...(state.geometriTypes  || ['area','perimeter'])],
+      multDivMode:   [...(state.multDivMode    || ['tables-basic'])],
+      specificTables:[...(state.specificTables || [1,2,3,4,5,6,7,8,9])],
+      addSubMode:    [...(state.addSubMode     || ['standard'])],
+      addSubVaxling: [...(state.addSubVaxling  || ['med'])],
+    };
+  }
   function getGrade()          { return state.grade; }
   function getAreas()          { return [...state.areas]; }
   function isExtraEnabled()    { return state.extraEnabled; }
   function getExtraType()      { return state.extraType; }
   function isProblemlosning()  { return state.problemlosning; }
-  function isBildstod()          { return state.bildstod; }
-  function isBildstodInstant()   { return state.bildstodInstant; }
-  function getGeometriTypes()    { return [...(state.geometriTypes || ['area','perimeter'])]; }
+  function isBildstod()        { return state.bildstod; }
+  function isBildstodInstant() { return state.bildstodInstant; }
+  function getGeometriTypes()  { return [...(state.geometriTypes || ['area','perimeter'])]; }
+  function getAddSubMode()     { return [...(state.addSubMode  || ['standard'])]; }
+  function getAddSubVaxling()  { return [...(state.addSubVaxling || ['med'])]; }
 
   // Setters – sparar direkt
   function setGrade(g)             { state.grade = parseInt(g, 10); save(); }
@@ -63,13 +77,18 @@ const Settings = (() => {
   function setGeometriTypes(arr)   { state.geometriTypes = [...arr]; save(); }
   function setMultDivMode(arr)     { state.multDivMode = [...arr]; save(); }
   function setSpecificTables(arr)  { state.specificTables = [...arr]; save(); }
+  function setAddSubMode(arr)      { state.addSubMode = [...arr]; save(); }
+  function setAddSubVaxling(arr)   { state.addSubVaxling = [...arr]; save(); }
 
   // Initiering
   load();
 
   return {
     get,
-    getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning, isBildstod, isBildstodInstant, getGeometriTypes,
-    setGrade, setAreas, setExtraEnabled, setExtraType, setProblemlosning, setBildstod, setBildstodInstant, setDivisionRest, setGeometriTypes, setMultDivMode, setSpecificTables,
+    getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning,
+    isBildstod, isBildstodInstant, getGeometriTypes, getAddSubMode, getAddSubVaxling,
+    setGrade, setAreas, setExtraEnabled, setExtraType, setProblemlosning,
+    setBildstod, setBildstodInstant, setDivisionRest, setGeometriTypes,
+    setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling,
   };
 })();

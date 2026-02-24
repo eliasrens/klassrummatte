@@ -61,8 +61,14 @@ const Menu = (() => {
     document.getElementById('specific-tables-wrap').classList.toggle('hidden', !tablesBasicChecked);
   }
 
+  function updateAddSubVaxlingVisibility() {
+    const uppstallningChecked = document.querySelector('#addsub-mode-checkboxes input[value="uppstallning"]').checked;
+    document.getElementById('addsub-vaxling-wrap').classList.toggle('hidden', !uppstallningChecked);
+  }
+
   function updateConditionalSections() {
     const areas        = Settings.getAreas();
+    const showAddSub   = areas.some(a => a === 'addition'  || a === 'subtraktion' || a === 'blandad');
     const showMultDiv  = areas.some(a => a === 'multiplikation' || a === 'division' || a === 'blandad');
     const showGeometri = areas.some(a => a === 'geometri'       || a === 'blandad');
     const showDivRest  = areas.some(a => a === 'division'       || a === 'blandad');
@@ -79,6 +85,7 @@ const Menu = (() => {
       }
     }
 
+    setSection('addsub-group-label',  'addsub-section',  showAddSub);
     setSection('multdiv-group-label',  'multdiv-section',  showMultDiv);
     setSection('geometri-group-label', 'geometri-section', showGeometri);
     document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
@@ -109,6 +116,15 @@ const Menu = (() => {
     document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
       cb.checked = s.areas.includes(cb.value);
     });
+
+    document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
+      cb.checked = (s.addSubMode || ['standard']).includes(cb.value);
+    });
+
+    document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = (s.addSubVaxling || ['med']).includes(cb.value);
+    });
+    updateAddSubVaxlingVisibility();
 
     document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
       cb.checked = (s.multDivMode || ['tables-basic']).includes(cb.value);
@@ -153,6 +169,23 @@ const Menu = (() => {
         Settings.setAreas(checked);
         updateConditionalSections();
         updateBildstodCheckbox();
+      });
+    });
+
+    document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#addsub-mode-checkboxes > label input:checked')].map(c => c.value);
+        if (checked.length > 0) Settings.setAddSubMode(checked);
+        else cb.checked = true;
+        updateAddSubVaxlingVisibility();
+      });
+    });
+
+    document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#addsub-vaxling-checkboxes input:checked')].map(c => c.value);
+        if (checked.length > 0) Settings.setAddSubVaxling(checked);
+        else cb.checked = true;
       });
     });
 

@@ -18,7 +18,7 @@
   --menu-hover:     rgba(255,255,255,0.08);
   --menu-width:     560px;
   --extra-width:    320px;
-  --problem-size:   clamp(2.8rem, 9vw, 7rem);
+  --problem-size:   clamp(2.4rem, 8vw, 6rem);
   --problem-size-text: clamp(1.6rem, 4vw, 3rem);
   --extra-size:     clamp(1.8rem, 3.5vw, 3rem);
   --radius:         10px;
@@ -201,6 +201,7 @@ select option {
 /* Checkboxar */
 #area-checkboxes,
 #multdiv-mode-checkboxes,
+#addsub-mode-checkboxes,
 #geometri-type-checkboxes {
   display: flex;
   flex-direction: column;
@@ -480,7 +481,17 @@ body.extra-visible #stage {
 }
 
 .uppstallning-answer {
-  opacity: 0; /* Svaret är dolt */
+  opacity: 0; /* Svaret är dolt tills "Visa svar" klickas */
+  transition: opacity 0.3s ease;
+}
+
+.uppstallning-answer.shown {
+  opacity: 1;
+}
+
+/* Uppställning i huvudvisningen – ärv font-storlek från #problem-display */
+#problem-display .uppstallning {
+  font-size: clamp(2rem, 5vw, 4rem);
 }
 
 /* === SVG-klocka === */
@@ -821,6 +832,11 @@ body.extra-visible .show-answer-btn {
 }
 
 /* === Svar-visning === */
+/* Förregistrerat svar – bevarar layoututrymme, döljer texten tills "Visa svar" klickas */
+.answer-hidden {
+  visibility: hidden;
+}
+
 .answer-value {
   color: var(--accent);
   font-weight: 700;
