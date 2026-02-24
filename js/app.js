@@ -6,11 +6,12 @@ const App = (() => {
   // =========================================================
   //  Konstanter
   // =========================================================
-  const EXTRA_DELAY_MS = 10000; // 10 sekunder
-  const CIRCLE_COLORS  = ['#e63946', '#457b9d', '#2a9d8f', '#e9c46a', '#f4a261', '#a8dadc'];
-  const DOT_COLOR_A    = '#e63946'; // röd – första operand
-  const DOT_COLOR_B    = '#457b9d'; // blå – andra operand
-  const DOT_COLOR_GREY = '#ccc';    // grå – subtraherade prickar
+  const EXTRA_DELAY_MS    = 10000;
+  const BILDSTOD_DELAY_MS = 10000;
+  const CIRCLE_COLORS     = ['#e63946', '#457b9d', '#2a9d8f', '#e9c46a', '#f4a261', '#a8dadc'];
+  const DOT_COLOR_A       = '#e63946';
+  const DOT_COLOR_B       = '#457b9d';
+  const DOT_COLOR_GREY    = '#d1d5db';
 
   // =========================================================
   //  DOM-referenser
@@ -23,7 +24,8 @@ const App = (() => {
   // =========================================================
   let problemVisible = false;
   let extraTimer     = null;
-  let hideTimer      = null; // används för att undvika race condition vid klick
+  let hideTimer      = null;
+  let bildstodTimer  = null;
 
   // =========================================================
   //  Init
@@ -41,11 +43,7 @@ const App = (() => {
     loadSettingsIntoUI();
     bindSettingsUI();
     bindStageEvents();
-
-    menuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
+    menuToggle.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
     menuOverlay.addEventListener('click', closeMenu);
   }
 
@@ -54,11 +52,8 @@ const App = (() => {
   // =========================================================
   function bindStageEvents() {
     stage.addEventListener('click', handleStageClick);
-    stage.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        handleStageClick();
-      }
+    stage.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleStageClick(); }
     });
   }
 
@@ -77,16 +72,13 @@ const App = (() => {
     if (!problemVisible) {
       showNewProblem();
     } else {
-      // Starta uttoningAnimation
+      // Starta uttoning
       problemDisplay.classList.remove('visible');
       clearExtraTask();
+      clearBildstod();
       problemVisible = false;
 
-      // Avbryt eventuell pågående hide-timer (kan inte hända i normal flöde,
-      // men säkrar mot dubbel-klick)
       if (hideTimer) clearTimeout(hideTimer);
-
-      // Vänta tills uttoning är klar, visa sedan ny uppgift
       hideTimer = setTimeout(() => {
         hideTimer = null;
         problemDisplay.innerHTML = '';
@@ -100,23 +92,29 @@ const App = (() => {
   // =========================================================
   function showNewProblem() {
     clearExtraTask();
+    clearBildstod();
+
     const settings = Settings.get();
     const problem  = Problems.generateProblem(settings);
 
     renderProblem(problem, settings);
 
     problemDisplay.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        problemDisplay.classList.add('visible');
-      });
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      problemDisplay.classList.add('visible');
+    }));
 
     clickHint.classList.add('hidden-hint');
     problemVisible = true;
 
     if (settings.extraEnabled) {
       extraTimer = setTimeout(() => showExtraTask(settings), EXTRA_DELAY_MS);
+    }
+
+    // Bildstöd – direkt eller fördröjt beroende på inställning
+    if (settings.bildstod && hasBildstodSupport(problem, settings)) {
+      const delay = settings.bildstodInstant ? 80 : BILDSTOD_DELAY_MS;
+      bildstodTimer = setTimeout(() => appendBildstod(problem, settings), delay);
     }
   }
 
@@ -127,16 +125,176 @@ const App = (() => {
     setTimeout(() => { extraDisplay.innerHTML = ''; }, 460);
   }
 
+  function clearBildstod() {
+    if (bildstodTimer) { clearTimeout(bildstodTimer); bildstodTimer = null; }
+    // Ta bort eventuellt redan inlagt bildstöd
+    const existing = problemDisplay.querySelector('.bildstod-container');
+    if (existing) existing.remove();
+  }
+
   function showExtraTask(settings) {
     const extra = Problems.generateExtraProblem(settings);
     renderExtraProblem(extra, settings);
     extraPanel.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        extraPanel.classList.add('visible');
-        document.body.classList.add('extra-visible');
-      });
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      extraPanel.classList.add('visible');
+      document.body.classList.add('extra-visible');
+    }));
+  }
+
+  // =========================================================
+  //  Bildstöd – fördröjd rendering
+  // =========================================================
+
+  // Returnerar true om detta problem kan ha bildstöd
+  function hasBildstodSupport(problem, settings) {
+    const grade = settings.grade;
+    switch (problem.type) {
+      case 'division':       return problem.bildstodEligible && grade <= 4;
+      case 'addition':
+      case 'subtraktion':    return grade <= 3 && problem.a <= 30 && problem.b <= 30;
+      case 'multiplikation': return grade <= 3 && problem.a * problem.b <= 30 && problem.a <= 10 && problem.b <= 10;
+      case 'matt-langd':
+      case 'matt-volym':     return canBuildMattBildstod(problem);
+      default:               return false;
+    }
+  }
+
+  // Bygger och lägger till bildstödet i problem-display, med fade-in
+  function appendBildstod(problem, settings) {
+    if (!problemVisible) return;
+
+    const el = buildBildstodEl(problem, settings);
+    if (!el) return;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'bildstod-container bildstod-anim';
+    wrapper.appendChild(el);
+    problemDisplay.appendChild(wrapper);
+  }
+
+  function buildBildstodEl(problem, settings) {
+    const grade = settings.grade;
+    switch (problem.type) {
+      case 'division':
+        if (problem.bildstodEligible && grade <= 4)
+          return buildDivisionGrid(problem.rows, problem.cols);
+        break;
+      case 'addition':
+        if (grade <= 3 && problem.a + problem.b <= 30)
+          return buildArithmeticDots(problem);
+        break;
+      case 'subtraktion':
+        if (grade <= 3 && problem.a <= 30)
+          return buildArithmeticDots(problem);
+        break;
+      case 'multiplikation':
+        if (grade <= 3 && problem.a * problem.b <= 30 && problem.a <= 10 && problem.b <= 10)
+          return buildArithmeticDots(problem);
+        break;
+      case 'matt-langd':
+      case 'matt-volym':
+        return buildMattBildstodEl(problem);
+    }
+    return null;
+  }
+
+  // Prickar för aritmetik
+  function buildArithmeticDots(problem) {
+    const { type, a, b } = problem;
+
+    if (type === 'addition') {
+      const wrap = makeDotWrap('bildstod-dots');
+      for (let i = 0; i < a; i++) addDot(wrap, DOT_COLOR_A);
+      // visuell separator
+      const sep = document.createElement('div');
+      sep.style.cssText = 'width:100%; height:0; flex-basis:100%;';
+      wrap.appendChild(sep);
+      for (let i = 0; i < b; i++) addDot(wrap, DOT_COLOR_B);
+      return wrap;
+    }
+
+    if (type === 'subtraktion') {
+      const wrap = makeDotWrap('bildstod-dots');
+      for (let i = 0; i < a; i++) addDot(wrap, i < (a - b) ? DOT_COLOR_A : DOT_COLOR_GREY);
+      return wrap;
+    }
+
+    if (type === 'multiplikation') {
+      const rows = Math.min(a, b), cols = Math.max(a, b);
+      if (rows * cols > 30 || rows > 10 || cols > 10) return null;
+      const grid = makeDotWrap('bildstod-mult-grid');
+      for (let r = 0; r < rows; r++) {
+        const row = document.createElement('div');
+        row.className = 'bildstod-row';
+        for (let c = 0; c < cols; c++) addDot(row, CIRCLE_COLORS[r % CIRCLE_COLORS.length]);
+        grid.appendChild(row);
+      }
+      return grid;
+    }
+
+    return null;
+  }
+
+  // Rutnät för division: divisor rader × quotient kolumner
+  function buildDivisionGrid(rows, cols) {
+    const grid = document.createElement('div');
+    grid.className = 'division-grid';
+    for (let r = 0; r < rows; r++) {
+      const row = document.createElement('div');
+      row.className = 'division-grid-row';
+      for (let c = 0; c < cols; c++) {
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.style.background = CIRCLE_COLORS[r % CIRCLE_COLORS.length];
+        row.appendChild(dot);
+      }
+      grid.appendChild(row);
+    }
+    return grid;
+  }
+
+  function canBuildMattBildstod(problem) {
+    const { from, factor } = problem.conversion;
+    return Number.isInteger(from) && from >= 1 && from <= 10 &&
+           Number.isInteger(factor) && factor >= 2 && factor <= 20;
+  }
+
+  function buildMattBildstodEl(problem) {
+    const { from, fromUnit, toUnit, factor } = problem.conversion;
+    if (!canBuildMattBildstod(problem)) return null;
+
+    const blockFactor = Math.round(factor);
+    const wrap = document.createElement('div');
+    wrap.className = 'matt-bildstod';
+
+    for (let i = 0; i < from; i++) {
+      const big = document.createElement('div');
+      big.className = 'matt-block-big';
+
+      const lbl = document.createElement('span');
+      lbl.className = 'matt-block-label';
+      lbl.textContent = `1 ${fromUnit}`;
+      big.appendChild(lbl);
+
+      const inner = document.createElement('div');
+      inner.className = 'matt-block-inner';
+      for (let j = 0; j < blockFactor; j++) {
+        const small = document.createElement('span');
+        small.className = 'matt-block-small';
+        small.title = `1 ${toUnit}`;
+        inner.appendChild(small);
+      }
+      big.appendChild(inner);
+
+      const sub = document.createElement('span');
+      sub.className = 'matt-block-sublabel';
+      sub.textContent = `= ${blockFactor} ${toUnit}`;
+      big.appendChild(sub);
+
+      wrap.appendChild(big);
+    }
+    return wrap;
   }
 
   // =========================================================
@@ -155,127 +313,72 @@ const App = (() => {
     }
 
     switch (problem.type) {
-      case 'division':
-        renderDivision(problem, problemDisplay, settings);
-        break;
-      case 'klocka':
-        renderKlocka(problem, problemDisplay);
-        break;
-      case 'brak':
-        renderBrak(problem, problemDisplay);
-        break;
-      case 'geometri':
-        renderGeometri(problem, problemDisplay);
-        break;
+      case 'division':       renderDivision(problem, problemDisplay);      break;
+      case 'klocka':         renderKlocka(problem, problemDisplay);         break;
+      case 'brak':           renderBrak(problem, problemDisplay);           break;
+      case 'geometri':       renderGeometri(problem, problemDisplay);       break;
+      case 'prioritet':      renderPrioritet(problem, problemDisplay);      break;
+      case 'oppna-utsaga':   renderOppnaUtsaga(problem, problemDisplay);    break;
       case 'matt-langd':
-      case 'matt-volym':
-        renderMatt(problem, problemDisplay, settings);
-        break;
-      default:
-        renderArithmetic(problem, problemDisplay, settings);
-        break;
+      case 'matt-volym':     renderMatt(problem, problemDisplay);           break;
+      default:               renderArithmetic(problem, problemDisplay);     break;
     }
   }
 
   // =========================================================
-  //  Aritmetik (addition, subtraktion, multiplikation)
+  //  Aritmetik
   // =========================================================
-  function renderArithmetic(problem, container, settings) {
-    const grade = settings ? settings.grade : 3;
-    const bildstod = settings && settings.bildstod;
-
+  function renderArithmetic(problem, container) {
     const span = document.createElement('span');
-    span.textContent = `${problem.a} ${problem.operator} ${problem.b} = ?`;
+    span.textContent = `${problem.a} ${problem.operator} ${problem.b} =`;
     container.appendChild(span);
-
-    // Bildstöd-prickar: bara åk 1-3 och om aktiverat
-    if (bildstod && grade <= 3) {
-      const dots = buildArithmeticDots(problem);
-      if (dots) container.appendChild(dots);
-    }
-  }
-
-  function buildArithmeticDots(problem) {
-    const { type, a, b } = problem;
-    const MAX = 30;
-
-    if (type === 'addition') {
-      if (a + b > MAX) return null;
-      const wrap = makeDotWrap();
-      // a röda prickar
-      for (let i = 0; i < a; i++) addDot(wrap, DOT_COLOR_A);
-      // separator
-      const sep = document.createElement('span');
-      sep.style.cssText = 'display:block; width:100%; height:0.4rem;';
-      wrap.appendChild(sep);
-      // b blå prickar
-      for (let i = 0; i < b; i++) addDot(wrap, DOT_COLOR_B);
-      return wrap;
-    }
-
-    if (type === 'subtraktion') {
-      if (a > MAX) return null;
-      const wrap = makeDotWrap();
-      // a prickar, sista b är gråa (subtraheras)
-      for (let i = 0; i < a; i++) addDot(wrap, i < (a - b) ? DOT_COLOR_A : DOT_COLOR_GREY);
-      return wrap;
-    }
-
-    if (type === 'multiplikation') {
-      if (a * b > MAX || a > 10 || b > 10) return null;
-      const wrap = document.createElement('div');
-      wrap.className = 'bildstod-mult-grid';
-      for (let r = 0; r < a; r++) {
-        const row = document.createElement('div');
-        row.className = 'bildstod-row';
-        for (let c = 0; c < b; c++) {
-          addDot(row, CIRCLE_COLORS[r % CIRCLE_COLORS.length]);
-        }
-        wrap.appendChild(row);
-      }
-      return wrap;
-    }
-
-    return null;
   }
 
   // =========================================================
-  //  Division
+  //  Division (bråkform)
   // =========================================================
-  function renderDivision(problem, container, settings) {
-    const grade   = settings ? settings.grade : 3;
-    const bildstod = settings && settings.bildstod;
-    const showGrid = bildstod && problem.bildstodEligible && grade <= 4;
-
-    if (showGrid) {
-      const grid = buildDivisionGrid(problem.rows, problem.cols);
-      container.appendChild(grid);
+  function renderDivision(problem, container) {
+    if (problem.hasRemainder) {
+      const span = document.createElement('span');
+      span.textContent = `${problem.a} ÷ ${problem.b} =`;
+      container.appendChild(span);
+    } else {
+      container.appendChild(buildFractionEl(problem.a, problem.b));
+      const eq = document.createElement('span');
+      eq.textContent = '=';
+      container.appendChild(eq);
     }
-
-    container.appendChild(buildFractionEl(problem.a, problem.b));
-
-    const eq = document.createElement('span');
-    eq.textContent = '= ?';
-    container.appendChild(eq);
   }
 
-  // Bygger ett rutnät med `rows` rader och `cols` kolumner
-  // T.ex. 15÷3: rows=3, cols=5 → 3 rader med 5 prickar
-  function buildDivisionGrid(rows, cols) {
-    const grid = document.createElement('div');
-    grid.className = 'division-grid';
-    for (let r = 0; r < rows; r++) {
-      const row = document.createElement('div');
-      row.className = 'division-grid-row';
-      for (let c = 0; c < cols; c++) {
-        const dot = document.createElement('span');
-        dot.className = 'dot';
-        dot.style.background = CIRCLE_COLORS[r % CIRCLE_COLORS.length];
-        row.appendChild(dot);
-      }
-      grid.appendChild(row);
+  // =========================================================
+  //  Prioriteringsregler
+  // =========================================================
+  function renderPrioritet(problem, container) {
+    const wrap = document.createElement('div');
+    wrap.className = 'prioritet-display';
+
+    const expr = document.createElement('span');
+    expr.className = 'prioritet-expr';
+    expr.textContent = `${problem.expression} =`;
+    wrap.appendChild(expr);
+
+    container.appendChild(wrap);
+  }
+
+  // =========================================================
+  //  Öppna utsagor
+  // =========================================================
+  function renderOppnaUtsaga(problem, container) {
+    const parts = problem.expression.split('_');
+    if (parts.length === 2) {
+      appendText(container, parts[0]);
+      const blank = document.createElement('span');
+      blank.className = 'open-blank';
+      container.appendChild(blank);
+      appendText(container, parts[1]);
+    } else {
+      appendText(container, problem.expression);
     }
-    return grid;
   }
 
   // =========================================================
@@ -284,18 +387,15 @@ const App = (() => {
   function renderKlocka(problem, container) {
     const wrapper = document.createElement('div');
     wrapper.className = 'clock-container';
-
     const svg = buildClockSVG(problem.hours, problem.minutes);
     svg.classList.add('clock-svg');
     wrapper.appendChild(svg);
-
     const q = document.createElement('p');
     q.className = 'clock-question';
     q.textContent = problem.questionType === 'read'
       ? 'Vad är klockan?'
       : `Vad är klockan om ${problem.minutesToAdd} minuter?`;
     wrapper.appendChild(q);
-
     container.appendChild(wrapper);
   }
 
@@ -305,43 +405,36 @@ const App = (() => {
   function renderBrak(problem, container) {
     if (problem.questionType === 'name') {
       container.appendChild(buildFractionEl(problem.numerator, problem.denominator));
-      appendText(container, ' = ?');
-
+      appendText(container, ' =');
     } else if (problem.questionType === 'add-same-den') {
       container.appendChild(buildFractionEl(problem.a, problem.denominator));
       appendText(container, ' + ');
       container.appendChild(buildFractionEl(problem.b, problem.denominator));
-      appendText(container, ' = ?');
-
+      appendText(container, ' =');
     } else {
       container.appendChild(buildFractionEl(problem.a.numerator, problem.a.denominator));
       appendText(container, ' + ');
       container.appendChild(buildFractionEl(problem.b.numerator, problem.b.denominator));
-      appendText(container, ' = ?');
+      appendText(container, ' =');
     }
   }
 
   // =========================================================
-  //  Geometri med SVG-figurer
+  //  Geometri med SVG
   // =========================================================
   function renderGeometri(problem, container) {
     const wrapper = document.createElement('div');
     wrapper.className = 'geometry-display';
-
-    const svg = buildShapeSVG(problem);
-    wrapper.appendChild(svg);
+    wrapper.appendChild(buildShapeSVG(problem));
 
     const qTxt = document.createElement('p');
     qTxt.className = 'geometry-question';
     if (problem.geoQuestion === 'area') {
       qTxt.textContent = 'Vad är arean?';
-    } else if (problem.shape === 'circle') {
-      qTxt.textContent = 'Vad är omkretsen?';
     } else {
-      qTxt.textContent = 'Vad är omkretsen?';
+      qTxt.textContent = problem.shape === 'circle' ? 'Vad är omkretsen?' : 'Vad är omkretsen?';
     }
     wrapper.appendChild(qTxt);
-
     container.appendChild(wrapper);
   }
 
@@ -352,56 +445,40 @@ const App = (() => {
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     svg.classList.add('geometry-svg');
 
-    const { shape, dimensions } = problem;
+    const { shape, dimensions: d } = problem;
     let inner = '';
 
     if (shape === 'square') {
-      const s  = Math.min(160, H - 50);
-      const x  = (W - s) / 2;
-      const y  = (H - s) / 2;
-      const lx = W / 2;
-      const ty = y - 18;
-      const rx = x + s + 22;
-      const my = H / 2;
+      const s = Math.min(160, H - 50);
+      const x = (W - s) / 2, y = (H - s) / 2;
       inner = `
         <rect x="${x}" y="${y}" width="${s}" height="${s}" fill="#dbeafe" stroke="#457b9d" stroke-width="3" rx="3"/>
-        <text x="${lx}" y="${ty}" text-anchor="middle" font-size="17" fill="#1a1a2e" font-weight="600">${dimensions.side} cm</text>
-        <text x="${rx}" y="${my}" text-anchor="start" dominant-baseline="central" font-size="17" fill="#1a1a2e" font-weight="600">${dimensions.side} cm</text>
-      `;
+        <text x="${W/2}" y="${y-16}" text-anchor="middle" font-size="17" fill="#1a1a2e" font-weight="600">${d.side} cm</text>
+        <text x="${x+s+18}" y="${H/2}" dominant-baseline="central" font-size="17" fill="#1a1a2e" font-weight="600">${d.side} cm</text>`;
 
     } else if (shape === 'rectangle') {
-      const rw = Math.min(220, W - 80);
-      const rh = Math.min(120, H - 60);
-      const x  = (W - rw) / 2;
-      const y  = (H - rh) / 2;
+      const rw = Math.min(220, W - 80), rh = Math.min(120, H - 60);
+      const x = (W - rw) / 2, y = (H - rh) / 2;
       inner = `
         <rect x="${x}" y="${y}" width="${rw}" height="${rh}" fill="#dbeafe" stroke="#457b9d" stroke-width="3" rx="3"/>
-        <text x="${W/2}" y="${y - 16}" text-anchor="middle" font-size="17" fill="#1a1a2e" font-weight="600">${dimensions.width} cm</text>
-        <text x="${x + rw + 16}" y="${H/2}" text-anchor="start" dominant-baseline="central" font-size="17" fill="#1a1a2e" font-weight="600">${dimensions.height} cm</text>
-      `;
+        <text x="${W/2}" y="${y-16}" text-anchor="middle" font-size="17" fill="#1a1a2e" font-weight="600">${d.width} cm</text>
+        <text x="${x+rw+16}" y="${H/2}" dominant-baseline="central" font-size="17" fill="#1a1a2e" font-weight="600">${d.height} cm</text>`;
 
     } else if (shape === 'triangle') {
-      const bx  = 50,  by  = H - 40;
-      const ex  = W - 50, ey  = H - 40;
-      const tx  = W / 2,  ty  = 30;
-      const midX = W / 2;
-      const midY = H - 22;
+      const bx=50, by=H-40, ex=W-50, ey=H-40, tx=W/2, ty=30;
       inner = `
         <polygon points="${bx},${by} ${ex},${ey} ${tx},${ty}" fill="#dcfce7" stroke="#2a9d8f" stroke-width="3"/>
-        <text x="${midX}" y="${midY}" text-anchor="middle" font-size="17" fill="#1a1a2e" font-weight="600">${dimensions.base} cm</text>
+        <text x="${W/2}" y="${by+22}" text-anchor="middle" font-size="17" fill="#1a1a2e" font-weight="600">${d.base} cm</text>
         <line x1="${tx}" y1="${ty}" x2="${tx}" y2="${by}" stroke="#2a9d8f" stroke-width="2" stroke-dasharray="6,4"/>
-        <text x="${tx + 16}" y="${(ty + by) / 2}" dominant-baseline="central" font-size="15" fill="#2a9d8f" font-weight="600">${dimensions.height} cm</text>
-      `;
+        <text x="${tx+18}" y="${(ty+by)/2}" dominant-baseline="central" font-size="15" fill="#2a9d8f" font-weight="600">${d.height} cm</text>`;
 
-    } else if (shape === 'circle') {
-      const cx = W / 2, cy = H / 2;
-      const r  = Math.min(85, H / 2 - 20);
+    } else {
+      const cx=W/2, cy=H/2, r=Math.min(85, H/2-20);
       inner = `
         <circle cx="${cx}" cy="${cy}" r="${r}" fill="#fef3c7" stroke="#e9c46a" stroke-width="3"/>
-        <line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#d97706" stroke-width="2.5" stroke-dasharray="6,4"/>
-        <text x="${cx + r / 2}" y="${cy - 12}" text-anchor="middle" font-size="16" fill="#92400e" font-weight="600">r = ${dimensions.radius} cm</text>
-        <circle cx="${cx}" cy="${cy}" r="4" fill="#d97706"/>
-      `;
+        <line x1="${cx}" y1="${cy}" x2="${cx+r}" y2="${cy}" stroke="#d97706" stroke-width="2.5" stroke-dasharray="6,4"/>
+        <text x="${cx+r/2}" y="${cy-14}" text-anchor="middle" font-size="16" fill="#92400e" font-weight="600">r = ${d.radius} cm</text>
+        <circle cx="${cx}" cy="${cy}" r="4" fill="#d97706"/>`;
     }
 
     svg.innerHTML = inner;
@@ -411,10 +488,8 @@ const App = (() => {
   // =========================================================
   //  Mått
   // =========================================================
-  function renderMatt(problem, container, settings) {
+  function renderMatt(problem, container) {
     const { from, fromUnit, toUnit } = problem.conversion;
-    const bildstod = settings && settings.bildstod;
-
     const wrapper = document.createElement('div');
     wrapper.className = 'matt-display';
     wrapper.innerHTML =
@@ -423,48 +498,6 @@ const App = (() => {
       `<span>\u202F=\u202F?\u202F</span>` +
       `<span class="matt-unit">${toUnit}</span>`;
     container.appendChild(wrapper);
-
-    if (bildstod) {
-      const vis = buildMattBildstod(problem);
-      if (vis) container.appendChild(vis);
-    }
-  }
-
-  // Enkel visuell representation av måttomvandling
-  function buildMattBildstod(problem) {
-    const { from, fromUnit, toUnit, factor } = problem.conversion;
-    // Visa bara för enkla heltalsfaktorer och rimliga antal block (≤ 10)
-    if (!Number.isInteger(from) || from > 10) return null;
-    const blockFactor = Math.round(factor);
-    if (!Number.isInteger(factor) || blockFactor < 2 || blockFactor > 20) return null;
-
-    const wrap = document.createElement('div');
-    wrap.className = 'matt-bildstod';
-
-    for (let i = 0; i < from; i++) {
-      const bigBlock = document.createElement('div');
-      bigBlock.className = 'matt-block-big';
-      bigBlock.innerHTML = `<span class="matt-block-label">1 ${fromUnit}</span>
-        <div class="matt-block-inner">`;
-      const inner = document.createElement('div');
-      inner.className = 'matt-block-inner';
-      for (let j = 0; j < blockFactor; j++) {
-        const small = document.createElement('span');
-        small.className = 'matt-block-small';
-        small.title = `1 ${toUnit}`;
-        inner.appendChild(small);
-      }
-      bigBlock.appendChild(inner);
-
-      const lbl = document.createElement('span');
-      lbl.className = 'matt-block-sublabel';
-      lbl.textContent = `= ${blockFactor} ${toUnit}`;
-      bigBlock.appendChild(lbl);
-
-      wrap.appendChild(bigBlock);
-    }
-
-    return wrap;
   }
 
   // =========================================================
@@ -472,7 +505,6 @@ const App = (() => {
   // =========================================================
   function renderExtraProblem(problem, settings) {
     extraDisplay.innerHTML = '';
-
     if (problem.type.startsWith('uppstallning')) {
       renderUppstallning(problem, extraDisplay);
     } else if (problem.type === 'klocka') {
@@ -480,7 +512,7 @@ const App = (() => {
     } else if (problem.type === 'geometri') {
       renderGeometri(problem, extraDisplay);
     } else {
-      renderArithmetic(problem, extraDisplay, settings);
+      renderArithmetic(problem, extraDisplay);
     }
   }
 
@@ -529,10 +561,8 @@ const App = (() => {
   // =========================================================
   function buildClockSVG(hours, minutes) {
     const SIZE = 200, CX = 100, CY = 100;
-
     const minAngle  = (minutes / 60) * 2 * Math.PI - Math.PI / 2;
     const hourAngle = ((hours % 12 + minutes / 60) / 12) * 2 * Math.PI - Math.PI / 2;
-
     const mx = CX + Math.cos(minAngle)  * 68;
     const my = CY + Math.sin(minAngle)  * 68;
     const hx = CX + Math.cos(hourAngle) * 48;
@@ -542,14 +572,11 @@ const App = (() => {
     for (let i = 0; i < 60; i++) {
       const angle  = (i / 60) * 2 * Math.PI - Math.PI / 2;
       const isHour = i % 5 === 0;
-      const r1     = isHour ? 76 : 83;
-      const sw     = isHour ? 3  : 1;
-      const col    = isHour ? '#1a1a2e' : '#aaa';
+      const r1 = isHour ? 76 : 83;
       ticks += `<line x1="${(CX+Math.cos(angle)*r1).toFixed(1)}" y1="${(CY+Math.sin(angle)*r1).toFixed(1)}"
                       x2="${(CX+Math.cos(angle)*90).toFixed(1)}" y2="${(CY+Math.sin(angle)*90).toFixed(1)}"
-                      stroke="${col}" stroke-width="${sw}"/>`;
+                      stroke="${isHour ? '#1a1a2e' : '#aaa'}" stroke-width="${isHour ? 3 : 1}"/>`;
     }
-
     let numbers = '';
     for (let i = 1; i <= 12; i++) {
       const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
@@ -564,7 +591,6 @@ const App = (() => {
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label',
       `Klockan visar ${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`);
-
     svg.innerHTML = `
       <circle cx="${CX}" cy="${CY}" r="92" fill="#f5f4f0" stroke="#1a1a2e" stroke-width="4"/>
       ${ticks}${numbers}
@@ -573,8 +599,135 @@ const App = (() => {
       <line x1="${CX}" y1="${CY}" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}"
             stroke="#457b9d" stroke-width="4" stroke-linecap="round"/>
       <circle cx="${CX}" cy="${CY}" r="5" fill="#1a1a2e"/>`;
-
     return svg;
+  }
+
+  // =========================================================
+  //  Menyhantering
+  // =========================================================
+  function toggleMenu() { document.body.classList.toggle('menu-open'); }
+  function closeMenu()  { document.body.classList.remove('menu-open'); }
+
+  // =========================================================
+  //  Bildstöd – tillgänglighetskoll
+  // =========================================================
+  function couldHaveBildstod(settings) {
+    const g = settings.grade;
+    const a = settings.areas;
+    return (a.includes('division')       && g <= 4)
+        || (a.includes('addition')       && g <= 3)
+        || (a.includes('subtraktion')    && g <= 3)
+        || (a.includes('multiplikation') && g <= 3)
+        || a.includes('matt-langd')
+        || a.includes('matt-volym')
+        || a.includes('blandad');
+  }
+
+  function updateBildstodCheckbox() {
+    const s      = Settings.get();
+    const canHave = couldHaveBildstod(s);
+    const cb     = document.getElementById('bildstod-check');
+    const lbl    = cb.closest('.check-label--featured');
+    cb.disabled  = !canHave;
+    if (lbl) lbl.classList.toggle('bildstod-unavailable', !canHave);
+    if (!canHave && cb.checked) {
+      cb.checked = false;
+      Settings.setBildstod(false);
+      document.getElementById('bildstod-options').classList.add('hidden');
+    }
+  }
+
+  // =========================================================
+  //  Inställnings-UI
+  // =========================================================
+  function loadSettingsIntoUI() {
+    const s = Settings.get();
+
+    document.getElementById('grade-select').value = s.grade;
+
+    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = s.areas.includes(cb.value);
+    });
+
+    document.querySelectorAll('#multdiv-mode-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = (s.multDivMode || ['tables-basic']).includes(cb.value);
+    });
+
+    document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = s.geometriTypes.includes(cb.value);
+    });
+
+    document.getElementById('bildstod-check').checked       = s.bildstod;
+    document.getElementById('bildstod-options').classList.toggle('hidden', !s.bildstod);
+    const timingVal = s.bildstodInstant ? 'instant' : 'delayed';
+    document.querySelectorAll('input[name="bildstod-timing"]').forEach(r => {
+      r.checked = r.value === timingVal;
+    });
+    document.getElementById('problemlosning-check').checked = s.problemlosning;
+    document.getElementById('extra-enabled-check').checked  = s.extraEnabled;
+    document.getElementById('extra-type-select').value      = s.extraType;
+    document.getElementById('extra-task-options').classList.toggle('hidden', !s.extraEnabled);
+    document.getElementById('division-rest-check').checked = s.divisionRest || false;
+    updateBildstodCheckbox();
+  }
+
+  function bindSettingsUI() {
+    document.getElementById('grade-select').addEventListener('change', e => {
+      Settings.setGrade(e.target.value);
+      updateBildstodCheckbox();
+    });
+
+    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value);
+        Settings.setAreas(checked);
+        updateBildstodCheckbox();
+      });
+    });
+
+    document.querySelectorAll('#multdiv-mode-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#multdiv-mode-checkboxes input:checked')].map(c => c.value);
+        if (checked.length > 0) Settings.setMultDivMode(checked);
+        else cb.checked = true;
+      });
+    });
+
+    document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#geometri-type-checkboxes input:checked')].map(c => c.value);
+        if (checked.length > 0) Settings.setGeometriTypes(checked);
+        else cb.checked = true;
+      });
+    });
+
+    document.getElementById('bildstod-check').addEventListener('change', e => {
+      Settings.setBildstod(e.target.checked);
+      document.getElementById('bildstod-options').classList.toggle('hidden', !e.target.checked);
+    });
+
+    document.querySelectorAll('input[name="bildstod-timing"]').forEach(r => {
+      r.addEventListener('change', () => {
+        Settings.setBildstodInstant(r.value === 'instant');
+      });
+    });
+
+    document.getElementById('problemlosning-check').addEventListener('change', e => {
+      Settings.setProblemlosning(e.target.checked);
+    });
+
+    document.getElementById('extra-enabled-check').addEventListener('change', e => {
+      Settings.setExtraEnabled(e.target.checked);
+      document.getElementById('extra-task-options').classList.toggle('hidden', !e.target.checked);
+    });
+
+    document.getElementById('extra-type-select').addEventListener('change', e => {
+      Settings.setExtraType(e.target.value);
+    });
+
+    document.getElementById('division-rest-check').addEventListener('change', e => {
+      Settings.setDivisionRest(e.target.checked);
+    });
   }
 
   // =========================================================
@@ -600,9 +753,9 @@ const App = (() => {
     container.appendChild(span);
   }
 
-  function makeDotWrap() {
+  function makeDotWrap(cls) {
     const wrap = document.createElement('div');
-    wrap.className = 'bildstod-dots';
+    wrap.className = cls;
     return wrap;
   }
 
@@ -614,82 +767,8 @@ const App = (() => {
   }
 
   // =========================================================
-  //  Menyhantering
-  // =========================================================
-  function toggleMenu() { document.body.classList.toggle('menu-open'); }
-  function closeMenu()  { document.body.classList.remove('menu-open'); }
-
-  // =========================================================
-  //  Inställnings-UI
-  // =========================================================
-  function loadSettingsIntoUI() {
-    const s = Settings.get();
-
-    document.getElementById('grade-select').value = s.grade;
-
-    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
-      cb.checked = s.areas.includes(cb.value);
-    });
-
-    document.getElementById('problemlosning-check').checked = s.problemlosning;
-    document.getElementById('bildstod-check').checked       = s.bildstod;
-    document.getElementById('extra-enabled-check').checked  = s.extraEnabled;
-    document.getElementById('extra-type-select').value      = s.extraType;
-
-    document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
-      cb.checked = s.geometriTypes.includes(cb.value);
-    });
-
-    document.getElementById('extra-task-options')
-      .classList.toggle('hidden', !s.extraEnabled);
-  }
-
-  function bindSettingsUI() {
-    document.getElementById('grade-select').addEventListener('change', e => {
-      Settings.setGrade(e.target.value);
-    });
-
-    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        const checked = [...document.querySelectorAll('#area-checkboxes input:checked')]
-          .map(c => c.value);
-        Settings.setAreas(checked);
-      });
-    });
-
-    document.getElementById('problemlosning-check').addEventListener('change', e => {
-      Settings.setProblemlosning(e.target.checked);
-    });
-
-    document.getElementById('bildstod-check').addEventListener('change', e => {
-      Settings.setBildstod(e.target.checked);
-    });
-
-    document.getElementById('extra-enabled-check').addEventListener('change', e => {
-      Settings.setExtraEnabled(e.target.checked);
-      document.getElementById('extra-task-options')
-        .classList.toggle('hidden', !e.target.checked);
-    });
-
-    document.getElementById('extra-type-select').addEventListener('change', e => {
-      Settings.setExtraType(e.target.value);
-    });
-
-    document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        const checked = [...document.querySelectorAll('#geometri-type-checkboxes input:checked')]
-          .map(c => c.value);
-        // Se till att minst ett alternativ alltid är valt
-        if (checked.length > 0) Settings.setGeometriTypes(checked);
-        else cb.checked = true; // återställ om man avmarkerar det sista
-      });
-    });
-  }
-
-  // =========================================================
   //  Start
   // =========================================================
   document.addEventListener('DOMContentLoaded', init);
-
   return {};
 })();

@@ -16,7 +16,7 @@
   --menu-text:      #f0eeea;
   --menu-border:    rgba(255,255,255,0.1);
   --menu-hover:     rgba(255,255,255,0.08);
-  --menu-width:     300px;
+  --menu-width:     560px;
   --extra-width:    320px;
   --problem-size:   clamp(2.8rem, 9vw, 7rem);
   --problem-size-text: clamp(1.6rem, 4vw, 3rem);
@@ -144,6 +144,18 @@ body.menu-open #settings-menu {
   margin-bottom: 0.5rem;
 }
 
+/* Grupprubrik i menyn */
+.menu-group-label {
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  padding: 1.1rem 0.5rem 0.3rem;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  margin-bottom: 0.1rem;
+}
+
 .menu-section {
   padding: 0.75rem 0.5rem;
   border-bottom: 1px solid var(--menu-border);
@@ -187,7 +199,9 @@ select option {
 }
 
 /* Checkboxar */
-#area-checkboxes {
+#area-checkboxes,
+#multdiv-mode-checkboxes,
+#geometri-type-checkboxes {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -351,6 +365,23 @@ body.extra-visible #stage {
   min-width: 0.8em;
 }
 
+
+/* === Prioriteringsregler === */
+.prioritet-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.prioritet-hint {
+  font-size: clamp(0.85rem, 2vw, 1.3rem);
+  font-weight: 400;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: min(720px, 82vw);
+  line-height: 1.45;
+}
 
 /* === Klickhint === */
 #click-hint {
@@ -636,10 +667,89 @@ body.extra-visible #stage {
   opacity: 0.7;
 }
 
+/* === Fördröjt bildstöd – fade-in === */
+@keyframes bildstod-fade-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bildstod-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1.2rem;
+}
+
+.bildstod-anim {
+  animation: bildstod-fade-in 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 /* === Responsiv justering === */
-@media (max-width: 600px) {
+/* === Öppna utsagor – blank === */
+.open-blank {
+  display: inline-block;
+  min-width: 1.2em;
+  border-bottom: 0.07em solid currentColor;
+  margin: 0 0.08em;
+  vertical-align: -0.12em;
+}
+
+/* === Radioknappar (bildstöd-timing) === */
+.check-label input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.check-label input[type="radio"]:checked {
+  border-color: var(--accent-2);
+}
+
+.check-label input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-2);
+}
+
+#bildstod-options {
+  margin-top: 0.4rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+/* Separator under en grupp-div i menyn */
+.check-label--sep {
+  margin-top: 0.4rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--menu-border);
+}
+
+/* Bildstöd-checkbox när inget område stöder det */
+.check-label--featured.bildstod-unavailable {
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
   :root {
-    --menu-width: 280px;
+    --menu-width: min(520px, 96vw);
     --extra-width: 240px;
   }
 }

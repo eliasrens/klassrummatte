@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <!-- Hamburgarmeny-knapp, alltid synlig -->
+  <!-- Hamburgarmeny-knapp -->
   <button id="menu-toggle" aria-label="Öppna inställningar" title="Inställningar">
     <span class="burger-line"></span>
     <span class="burger-line"></span>
@@ -17,9 +17,13 @@
 
   <!-- Fällbar vänstermeny -->
   <nav id="settings-menu" aria-label="Inställningar">
-    <h2>Inställningar</h2>
+    <div class="menu-header">
+      <h2>Inställningar</h2>
+    </div>
 
-    <!-- Årskurs -->
+    <!-- ── GRUNDINSTÄLLNINGAR ─────────────────────────── -->
+    <div class="menu-group-label">Grundinställningar</div>
+
     <section class="menu-section">
       <label class="section-label" for="grade-select">Årskurs</label>
       <select id="grade-select">
@@ -32,9 +36,10 @@
       </select>
     </section>
 
-    <!-- Område -->
+    <!-- ── MATEMATIKOMRÅDEN ───────────────────────────── -->
+    <div class="menu-group-label">Matematikområden</div>
+
     <section class="menu-section">
-      <span class="section-label">Område</span>
       <div id="area-checkboxes">
         <label class="check-label">
           <input type="checkbox" value="addition" checked>
@@ -51,6 +56,10 @@
         <label class="check-label">
           <input type="checkbox" value="division">
           <span>Division</span>
+        </label>
+        <label class="check-label">
+          <input type="checkbox" value="prioritet">
+          <span>Prioriteringsregler</span>
         </label>
         <label class="check-label">
           <input type="checkbox" value="brak">
@@ -72,6 +81,10 @@
           <input type="checkbox" value="matt-volym">
           <span>Mått – volym</span>
         </label>
+        <label class="check-label">
+          <input type="checkbox" value="oppna-utsagor">
+          <span>Öppna utsagor</span>
+        </label>
         <label class="check-label check-label--mixed">
           <input type="checkbox" value="blandad">
           <span>Blandad repetition</span>
@@ -79,9 +92,34 @@
       </div>
     </section>
 
-    <!-- Geometri – frågetyp -->
+    <!-- ── SUBINSTÄLLNINGAR: MULT / DIV ──────────────── -->
+    <div class="menu-group-label">Multiplikation &amp; division – nivå</div>
+
     <section class="menu-section">
-      <span class="section-label">Geometri – frågetyp</span>
+      <div id="multdiv-mode-checkboxes">
+        <label class="check-label">
+          <input type="checkbox" value="tables-basic" checked>
+          <span>Tabeller 1–9</span>
+        </label>
+        <label class="check-label">
+          <input type="checkbox" value="tables-ten">
+          <span>Mult/div med 10 och 100</span>
+        </label>
+        <label class="check-label">
+          <input type="checkbox" value="tables-large">
+          <span>Stora tal (flersiffrigt)</span>
+        </label>
+      </div>
+      <label class="check-label check-label--sep" id="division-rest-label">
+        <input type="checkbox" id="division-rest-check">
+        <span>Division med rest</span>
+      </label>
+    </section>
+
+    <!-- ── SUBINSTÄLLNINGAR: GEOMETRI ────────────────── -->
+    <div class="menu-group-label">Geometri – frågetyp</div>
+
+    <section class="menu-section">
       <div id="geometri-type-checkboxes">
         <label class="check-label">
           <input type="checkbox" value="area" checked>
@@ -94,35 +132,49 @@
       </div>
     </section>
 
-    <!-- Bildstöd -->
+    <!-- ── PEDAGOGISKA VERKTYG ────────────────────────── -->
+    <div class="menu-group-label">Pedagogiska verktyg</div>
+
     <section class="menu-section">
       <label class="check-label check-label--featured">
         <input type="checkbox" id="bildstod-check">
         <span>Bildstöd<br><small>Prickar/figurer som visuellt stöd</small></span>
       </label>
+      <div id="bildstod-options" class="hidden">
+        <label class="check-label">
+          <input type="radio" name="bildstod-timing" value="instant">
+          <span>Visa direkt</span>
+        </label>
+        <label class="check-label">
+          <input type="radio" name="bildstod-timing" value="delayed" checked>
+          <span>Visa efter 10 sek</span>
+        </label>
+      </div>
     </section>
 
-    <!-- Problemlösning -->
     <section class="menu-section">
       <label class="check-label check-label--featured">
         <input type="checkbox" id="problemlosning-check">
-        <span>Problemlösning<br><small>Visa textuppgifter</small></span>
+        <span>Problemlösning<br><small>Textuppgifter med namn och scenarion</small></span>
       </label>
     </section>
 
-    <!-- Extrauppgift -->
+    <!-- ── EXTRAUPPGIFT ───────────────────────────────── -->
+    <div class="menu-group-label">Extrauppgift</div>
+
     <section class="menu-section">
       <label class="check-label check-label--featured">
         <input type="checkbox" id="extra-enabled-check">
-        <span>Aktivera extrauppgift<br><small>Visas efter 10 sek</small></span>
+        <span>Aktivera extrauppgift<br><small>Visas i högerpanelen efter 10 sek</small></span>
       </label>
       <div id="extra-task-options" class="hidden">
-        <label class="section-label" for="extra-type-select">Typ av extrauppgift</label>
+        <label class="section-label" for="extra-type-select">Typ</label>
         <select id="extra-type-select">
           <option value="uppstallning-add">Uppställning – addition</option>
           <option value="uppstallning-sub">Uppställning – subtraktion</option>
           <option value="uppstallning-mult">Uppställning – multiplikation</option>
           <option value="geometri-area">Geometri – area</option>
+          <option value="geometri-perimeter">Geometri – omkrets</option>
           <option value="klocka">Klocka</option>
         </select>
       </div>
@@ -130,29 +182,21 @@
 
   </nav>
 
-  <!-- Mörk overlay bakom menyn på mobil -->
+  <!-- Overlay bakom menyn -->
   <div id="menu-overlay"></div>
 
-  <!-- Huvudscen: klickbar yta -->
+  <!-- Huvudscen -->
   <main id="stage" role="button" tabindex="0" aria-label="Tryck för ny uppgift">
-
-    <div id="problem-display" class="hidden" aria-live="polite">
-      <!-- Fylls av app.js -->
-    </div>
-
+    <div id="problem-display" class="hidden" aria-live="polite"></div>
     <p id="click-hint">Tryck för att börja</p>
-
   </main>
 
   <!-- Extrauppgiftspanel (höger) -->
   <aside id="extra-panel" class="hidden" aria-label="Extrauppgift">
     <div class="extra-label">Extrauppgift</div>
-    <div id="extra-display">
-      <!-- Fylls av app.js -->
-    </div>
+    <div id="extra-display"></div>
   </aside>
 
-  <!-- Skript i beroendeordning -->
   <script src="js/settings.js"></script>
   <script src="js/templates.js"></script>
   <script src="js/problems.js"></script>
