@@ -43,6 +43,7 @@ const App = (() => {
     loadSettingsIntoUI();
     bindSettingsUI();
     bindStageEvents();
+    bindMenuCollapse();
     menuToggle.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
     menuOverlay.addEventListener('click', closeMenu);
   }
@@ -127,8 +128,7 @@ const App = (() => {
 
   function clearBildstod() {
     if (bildstodTimer) { clearTimeout(bildstodTimer); bildstodTimer = null; }
-    // Ta bort eventuellt redan inlagt bildstöd
-    const existing = problemDisplay.querySelector('.bildstod-container');
+    const existing = stage.querySelector('.bildstod-container');
     if (existing) existing.remove();
   }
 
@@ -170,7 +170,7 @@ const App = (() => {
     const wrapper = document.createElement('div');
     wrapper.className = 'bildstod-container bildstod-anim';
     wrapper.appendChild(el);
-    problemDisplay.appendChild(wrapper);
+    stage.appendChild(wrapper);
   }
 
   function buildBildstodEl(problem, settings) {
@@ -338,16 +338,10 @@ const App = (() => {
   //  Division (bråkform)
   // =========================================================
   function renderDivision(problem, container) {
-    if (problem.hasRemainder) {
-      const span = document.createElement('span');
-      span.textContent = `${problem.a} ÷ ${problem.b} =`;
-      container.appendChild(span);
-    } else {
-      container.appendChild(buildFractionEl(problem.a, problem.b));
-      const eq = document.createElement('span');
-      eq.textContent = '=';
-      container.appendChild(eq);
-    }
+    container.appendChild(buildFractionEl(problem.a, problem.b));
+    const eq = document.createElement('span');
+    eq.textContent = '=';
+    container.appendChild(eq);
   }
 
   // =========================================================
@@ -609,6 +603,23 @@ const App = (() => {
   function closeMenu()  { document.body.classList.remove('menu-open'); }
 
   // =========================================================
+  //  Hopfällbara menygrupper
+  // =========================================================
+  function bindMenuCollapse() {
+    document.querySelectorAll('#settings-menu .menu-group-label').forEach(label => {
+      label.classList.add('is-collapsible');
+      label.addEventListener('click', () => {
+        const collapsed = label.classList.toggle('is-collapsed');
+        let el = label.nextElementSibling;
+        while (el && !el.classList.contains('menu-group-label')) {
+          el.classList.toggle('section-collapsed', collapsed);
+          el = el.nextElementSibling;
+        }
+      });
+    });
+  }
+
+  // =========================================================
   //  Bildstöd – tillgänglighetskoll
   // =========================================================
   function couldHaveBildstod(settings) {
@@ -621,6 +632,29 @@ const App = (() => {
         || a.includes('matt-langd')
         || a.includes('matt-volym')
         || a.includes('blandad');
+  }
+
+  function updateConditionalSections() {
+    const areas        = Settings.getAreas();
+    const showMultDiv  = areas.some(a => a === 'multiplikation' || a === 'division' || a === 'blandad');
+    const showGeometri = areas.some(a => a === 'geometri'       || a === 'blandad');
+    const showDivRest  = areas.some(a => a === 'division'       || a === 'blandad');
+
+    function setSection(labelId, sectionId, show) {
+      const lbl = document.getElementById(labelId);
+      const sec = document.getElementById(sectionId);
+      if (show) {
+        lbl.classList.remove('hidden', 'section-collapsed', 'is-collapsed');
+        sec.classList.remove('hidden', 'section-collapsed');
+      } else {
+        lbl.classList.add('hidden');
+        sec.classList.add('hidden');
+      }
+    }
+
+    setSection('multdiv-group-label',  'multdiv-section',  showMultDiv);
+    setSection('geometri-group-label', 'geometri-section', showGeometri);
+    document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
   }
 
   function updateBildstodCheckbox() {
@@ -668,6 +702,7 @@ const App = (() => {
     document.getElementById('extra-type-select').value      = s.extraType;
     document.getElementById('extra-task-options').classList.toggle('hidden', !s.extraEnabled);
     document.getElementById('division-rest-check').checked = s.divisionRest || false;
+    updateConditionalSections();
     updateBildstodCheckbox();
   }
 
@@ -681,6 +716,7 @@ const App = (() => {
       cb.addEventListener('change', () => {
         const checked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value);
         Settings.setAreas(checked);
+        updateConditionalSections();
         updateBildstodCheckbox();
       });
     });

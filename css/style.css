@@ -667,23 +667,49 @@ body.extra-visible #stage {
   opacity: 0.7;
 }
 
-/* === Fördröjt bildstöd – fade-in === */
-@keyframes bildstod-fade-in {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* === Bildstöd – absolut vänsterposition, ingen layoutpåverkan === */
+@keyframes bildstod-slide-in {
+  from { opacity: 0; transform: translateY(-50%) translateX(-14px); }
+  to   { opacity: 1; transform: translateY(-50%); }
 }
 
 .bildstod-container {
+  position: absolute;
+  left: 1.5rem;
+  top: 50%;
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  width: 100%;
-  margin-top: 1.2rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  max-width: min(26vw, 360px);
 }
 
 .bildstod-anim {
-  animation: bildstod-fade-in 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: bildstod-slide-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* === Hopfällbara menygrupper === */
+.menu-group-label.is-collapsible {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-group-label.is-collapsible::after {
+  content: '▾';
+  font-size: 1em;
+  flex-shrink: 0;
+  transition: transform var(--transition);
+}
+
+.menu-group-label.is-collapsible.is-collapsed::after {
+  transform: rotate(-90deg);
+}
+
+.section-collapsed {
+  display: none !important;
 }
 
 /* === Responsiv justering === */
