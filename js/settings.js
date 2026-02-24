@@ -16,6 +16,7 @@ const Settings = (() => {
     divisionRest: false,
     geometriTypes: ['area', 'perimeter'],
     multDivMode: ['tables-basic'],
+    specificTables: [1,2,3,4,5,6,7,8,9],
   };
 
   let state = { ...DEFAULTS };
@@ -40,7 +41,7 @@ const Settings = (() => {
   }
 
   // Getters – returnerar alltid kopior, aldrig referenser
-  function get()               { return { ...state, areas: [...state.areas], geometriTypes: [...(state.geometriTypes || ['area','perimeter'])], multDivMode: [...(state.multDivMode || ['tables-basic'])] }; }
+  function get()               { return { ...state, areas: [...state.areas], geometriTypes: [...(state.geometriTypes || ['area','perimeter'])], multDivMode: [...(state.multDivMode || ['tables-basic'])], specificTables: [...(state.specificTables || [1,2,3,4,5,6,7,8,9])] }; }
   function getGrade()          { return state.grade; }
   function getAreas()          { return [...state.areas]; }
   function isExtraEnabled()    { return state.extraEnabled; }
@@ -61,6 +62,7 @@ const Settings = (() => {
   function setDivisionRest(b)      { state.divisionRest = !!b; save(); }
   function setGeometriTypes(arr)   { state.geometriTypes = [...arr]; save(); }
   function setMultDivMode(arr)     { state.multDivMode = [...arr]; save(); }
+  function setSpecificTables(arr)  { state.specificTables = [...arr]; save(); }
 
   // Initiering
   load();
@@ -68,6 +70,6 @@ const Settings = (() => {
   return {
     get,
     getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning, isBildstod, isBildstodInstant, getGeometriTypes,
-    setGrade, setAreas, setExtraEnabled, setExtraType, setProblemlosning, setBildstod, setBildstodInstant, setDivisionRest, setGeometriTypes, setMultDivMode,
+    setGrade, setAreas, setExtraEnabled, setExtraType, setProblemlosning, setBildstod, setBildstodInstant, setDivisionRest, setGeometriTypes, setMultDivMode, setSpecificTables,
   };
 })();

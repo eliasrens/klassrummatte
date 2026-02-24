@@ -37,7 +37,7 @@
     </section>
 
     <!-- ── MATEMATIKOMRÅDEN ───────────────────────────── -->
-    <div class="menu-group-label">Matematikområden</div>
+    <div class="menu-group-label" id="matematikarea-group-label">Matematikområden</div>
 
     <section class="menu-section">
       <div id="area-checkboxes">
@@ -101,6 +101,20 @@
           <input type="checkbox" value="tables-basic" checked>
           <span>Tabeller 1–9</span>
         </label>
+        <div id="specific-tables-wrap" class="specific-tables-wrap hidden">
+          <div class="specific-tables-label">Välj tabeller:</div>
+          <div id="specific-tables-checkboxes" class="specific-tables-grid">
+            <label class="check-label check-label--sm"><input type="checkbox" value="1" name="specific-table"><span>1</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="2" name="specific-table" checked><span>2</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="3" name="specific-table" checked><span>3</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="4" name="specific-table" checked><span>4</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="5" name="specific-table" checked><span>5</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="6" name="specific-table" checked><span>6</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="7" name="specific-table" checked><span>7</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="8" name="specific-table" checked><span>8</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="9" name="specific-table" checked><span>9</span></label>
+          </div>
+        </div>
         <label class="check-label">
           <input type="checkbox" value="tables-ten">
           <span>Mult/div med 10 och 100</span>
@@ -189,6 +203,7 @@
   <main id="stage" role="button" tabindex="0" aria-label="Tryck för ny uppgift">
     <div id="problem-display" class="hidden" aria-live="polite"></div>
     <p id="click-hint">Tryck för att börja</p>
+    <button id="show-answer-btn" class="show-answer-btn" aria-label="Visa svar" tabindex="-1">Visa svar</button>
   </main>
 
   <!-- Extrauppgiftspanel (höger) -->

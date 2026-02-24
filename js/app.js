@@ -17,15 +17,17 @@ const App = (() => {
   //  DOM-referenser
   // =========================================================
   let stage, problemDisplay, extraPanel, extraDisplay,
-      clickHint, menuToggle, settingsMenu, menuOverlay;
+      clickHint, menuToggle, settingsMenu, menuOverlay, showAnswerBtn;
 
   // =========================================================
   //  App-state
   // =========================================================
-  let problemVisible = false;
-  let extraTimer     = null;
-  let hideTimer      = null;
-  let bildstodTimer  = null;
+  let problemVisible  = false;
+  let extraTimer      = null;
+  let hideTimer       = null;
+  let bildstodTimer   = null;
+  let currentProblem  = null;
+  let lastProblem     = null;
 
   // =========================================================
   //  Init
@@ -40,12 +42,19 @@ const App = (() => {
     settingsMenu   = document.getElementById('settings-menu');
     menuOverlay    = document.getElementById('menu-overlay');
 
+    showAnswerBtn = document.getElementById('show-answer-btn');
+
     loadSettingsIntoUI();
     bindSettingsUI();
     bindStageEvents();
     bindMenuCollapse();
     menuToggle.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
     menuOverlay.addEventListener('click', closeMenu);
+
+    showAnswerBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      showAnswer(currentProblem);
+    });
   }
 
   // =========================================================
@@ -75,6 +84,7 @@ const App = (() => {
     } else {
       // Starta uttoning
       problemDisplay.classList.remove('visible');
+      showAnswerBtn.classList.remove('problem-visible');
       clearExtraTask();
       clearBildstod();
       problemVisible = false;
@@ -96,13 +106,27 @@ const App = (() => {
     clearBildstod();
 
     const settings = Settings.get();
-    const problem  = Problems.generateProblem(settings);
+
+    // Förhindra samma tal två gånger i rad
+    let problem;
+    let attempts = 0;
+    do {
+      problem = Problems.generateProblem(settings);
+      attempts++;
+    } while (isSameProblem(problem, lastProblem) && attempts < 5);
+    lastProblem     = problem;
+    currentProblem  = problem;
 
     renderProblem(problem, settings);
+
+    // Återställ svar-knappen
+    showAnswerBtn.disabled     = false;
+    showAnswerBtn.textContent  = 'Visa svar';
 
     problemDisplay.classList.remove('hidden');
     requestAnimationFrame(() => requestAnimationFrame(() => {
       problemDisplay.classList.add('visible');
+      showAnswerBtn.classList.add('problem-visible');
     }));
 
     clickHint.classList.add('hidden-hint');
@@ -160,7 +184,7 @@ const App = (() => {
     }
   }
 
-  // Bygger och lägger till bildstödet i problem-display, med fade-in
+  // Bygger och lägger till bildstödet i problem-display (bredvid talen), med fade-in
   function appendBildstod(problem, settings) {
     if (!problemVisible) return;
 
@@ -170,7 +194,7 @@ const App = (() => {
     const wrapper = document.createElement('div');
     wrapper.className = 'bildstod-container bildstod-anim';
     wrapper.appendChild(el);
-    stage.appendChild(wrapper);
+    problemDisplay.prepend(wrapper);
   }
 
   function buildBildstodEl(problem, settings) {
@@ -605,6 +629,15 @@ const App = (() => {
   // =========================================================
   //  Hopfällbara menygrupper
   // =========================================================
+  function collapseMenuLabel(label) {
+    label.classList.add('is-collapsed');
+    let el = label.nextElementSibling;
+    while (el && !el.classList.contains('menu-group-label')) {
+      el.classList.add('section-collapsed');
+      el = el.nextElementSibling;
+    }
+  }
+
   function bindMenuCollapse() {
     document.querySelectorAll('#settings-menu .menu-group-label').forEach(label => {
       label.classList.add('is-collapsible');
@@ -616,6 +649,11 @@ const App = (() => {
           el = el.nextElementSibling;
         }
       });
+
+      // Alla sektioner utom Matematikområden startar ihopfällda
+      if (label.id !== 'matematikarea-group-label') {
+        collapseMenuLabel(label);
+      }
     });
   }
 
@@ -632,6 +670,11 @@ const App = (() => {
         || a.includes('matt-langd')
         || a.includes('matt-volym')
         || a.includes('blandad');
+  }
+
+  function updateSpecificTablesVisibility() {
+    const tablesBasicChecked = document.querySelector('#multdiv-mode-checkboxes input[value="tables-basic"]').checked;
+    document.getElementById('specific-tables-wrap').classList.toggle('hidden', !tablesBasicChecked);
   }
 
   function updateConditionalSections() {
@@ -683,9 +726,14 @@ const App = (() => {
       cb.checked = s.areas.includes(cb.value);
     });
 
-    document.querySelectorAll('#multdiv-mode-checkboxes input[type=checkbox]').forEach(cb => {
+    document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
       cb.checked = (s.multDivMode || ['tables-basic']).includes(cb.value);
     });
+
+    document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = (s.specificTables || [1,2,3,4,5,6,7,8,9]).includes(parseInt(cb.value, 10));
+    });
+    updateSpecificTablesVisibility();
 
     document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
       cb.checked = s.geometriTypes.includes(cb.value);
@@ -721,11 +769,21 @@ const App = (() => {
       });
     });
 
-    document.querySelectorAll('#multdiv-mode-checkboxes input[type=checkbox]').forEach(cb => {
+    document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
       cb.addEventListener('change', () => {
-        const checked = [...document.querySelectorAll('#multdiv-mode-checkboxes input:checked')].map(c => c.value);
+        const checked = [...document.querySelectorAll('#multdiv-mode-checkboxes > label input:checked')].map(c => c.value);
         if (checked.length > 0) Settings.setMultDivMode(checked);
         else cb.checked = true;
+        updateSpecificTablesVisibility();
+      });
+    });
+
+    document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#specific-tables-checkboxes input:checked')]
+          .map(c => parseInt(c.value, 10));
+        if (checked.length > 0) Settings.setSpecificTables(checked);
+        else cb.checked = true; // minst en tabell måste vara vald
       });
     });
 
@@ -764,6 +822,105 @@ const App = (() => {
     document.getElementById('division-rest-check').addEventListener('change', e => {
       Settings.setDivisionRest(e.target.checked);
     });
+  }
+
+  // =========================================================
+  //  Upprepningsskydd
+  // =========================================================
+  function isSameProblem(a, b) {
+    if (!a || !b || a.type !== b.type) return false;
+    switch (a.type) {
+      case 'addition':
+      case 'subtraktion':
+      case 'multiplikation':
+      case 'division':
+        return a.a === b.a && a.b === b.b;
+      case 'oppna-utsaga':
+      case 'prioritet':
+        return a.expression === b.expression;
+      case 'klocka':
+        return a.hours === b.hours && a.minutes === b.minutes && a.questionType === b.questionType;
+      case 'brak':
+        return a.answer === b.answer && a.questionType === b.questionType;
+      case 'geometri':
+        return a.shape === b.shape && a.geoQuestion === b.geoQuestion &&
+               JSON.stringify(a.dimensions) === JSON.stringify(b.dimensions);
+      case 'matt-langd':
+      case 'matt-volym':
+        return a.conversion.from === b.conversion.from &&
+               a.conversion.fromUnit === b.conversion.fromUnit &&
+               a.conversion.toUnit === b.conversion.toUnit;
+      default:
+        return false;
+    }
+  }
+
+  // =========================================================
+  //  Visa rätt svar
+  // =========================================================
+  function showAnswer(problem) {
+    if (!problem || !problemVisible) return;
+    showAnswerBtn.disabled    = true;
+    showAnswerBtn.textContent = '✓';
+
+    if (problem.isTextProblem) {
+      appendAnswerBox(problem.answer);
+      return;
+    }
+
+    switch (problem.type) {
+      case 'oppna-utsaga': {
+        const blank = problemDisplay.querySelector('.open-blank');
+        if (blank) {
+          blank.textContent = problem.answer;
+          blank.classList.add('open-blank--answered');
+        }
+        break;
+      }
+      case 'klocka':
+        appendAnswerBox(problem.answer);
+        break;
+      case 'geometri': {
+        const unit = problem.geoQuestion === 'area' ? 'cm²' : 'cm';
+        appendAnswerBox(`${problem.answer} ${unit}`);
+        break;
+      }
+      case 'matt-langd':
+      case 'matt-volym': {
+        const { from, fromUnit, toUnit } = problem.conversion;
+        const display = problemDisplay.querySelector('.matt-display');
+        if (display) {
+          display.innerHTML =
+            `<span>${from}\u202F</span>` +
+            `<span class="matt-unit">${fromUnit}</span>` +
+            `<span>\u202F=\u202F</span>` +
+            `<span class="answer-value">${problem.answer}\u202F</span>` +
+            `<span class="matt-unit">${toUnit}</span>`;
+        }
+        break;
+      }
+      default: {
+        // Problem med '=': lägg till svaret som sista element
+        const ansSpan = document.createElement('span');
+        ansSpan.className = 'answer-value';
+        ansSpan.textContent = ` ${problem.answer}`;
+        problemDisplay.appendChild(ansSpan);
+      }
+    }
+  }
+
+  function appendAnswerBox(text) {
+    const box = document.createElement('div');
+    box.className = 'answer-box';
+    const label = document.createElement('span');
+    label.className = 'answer-box-label';
+    label.textContent = 'Svar:';
+    const val = document.createElement('span');
+    val.className = 'answer-value';
+    val.textContent = text;
+    box.appendChild(label);
+    box.appendChild(val);
+    problemDisplay.appendChild(box);
   }
 
   // =========================================================

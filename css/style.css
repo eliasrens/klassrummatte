@@ -667,21 +667,19 @@ body.extra-visible #stage {
   opacity: 0.7;
 }
 
-/* === Bildstöd – absolut vänsterposition, ingen layoutpåverkan === */
+/* === Bildstöd – flexobjekt bredvid talen === */
 @keyframes bildstod-slide-in {
-  from { opacity: 0; transform: translateY(-50%) translateX(-14px); }
-  to   { opacity: 1; transform: translateY(-50%); }
+  from { opacity: 0; transform: translateX(-14px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 .bildstod-container {
-  position: absolute;
-  left: 1.5rem;
-  top: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.8rem;
   max-width: min(26vw, 360px);
+  flex-shrink: 0;
 }
 
 .bildstod-anim {
@@ -719,7 +717,7 @@ body.extra-visible #stage {
   min-width: 1.2em;
   border-bottom: 0.07em solid currentColor;
   margin: 0 0.08em;
-  vertical-align: -0.12em;
+  vertical-align: baseline;
 }
 
 /* === Radioknappar (bildstöd-timing) === */
@@ -771,6 +769,104 @@ body.extra-visible #stage {
 .check-label--featured.bildstod-unavailable {
   opacity: 0.38;
   pointer-events: none;
+}
+
+/* === Visa svar-knapp === */
+.show-answer-btn {
+  position: absolute;
+  bottom: 4vh;
+  right: 2rem;
+  background: rgba(26, 26, 46, 0.07);
+  border: 1.5px solid rgba(26, 26, 46, 0.13);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 0.35rem 0.85rem;
+  font-size: clamp(0.72rem, 1.3vw, 0.88rem);
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  opacity: 0;
+  pointer-events: none;
+  transition: right var(--transition), opacity 0.3s ease, background 0.2s ease, color 0.2s ease;
+  z-index: 10;
+}
+
+.show-answer-btn.problem-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.show-answer-btn:hover {
+  background: rgba(26, 26, 46, 0.13);
+  color: var(--text);
+}
+
+.show-answer-btn:active {
+  transform: scale(0.97);
+}
+
+body.extra-visible .show-answer-btn {
+  right: calc(var(--extra-width) + 1.5rem);
+}
+
+/* === Svar-visning === */
+.answer-value {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.answer-box {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4em;
+  background: rgba(230, 57, 70, 0.07);
+  border: 2px solid rgba(230, 57, 70, 0.18);
+  border-radius: 10px;
+  padding: 0.15em 0.55em;
+  margin-top: 0.4em;
+  font-size: 0.65em;
+}
+
+.answer-box-label {
+  color: var(--text-muted);
+  font-size: 0.82em;
+  font-weight: 600;
+}
+
+.open-blank--answered {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  padding: 0 0.1em;
+}
+
+/* === Specifika tabellval === */
+.specific-tables-wrap {
+  margin: 0.15rem 0 0.25rem 1.5rem;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-left: 2px solid rgba(255,255,255,0.1);
+}
+
+.specific-tables-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 0.25rem;
+}
+
+.specific-tables-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem;
+}
+
+.check-label--sm {
+  padding: 0.2rem 0.35rem;
+  font-size: 0.88rem;
+  min-width: 2.6rem;
+  justify-content: center;
 }
 
 @media (max-width: 640px) {

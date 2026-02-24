@@ -98,13 +98,15 @@ const Problems = (() => {
     const c           = cfg(grade);
     const multDivMode = settings.multDivMode || ['tables-basic'];
 
+    const specificTables = settings.specificTables || [1,2,3,4,5,6,7,8,9];
+
     switch (area) {
       case 'addition':          return genAddition(c);
       case 'subtraktion':       return genSubtraktion(c);
-      case 'multiplikation':    return genMultiplikation(c, grade, multDivMode);
-      case 'division':          return genDivision(c, grade, multDivMode, settings.divisionRest || false);
+      case 'multiplikation':    return genMultiplikation(c, grade, multDivMode, specificTables);
+      case 'division':          return genDivision(c, grade, multDivMode, settings.divisionRest || false, specificTables);
       case 'prioritet':         return genPrioritet(grade);
-      case 'oppna-utsagor':    return genOppnaUtsaga(c, grade);
+      case 'oppna-utsagor':    return genOppnaUtsaga(c, grade, specificTables);
       case 'brak':              return genBrak(grade);
       case 'geometri':          return genGeometri(grade, null, settings.geometriTypes);
       case 'klocka':            return genKlocka(c);
@@ -137,7 +139,7 @@ const Problems = (() => {
   // =========================================================
   //  Multiplikation – stödjer tre nivåer via multDivMode
   // =========================================================
-  function genMultiplikation(c, grade, multDivMode) {
+  function genMultiplikation(c, grade, multDivMode, specificTables) {
     const modes = multDivMode && multDivMode.length > 0 ? multDivMode : ['tables-basic'];
     const mode  = pickRandom(modes);
 
@@ -160,8 +162,10 @@ const Problems = (() => {
     }
 
     // tables-basic (standard) – cap at 9 to match label "Tabeller 1–9"
-    const tables = (c.multTables === 'all'
+    const allTables = (c.multTables === 'all'
       ? [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] : c.multTables).filter(t => t <= 9);
+    let tables = specificTables ? allTables.filter(t => specificTables.includes(t)) : allTables;
+    if (tables.length === 0) tables = allTables; // fallback om inget matchar årsklassen
     if (tables.length === 0) return { type: 'multiplikation', a: 2, b: 2, operator: '·', answer: 4 };
     const table  = pickRandom(tables);
     const factor = randInt(1, 12);
@@ -172,7 +176,7 @@ const Problems = (() => {
   // =========================================================
   //  Division – stödjer tre nivåer via multDivMode
   // =========================================================
-  function genDivision(c, grade, multDivMode, withRest) {
+  function genDivision(c, grade, multDivMode, withRest, specificTables) {
     const tables = c.divTables;
     if (!tables || tables.length === 0) return genAddition(c);
 
@@ -202,7 +206,9 @@ const Problems = (() => {
     }
 
     // tables-basic (standard) – cap at 9 to match label "Tabeller 1–9"
-    const realTables = (tables === 'all' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : tables).filter(t => t <= 9);
+    const allRealTables = (tables === 'all' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : tables).filter(t => t <= 9);
+    let realTables = specificTables ? allRealTables.filter(t => specificTables.includes(t)) : allRealTables;
+    if (realTables.length === 0) realTables = allRealTables; // fallback
     if (realTables.length === 0) return genAddition(c);
     const divisor  = pickRandom(realTables);
 
@@ -281,7 +287,7 @@ const Problems = (() => {
   // =========================================================
   //  Öppna utsagor  (5 + _ = 14)
   // =========================================================
-  function genOppnaUtsaga(c, grade) {
+  function genOppnaUtsaga(c, grade, specificTables) {
     const ops = ['add', 'sub'];
     if (grade >= 2) ops.push('mult');
     if (grade >= 3) ops.push('div');
@@ -307,8 +313,10 @@ const Problems = (() => {
     }
 
     if (op === 'mult') {
-      const tables = c.multTables === 'all' ? [2,3,4,5,6,7,8,9,10] : c.multTables;
-      const table  = pickRandom(tables);
+      const allMultTables = (c.multTables === 'all' ? [2,3,4,5,6,7,8,9,10] : c.multTables).filter(t => t <= 9);
+      let multTables = specificTables ? allMultTables.filter(t => specificTables.includes(t)) : allMultTables;
+      if (multTables.length === 0) multTables = allMultTables;
+      const table  = pickRandom(multTables);
       const factor = randInt(2, grade <= 3 ? 9 : 12);
       if (Math.random() < 0.5)
         return { type: 'oppna-utsaga', expression: `${table} · _ = ${table * factor}`, answer: factor };
@@ -316,9 +324,11 @@ const Problems = (() => {
     }
 
     // div
-    const tables = c.divTables === 'all' ? [2,3,4,5,6,7,8,9,10] : (c.divTables || [2,3,4,5]);
-    if (!tables || tables.length === 0) return genAddition(c);
-    const divisor  = pickRandom(tables);
+    const allDivTables = (c.divTables === 'all' ? [2,3,4,5,6,7,8,9,10] : (c.divTables || [2,3,4,5])).filter(t => t <= 9);
+    let divTables = specificTables ? allDivTables.filter(t => specificTables.includes(t)) : allDivTables;
+    if (divTables.length === 0) divTables = allDivTables;
+    if (!divTables || divTables.length === 0) return genAddition(c);
+    const divisor  = pickRandom(divTables);
     const quotient = randInt(2, grade <= 3 ? 9 : 12);
     const dividend = divisor * quotient;
     if (Math.random() < 0.5)
@@ -441,7 +451,17 @@ const Problems = (() => {
       minutesToAdd = opts.length > 0 ? pickRandom(opts) : 15;
     }
 
-    return { type: 'klocka', hours, minutes, questionType, minutesToAdd };
+    let answer;
+    if (questionType === 'read') {
+      answer = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
+    } else {
+      const totalMin = hours * 60 + minutes + minutesToAdd;
+      const nh = Math.floor(totalMin / 60) % 12 || 12;
+      const nm = totalMin % 60;
+      answer = `${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')}`;
+    }
+
+    return { type: 'klocka', hours, minutes, questionType, minutesToAdd, answer };
   }
 
   // =========================================================
