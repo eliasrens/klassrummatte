@@ -321,6 +321,7 @@ body.extra-visible #stage {
   line-height: 1.2;
   text-align: center;
   color: var(--text);
+  position: relative; /* Ankare för bildstöd och svar (absolut positionerade) */
 
   opacity: 0;
   transform: scale(0.88) translateY(12px);
@@ -667,19 +668,22 @@ body.extra-visible #stage {
   opacity: 0.7;
 }
 
-/* === Bildstöd – flexobjekt bredvid talen === */
+/* === Bildstöd – absolut positionerat till vänster om problemet === */
 @keyframes bildstod-slide-in {
-  from { opacity: 0; transform: translateX(-14px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateY(-50%) translateX(-14px); }
+  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
 }
 
 .bildstod-container {
+  position: absolute;
+  right: calc(100% + 1.5rem); /* 1.5rem till vänster om problem-display */
+  top: 50%;
+  /* transform hanteras av animationen */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.8rem;
   max-width: min(26vw, 360px);
-  flex-shrink: 0;
 }
 
 .bildstod-anim {
@@ -712,12 +716,18 @@ body.extra-visible #stage {
 
 /* === Responsiv justering === */
 /* === Öppna utsagor – blank === */
+/* overflow: hidden gör att baseline alltid = underkant av elementet (CSS-spec),
+   vilket håller strecket i jämnhöjd med talets botten oavsett om blanken är tom eller fylld */
 .open-blank {
   display: inline-block;
   min-width: 1.2em;
+  height: 1.1em;
+  line-height: 1.1em;
+  overflow: hidden;
   border-bottom: 0.07em solid currentColor;
   margin: 0 0.08em;
   vertical-align: baseline;
+  text-align: center;
 }
 
 /* === Radioknappar (bildstöd-timing) === */
@@ -817,15 +827,20 @@ body.extra-visible .show-answer-btn {
 }
 
 .answer-box {
+  /* Absolut under problemet – påverkar inte problemets position */
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
   display: flex;
   align-items: baseline;
   gap: 0.4em;
   background: rgba(230, 57, 70, 0.07);
   border: 2px solid rgba(230, 57, 70, 0.18);
   border-radius: 10px;
-  padding: 0.15em 0.55em;
-  margin-top: 0.4em;
-  font-size: 0.65em;
+  padding: 0.2em 0.7em;
+  font-size: 0.42em;
 }
 
 .answer-box-label {
@@ -837,7 +852,6 @@ body.extra-visible .show-answer-btn {
 .open-blank--answered {
   color: var(--accent);
   border-bottom-color: var(--accent);
-  padding: 0 0.1em;
 }
 
 /* === Specifika tabellval === */
