@@ -5,9 +5,9 @@
 const Problems = (() => {
 
   // Fallback-pooler när inga områden är valda
-  const BASE = ['addition', 'subtraktion', 'multiplikation', 'division', 'prioritet', 'oppna-utsagor', 'brak', 'geometri', 'klocka', 'matt-langd', 'matt-volym'];
-  const BASE_GR13 = [...BASE, 'tallinje', 'talsorter'];
-  const BASE_GR4  = [...BASE, 'procent'];
+  const BASE = ['addition', 'subtraktion', 'multiplikation', 'division', 'prioritet', 'oppna-utsagor', 'brak', 'geometri', 'klocka', 'matt-langd', 'matt-volym', 'matt-vikt', 'matt-tid'];
+  const BASE_GR13 = [...BASE, 'tallinje', 'talsorter', 'talfoljd'];
+  const BASE_GR4  = [...BASE, 'procent', 'talfoljd'];
 
   function generateProblem(settings) {
     // Flersteg: generera tvåstegsproblem om inställningen är aktiv
