@@ -12,10 +12,58 @@ class KlockaPlugin extends BasePlugin {
     const possibleMinutes = [];
     for (let m = 0; m < 60; m += step) possibleMinutes.push(m);
 
-    const hours        = PluginUtils.randInt(1, 12);
-    const minutes      = PluginUtils.pickRandom(possibleMinutes);
-    const questionType = Math.random() < 0.6 ? 'read' : 'add-minutes';
-    let minutesToAdd   = null;
+    // 'diff' (tidsskillnad) introduceras åk 3+
+    const types = settings.grade >= 3
+      ? ['read', 'read', 'add-minutes', 'diff']
+      : ['read', 'add-minutes'];
+    const questionType = PluginUtils.pickRandom(types);
+
+    // ── Tidsskillnad ──────────────────────────────────────────
+    if (questionType === 'diff') {
+      const startH = PluginUtils.randInt(7, 14);
+      const startM = PluginUtils.pickRandom(possibleMinutes);
+
+      // Differens alltid i hela 5-minutersteg, oavsett step-nivå
+      const stepForDiff = Math.max(step, 5);
+      const maxDiff     = settings.grade <= 3 ? 60 : 120;
+      const diffOptions = [];
+      for (let d = stepForDiff * 3; d <= maxDiff; d += stepForDiff) diffOptions.push(d);
+
+      const diff    = PluginUtils.pickRandom(diffOptions);
+      const totalEnd = startH * 60 + startM + diff;
+      const endH    = Math.floor(totalEnd / 60);
+      const endM    = totalEnd % 60;
+
+      const hPart = Math.floor(diff / 60);
+      const mPart = diff % 60;
+      let answer;
+      if (hPart === 0)      answer = `${mPart} minuter`;
+      else if (mPart === 0) answer = hPart === 1 ? '1 timme' : `${hPart} timmar`;
+      else                  answer = hPart === 1
+        ? `1 timme och ${mPart} minuter`
+        : `${hPart} timmar och ${mPart} minuter`;
+
+      const contexts = [
+        'Lektionen slutar', 'Rasten börjar',
+        'Skolan slutar',    'Filmen börjar',
+        'Matrasten börjar',
+      ];
+      const context = PluginUtils.pickRandom(contexts);
+      const endStr  = `${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`;
+
+      return {
+        type: 'klocka',
+        questionType: 'diff',
+        hours:   startH % 12 || 12,
+        minutes: startM,
+        endStr, context, diff, answer,
+      };
+    }
+
+    // ── Läs av / addera minuter ───────────────────────────────
+    const hours   = PluginUtils.randInt(1, 12);
+    const minutes = PluginUtils.pickRandom(possibleMinutes);
+    let minutesToAdd = null;
 
     if (questionType === 'add-minutes') {
       const opts = [5, 10, 15, 20, 30].filter(m => m % step === 0);
@@ -41,11 +89,16 @@ class KlockaPlugin extends BasePlugin {
     const svg = buildClockSVG(problem.hours, problem.minutes);
     svg.classList.add('clock-svg');
     wrapper.appendChild(svg);
+
     const q = document.createElement('p');
     q.className = 'clock-question';
-    q.textContent = problem.questionType === 'read'
-      ? 'Vad är klockan?'
-      : `Vad är klockan om ${problem.minutesToAdd} minuter?`;
+    if (problem.questionType === 'read') {
+      q.textContent = 'Vad är klockan?';
+    } else if (problem.questionType === 'add-minutes') {
+      q.textContent = `Vad är klockan om ${problem.minutesToAdd} minuter?`;
+    } else {
+      q.textContent = `${problem.context} klockan ${problem.endStr}. Hur lång tid är det?`;
+    }
     wrapper.appendChild(q);
     container.appendChild(wrapper);
   }
@@ -56,7 +109,10 @@ class KlockaPlugin extends BasePlugin {
   }
 
   isSameProblem(a, b) {
-    return a.hours === b.hours && a.minutes === b.minutes && a.questionType === b.questionType;
+    if (a.questionType !== b.questionType) return false;
+    if (a.questionType === 'diff')
+      return a.hours === b.hours && a.minutes === b.minutes && a.diff === b.diff;
+    return a.hours === b.hours && a.minutes === b.minutes;
   }
 }
 

@@ -715,6 +715,34 @@ body.extra-visible #stage {
   flex-shrink: 0;
 }
 
+/* === Bråk – frågetyper (jämförelse, förenkla, blandat tal) === */
+.brak-question-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.brak-compare-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+}
+
+.brak-compare-eller {
+  font-size: clamp(1rem, 2.5vw, 1.8rem);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.brak-subtext {
+  font-size: clamp(0.9rem, 2vw, 1.5rem);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+}
+
 /* === Bildstöd – absolut positionerat till vänster om problemet === */
 @keyframes bildstod-slide-in {
   from { opacity: 0; transform: translateY(-50%) translateX(-14px); }
