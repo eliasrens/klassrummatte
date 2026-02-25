@@ -517,6 +517,10 @@ body.extra-visible #stage {
 #problem-display .uppstallning {
   font-size: clamp(2rem, 5vw, 4rem);
 }
+/* I multi-mode ärver uppställningen grid-cellens --problem-size istället */
+#problem-display.multi-mode .uppstallning {
+  font-size: var(--problem-size);
+}
 
 /* === SVG-klocka === */
 .clock-container {
@@ -946,15 +950,15 @@ body.extra-visible .show-answer-btn {
   width: 100%;
   height: 100%;
   gap: 0;
-  --problem-size:      clamp(1.4rem, 3vw, 2.5rem);
-  --problem-size-text: clamp(0.9rem, 1.8vw, 1.4rem);
+  --problem-size:      clamp(1.87rem, 4.24vw, 3.69rem);
+  --problem-size-text: clamp(1.27rem, 2.64vw, 2.09rem);
 }
 
 .problems-grid--2 { grid-template-columns: 1fr 1fr; }
-.problems-grid--3 {
-  grid-template-columns: 1fr 1fr 1fr;
-  --problem-size:      clamp(1rem, 2.2vw, 2rem);
-  --problem-size-text: clamp(0.75rem, 1.5vw, 1.2rem);
+.problems-grid--3 { grid-template-columns: 1fr 1fr 1fr; }
+.problems-grid--3 .tallinje-sequence {
+  font-size: clamp(1.37rem, 3.01vw, 2.46rem);
+  gap: clamp(0.13rem, 0.55vw, 0.41rem);
 }
 .problems-grid--4 { grid-template-columns: 1fr 1fr; }
 
@@ -967,6 +971,7 @@ body.extra-visible .show-answer-btn {
   padding: clamp(1.5rem, 3vh, 4rem) clamp(2rem, 3vw, 4rem);
   border-right:  1px solid rgba(26, 26, 46, 0.1);
   border-bottom: 1px solid rgba(26, 26, 46, 0.1);
+  font-size: var(--problem-size);
 }
 
 /* Remove right border from last column */
