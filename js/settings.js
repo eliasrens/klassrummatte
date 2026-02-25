@@ -19,6 +19,7 @@ const Settings = (() => {
     specificTables: [1,2,3,4,5,6,7,8,9],
     addSubMode: ['standard'],
     addSubVaxling: ['med'],
+    flersteg: false,
   };
 
   let state = { ...DEFAULTS };
@@ -79,6 +80,7 @@ const Settings = (() => {
   function setSpecificTables(arr)  { state.specificTables = [...arr]; save(); }
   function setAddSubMode(arr)      { state.addSubMode = [...arr]; save(); }
   function setAddSubVaxling(arr)   { state.addSubVaxling = [...arr]; save(); }
+  function setFlersteg(b)          { state.flersteg = !!b; save(); }
 
   // Initiering
   load();
@@ -89,6 +91,6 @@ const Settings = (() => {
     isBildstod, isBildstodInstant, getGeometriTypes, getAddSubMode, getAddSubVaxling,
     setGrade, setAreas, setExtraEnabled, setExtraType, setProblemlosning,
     setBildstod, setBildstodInstant, setDivisionRest, setGeometriTypes,
-    setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling,
+    setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setFlersteg,
   };
 })();

@@ -931,6 +931,81 @@ body.extra-visible .show-answer-btn {
   justify-content: center;
 }
 
+/* === Tallinje === */
+.tallinje-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 2vw, 1.2rem);
+}
+
+.tallinje-sequence {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.2rem, 1vw, 0.5rem);
+  font-size: clamp(1.8rem, 5vw, 3.6rem);
+  font-weight: 700;
+}
+
+.tallinje-box {
+  min-width: 1.4em;
+  text-align: center;
+}
+
+.tallinje-sep {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.tallinje-blank {
+  display: inline-block;
+  min-width: 1.2em;
+  border-bottom: 4px solid var(--text);
+  vertical-align: baseline;
+  text-align: center;
+}
+
+.tallinje-question {
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* === Talsorter === */
+.talsorter-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 2vw, 1.2rem);
+}
+
+.talsorter-display {
+  display: flex;
+  align-items: baseline;
+  gap: 0.05em;
+  font-size: clamp(2.8rem, 9vw, 6.5rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.talsorter-highlight {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  text-decoration-thickness: 0.08em;
+}
+
+.talsorter-question {
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.talsorter-answer {
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  font-weight: 700;
+}
+
 @media (max-width: 640px) {
   :root {
     --menu-width: min(520px, 96vw);

@@ -69,6 +69,14 @@
         </div>
 
         <div class="area-category">
+          <div class="area-category-label">Taluppfattning</div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="tallinje"><span>Tallinje <small>(Åk 1–3)</small></span></label>
+            <label class="check-label"><input type="checkbox" value="talsorter"><span>Talsorter <small>(Åk 1–3)</small></span></label>
+          </div>
+        </div>
+
+        <div class="area-category">
           <div class="area-category-label">Geometri</div>
           <label class="check-label"><input type="checkbox" value="geometri"><span>Geometri</span></label>
         </div>
@@ -200,6 +208,12 @@
         <input type="checkbox" id="problemlosning-check">
         <span>Problemlösning<br><small>Textuppgifter med namn och scenarion</small></span>
       </label>
+      <div id="flersteg-wrap" class="hidden">
+        <label class="check-label">
+          <input type="checkbox" id="flersteg-check">
+          <span>Flerstegsuppgifter<br><small>Tvåstegsproblem (kräver 2 räknesätt)</small></span>
+        </label>
+      </div>
     </section>
 
     <!-- ── EXTRAUPPGIFT ───────────────────────────────── -->
@@ -257,6 +271,8 @@
   <script src="js/plugins/matt-langd.js"></script>
   <script src="js/plugins/matt-volym.js"></script>
   <script src="js/plugins/procent.js"></script>
+  <script src="js/plugins/tallinje.js"></script>
+  <script src="js/plugins/talsorter.js"></script>
 
   <!-- Befintliga moduler (tunna fasader) -->
   <script src="js/settings.js"></script>

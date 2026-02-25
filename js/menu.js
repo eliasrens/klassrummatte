@@ -147,6 +147,8 @@ const Menu = (() => {
       r.checked = r.value === timingVal;
     });
     document.getElementById('problemlosning-check').checked = s.problemlosning;
+    document.getElementById('flersteg-check').checked = s.flersteg || false;
+    document.getElementById('flersteg-wrap').classList.toggle('hidden', !s.problemlosning);
     document.getElementById('extra-enabled-check').checked  = s.extraEnabled;
     document.getElementById('extra-type-select').value      = s.extraType;
     document.getElementById('extra-task-options').classList.toggle('hidden', !s.extraEnabled);
@@ -229,6 +231,15 @@ const Menu = (() => {
 
     document.getElementById('problemlosning-check').addEventListener('change', e => {
       Settings.setProblemlosning(e.target.checked);
+      document.getElementById('flersteg-wrap').classList.toggle('hidden', !e.target.checked);
+      if (!e.target.checked) {
+        document.getElementById('flersteg-check').checked = false;
+        Settings.setFlersteg(false);
+      }
+    });
+
+    document.getElementById('flersteg-check').addEventListener('change', e => {
+      Settings.setFlersteg(e.target.checked);
     });
 
     document.getElementById('extra-enabled-check').addEventListener('change', e => {
