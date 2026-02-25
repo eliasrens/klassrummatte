@@ -53,6 +53,7 @@ const Menu = (() => {
         || (a.includes('multiplikation') && g <= 3)
         || a.includes('matt-langd')
         || a.includes('matt-volym')
+        || a.includes('brak')
         || a.includes('blandad');
   }
 

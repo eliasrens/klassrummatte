@@ -1,5 +1,43 @@
 // js/plugins/brak.js
 
+// Privat hjälpfunktion – cirkel-SVG som bildstöd för bråk
+function buildFractionCircle(numerator, denominator) {
+  const CX = 50, CY = 50, R = 46;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.classList.add('brak-circle-svg');
+
+  if (denominator <= 1) {
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', CX); c.setAttribute('cy', CY); c.setAttribute('r', R);
+    c.setAttribute('fill', numerator >= 1 ? '#e63946' : '#e5e7eb');
+    c.setAttribute('stroke', '#6b7280'); c.setAttribute('stroke-width', '2');
+    svg.appendChild(c);
+    return svg;
+  }
+
+  const sliceAngle = (2 * Math.PI) / denominator;
+  for (let i = 0; i < denominator; i++) {
+    const start = -Math.PI / 2 + i * sliceAngle;
+    const end   = start + sliceAngle;
+    const x1 = CX + R * Math.cos(start), y1 = CY + R * Math.sin(start);
+    const x2 = CX + R * Math.cos(end),   y2 = CY + R * Math.sin(end);
+    const large = sliceAngle > Math.PI ? 1 : 0;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${CX} ${CY} L ${x1.toFixed(3)} ${y1.toFixed(3)} A ${R} ${R} 0 ${large} 1 ${x2.toFixed(3)} ${y2.toFixed(3)} Z`);
+    path.setAttribute('fill', i < numerator ? '#e63946' : '#e5e7eb');
+    path.setAttribute('stroke', '#9ca3af'); path.setAttribute('stroke-width', '1');
+    svg.appendChild(path);
+  }
+
+  const border = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  border.setAttribute('cx', CX); border.setAttribute('cy', CY); border.setAttribute('r', R);
+  border.setAttribute('fill', 'none');
+  border.setAttribute('stroke', '#6b7280'); border.setAttribute('stroke-width', '2');
+  svg.appendChild(border);
+  return svg;
+}
+
 class BrakPlugin extends BasePlugin {
   constructor() {
     super();
@@ -63,6 +101,30 @@ class BrakPlugin extends BasePlugin {
 
   isSameProblem(a, b) {
     return a.answer === b.answer && a.questionType === b.questionType;
+  }
+
+  hasBildstodSupport(problem) {
+    if (problem.questionType === 'name')         return problem.denominator <= 10;
+    if (problem.questionType === 'add-same-den') return problem.denominator <= 8;
+    return false;
+  }
+
+  buildBildstod(problem) {
+    if (problem.questionType === 'name') {
+      return buildFractionCircle(problem.numerator, problem.denominator);
+    }
+    if (problem.questionType === 'add-same-den') {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex; gap:0.5rem; align-items:center;';
+      wrap.appendChild(buildFractionCircle(problem.a, problem.denominator));
+      const plus = document.createElement('span');
+      plus.textContent = '+';
+      plus.style.cssText = 'font-size:1.2rem; font-weight:700; color:#1a1a2e;';
+      wrap.appendChild(plus);
+      wrap.appendChild(buildFractionCircle(problem.b, problem.denominator));
+      return wrap;
+    }
+    return null;
   }
 }
 

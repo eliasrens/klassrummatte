@@ -7,7 +7,7 @@ const Settings = (() => {
 
   const DEFAULTS = {
     grade: 3,
-    areas: ['addition'],
+    areas: [],
     problemlosning: false,
     extraEnabled: false,
     extraType: 'uppstallning-add',

@@ -199,13 +199,37 @@ select option {
 }
 
 /* Checkboxar */
-#area-checkboxes,
+#area-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 #multdiv-mode-checkboxes,
 #addsub-mode-checkboxes,
 #geometri-type-checkboxes {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+}
+
+/* Kategorier i matematikområden */
+.area-category {
+  margin-bottom: 0.05rem;
+}
+
+.area-category-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+  padding: 0.55rem 0.5rem 0.1rem;
+}
+
+.area-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
 .check-label {
@@ -677,6 +701,14 @@ body.extra-visible #stage {
   border-radius: 3px;
   background: var(--accent-2);
   opacity: 0.7;
+}
+
+/* === Bråk bildstöd – cirkel-SVG === */
+.brak-circle-svg {
+  width: clamp(70px, 13vw, 110px);
+  height: clamp(70px, 13vw, 110px);
+  display: block;
+  flex-shrink: 0;
 }
 
 /* === Bildstöd – absolut positionerat till vänster om problemet === */

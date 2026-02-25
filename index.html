@@ -41,54 +41,52 @@
 
     <section class="menu-section">
       <div id="area-checkboxes">
-        <label class="check-label">
-          <input type="checkbox" value="addition" checked>
-          <span>Addition</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="subtraktion">
-          <span>Subtraktion</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="multiplikation">
-          <span>Multiplikation</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="division">
-          <span>Division</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="prioritet">
-          <span>Prioriteringsregler</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="brak">
-          <span>Bråk</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="geometri">
-          <span>Geometri</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="klocka">
-          <span>Klocka</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="matt-langd">
-          <span>Mått – längd</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="matt-volym">
-          <span>Mått – volym</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="oppna-utsagor">
-          <span>Öppna utsagor</span>
-        </label>
+
+        <div class="area-category">
+          <div class="area-category-label">Aritmetik</div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="addition"><span>Addition</span></label>
+            <label class="check-label"><input type="checkbox" value="subtraktion"><span>Subtraktion</span></label>
+            <label class="check-label"><input type="checkbox" value="multiplikation"><span>Multiplikation</span></label>
+            <label class="check-label"><input type="checkbox" value="division"><span>Division</span></label>
+          </div>
+        </div>
+
+        <div class="area-category">
+          <div class="area-category-label">Algebra</div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="prioritet"><span>Prioritetsregler</span></label>
+            <label class="check-label"><input type="checkbox" value="oppna-utsagor"><span>Öppna utsagor</span></label>
+          </div>
+        </div>
+
+        <div class="area-category">
+          <div class="area-category-label">Tal &amp; samband</div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="brak"><span>Bråk</span></label>
+            <label class="check-label"><input type="checkbox" value="procent"><span>Procent <small>(Åk 4+)</small></span></label>
+          </div>
+        </div>
+
+        <div class="area-category">
+          <div class="area-category-label">Geometri</div>
+          <label class="check-label"><input type="checkbox" value="geometri"><span>Geometri</span></label>
+        </div>
+
+        <div class="area-category">
+          <div class="area-category-label">Mått &amp; tid</div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="klocka"><span>Klocka</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-langd"><span>Mått – längd</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-volym"><span>Mått – volym</span></label>
+          </div>
+        </div>
+
         <label class="check-label check-label--mixed">
           <input type="checkbox" value="blandad">
           <span>Blandad repetition</span>
         </label>
+
       </div>
     </section>
 
@@ -258,6 +256,7 @@
   <script src="js/plugins/klocka.js"></script>
   <script src="js/plugins/matt-langd.js"></script>
   <script src="js/plugins/matt-volym.js"></script>
+  <script src="js/plugins/procent.js"></script>
 
   <!-- Befintliga moduler (tunna fasader) -->
   <script src="js/settings.js"></script>
