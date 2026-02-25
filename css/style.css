@@ -718,19 +718,25 @@ body.extra-visible #stage {
 /* Host-container för inline bildstöd (cirkel ovanför respektive bråk) */
 .brak-frac-host {
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   vertical-align: middle;
-  gap: 0.25em;
+  position: relative; /* ankare för absolut cirkel */
+}
+
+/* Cirkeln positioneras absolut ovanför bråket – påverkar inte layoutflödet */
+.brak-frac-host .brak-circle-svg {
+  position: absolute;
+  bottom: calc(100% + 0.4em);
+  left: 50%;
 }
 
 @keyframes brak-circle-appear {
-  from { opacity: 0; transform: translateY(-10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 .brak-circle-anim {
-  animation: brak-circle-appear 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: brak-circle-appear 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* === Bråk – frågetyper (jämförelse, förenkla, blandat tal) === */
