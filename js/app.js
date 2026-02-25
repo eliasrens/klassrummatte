@@ -10,28 +10,31 @@ const App = (() => {
   // =========================================================
   //  DOM-referenser
   // =========================================================
-  let stage, problemDisplay, extraPanel, extraDisplay, clickHint, showAnswerBtn;
+  let stage, problemDisplay, extraPanel, extraDisplay, clickHint, showAnswerBtn, extraAnswerBtn;
 
   // =========================================================
   //  App-state
   // =========================================================
-  let problemVisible = false;
-  let extraTimer     = null;
-  let hideTimer      = null;
-  let bildstodTimer  = null;
-  let currentProblem = null;
-  let lastProblem    = null;
+  let problemVisible   = false;
+  let extraTimer       = null;
+  let hideTimer        = null;
+  let bildstodTimer    = null;
+  let currentProblem   = null;
+  let lastProblem      = null;
+  let currentProblems  = [];   // används i multi-mode
+  let currentExtraProblem = null;
 
   // =========================================================
   //  Init
   // =========================================================
   function init() {
-    stage          = document.getElementById('stage');
-    problemDisplay = document.getElementById('problem-display');
-    extraPanel     = document.getElementById('extra-panel');
-    extraDisplay   = document.getElementById('extra-display');
-    clickHint      = document.getElementById('click-hint');
-    showAnswerBtn  = document.getElementById('show-answer-btn');
+    stage           = document.getElementById('stage');
+    problemDisplay  = document.getElementById('problem-display');
+    extraPanel      = document.getElementById('extra-panel');
+    extraDisplay    = document.getElementById('extra-display');
+    clickHint       = document.getElementById('click-hint');
+    showAnswerBtn   = document.getElementById('show-answer-btn');
+    extraAnswerBtn  = document.getElementById('extra-answer-btn');
 
     Menu.init(
       document.getElementById('menu-toggle'),
@@ -42,9 +45,34 @@ const App = (() => {
 
     showAnswerBtn.addEventListener('click', e => {
       e.stopPropagation();
-      if (currentProblem && problemVisible) {
+      if (!problemVisible) return;
+      const settings = Settings.get();
+      if (settings.multipleProblems && currentProblems.length > 0) {
+        const cells = problemDisplay.querySelectorAll('.problem-cell');
+        currentProblems.forEach((p, i) => {
+          if (cells[i]) Answer.showAnswer(p, cells[i], null);
+        });
+        showAnswerBtn.disabled    = true;
+        showAnswerBtn.textContent = '✓';
+      } else if (currentProblem) {
         Answer.showAnswer(currentProblem, problemDisplay, showAnswerBtn);
       }
+    });
+
+    extraAnswerBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!currentExtraProblem) return;
+      if (currentExtraProblem.type.startsWith('uppstallning')) {
+        const row = extraDisplay.querySelector('.uppstallning-answer');
+        if (row) row.classList.add('shown');
+      } else {
+        const ans = document.createElement('p');
+        ans.className = 'extra-answer-reveal';
+        ans.textContent = `Svar: ${currentExtraProblem.answer}`;
+        extraDisplay.appendChild(ans);
+      }
+      extraAnswerBtn.disabled    = true;
+      extraAnswerBtn.textContent = '✓';
     });
   }
 
@@ -98,17 +126,25 @@ const App = (() => {
 
     const settings = Settings.get();
 
-    // Förhindra samma uppgift två gånger i rad
-    let problem;
-    let attempts = 0;
-    do {
-      problem = Problems.generateProblem(settings);
-      attempts++;
-    } while (Answer.isSameProblem(problem, lastProblem) && attempts < 5);
-    lastProblem    = problem;
-    currentProblem = problem;
-
-    Renderer.renderProblem(problem, problemDisplay);
+    if (settings.multipleProblems) {
+      problemDisplay.classList.add('multi-mode');
+      currentProblems = Problems.generateMultipleProblems(settings);
+      currentProblem  = null;
+      Renderer.renderMultiple(currentProblems, problemDisplay);
+    } else {
+      problemDisplay.classList.remove('multi-mode');
+      // Förhindra samma uppgift två gånger i rad
+      let problem;
+      let attempts = 0;
+      do {
+        problem = Problems.generateProblem(settings);
+        attempts++;
+      } while (Answer.isSameProblem(problem, lastProblem) && attempts < 5);
+      lastProblem    = problem;
+      currentProblem = problem;
+      currentProblems = [];
+      Renderer.renderProblem(problem, problemDisplay);
+    }
 
     // Återställ svar-knappen
     showAnswerBtn.disabled    = false;
@@ -123,20 +159,22 @@ const App = (() => {
     clickHint.classList.add('hidden-hint');
     problemVisible = true;
 
-    if (settings.extraEnabled) {
+    if (settings.extraEnabled && !settings.multipleProblems) {
       extraTimer = setTimeout(() => showExtraTask(settings), EXTRA_DELAY_MS);
     }
 
-    if (settings.bildstod && Bildstod.hasBildstodSupport(problem, settings)) {
+    if (!settings.multipleProblems && currentProblem &&
+        settings.bildstod && Bildstod.hasBildstodSupport(currentProblem, settings)) {
       const delay = settings.bildstodInstant ? 80 : BILDSTOD_DELAY_MS;
       bildstodTimer = setTimeout(() => {
-        Bildstod.appendBildstod(problem, settings, problemDisplay, problemVisible);
+        Bildstod.appendBildstod(currentProblem, settings, problemDisplay, problemVisible);
       }, delay);
     }
   }
 
   function clearExtraTask() {
     if (extraTimer) { clearTimeout(extraTimer); extraTimer = null; }
+    currentExtraProblem = null;
     extraPanel.classList.remove('visible');
     document.body.classList.remove('extra-visible');
     setTimeout(() => { extraDisplay.innerHTML = ''; }, 460);
@@ -150,7 +188,10 @@ const App = (() => {
 
   function showExtraTask(settings) {
     const extra = Problems.generateExtraProblem(settings);
+    currentExtraProblem = extra;
     Renderer.renderExtraProblem(extra, extraDisplay);
+    extraAnswerBtn.disabled    = false;
+    extraAnswerBtn.textContent = 'Visa svar';
     extraPanel.classList.remove('hidden');
     requestAnimationFrame(() => requestAnimationFrame(() => {
       extraPanel.classList.add('visible');

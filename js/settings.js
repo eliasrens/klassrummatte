@@ -7,6 +7,7 @@ const Settings = (() => {
 
   const DEFAULTS = {
     grade: 3,
+    gradeSelected: false,
     areas: [],
     problemlosning: false,
     extraEnabled: false,
@@ -20,6 +21,8 @@ const Settings = (() => {
     addSubMode: ['standard'],
     addSubVaxling: ['med'],
     flersteg: false,
+    multipleProblems: false,
+    multipleCount: 2,
   };
 
   let state = { ...DEFAULTS };
@@ -29,6 +32,10 @@ const Settings = (() => {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (saved && typeof saved === 'object') {
         state = { ...DEFAULTS, ...saved };
+        // Returning user who saved grade before gradeSelected existed → treat as selected
+        if (saved.grade !== undefined && !saved.gradeSelected) {
+          state.gradeSelected = true;
+        }
       }
     } catch (_) {
       state = { ...DEFAULTS };
@@ -81,6 +88,9 @@ const Settings = (() => {
   function setAddSubMode(arr)      { state.addSubMode = [...arr]; save(); }
   function setAddSubVaxling(arr)   { state.addSubVaxling = [...arr]; save(); }
   function setFlersteg(b)          { state.flersteg = !!b; save(); }
+  function setGradeSelected(b)     { state.gradeSelected = !!b; save(); }
+  function setMultipleProblems(b)  { state.multipleProblems = !!b; save(); }
+  function setMultipleCount(n)     { state.multipleCount = parseInt(n, 10); save(); }
 
   // Initiering
   load();
@@ -92,5 +102,6 @@ const Settings = (() => {
     setGrade, setAreas, setExtraEnabled, setExtraType, setProblemlosning,
     setBildstod, setBildstodInstant, setDivisionRest, setGeometriTypes,
     setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setFlersteg,
+    setGradeSelected, setMultipleProblems, setMultipleCount,
   };
 })();

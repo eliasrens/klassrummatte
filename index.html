@@ -27,9 +27,10 @@
     <section class="menu-section">
       <label class="section-label" for="grade-select">Årskurs</label>
       <select id="grade-select">
+        <option value="" disabled>Välj årskurs ...</option>
         <option value="1">Åk 1</option>
         <option value="2">Åk 2</option>
-        <option value="3" selected>Åk 3</option>
+        <option value="3">Åk 3</option>
         <option value="4">Åk 4</option>
         <option value="5">Åk 5</option>
         <option value="6">Åk 6</option>
@@ -208,11 +209,26 @@
         <input type="checkbox" id="problemlosning-check">
         <span>Problemlösning<br><small>Textuppgifter med namn och scenarion</small></span>
       </label>
-      <div id="flersteg-wrap" class="hidden">
+      <div id="flersteg-wrap" class="hidden specific-tables-wrap">
         <label class="check-label">
           <input type="checkbox" id="flersteg-check">
           <span>Flerstegsuppgifter<br><small>Tvåstegsproblem (kräver 2 räknesätt)</small></span>
         </label>
+      </div>
+    </section>
+
+    <section class="menu-section">
+      <label class="check-label check-label--featured">
+        <input type="checkbox" id="multiple-check">
+        <span>Flera uppgifter<br><small>Visa 2–4 uppgifter samtidigt på skärmen</small></span>
+      </label>
+      <div id="multiple-count-wrap" class="hidden specific-tables-wrap">
+        <div class="specific-tables-label">Antal uppgifter:</div>
+        <select id="multiple-count-select">
+          <option value="2">2 uppgifter</option>
+          <option value="3">3 uppgifter</option>
+          <option value="4">4 uppgifter</option>
+        </select>
       </div>
     </section>
 
@@ -253,6 +269,7 @@
   <aside id="extra-panel" class="hidden" aria-label="Extrauppgift">
     <div class="extra-label">Extrauppgift</div>
     <div id="extra-display"></div>
+    <button id="extra-answer-btn" class="extra-answer-btn">Visa svar</button>
   </aside>
 
   <!-- Plugin-system (laddas före fasaderna) -->

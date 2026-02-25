@@ -931,6 +931,107 @@ body.extra-visible .show-answer-btn {
   justify-content: center;
 }
 
+/* === Flera uppgifter – grid === */
+/* Problem-display fyller hela scenen i multi-mode så att
+   grid-rader kan placeras mot hörnen med space-between */
+#problem-display.multi-mode {
+  align-self: stretch;
+  flex-grow: 1;
+  padding: 0;
+  align-items: stretch;
+}
+
+.problems-grid {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  gap: 0;
+  --problem-size:      clamp(1.4rem, 3vw, 2.5rem);
+  --problem-size-text: clamp(0.9rem, 1.8vw, 1.4rem);
+}
+
+.problems-grid--2 { grid-template-columns: 1fr 1fr; }
+.problems-grid--3 {
+  grid-template-columns: 1fr 1fr 1fr;
+  --problem-size:      clamp(1rem, 2.2vw, 2rem);
+  --problem-size-text: clamp(0.75rem, 1.5vw, 1.2rem);
+}
+.problems-grid--4 { grid-template-columns: 1fr 1fr; }
+
+.problem-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: clamp(1.5rem, 3vh, 4rem) clamp(2rem, 3vw, 4rem);
+  border-right:  1px solid rgba(26, 26, 46, 0.1);
+  border-bottom: 1px solid rgba(26, 26, 46, 0.1);
+}
+
+/* Remove right border from last column */
+.problems-grid--2 .problem-cell:nth-child(2n),
+.problems-grid--4 .problem-cell:nth-child(2n) { border-right: none; }
+.problems-grid--3 .problem-cell:nth-child(3n) { border-right: none; }
+
+/* Single-row grids: no bottom border needed */
+.problems-grid--2 .problem-cell,
+.problems-grid--3 .problem-cell { border-bottom: none; }
+
+/* 4-item grid: remove bottom border from last row, more vertical spacing */
+.problems-grid--4 .problem-cell:nth-last-child(-n+2) { border-bottom: none; }
+.problems-grid--4 .problem-cell {
+  padding-top:    clamp(2.5rem, 6vh, 7rem);
+  padding-bottom: clamp(2.5rem, 6vh, 7rem);
+}
+
+/* 3-col: prevent arithmetic expression wrapping */
+.problems-grid--3 .problem-cell > span { white-space: nowrap; }
+
+/* Arithmetic cells: right-align so = signs line up within each column */
+.arithmetic-cell { justify-content: flex-end; }
+.arithmetic-cell .answer-value,
+.arithmetic-cell .answer-hidden {
+  display: inline-block;
+  min-width: 3ch;
+}
+
+/* === Extra-panel svar === */
+.extra-answer-btn {
+  position: absolute;
+  bottom: 4vh;
+  right: 1.5rem;
+  padding: 0.35rem 0.85rem;
+  font-size: clamp(0.72rem, 1.3vw, 0.88rem);
+  font-weight: 500;
+  font-family: inherit;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: rgba(26, 26, 46, 0.07);
+  border: 1.5px solid rgba(26, 26, 46, 0.13);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.extra-answer-btn:hover:not(:disabled) {
+  background: rgba(26, 26, 46, 0.13);
+  color: var(--text);
+}
+
+.extra-answer-btn:disabled {
+  cursor: default;
+}
+
+.extra-answer-reveal {
+  margin-top: 0.6rem;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8em;
+  text-align: center;
+}
+
 /* === Tallinje === */
 .tallinje-display {
   display: flex;

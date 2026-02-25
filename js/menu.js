@@ -34,8 +34,9 @@ const Menu = (() => {
         }
       });
 
-      // Alla sektioner utom Matematikområden startar ihopfällda
-      if (label.id !== 'matematikarea-group-label') {
+      // Matematikområden startar öppen bara om klass redan är vald
+      const gradeAlreadySelected = Settings.get().gradeSelected;
+      if (label.id !== 'matematikarea-group-label' || !gradeAlreadySelected) {
         collapseMenuLabel(label);
       }
     });
@@ -112,7 +113,7 @@ const Menu = (() => {
   function loadSettingsIntoUI() {
     const s = Settings.get();
 
-    document.getElementById('grade-select').value = s.grade;
+    document.getElementById('grade-select').value = s.gradeSelected ? s.grade : '';
 
     document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
       cb.checked = s.areas.includes(cb.value);
@@ -153,6 +154,9 @@ const Menu = (() => {
     document.getElementById('extra-type-select').value      = s.extraType;
     document.getElementById('extra-task-options').classList.toggle('hidden', !s.extraEnabled);
     document.getElementById('division-rest-check').checked  = s.divisionRest || false;
+    document.getElementById('multiple-check').checked       = s.multipleProblems || false;
+    document.getElementById('multiple-count-select').value  = s.multipleCount || 2;
+    document.getElementById('multiple-count-wrap').classList.toggle('hidden', !s.multipleProblems);
     updateConditionalSections();
     updateBildstodCheckbox();
   }
@@ -163,6 +167,14 @@ const Menu = (() => {
   function bindSettingsUI() {
     document.getElementById('grade-select').addEventListener('change', e => {
       Settings.setGrade(e.target.value);
+      if (!Settings.get().gradeSelected) {
+        Settings.setGradeSelected(true);
+        // Fäll ut Matematikområden automatiskt
+        const matLabel = document.getElementById('matematikarea-group-label');
+        if (matLabel && matLabel.classList.contains('is-collapsed')) {
+          matLabel.click();
+        }
+      }
       updateBildstodCheckbox();
     });
 
@@ -253,6 +265,15 @@ const Menu = (() => {
 
     document.getElementById('division-rest-check').addEventListener('change', e => {
       Settings.setDivisionRest(e.target.checked);
+    });
+
+    document.getElementById('multiple-check').addEventListener('change', e => {
+      Settings.setMultipleProblems(e.target.checked);
+      document.getElementById('multiple-count-wrap').classList.toggle('hidden', !e.target.checked);
+    });
+
+    document.getElementById('multiple-count-select').addEventListener('change', e => {
+      Settings.setMultipleCount(e.target.value);
     });
   }
 
