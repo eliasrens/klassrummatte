@@ -941,6 +941,7 @@ body.extra-visible .show-answer-btn {
 
 .tallinje-sequence {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: clamp(0.2rem, 1vw, 0.5rem);
   font-size: clamp(1.8rem, 5vw, 3.6rem);
@@ -981,6 +982,7 @@ body.extra-visible .show-answer-btn {
 
 .talsorter-display {
   display: flex;
+  flex-direction: row;
   align-items: baseline;
   gap: 0.05em;
   font-size: clamp(2.8rem, 9vw, 6.5rem);

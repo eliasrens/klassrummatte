@@ -50,7 +50,7 @@ class TallinjPlugin extends BasePlugin {
         sep.textContent = ',';
         seq.appendChild(sep);
       }
-      const box = document.createElement('div');
+      const box = document.createElement('span');
       box.className = 'tallinje-box';
       if (val === null) {
         const blank = document.createElement('span');
