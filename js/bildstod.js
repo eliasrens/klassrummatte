@@ -16,8 +16,18 @@ const Bildstod = (() => {
     if (!plugin) return;
     const el = plugin.buildBildstod(problem, settings);
     if (!el) return;
+    // Inject-läge: cirklarna placeras direkt ovanför respektive bråkelement
+    if (!(el instanceof Node) && el.type === 'inject') {
+      el.targets.forEach(({ selector, circle }) => {
+        const host = problemDisplay.querySelector(selector);
+        if (host) { circle.classList.add('brak-circle-anim'); host.prepend(circle); }
+      });
+      return;
+    }
+
     const wrapper = document.createElement('div');
-    wrapper.className = 'bildstod-container bildstod-anim';
+    const aboveClass = problem.type === 'brak' ? ' bildstod-container--above' : '';
+    wrapper.className = `bildstod-container bildstod-anim${aboveClass}`;
     wrapper.appendChild(el);
     problemDisplay.prepend(wrapper);
   }

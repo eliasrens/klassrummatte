@@ -275,6 +275,25 @@ const Menu = (() => {
     document.getElementById('multiple-count-select').addEventListener('change', e => {
       Settings.setMultipleCount(e.target.value);
     });
+
+    document.getElementById('clear-areas-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setAreas([]);
+
+      document.getElementById('problemlosning-check').checked = false;
+      Settings.setProblemlosning(false);
+      document.getElementById('flersteg-wrap').classList.add('hidden');
+      document.getElementById('flersteg-check').checked = false;
+      Settings.setFlersteg(false);
+
+      document.getElementById('extra-enabled-check').checked = false;
+      Settings.setExtraEnabled(false);
+      document.getElementById('extra-task-options').classList.add('hidden');
+
+      updateConditionalSections();
+      updateBildstodCheckbox();
+    });
   }
 
   // =========================================================

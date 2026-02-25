@@ -38,6 +38,27 @@ function buildFractionCircle(numerator, denominator) {
   return svg;
 }
 
+// Wrappar ett bråkelement i en host-container för inline-bildstöd
+function _hostWrap(idx, fracEl) {
+  const span = document.createElement('span');
+  span.className = 'brak-frac-host';
+  span.dataset.idx = String(idx);
+  span.appendChild(fracEl);
+  return span;
+}
+
+// Cirkel med bråketikett nedanför (privat hjälpfunktion)
+function _cirkelMedEtikett(num, den) {
+  const col = document.createElement('div');
+  col.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:0.25em;';
+  col.appendChild(buildFractionCircle(num, den));
+  const lbl = document.createElement('span');
+  lbl.textContent = `${num}/${den}`;
+  lbl.style.cssText = 'font-size:clamp(0.75rem,1.4vw,1rem); font-weight:700; color:#1a1a2e;';
+  col.appendChild(lbl);
+  return col;
+}
+
 class BrakPlugin extends BasePlugin {
   constructor() {
     super();
@@ -202,16 +223,16 @@ class BrakPlugin extends BasePlugin {
 
     } else if (qt === 'add-same-den' || qt === 'sub-same-den') {
       const op = qt === 'add-same-den' ? ' + ' : ' \u2212 ';
-      container.appendChild(PluginUtils.buildFractionEl(problem.a, problem.denominator));
+      container.appendChild(_hostWrap(0, PluginUtils.buildFractionEl(problem.a, problem.denominator)));
       PluginUtils.appendText(container, op);
-      container.appendChild(PluginUtils.buildFractionEl(problem.b, problem.denominator));
+      container.appendChild(_hostWrap(1, PluginUtils.buildFractionEl(problem.b, problem.denominator)));
       PluginUtils.appendText(container, ' =');
 
     } else if (qt === 'add-diff-den' || qt === 'sub-diff-den') {
       const op = qt === 'add-diff-den' ? ' + ' : ' \u2212 ';
-      container.appendChild(PluginUtils.buildFractionEl(problem.a.numerator, problem.a.denominator));
+      container.appendChild(_hostWrap(0, PluginUtils.buildFractionEl(problem.a.numerator, problem.a.denominator)));
       PluginUtils.appendText(container, op);
-      container.appendChild(PluginUtils.buildFractionEl(problem.b.numerator, problem.b.denominator));
+      container.appendChild(_hostWrap(1, PluginUtils.buildFractionEl(problem.b.numerator, problem.b.denominator)));
       PluginUtils.appendText(container, ' =');
 
     } else if (qt === 'fraction-of-whole') {
@@ -224,12 +245,12 @@ class BrakPlugin extends BasePlugin {
       wrap.className = 'brak-question-wrap';
       const row = document.createElement('div');
       row.className = 'brak-compare-row';
-      row.appendChild(PluginUtils.buildFractionEl(problem.a.numerator, problem.a.denominator));
+      row.appendChild(_hostWrap(0, PluginUtils.buildFractionEl(problem.a.numerator, problem.a.denominator)));
       const eller = document.createElement('span');
       eller.className = 'brak-compare-eller';
       eller.textContent = 'eller';
       row.appendChild(eller);
-      row.appendChild(PluginUtils.buildFractionEl(problem.b.numerator, problem.b.denominator));
+      row.appendChild(_hostWrap(1, PluginUtils.buildFractionEl(problem.b.numerator, problem.b.denominator)));
       const q = document.createElement('p');
       q.className = 'brak-subtext';
       q.textContent = 'Vilket bråk är störst?';
@@ -308,36 +329,43 @@ class BrakPlugin extends BasePlugin {
     if (problem.questionType === 'name')         return problem.denominator <= 10;
     if (problem.questionType === 'add-same-den') return problem.denominator <= 8;
     if (problem.questionType === 'sub-same-den') return problem.denominator <= 8;
+    if (problem.questionType === 'add-diff-den') return problem.a.denominator <= 8 && problem.b.denominator <= 8;
+    if (problem.questionType === 'sub-diff-den') return problem.a.denominator <= 8 && problem.b.denominator <= 8;
     if (problem.questionType === 'compare')      return problem.a.denominator <= 10 && problem.b.denominator <= 10;
     return false;
   }
 
   buildBildstod(problem) {
     if (problem.questionType === 'name') {
-      return buildFractionCircle(problem.numerator, problem.denominator);
+      // Enkel cirkel – visas ovanför hela uppgiften via wrapper
+      return _cirkelMedEtikett(problem.numerator, problem.denominator);
     }
     if (problem.questionType === 'add-same-den' || problem.questionType === 'sub-same-den') {
-      const op   = problem.questionType === 'add-same-den' ? '+' : '\u2212';
-      const wrap = document.createElement('div');
-      wrap.style.cssText = 'display:flex; gap:0.5rem; align-items:center;';
-      wrap.appendChild(buildFractionCircle(problem.a, problem.denominator));
-      const sym = document.createElement('span');
-      sym.textContent = op;
-      sym.style.cssText = 'font-size:1.2rem; font-weight:700; color:#1a1a2e;';
-      wrap.appendChild(sym);
-      wrap.appendChild(buildFractionCircle(problem.b, problem.denominator));
-      return wrap;
+      return {
+        type: 'inject',
+        targets: [
+          { selector: '.brak-frac-host[data-idx="0"]', circle: buildFractionCircle(problem.a, problem.denominator) },
+          { selector: '.brak-frac-host[data-idx="1"]', circle: buildFractionCircle(problem.b, problem.denominator) },
+        ],
+      };
+    }
+    if (problem.questionType === 'add-diff-den' || problem.questionType === 'sub-diff-den') {
+      return {
+        type: 'inject',
+        targets: [
+          { selector: '.brak-frac-host[data-idx="0"]', circle: buildFractionCircle(problem.a.numerator, problem.a.denominator) },
+          { selector: '.brak-frac-host[data-idx="1"]', circle: buildFractionCircle(problem.b.numerator, problem.b.denominator) },
+        ],
+      };
     }
     if (problem.questionType === 'compare') {
-      const wrap = document.createElement('div');
-      wrap.style.cssText = 'display:flex; gap:0.75rem; align-items:center;';
-      wrap.appendChild(buildFractionCircle(problem.a.numerator, problem.a.denominator));
-      const vs = document.createElement('span');
-      vs.textContent = 'eller';
-      vs.style.cssText = 'font-size:1rem; font-weight:600; color:#1a1a2e;';
-      wrap.appendChild(vs);
-      wrap.appendChild(buildFractionCircle(problem.b.numerator, problem.b.denominator));
-      return wrap;
+      return {
+        type: 'inject',
+        targets: [
+          { selector: '.brak-frac-host[data-idx="0"]', circle: buildFractionCircle(problem.a.numerator, problem.a.denominator) },
+          { selector: '.brak-frac-host[data-idx="1"]', circle: buildFractionCircle(problem.b.numerator, problem.b.denominator) },
+        ],
+      };
     }
     return null;
   }
