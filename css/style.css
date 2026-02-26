@@ -1323,6 +1323,32 @@ body.extra-visible .show-answer-btn {
   margin: 0;
 }
 
+/* === Flersteg – synliga beräkningssteg === */
+.flersteg-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  margin-top: 0.6em;
+  align-items: flex-start;
+}
+.flersteg-step {
+  display: flex;
+  align-items: baseline;
+  gap: 0.15em;
+  font-size: clamp(1.1rem, 2.5vw, 1.9rem);
+  font-weight: 600;
+}
+.flersteg-label {
+  font-size: clamp(0.65rem, 1.3vw, 0.95rem);
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 4.5em;
+  padding-right: 0.5em;
+}
+.flersteg-op-str {
+  font-family: 'Segoe UI', sans-serif;
+}
+
 /* === Symmetri === */
 .sym-wrap {
   display: flex;

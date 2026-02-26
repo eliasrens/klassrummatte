@@ -321,6 +321,30 @@ const Templates = (() => {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
+  /**
+   * Lägger till en irrelevant mening i en textuppgift ("för mycket information").
+   * Distraktorn innehåller ett tal som INTE används i beräkningen.
+   */
+  function _addExtraInfo(text, name1) {
+    const extras = [
+      `${name1} är 9 år gammal. `,
+      `Det finns 25 elever i klassen. `,
+      `${name1} bor 3 kilometer från skolan. `,
+      `Det är måndag idag. `,
+      `I lekstugan finns 12 stolar. `,
+      `${name1} har 2 syskon. `,
+      `Skolan öppnar klockan 8. `,
+      `I trädgården finns 7 träd. `,
+    ];
+    const extra = pickRandom(extras);
+    // Infoga distraktorn mitt i texten (efter första meningen)
+    const firstPeriod = text.indexOf('. ');
+    if (firstPeriod > 0 && firstPeriod < text.length - 3) {
+      return text.slice(0, firstPeriod + 2) + extra + text.slice(firstPeriod + 2);
+    }
+    return extra + text;
+  }
+
   function twoDistinctNames() {
     const n1 = pickRandom(NAMES);
     let n2   = pickRandom(NAMES);
@@ -350,13 +374,16 @@ const Templates = (() => {
     let text;
     switch (problem.type) {
       case 'addition': {
-        const addPools = [ADDITION_TEMPLATES, ADDITION_TEMPLATES, PENGAR_ADDITION_TEMPLATES, TID_ADDITION_TEMPLATES];
-        text = pickRandom(pickRandom(addPools))(name1, name2, obj, problem.a, problem.b);
+        const addPool = pickRandom([ADDITION_TEMPLATES, ADDITION_TEMPLATES, PENGAR_ADDITION_TEMPLATES, TID_ADDITION_TEMPLATES]);
+        text = pickRandom(addPool)(name1, name2, obj, problem.a, problem.b);
+        // 20% chans: lägg till irrelevant information (bara för objektmallar)
+        if (addPool === ADDITION_TEMPLATES && Math.random() < 0.2) text = _addExtraInfo(text, name1);
         break;
       }
       case 'subtraktion': {
-        const subPools = [SUBTRAKTION_TEMPLATES, SUBTRAKTION_TEMPLATES, PENGAR_SUBTRAKTION_TEMPLATES, TID_SUBTRAKTION_TEMPLATES];
-        text = pickRandom(pickRandom(subPools))(name1, name2, obj, problem.a, problem.b);
+        const subPool = pickRandom([SUBTRAKTION_TEMPLATES, SUBTRAKTION_TEMPLATES, PENGAR_SUBTRAKTION_TEMPLATES, TID_SUBTRAKTION_TEMPLATES]);
+        text = pickRandom(subPool)(name1, name2, obj, problem.a, problem.b);
+        if (subPool === SUBTRAKTION_TEMPLATES && Math.random() < 0.2) text = _addExtraInfo(text, name1);
         break;
       }
       case 'multiplikation': {

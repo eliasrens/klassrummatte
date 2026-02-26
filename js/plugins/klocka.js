@@ -12,6 +12,9 @@ class KlockaPlugin extends BasePlugin {
     const possibleMinutes = [];
     for (let m = 0; m < 60; m += step) possibleMinutes.push(m);
 
+    // Digital visning: analog (vanligare) eller digital
+    const displayMode = PluginUtils.pickRandom(['analog', 'analog', 'digital']);
+
     // 'diff' (tidsskillnad) introduceras åk 3+
     const types = settings.grade >= 3
       ? ['read', 'read', 'add-minutes', 'diff']
@@ -54,6 +57,7 @@ class KlockaPlugin extends BasePlugin {
       return {
         type: 'klocka',
         questionType: 'diff',
+        displayMode,
         hours:   startH % 12 || 12,
         minutes: startM,
         endStr, context, diff, answer,
@@ -80,13 +84,15 @@ class KlockaPlugin extends BasePlugin {
       answer = `${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')}`;
     }
 
-    return { type: 'klocka', hours, minutes, questionType, minutesToAdd, answer };
+    return { type: 'klocka', hours, minutes, questionType, displayMode, minutesToAdd, answer };
   }
 
   render(problem, container) {
     const wrapper = document.createElement('div');
     wrapper.className = 'clock-container';
-    const svg = buildClockSVG(problem.hours, problem.minutes);
+    const svg = problem.displayMode === 'digital'
+      ? buildDigitalClockSVG(problem.hours, problem.minutes)
+      : buildClockSVG(problem.hours, problem.minutes);
     svg.classList.add('clock-svg');
     wrapper.appendChild(svg);
 
@@ -159,6 +165,26 @@ function buildClockSVG(hours, minutes) {
     <line x1="${CX}" y1="${CY}" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}"
           stroke="#457b9d" stroke-width="4" stroke-linecap="round"/>
     <circle cx="${CX}" cy="${CY}" r="5" fill="#1a1a2e"/>`;
+  return svg;
+}
+
+// =========================================================
+//  Digital klocka-SVG (privat i denna fil)
+// =========================================================
+function buildDigitalClockSVG(hours, minutes) {
+  const W = 200, H = 200;
+  const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg   = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', `Digital klocka visar ${timeStr}`);
+  svg.innerHTML = `
+    <rect x="12" y="52" width="176" height="96" rx="12"
+          fill="#1a1a2e" stroke="#457b9d" stroke-width="3"/>
+    <text x="100" y="103" text-anchor="middle" dominant-baseline="central"
+          font-size="46" font-family="'Courier New', monospace" font-weight="700"
+          fill="#4ade80" letter-spacing="3">${timeStr}</text>`;
   return svg;
 }
 
