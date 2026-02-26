@@ -35,6 +35,7 @@ class MattAreaPlugin extends BasePlugin {
       );
     }
 
+    if (pairs.length === 0) return null;
     const conv = PluginUtils.pickRandom(pairs)();
     const answer = String(parseFloat((conv.from * conv.factor).toFixed(4)));
     return { type: 'matt-area', conversion: conv, answer };

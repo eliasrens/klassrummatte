@@ -269,6 +269,23 @@
       </div>
     </section>
 
+    <section class="menu-section">
+      <label class="check-label check-label--featured">
+        <input type="checkbox" id="discussion-check">
+        <span>Diskussionsstöd<br><small>Visar en samtalsfråga vid varje uppgift</small></span>
+      </label>
+      <div style="margin-top:0.6rem">
+        <div class="specific-tables-label">Uppgifter per genomgång:</div>
+        <select id="session-limit-select">
+          <option value="unlimited">Obegränsat</option>
+          <option value="5">5 uppgifter</option>
+          <option value="10">10 uppgifter</option>
+          <option value="15">15 uppgifter</option>
+          <option value="20">20 uppgifter</option>
+        </select>
+      </div>
+    </section>
+
     <!-- ── EXTRAUPPGIFT ───────────────────────────────── -->
     <div class="menu-group-label">Extrauppgift</div>
 
@@ -306,7 +323,9 @@
 
   <!-- Huvudscen -->
   <main id="stage" role="button" tabindex="0" aria-label="Tryck för ny uppgift">
+    <div id="session-counter" class="session-counter" aria-live="polite"></div>
     <div id="problem-display" class="hidden" aria-live="polite"></div>
+    <div id="discussion-prompt" class="discussion-prompt hidden"></div>
     <p id="click-hint">Tryck för att börja</p>
     <button id="show-answer-btn" class="show-answer-btn" aria-label="Visa svar" tabindex="-1">Visa svar</button>
   </main>
@@ -319,6 +338,8 @@
   </aside>
 
   <!-- Plugin-system (laddas före fasaderna) -->
+  <script src="js/plugins/_math-utils.js"></script>
+  <script src="js/plugins/_render-utils.js"></script>
   <script src="js/plugins/_utils.js"></script>
   <script src="js/plugins/BasePlugin.js"></script>
   <script src="js/plugins/PluginManager.js"></script>

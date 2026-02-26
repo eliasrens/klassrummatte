@@ -25,6 +25,8 @@ const Settings = (() => {
     multipleProblems: false,
     multipleCount: 2,
     klockaDisplayMode: 'mixed',
+    sessionLimit: 'unlimited',
+    discussionEnabled: false,
   };
 
   let state = { ...DEFAULTS };
@@ -96,6 +98,10 @@ const Settings = (() => {
   function setMultipleCount(n)         { state.multipleCount = parseInt(n, 10); save(); }
   function getKlockaDisplayMode()      { return state.klockaDisplayMode || 'mixed'; }
   function setKlockaDisplayMode(v)     { state.klockaDisplayMode = v; save(); }
+  function getSessionLimit()           { return state.sessionLimit || 'unlimited'; }
+  function setSessionLimit(v)          { state.sessionLimit = v; save(); }
+  function isDiscussionEnabled()       { return !!state.discussionEnabled; }
+  function setDiscussionEnabled(b)     { state.discussionEnabled = !!b; save(); }
 
   // Initiering
   load();
@@ -109,5 +115,7 @@ const Settings = (() => {
     setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setFlersteg,
     setGradeSelected, setMultipleProblems, setMultipleCount,
     getKlockaDisplayMode, setKlockaDisplayMode,
+    getSessionLimit, setSessionLimit,
+    isDiscussionEnabled, setDiscussionEnabled,
   };
 })();

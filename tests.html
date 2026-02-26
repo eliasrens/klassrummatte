@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Klassrummatte – Plugin-tester</title>
+  <style>
+    body { font-family: monospace; margin: 2rem; background: #1a1a2e; color: #eee; }
+    h1 { color: #fff; margin-bottom: 1.5rem; }
+    .summary { font-size: 1.1rem; margin-bottom: 1.5rem; padding: 0.75rem 1rem; border-radius: 6px; }
+    .summary.all-pass { background: #1a3a1a; color: #7fff7f; }
+    .summary.has-fail  { background: #3a1a1a; color: #ff9f9f; }
+    table { border-collapse: collapse; width: 100%; max-width: 800px; }
+    th { text-align: left; padding: 0.4rem 0.8rem; background: #333; }
+    td { padding: 0.35rem 0.8rem; border-bottom: 1px solid #333; }
+    tr.pass td:first-child::before { content: '✓  '; color: #7fff7f; }
+    tr.fail td:first-child::before { content: '✗  '; color: #ff6b6b; }
+    tr.pass { color: #ccc; }
+    tr.fail { color: #ff9f9f; background: #2a1a1a; }
+    .error-msg { font-size: 0.85em; color: #ff8888; }
+    .run-count { color: #888; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>Klassrummatte – Plugin-tester</h1>
+  <div id="summary"></div>
+  <table>
+    <thead><tr><th>Plugin</th><th>Körningar</th><th>Fel</th></tr></thead>
+    <tbody id="results"></tbody>
+  </table>
+
+  <!-- Plugin-system (samma ordning som index.html) -->
+  <script src="js/plugins/_math-utils.js"></script>
+  <script src="js/plugins/_render-utils.js"></script>
+  <script src="js/plugins/_utils.js"></script>
+  <script src="js/plugins/BasePlugin.js"></script>
+  <script src="js/plugins/PluginManager.js"></script>
+  <script src="js/plugins/addition.js"></script>
+  <script src="js/plugins/subtraktion.js"></script>
+  <script src="js/plugins/multiplikation.js"></script>
+  <script src="js/plugins/division.js"></script>
+  <script src="js/plugins/prioritet.js"></script>
+  <script src="js/plugins/oppna-utsaga.js"></script>
+  <script src="js/plugins/brak.js"></script>
+  <script src="js/plugins/geometri.js"></script>
+  <script src="js/plugins/klocka.js"></script>
+  <script src="js/plugins/matt-langd.js"></script>
+  <script src="js/plugins/matt-volym.js"></script>
+  <script src="js/plugins/matt-vikt.js"></script>
+  <script src="js/plugins/matt-tid.js"></script>
+  <script src="js/plugins/procent.js"></script>
+  <script src="js/plugins/tallinje.js"></script>
+  <script src="js/plugins/talsorter.js"></script>
+  <script src="js/plugins/talfoljd.js"></script>
+  <script src="js/plugins/matt-area.js"></script>
+  <script src="js/plugins/negativa-tal.js"></script>
+  <script src="js/plugins/sannolikhet.js"></script>
+  <script src="js/plugins/statistik.js"></script>
+  <script src="js/plugins/koordinatsystem.js"></script>
+  <script src="js/plugins/symmetri.js"></script>
+  <script src="js/plugins/romerska.js"></script>
+  <script src="js/settings.js"></script>
+
+  <script>
+    // Minimal mock av Templates (behövs av generate() i vissa plugins)
+    const Templates = {
+      canWrap: () => false,
+      wrapInTemplate: p => p,
+      generateFlersteg: () => null,
+    };
+
+    const GRADES = [1, 2, 3, 4, 5, 6];
+    const RUNS_PER_GRADE = 15;
+
+    function buildSettings(grade) {
+      return {
+        grade,
+        areas: [],
+        addSubMode: ['standard'],
+        addSubVaxling: ['med'],
+        multDivMode: ['tables-basic'],
+        specificTables: [1,2,3,4,5,6,7,8,9],
+        geometriTypes: ['area', 'perimeter'],
+        klockaDisplayMode: 'mixed',
+        bildstod: false,
+        bildstodInstant: false,
+        divisionRest: false,
+        problemlosning: false,
+        flersteg: false,
+        multipleProblems: false,
+        multipleCount: 2,
+        extraEnabled: false,
+        extraType: 'uppstallning-add',
+        extraDelay: 10,
+        sessionLimit: 'unlimited',
+        discussionEnabled: false,
+      };
+    }
+
+    function validateProblem(problem) {
+      if (problem === null || problem === undefined) return null; // null = ej tillämplig för denna åk, OK
+      if (typeof problem !== 'object')              return `generate() returnerade ${typeof problem} (förväntat object)`;
+      if (typeof problem.type !== 'string')         return `problem.type saknas eller är inte string (got: ${problem.type})`;
+      if (problem.answer === undefined)             return 'problem.answer saknas';
+      return null; // OK
+    }
+
+    function runTests() {
+      const plugins = PluginManager.getAll ? PluginManager.getAll() : [];
+      const rows = document.getElementById('results');
+      let totalPass = 0, totalFail = 0;
+
+      plugins.forEach(plugin => {
+        const errors = [];
+        let runs = 0;
+        let skipped = 0;
+
+        GRADES.forEach(grade => {
+          const settings = buildSettings(grade);
+          for (let i = 0; i < RUNS_PER_GRADE; i++) {
+            runs++;
+            try {
+              const problem = plugin.generate(settings);
+              if (problem === null || problem === undefined) { skipped++; continue; }
+              const err = validateProblem(problem);
+              if (err) errors.push(`Åk ${grade}, körning ${i+1}: ${err}`);
+            } catch (ex) {
+              errors.push(`Åk ${grade}, körning ${i+1}: kastade undantag – ${ex.message}`);
+            }
+          }
+        });
+
+        const pass = errors.length === 0;
+        if (pass) totalPass++; else totalFail++;
+
+        const tr = document.createElement('tr');
+        tr.className = pass ? 'pass' : 'fail';
+        const errorHtml = errors.slice(0, 3).map(e => `<div class="error-msg">${e}</div>`).join('');
+        const moreErrors = errors.length > 3 ? `<div class="error-msg">… och ${errors.length - 3} till</div>` : '';
+        const skipNote = skipped > 0 ? `<span class="run-count"> (${skipped} hoppades över – ej tillämplig åk)</span>` : '';
+        tr.innerHTML = `
+          <td>${plugin.type}</td>
+          <td class="run-count">${runs - skipped}${skipNote}</td>
+          <td>${errorHtml}${moreErrors}</td>
+        `;
+        rows.appendChild(tr);
+      });
+
+      const summary = document.getElementById('summary');
+      const allPass = totalFail === 0;
+      summary.className = `summary ${allPass ? 'all-pass' : 'has-fail'}`;
+      summary.textContent = allPass
+        ? `Alla ${totalPass} plugins klarade testerna.`
+        : `${totalPass} plugins OK – ${totalFail} plugins har fel.`;
+    }
+
+    document.addEventListener('DOMContentLoaded', runTests);
+  </script>
+</body>
+</html>

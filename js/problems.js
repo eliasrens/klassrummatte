@@ -34,7 +34,13 @@ const Problems = (() => {
     const plugin = PluginManager.get(pluginType);
     if (!plugin) return null;
 
-    let problem = plugin.generate(settings);
+    let problem;
+    try {
+      problem = plugin.generate(settings);
+    } catch (err) {
+      console.error(`[Klassrummatte] Plugin "${pluginType}" kastade ett fel:`, err);
+      return null;
+    }
     if (settings.problemlosning && Templates.canWrap(pluginType)) {
       problem = Templates.wrapInTemplate(problem, settings.grade);
     }
@@ -66,7 +72,13 @@ const Problems = (() => {
       const pluginType = area === 'oppna-utsagor' ? 'oppna-utsaga' : area;
       const plugin = PluginManager.get(pluginType);
       if (!plugin) return null;
-      let problem = plugin.generate(settings);
+      let problem;
+      try {
+        problem = plugin.generate(settings);
+      } catch (err) {
+        console.error(`[Klassrummatte] Plugin "${pluginType}" kastade ett fel:`, err);
+        return null;
+      }
       if (settings.problemlosning && Templates.canWrap(pluginType)) {
         problem = Templates.wrapInTemplate(problem, settings.grade);
       }

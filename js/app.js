@@ -6,6 +6,14 @@ const App = (() => {
 
   const BILDSTOD_DELAY_MS = 10000;
 
+  const DISCUSSION_PROMPTS = [
+    'Förklara för din granne hur du tänkte.',
+    'Hur visste du att svaret är rätt?',
+    'Finns det ett annat sätt att lösa det?',
+    'Är alla överens? Varför / varför inte?',
+    'Vad är det knepiga med den här uppgiften?',
+  ];
+
   // =========================================================
   //  DOM-referenser
   // =========================================================
@@ -23,6 +31,7 @@ const App = (() => {
   let lastProblem          = null;
   let currentProblems      = [];   // används i multi-mode
   let currentExtraProblem  = null;
+  let sessionCurrent       = 0;
 
   // =========================================================
   //  Init
@@ -159,6 +168,16 @@ const App = (() => {
     clickHint.classList.add('hidden-hint');
     problemVisible = true;
 
+    updateSessionCounter();
+
+    const dp = document.getElementById('discussion-prompt');
+    if (Settings.isDiscussionEnabled()) {
+      dp.textContent = DISCUSSION_PROMPTS[Math.floor(Math.random() * DISCUSSION_PROMPTS.length)];
+      dp.classList.remove('hidden');
+    } else {
+      dp.classList.add('hidden');
+    }
+
     if (settings.extraEnabled && !settings.multipleProblems) {
       const extraDelayMs = settings.extraDelay === 0 ? 80 : (settings.extraDelay || 10) * 1000;
       extraTimer = setTimeout(() => showExtraTask(settings), extraDelayMs);
@@ -180,6 +199,22 @@ const App = (() => {
     extraPanel.classList.remove('visible');
     document.body.classList.remove('extra-visible');
     extraClearTimer = setTimeout(() => { extraDisplay.innerHTML = ''; extraClearTimer = null; }, 460);
+  }
+
+  function resetSession() {
+    sessionCurrent = 0;
+    const el = document.getElementById('session-counter');
+    if (el) el.textContent = '';
+  }
+
+  function updateSessionCounter() {
+    const limit = Settings.getSessionLimit();
+    const el = document.getElementById('session-counter');
+    if (limit === 'unlimited') { el.textContent = ''; return; }
+    sessionCurrent++;
+    const n = parseInt(limit, 10);
+    el.textContent = `${sessionCurrent} / ${n}`;
+    if (sessionCurrent >= n) sessionCurrent = 0;
   }
 
   function clearBildstod() {
@@ -206,5 +241,5 @@ const App = (() => {
   //  Start
   // =========================================================
   document.addEventListener('DOMContentLoaded', init);
-  return {};
+  return { resetSession };
 })();

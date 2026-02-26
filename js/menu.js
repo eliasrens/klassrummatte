@@ -180,6 +180,8 @@ const Menu = (() => {
     document.getElementById('multiple-check').checked       = s.multipleProblems || false;
     document.getElementById('multiple-count-select').value  = s.multipleCount || 2;
     document.getElementById('multiple-count-wrap').classList.toggle('hidden', !s.multipleProblems);
+    document.getElementById('discussion-check').checked     = s.discussionEnabled || false;
+    document.getElementById('session-limit-select').value   = s.sessionLimit || 'unlimited';
     updateConditionalSections();
     updateBildstodCheckbox();
   }
@@ -307,6 +309,15 @@ const Menu = (() => {
       Settings.setMultipleCount(e.target.value);
     });
 
+    document.getElementById('discussion-check').addEventListener('change', e => {
+      Settings.setDiscussionEnabled(e.target.checked);
+    });
+
+    document.getElementById('session-limit-select').addEventListener('change', e => {
+      Settings.setSessionLimit(e.target.value);
+      App.resetSession();
+    });
+
     document.getElementById('clear-areas-btn').addEventListener('click', e => {
       e.stopPropagation();
       document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
@@ -321,6 +332,9 @@ const Menu = (() => {
       document.getElementById('extra-enabled-check').checked = false;
       Settings.setExtraEnabled(false);
       document.getElementById('extra-task-options').classList.add('hidden');
+
+      document.getElementById('discussion-check').checked = false;
+      Settings.setDiscussionEnabled(false);
 
       updateConditionalSections();
       updateBildstodCheckbox();

@@ -964,6 +964,31 @@ body.extra-visible .show-answer-btn {
   right: calc(var(--extra-width) + 1.5rem);
 }
 
+/* === Sessionsräknare === */
+.session-counter {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* === Diskussionsstöd === */
+.discussion-prompt {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  color: rgba(26, 26, 46, 0.45);
+  font-style: italic;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* === Svar-visning === */
 /* Förregistrerat svar – bevarar layoututrymme, döljer texten tills "Visa svar" klickas */
 .answer-hidden {
