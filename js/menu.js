@@ -110,6 +110,40 @@ const Menu = (() => {
     updateProblemlosningCheckbox();
   }
 
+  // Vilka areas kräver en viss lägsta/högsta årskurs
+  const AREA_GRADE_LIMITS = {
+    'procent':      { min: 4 },
+    'matt-area':    { min: 4 },
+    'negativa-tal': { min: 5 },
+    'romerska':     { min: 4 },
+    'talsorter':    { max: 3 },
+  };
+
+  function updateAreaCheckboxAvailability() {
+    const s = Settings.get();
+    if (!s.gradeSelected) return;
+    const grade = s.grade;
+    let changed = false;
+
+    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
+      const limits = AREA_GRADE_LIMITS[cb.value];
+      if (!limits) { cb.disabled = false; return; }
+      const unavailable = (limits.min && grade < limits.min) || (limits.max && grade > limits.max);
+      cb.disabled = unavailable;
+      if (unavailable && cb.checked) {
+        cb.checked = false;
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      const checked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value);
+      Settings.setAreas(checked);
+      updateConditionalSections();
+      updateBildstodCheckbox();
+    }
+  }
+
   function updateBildstodCheckbox() {
     const s       = Settings.get();
     const canHave = couldHaveBildstod(s);
@@ -183,6 +217,7 @@ const Menu = (() => {
     document.getElementById('discussion-check').checked     = s.discussionEnabled || false;
     document.getElementById('session-limit-select').value   = s.sessionLimit || 'unlimited';
     updateConditionalSections();
+    updateAreaCheckboxAvailability();
     updateBildstodCheckbox();
   }
 
@@ -200,6 +235,7 @@ const Menu = (() => {
           matLabel.click();
         }
       }
+      updateAreaCheckboxAvailability();
       updateBildstodCheckbox();
     });
 
