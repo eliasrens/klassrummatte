@@ -20,6 +20,7 @@ class GeometriPlugin extends BasePlugin {
     const shapePool = ['square', 'rectangle'];
     if (level === 'with-triangle' || level === 'with-circle') shapePool.push('triangle');
     if (level === 'with-circle') shapePool.push('circle');
+    if (grade >= 3) shapePool.push('kropp');
     if (grade >= 4) shapePool.push('angle');
     if (grade >= 4) shapePool.push('classify');
     if (grade >= 5) shapePool.push('cuboid');
@@ -64,6 +65,16 @@ class GeometriPlugin extends BasePlugin {
       else if (angleType === 'rät')     degrees = 90;
       else                              degrees = PluginUtils.pickRandom([100, 110, 120, 130, 135, 145, 155]);
       return { type: 'geometri', shape: 'angle', dimensions: { degrees }, geoQuestion: 'identify-type', answer: angleType.charAt(0).toUpperCase() + angleType.slice(1) };
+    }
+
+    // ── Geometrisk kropp – namnge ─────────────────────────────
+    if (shape === 'kropp') {
+      const pool = grade >= 4
+        ? ['kub', 'cylinder', 'klot', 'kon', 'pyramid', 'ratblock']
+        : ['kub', 'cylinder', 'klot', 'kon'];
+      const body  = PluginUtils.pickRandom(pool);
+      const NAMES = { kub: 'Kub', cylinder: 'Cylinder', klot: 'Klot', kon: 'Kon', pyramid: 'Pyramid', ratblock: 'Rätblock' };
+      return { type: 'geometri', shape: 'kropp', dimensions: { body }, geoQuestion: 'identify-body', answer: NAMES[body] };
     }
 
     // ── Rätblock / Volym ──────────────────────────────────────
@@ -118,10 +129,15 @@ class GeometriPlugin extends BasePlugin {
     wrapper.appendChild(buildShapeSVG(problem));
     const qTxt = document.createElement('p');
     qTxt.className = 'geometry-question';
-    if (problem.geoQuestion === 'area')          qTxt.textContent = 'Vad är arean?';
+    if (problem.shape === 'circle') {
+      qTxt.textContent = problem.geoQuestion === 'area'
+        ? 'Vad är cirkelns area?\u00a0\u00a0A\u00a0=\u00a0\u03c0\u00a0\u00d7\u00a0r\u00b2'
+        : 'Vad är cirkelns omkrets?\u00a0\u00a0C\u00a0=\u00a02\u00a0\u00d7\u00a0\u03c0\u00a0\u00d7\u00a0r';
+    } else if (problem.geoQuestion === 'area')          qTxt.textContent = 'Vad är arean?';
     else if (problem.geoQuestion === 'perimeter') qTxt.textContent = 'Vad är omkretsen?';
     else if (problem.geoQuestion === 'volume')    qTxt.textContent = 'Vad är volymen?';
     else if (problem.geoQuestion === 'classify')  qTxt.textContent = 'Vad heter denna figur?';
+    else if (problem.geoQuestion === 'identify-body') qTxt.textContent = 'Vad heter denna geometriska kropp?';
     else if (problem.geoQuestion === 'angle-sum') qTxt.textContent = `Vinkeln A\u00a0=\u00a0${problem.dimensions.a}°, vinkeln B\u00a0=\u00a0${problem.dimensions.b}°. Hur stor är vinkeln C?`;
     else                                          qTxt.textContent = 'Vad är det för typ av vinkel?';
     wrapper.appendChild(qTxt);
@@ -130,12 +146,13 @@ class GeometriPlugin extends BasePlugin {
 
   showAnswer(problem, container, btn) {
     if (btn) { btn.disabled = true; btn.textContent = '✓'; }
-    const unit = problem.geoQuestion === 'area'      ? ' cm²'
-               : problem.geoQuestion === 'perimeter' ? ' cm'
-               : problem.geoQuestion === 'volume'    ? ' cm³'
-               : problem.geoQuestion === 'angle-sum' ? '°'
-               : '';
-    PluginUtils.appendAnswerBox(`${problem.answer}${unit}`, container);
+    const unit   = problem.geoQuestion === 'area'      ? ' cm²'
+                 : problem.geoQuestion === 'perimeter' ? ' cm'
+                 : problem.geoQuestion === 'volume'    ? ' cm³'
+                 : problem.geoQuestion === 'angle-sum' ? '°'
+                 : '';
+    const prefix = problem.shape === 'circle' ? '\u2248\u00a0' : '';
+    PluginUtils.appendAnswerBox(`${prefix}${problem.answer}${unit}`, container);
   }
 
   isSameProblem(a, b) {
@@ -252,7 +269,63 @@ function buildShapeSVG(problem) {
       <text x="${(x1+x2)/2}" y="${y3+22}" text-anchor="middle" font-size="15" fill="#7c2d12" font-weight="700">l\u00a0=\u00a0${d.l}\u00a0cm</text>
       <text x="${x3+10}" y="${(y2+y3)/2}" dominant-baseline="central" font-size="15" fill="#7c2d12" font-weight="700">h\u00a0=\u00a0${d.h}\u00a0cm</text>
       <text x="${(x2+x6)/2+6}" y="${y2-14}" text-anchor="middle" font-size="15" fill="#7c2d12" font-weight="700">b\u00a0=\u00a0${d.b}\u00a0cm</text>`;
-  }
+
+  // ── Geometrisk kropp ─────────────────────────────────────
+  } else if (shape === 'kropp') {
+    const body = d.body;
+    if (body === 'kub') {
+      // Kub i isometrisk perspektiv (lika sidor)
+      const fw = 118, fh = 118, dx = 50, dy = -38, x0 = 100, y0 = 52;
+      const [x1,y1]=[x0,y0],[x2,y2]=[x0+fw,y0],[x3,y3]=[x0+fw,y0+fh],[x4,y4]=[x0,y0+fh];
+      const [x5,y5]=[x1+dx,y1+dy],[x6,y6]=[x2+dx,y2+dy],[x7,y7]=[x3+dx,y3+dy];
+      inner = `
+        <polygon points="${x1},${y1} ${x2},${y2} ${x6},${y6} ${x5},${y5}" fill="#dbeafe" stroke="#457b9d" stroke-width="2.5"/>
+        <polygon points="${x2},${y2} ${x3},${y3} ${x7},${y7} ${x6},${y6}" fill="#bfdbfe" stroke="#457b9d" stroke-width="2.5"/>
+        <rect x="${x1}" y="${y1}" width="${fw}" height="${fh}" fill="#eff6ff" stroke="#457b9d" stroke-width="2.5"/>`;
+
+    } else if (body === 'ratblock') {
+      // Rätblock (avgjort bredare/flackare än kub)
+      const fw = 160, fh = 90, dx = 55, dy = -35, x0 = 72, y0 = 68;
+      const [x1,y1]=[x0,y0],[x2,y2]=[x0+fw,y0],[x3,y3]=[x0+fw,y0+fh],[x4,y4]=[x0,y0+fh];
+      const [x5,y5]=[x1+dx,y1+dy],[x6,y6]=[x2+dx,y2+dy],[x7,y7]=[x3+dx,y3+dy],[x8,y8]=[x4+dx,y4+dy];
+      inner = `
+        <polygon points="${x1},${y1} ${x2},${y2} ${x6},${y6} ${x5},${y5}" fill="#dbeafe" stroke="#457b9d" stroke-width="2.5"/>
+        <polygon points="${x2},${y2} ${x3},${y3} ${x7},${y7} ${x6},${y6}" fill="#bfdbfe" stroke="#457b9d" stroke-width="2.5"/>
+        <rect x="${x1}" y="${y1}" width="${fw}" height="${fh}" fill="#eff6ff" stroke="#457b9d" stroke-width="2.5"/>
+        <line x1="${x5}" y1="${y5}" x2="${x6}" y2="${y6}" stroke="#457b9d" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <line x1="${x5}" y1="${y5}" x2="${x8}" y2="${y8}" stroke="#457b9d" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <line x1="${x8}" y1="${y8}" x2="${x7}" y2="${y7}" stroke="#457b9d" stroke-width="1.5" stroke-dasharray="5,4"/>`;
+
+    } else if (body === 'cylinder') {
+      inner = `
+        <ellipse cx="170" cy="162" rx="72" ry="22" fill="#dbeafe" stroke="#457b9d" stroke-width="2.5"/>
+        <rect x="98" y="57" width="144" height="105" fill="#eff6ff" stroke="none"/>
+        <line x1="98" y1="57" x2="98" y2="162" stroke="#457b9d" stroke-width="2.5"/>
+        <line x1="242" y1="57" x2="242" y2="162" stroke="#457b9d" stroke-width="2.5"/>
+        <ellipse cx="170" cy="57" rx="72" ry="22" fill="#dbeafe" stroke="#457b9d" stroke-width="2.5"/>`;
+
+    } else if (body === 'kon') {
+      inner = `
+        <ellipse cx="170" cy="172" rx="76" ry="24" fill="#dcfce7" stroke="#2a9d8f" stroke-width="2.5"/>
+        <line x1="94" y1="172" x2="170" y2="28" stroke="#2a9d8f" stroke-width="2.5"/>
+        <line x1="246" y1="172" x2="170" y2="28" stroke="#2a9d8f" stroke-width="2.5"/>
+        <circle cx="170" cy="28" r="4" fill="#2a9d8f"/>`;
+
+    } else if (body === 'pyramid') {
+      // Kvadratisk pyramid: bas i perspektiv + apex
+      inner = `
+        <polygon points="170,188 78,145 170,102 262,145" fill="#fef3c7" stroke="#e9c46a" stroke-width="2.5"/>
+        <line x1="170" y1="188" x2="170" y2="25" stroke="#d97706" stroke-width="2.5"/>
+        <line x1="78"  y1="145" x2="170" y2="25" stroke="#d97706" stroke-width="2.5"/>
+        <line x1="262" y1="145" x2="170" y2="25" stroke="#d97706" stroke-width="2.5"/>
+        <line x1="170" y1="102" x2="170" y2="25" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <circle cx="170" cy="25" r="4" fill="#d97706"/>`;
+
+    } else if (body === 'klot') {
+      inner = `
+        <circle cx="170" cy="110" r="86" fill="#fde8d8" stroke="#c2410c" stroke-width="2.5"/>
+        <ellipse cx="170" cy="110" rx="86" ry="28" fill="none" stroke="#c2410c" stroke-width="1.5" stroke-dasharray="6,4"/>`;
+    }
 
   // ── Klassificering ────────────────────────────────────────
   } else if (shape === 'classify') {
