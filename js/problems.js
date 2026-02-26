@@ -7,7 +7,8 @@ const Problems = (() => {
   // Fallback-pooler när inga områden är valda
   const BASE = ['addition', 'subtraktion', 'multiplikation', 'division', 'prioritet', 'oppna-utsagor', 'brak', 'geometri', 'klocka', 'matt-langd', 'matt-volym', 'matt-vikt', 'matt-tid'];
   const BASE_GR13 = [...BASE, 'tallinje', 'talsorter', 'talfoljd'];
-  const BASE_GR4  = [...BASE, 'procent', 'talfoljd'];
+  const BASE_GR4  = [...BASE, 'procent', 'talfoljd', 'matt-area', 'koordinatsystem', 'statistik'];
+  const BASE_GR56 = [...BASE_GR4, 'negativa-tal', 'sannolikhet'];
 
   function generateProblem(settings) {
     // Flersteg: generera tvåstegsproblem om inställningen är aktiv
@@ -15,7 +16,7 @@ const Problems = (() => {
       return Templates.generateFlersteg(settings);
     }
 
-    const fallback = settings.grade >= 4 ? BASE_GR4 : BASE_GR13;
+    const fallback = settings.grade >= 5 ? BASE_GR56 : settings.grade >= 4 ? BASE_GR4 : BASE_GR13;
     const areas = settings.areas.length > 0 ? settings.areas : fallback;
     let area;
 
@@ -42,7 +43,7 @@ const Problems = (() => {
 
   function generateMultipleProblems(settings) {
     const count = settings.multipleCount || 2;
-    const fallback = settings.grade >= 4 ? BASE_GR4 : BASE_GR13;
+    const fallback = settings.grade >= 5 ? BASE_GR56 : settings.grade >= 4 ? BASE_GR4 : BASE_GR13;
     let rawAreas = settings.areas.length > 0 ? settings.areas : fallback;
 
     // Expandera 'blandad' till konkreta områden

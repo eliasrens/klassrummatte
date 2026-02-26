@@ -1213,3 +1213,112 @@ body.extra-visible .show-answer-btn {
     --extra-width: 240px;
   }
 }
+
+/* === Negativa tal === */
+.negtal-question {
+  font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 0.5em;
+}
+.negtal-text {
+  font-size: clamp(1rem, 2.2vw, 1.6rem);
+  font-weight: 600;
+  text-align: center;
+  max-width: 34em;
+  line-height: 1.4;
+  margin: 0 auto;
+}
+.negtal-expr {
+  font-size: clamp(1.8rem, 5vw, 4rem);
+  font-weight: 700;
+}
+.negtal-line {
+  width: clamp(260px, 55vw, 480px);
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* === Sannolikhet === */
+.sann-question {
+  font-size: clamp(1rem, 2.3vw, 1.7rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 0.5em;
+}
+.sann-hint {
+  font-size: clamp(0.75rem, 1.5vw, 1.1rem);
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+}
+.sann-kulor-svg {
+  width: clamp(90px, 16vw, 160px);
+  height: auto;
+  display: block;
+  margin: 0 auto 0.4em;
+}
+.sann-compare-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+.sann-compare-row {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+  justify-content: center;
+}
+.sann-compare-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+}
+.sann-col-label {
+  font-size: clamp(0.75rem, 1.4vw, 1rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+  max-width: 10em;
+}
+
+/* === Statistik === */
+.stat-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+}
+.stat-chart-svg {
+  width: clamp(240px, 52vw, 460px);
+  height: auto;
+  display: block;
+}
+.stat-question {
+  font-size: clamp(1rem, 2.3vw, 1.7rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+
+/* === Koordinatsystem === */
+.koord-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+.koord-svg {
+  width: clamp(200px, 40vw, 320px);
+  height: auto;
+  display: block;
+}
+.koord-question {
+  font-size: clamp(1rem, 2.3vw, 1.7rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
