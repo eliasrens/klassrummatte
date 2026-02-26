@@ -969,11 +969,16 @@ body.extra-visible .show-answer-btn {
   position: absolute;
   top: 1rem;
   right: 1.5rem;
-  font-size: 1rem;
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   pointer-events: none;
   z-index: 10;
+  transition: right var(--transition);
+}
+
+body.extra-visible .session-counter {
+  right: calc(var(--extra-width) + 1.5rem);
 }
 
 /* === Diskussionsstöd === */
