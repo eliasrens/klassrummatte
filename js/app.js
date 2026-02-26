@@ -4,7 +4,6 @@
 
 const App = (() => {
 
-  const EXTRA_DELAY_MS    = 10000;
   const BILDSTOD_DELAY_MS = 10000;
 
   // =========================================================
@@ -15,14 +14,15 @@ const App = (() => {
   // =========================================================
   //  App-state
   // =========================================================
-  let problemVisible   = false;
-  let extraTimer       = null;
-  let hideTimer        = null;
-  let bildstodTimer    = null;
-  let currentProblem   = null;
-  let lastProblem      = null;
-  let currentProblems  = [];   // används i multi-mode
-  let currentExtraProblem = null;
+  let problemVisible       = false;
+  let extraTimer           = null;
+  let extraClearTimer      = null;
+  let hideTimer            = null;
+  let bildstodTimer        = null;
+  let currentProblem       = null;
+  let lastProblem          = null;
+  let currentProblems      = [];   // används i multi-mode
+  let currentExtraProblem  = null;
 
   // =========================================================
   //  Init
@@ -160,7 +160,8 @@ const App = (() => {
     problemVisible = true;
 
     if (settings.extraEnabled && !settings.multipleProblems) {
-      extraTimer = setTimeout(() => showExtraTask(settings), EXTRA_DELAY_MS);
+      const extraDelayMs = settings.extraDelay === 0 ? 80 : (settings.extraDelay || 10) * 1000;
+      extraTimer = setTimeout(() => showExtraTask(settings), extraDelayMs);
     }
 
     if (!settings.multipleProblems && currentProblem &&
@@ -173,11 +174,12 @@ const App = (() => {
   }
 
   function clearExtraTask() {
-    if (extraTimer) { clearTimeout(extraTimer); extraTimer = null; }
+    if (extraTimer)      { clearTimeout(extraTimer);      extraTimer      = null; }
+    if (extraClearTimer) { clearTimeout(extraClearTimer); extraClearTimer = null; }
     currentExtraProblem = null;
     extraPanel.classList.remove('visible');
     document.body.classList.remove('extra-visible');
-    setTimeout(() => { extraDisplay.innerHTML = ''; }, 460);
+    extraClearTimer = setTimeout(() => { extraDisplay.innerHTML = ''; extraClearTimer = null; }, 460);
   }
 
   function clearBildstod() {
@@ -187,6 +189,7 @@ const App = (() => {
   }
 
   function showExtraTask(settings) {
+    if (extraClearTimer) { clearTimeout(extraClearTimer); extraClearTimer = null; extraDisplay.innerHTML = ''; }
     const extra = Problems.generateExtraProblem(settings);
     currentExtraProblem = extra;
     Renderer.renderExtraProblem(extra, extraDisplay);

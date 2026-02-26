@@ -152,6 +152,7 @@ const Menu = (() => {
     document.getElementById('flersteg-wrap').classList.toggle('hidden', !s.problemlosning);
     document.getElementById('extra-enabled-check').checked  = s.extraEnabled;
     document.getElementById('extra-type-select').value      = s.extraType;
+    document.getElementById('extra-delay-select').value     = s.extraDelay || 10;
     document.getElementById('extra-task-options').classList.toggle('hidden', !s.extraEnabled);
     document.getElementById('division-rest-check').checked  = s.divisionRest || false;
     document.getElementById('multiple-check').checked       = s.multipleProblems || false;
@@ -261,6 +262,10 @@ const Menu = (() => {
 
     document.getElementById('extra-type-select').addEventListener('change', e => {
       Settings.setExtraType(e.target.value);
+    });
+
+    document.getElementById('extra-delay-select').addEventListener('change', e => {
+      Settings.setExtraDelay(e.target.value);
     });
 
     document.getElementById('division-rest-check').addEventListener('change', e => {

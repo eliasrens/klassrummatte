@@ -241,7 +241,7 @@
     <section class="menu-section">
       <label class="check-label check-label--featured">
         <input type="checkbox" id="extra-enabled-check">
-        <span>Aktivera extrauppgift<br><small>Visas i högerpanelen efter 10 sek</small></span>
+        <span>Aktivera extrauppgift</span>
       </label>
       <div id="extra-task-options" class="hidden">
         <label class="section-label" for="extra-type-select">Typ</label>
@@ -252,6 +252,15 @@
           <option value="geometri-area">Geometri – area</option>
           <option value="geometri-perimeter">Geometri – omkrets</option>
           <option value="klocka">Klocka</option>
+        </select>
+        <label class="section-label" for="extra-delay-select">Visas efter</label>
+        <select id="extra-delay-select">
+          <option value="0">Visa direkt</option>
+          <option value="5">5 sekunder</option>
+          <option value="10">10 sekunder</option>
+          <option value="15">15 sekunder</option>
+          <option value="20">20 sekunder</option>
+          <option value="30">30 sekunder</option>
         </select>
       </div>
     </section>

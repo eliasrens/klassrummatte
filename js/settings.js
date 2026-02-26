@@ -12,6 +12,7 @@ const Settings = (() => {
     problemlosning: false,
     extraEnabled: false,
     extraType: 'uppstallning-add',
+    extraDelay: 10,
     bildstod: false,
     bildstodInstant: false,
     divisionRest: false,
@@ -78,6 +79,7 @@ const Settings = (() => {
   function setAreas(arr)           { state.areas = [...arr]; save(); }
   function setExtraEnabled(b)      { state.extraEnabled = !!b; save(); }
   function setExtraType(t)         { state.extraType = t; save(); }
+  function setExtraDelay(n)        { state.extraDelay = parseInt(n, 10); save(); }
   function setProblemlosning(b)    { state.problemlosning = !!b; save(); }
   function setBildstod(b)          { state.bildstod = !!b; save(); }
   function setBildstodInstant(b)   { state.bildstodInstant = !!b; save(); }
@@ -99,7 +101,7 @@ const Settings = (() => {
     get,
     getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning,
     isBildstod, isBildstodInstant, getGeometriTypes, getAddSubMode, getAddSubVaxling,
-    setGrade, setAreas, setExtraEnabled, setExtraType, setProblemlosning,
+    setGrade, setAreas, setExtraEnabled, setExtraType, setExtraDelay, setProblemlosning,
     setBildstod, setBildstodInstant, setDivisionRest, setGeometriTypes,
     setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setFlersteg,
     setGradeSelected, setMultipleProblems, setMultipleCount,
