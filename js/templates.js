@@ -110,6 +110,70 @@ const Templates = (() => {
 
     (n1, _n2, o, dividend, divisor) =>
       `${n1} har ${n(dividend, o)} och packar dem i ${divisor} lika stora påsar. Hur många ${o.svPlural} ryms i varje påse?`,
+
+    // ── Pengar ──
+    (n1, _n2, _o, dividend, divisor) =>
+      `${n1} ska dela ${dividend}\u00a0kr lika med ${divisor} kompisar. Hur mycket får varje kompis?`,
+
+    (_n1, _n2, _o, dividend, divisor) =>
+      `${dividend}\u00a0kr ska delas lika mellan ${divisor} syskon. Hur mycket får var och en?`,
+  ];
+
+  // ── Pengar-mallar (blandas in i addition/subtraktion/multiplikation) ──────
+  const PENGAR_ADDITION_TEMPLATES = [
+    (n1, n2, _o, a, b) =>
+      `${n1} har ${a}\u00a0kr och ${n2} har ${b}\u00a0kr. Hur mycket har de tillsammans?`,
+    (n1, _n2, _o, a, b) =>
+      `${n1} tjänar ${a}\u00a0kr på lördag och ${b}\u00a0kr på söndag. Hur mycket tjänar ${n1} totalt?`,
+    (n1, _n2, _o, a, b) =>
+      `${n1} hittar ${a}\u00a0kr i fickan och ${b}\u00a0kr i väskan. Hur mycket är det totalt?`,
+    (n1, n2, _o, a, b) =>
+      `${n1} har sparat ${a}\u00a0kr och ${n2} har sparat ${b}\u00a0kr. Hur mycket har de sparat ihop?`,
+  ];
+
+  const PENGAR_SUBTRAKTION_TEMPLATES = [
+    (n1, _n2, _o, a, b) =>
+      `${n1} har ${a}\u00a0kr och köper en bok för ${b}\u00a0kr. Hur mycket har ${n1} kvar?`,
+    (n1, _n2, _o, a, b) =>
+      `${n1} hade ${a}\u00a0kr och handlade mat för ${b}\u00a0kr. Hur mycket pengar är kvar?`,
+    (n1, n2, _o, a, b) =>
+      `${n1} har ${a}\u00a0kr och lånar ut ${b}\u00a0kr till ${n2}. Hur mycket har ${n1} kvar?`,
+    (n1, _n2, _o, a, b) =>
+      `${n1} ska betala ${a}\u00a0kr men har bara ${a - b}\u00a0kr. Hur mycket saknas?`,
+  ];
+
+  const PENGAR_MULTIPLIKATION_TEMPLATES = [
+    (_n1, _n2, _o, a, b) =>
+      `En glass kostar ${b}\u00a0kr. Hur mycket kostar ${a} glassar?`,
+    (n1, _n2, _o, a, b) =>
+      `${n1} köper ${a} böcker. Varje bok kostar ${b}\u00a0kr. Hur mycket kostar det totalt?`,
+    (_n1, _n2, _o, a, b) =>
+      `En biobiljett kostar ${b}\u00a0kr. Hur mycket kostar det för ${a} personer?`,
+    (n1, _n2, _o, a, b) =>
+      `${n1} sparar ${b}\u00a0kr om dagen i ${a} dagar. Hur mycket har ${n1} sparat?`,
+  ];
+
+  // ── Tid-mallar ───────────────────────────────────────────────────────────
+  const TID_ADDITION_TEMPLATES = [
+    (n1, _n2, _o, a, b) =>
+      `${n1} tränar ${a} minuter på måndag och ${b} minuter på tisdag. Hur lång tid tränar ${n1} totalt?`,
+    (n1, _n2, _o, a, b) =>
+      `${n1} läser i ${a} minuter på förmiddagen och ${b} minuter på eftermiddagen. Hur länge läser ${n1} totalt?`,
+    (n1, n2, _o, a, b) =>
+      `${n1} promenerar ${a} minuter och ${n2} promenerar ${b} minuter. Hur lång tid promenerar de sammanlagt?`,
+    (_n1, _n2, _o, a, b) =>
+      `En film är ${a} minuter lång och förhandsvisningen tar ${b} minuter. Hur lång är hela visningen?`,
+  ];
+
+  const TID_SUBTRAKTION_TEMPLATES = [
+    (n1, _n2, _o, a, b) =>
+      `${n1} ska träna ${a} minuter. Hen har tränat i ${b} minuter. Hur många minuter är det kvar?`,
+    (_n1, _n2, _o, a, b) =>
+      `En film är ${a} minuter lång. Det är ${a - b} minuter kvar. Hur länge har filmen spelat?`,
+    (n1, _n2, _o, a, b) =>
+      `${n1} ska städa i ${a} minuter och har städat i ${b} minuter. Hur lång tid är det kvar?`,
+    (n1, _n2, _o, a, b) =>
+      `${n1} ska vara ute i ${a} minuter. Hen har redan varit ute ${b} minuter. Hur länge är det kvar?`,
   ];
 
   // =========================================================
@@ -285,15 +349,21 @@ const Templates = (() => {
 
     let text;
     switch (problem.type) {
-      case 'addition':
-        text = pickRandom(ADDITION_TEMPLATES)(name1, name2, obj, problem.a, problem.b);
+      case 'addition': {
+        const addPools = [ADDITION_TEMPLATES, ADDITION_TEMPLATES, PENGAR_ADDITION_TEMPLATES, TID_ADDITION_TEMPLATES];
+        text = pickRandom(pickRandom(addPools))(name1, name2, obj, problem.a, problem.b);
         break;
-      case 'subtraktion':
-        text = pickRandom(SUBTRAKTION_TEMPLATES)(name1, name2, obj, problem.a, problem.b);
+      }
+      case 'subtraktion': {
+        const subPools = [SUBTRAKTION_TEMPLATES, SUBTRAKTION_TEMPLATES, PENGAR_SUBTRAKTION_TEMPLATES, TID_SUBTRAKTION_TEMPLATES];
+        text = pickRandom(pickRandom(subPools))(name1, name2, obj, problem.a, problem.b);
         break;
-      case 'multiplikation':
-        text = pickRandom(MULTIPLIKATION_TEMPLATES)(name1, name2, obj, problem.a, problem.b);
+      }
+      case 'multiplikation': {
+        const multPools = [MULTIPLIKATION_TEMPLATES, MULTIPLIKATION_TEMPLATES, PENGAR_MULTIPLIKATION_TEMPLATES];
+        text = pickRandom(pickRandom(multPools))(name1, name2, obj, problem.a, problem.b);
         break;
+      }
       case 'division':
         text = pickRandom(DIVISION_TEMPLATES)(name1, name2, obj, problem.a, problem.b);
         break;

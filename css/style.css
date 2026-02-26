@@ -1322,3 +1322,50 @@ body.extra-visible .show-answer-btn {
   text-align: center;
   margin: 0;
 }
+
+/* === Symmetri === */
+.sym-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+.sym-svg {
+  width: clamp(160px, 34vw, 300px);
+  height: auto;
+  display: block;
+}
+.sym-question {
+  font-size: clamp(1rem, 2.3vw, 1.7rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+
+/* === Romerska siffror === */
+.rom-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+}
+.rom-value {
+  font-size: clamp(2.8rem, 8vw, 6rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  margin: 0;
+  line-height: 1.1;
+}
+.rom-question {
+  font-size: clamp(1rem, 2.3vw, 1.7rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+.rom-ref {
+  font-size: clamp(0.7rem, 1.4vw, 1rem);
+  color: var(--text-muted);
+  margin: 0.2em 0 0;
+  letter-spacing: 0.03em;
+}
