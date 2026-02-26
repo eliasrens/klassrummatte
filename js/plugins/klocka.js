@@ -12,8 +12,11 @@ class KlockaPlugin extends BasePlugin {
     const possibleMinutes = [];
     for (let m = 0; m < 60; m += step) possibleMinutes.push(m);
 
-    // Digital visning: analog (vanligare) eller digital
-    const displayMode = PluginUtils.pickRandom(['analog', 'analog', 'digital']);
+    // Digital visning: styrs av inställning eller blandat (2:1 analog)
+    const modeSetting = settings.klockaDisplayMode || 'mixed';
+    const displayMode = modeSetting === 'analog'  ? 'analog'
+                      : modeSetting === 'digital' ? 'digital'
+                      : PluginUtils.pickRandom(['analog', 'analog', 'digital']);
 
     // 'diff' (tidsskillnad) introduceras åk 3+
     const types = settings.grade >= 3

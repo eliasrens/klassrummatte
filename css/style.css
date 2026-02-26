@@ -920,6 +920,10 @@ body.extra-visible #stage {
   opacity: 0.38;
   pointer-events: none;
 }
+.check-label:has(input:disabled) {
+  opacity: 0.38;
+  pointer-events: none;
+}
 
 /* === Visa svar-knapp === */
 .show-answer-btn {

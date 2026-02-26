@@ -68,12 +68,27 @@ const Menu = (() => {
     document.getElementById('addsub-vaxling-wrap').classList.toggle('hidden', !uppstallningChecked);
   }
 
+  function updateProblemlosningCheckbox() {
+    const areas   = Settings.getAreas();
+    const canHave = areas.some(a => Templates.canWrap(a));
+    const cb      = document.getElementById('problemlosning-check');
+    cb.disabled   = !canHave;
+    if (!canHave && cb.checked) {
+      cb.checked = false;
+      Settings.setProblemlosning(false);
+      document.getElementById('flersteg-wrap').classList.add('hidden');
+      document.getElementById('flersteg-check').checked = false;
+      Settings.setFlersteg(false);
+    }
+  }
+
   function updateConditionalSections() {
     const areas        = Settings.getAreas();
     const showAddSub   = areas.some(a => a === 'addition'  || a === 'subtraktion' || a === 'blandad');
     const showMultDiv  = areas.some(a => a === 'multiplikation' || a === 'division' || a === 'blandad');
     const showGeometri = areas.some(a => a === 'geometri'       || a === 'blandad');
     const showDivRest  = areas.some(a => a === 'division'       || a === 'blandad');
+    const showKlocka   = areas.some(a => a === 'klocka');
 
     function setSection(labelId, sectionId, show) {
       const lbl = document.getElementById(labelId);
@@ -90,7 +105,9 @@ const Menu = (() => {
     setSection('addsub-group-label',  'addsub-section',  showAddSub);
     setSection('multdiv-group-label',  'multdiv-section',  showMultDiv);
     setSection('geometri-group-label', 'geometri-section', showGeometri);
+    setSection('klocka-group-label',   'klocka-section',   showKlocka);
     document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
+    updateProblemlosningCheckbox();
   }
 
   function updateBildstodCheckbox() {
@@ -147,6 +164,11 @@ const Menu = (() => {
     document.querySelectorAll('input[name="bildstod-timing"]').forEach(r => {
       r.checked = r.value === timingVal;
     });
+    const klockaModeVal = Settings.getKlockaDisplayMode();
+    document.querySelectorAll('input[name="klocka-mode"]').forEach(r => {
+      r.checked = r.value === klockaModeVal;
+    });
+
     document.getElementById('problemlosning-check').checked = s.problemlosning;
     document.getElementById('flersteg-check').checked = s.flersteg || false;
     document.getElementById('flersteg-wrap').classList.toggle('hidden', !s.problemlosning);
@@ -240,6 +262,10 @@ const Menu = (() => {
       r.addEventListener('change', () => {
         Settings.setBildstodInstant(r.value === 'instant');
       });
+    });
+
+    document.querySelectorAll('input[name="klocka-mode"]').forEach(r => {
+      r.addEventListener('change', () => Settings.setKlockaDisplayMode(r.value));
     });
 
     document.getElementById('problemlosning-check').addEventListener('change', e => {

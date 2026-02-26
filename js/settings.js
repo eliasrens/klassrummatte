@@ -24,6 +24,7 @@ const Settings = (() => {
     flersteg: false,
     multipleProblems: false,
     multipleCount: 2,
+    klockaDisplayMode: 'mixed',
   };
 
   let state = { ...DEFAULTS };
@@ -92,7 +93,9 @@ const Settings = (() => {
   function setFlersteg(b)          { state.flersteg = !!b; save(); }
   function setGradeSelected(b)     { state.gradeSelected = !!b; save(); }
   function setMultipleProblems(b)  { state.multipleProblems = !!b; save(); }
-  function setMultipleCount(n)     { state.multipleCount = parseInt(n, 10); save(); }
+  function setMultipleCount(n)         { state.multipleCount = parseInt(n, 10); save(); }
+  function getKlockaDisplayMode()      { return state.klockaDisplayMode || 'mixed'; }
+  function setKlockaDisplayMode(v)     { state.klockaDisplayMode = v; save(); }
 
   // Initiering
   load();
@@ -105,5 +108,6 @@ const Settings = (() => {
     setBildstod, setBildstodInstant, setDivisionRest, setGeometriTypes,
     setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setFlersteg,
     setGradeSelected, setMultipleProblems, setMultipleCount,
+    getKlockaDisplayMode, setKlockaDisplayMode,
   };
 })();
