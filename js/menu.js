@@ -374,6 +374,14 @@ const Menu = (() => {
       document.getElementById('discussion-check').checked = false;
       Settings.setDiscussionEnabled(false);
 
+      document.getElementById('session-limit-select').value = 'unlimited';
+      Settings.setSessionLimit('unlimited');
+      App.resetSession();
+
+      document.getElementById('multiple-check').checked = false;
+      Settings.setMultipleProblems(false);
+      document.getElementById('multiple-count-wrap').classList.add('hidden');
+
       updateConditionalSections();
       updateBildstodCheckbox();
     });

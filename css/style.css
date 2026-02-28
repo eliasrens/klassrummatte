@@ -82,6 +82,9 @@ body {
 }
 
 /* Burger → X vid öppen meny */
+body.menu-open #menu-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
 body.menu-open #menu-toggle .burger-line:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
 }
@@ -846,10 +849,10 @@ body.extra-visible #stage {
 .clear-areas-btn {
   margin-left: auto;
   margin-right: 0.4rem;
-  padding: 0.1em 0.55em;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--clr-text-muted, #888);
+  padding: 0.25em 0.75em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--menu-text);
   background: transparent;
   border: 1px solid currentColor;
   border-radius: 4px;
