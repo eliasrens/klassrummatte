@@ -397,6 +397,7 @@ class BrakPlugin extends BasePlugin {
     const el = container.querySelector('.answer-value');
     if (el) {
       el.classList.remove('answer-hidden');
+      container.querySelectorAll('.brak-bildstod-answer').forEach(e => { e.style.display = ''; e.classList.remove('brak-bildstod-answer'); });
       return;
     }
     // Endast 'compare' saknar inline-svar – visa answer-box
@@ -416,6 +417,7 @@ class BrakPlugin extends BasePlugin {
     if (problem.questionType === 'sub-diff-den') return problem.a.denominator <= 10 && problem.b.denominator <= 10;
     if (problem.questionType === 'compare')          return problem.a.denominator <= 10 && problem.b.denominator <= 10;
     if (problem.questionType === 'fraction-of-whole') return true;
+    if (problem.questionType === 'simplify') return problem.denominator <= 10;
     return false;
   }
 
@@ -452,6 +454,23 @@ class BrakPlugin extends BasePlugin {
           { selector: '.brak-frac-host[data-idx="1"]', circle: buildFractionCircle(problem.b.numerator, problem.b.denominator) },
         ],
       };
+    }
+    if (problem.questionType === 'simplify') {
+      const [sNum, sDen] = problem.answer.split('/').map(Number);
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex; align-items:center; gap:0.6em;';
+      wrap.appendChild(buildFractionCircle(problem.numerator, problem.denominator));
+      const eq = document.createElement('span');
+      eq.textContent = '=';
+      eq.style.cssText = 'font-size:1.4em; font-weight:700; color:#1a1a2e;';
+      eq.classList.add('brak-bildstod-answer');
+      eq.style.display = 'none';
+      wrap.appendChild(eq);
+      const ansCircle = buildFractionCircle(sNum, sDen);
+      ansCircle.classList.add('brak-bildstod-answer');
+      ansCircle.style.display = 'none';
+      wrap.appendChild(ansCircle);
+      return wrap;
     }
     return null;
   }
