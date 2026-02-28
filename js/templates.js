@@ -74,9 +74,6 @@ const Templates = (() => {
     (n1, _n2, o, a, b) =>
       `Det låg ${n(a, o)} i korgen. ${n1} tog ${n(b, o)}. Hur många ${o.svPlural} är kvar?`,
 
-    (n1, _n2, o, a, b) =>
-      `${n1} hade ${a} kronor. Hen köpte något för ${b} kronor. Hur mycket har ${n1} kvar?`,
-
     (n1, n2, o, a, b) =>
       `${n1} och ${n2} hade ${n(a, o)} tillsammans. ${n2} tog sina ${b}. Hur många har ${n1} kvar?`,
 
@@ -98,7 +95,7 @@ const Templates = (() => {
       `${n1} samlar ${o.svPlural} i ${a} veckor och samlar ${b} i veckan. Hur många har ${n1} efter ${a} veckor?`,
   ];
 
-  const DIVISION_TEMPLATES = [
+  const DIVISION_OBJECT_TEMPLATES = [
     (n1, _n2, o, dividend, divisor) =>
       `${n1} ska dela ut ${n(dividend, o)} lika till ${divisor} kompisar. Hur många ${o.svPlural} får varje kompis?`,
 
@@ -110,8 +107,9 @@ const Templates = (() => {
 
     (n1, _n2, o, dividend, divisor) =>
       `${n1} har ${n(dividend, o)} och packar dem i ${divisor} lika stora påsar. Hur många ${o.svPlural} ryms i varje påse?`,
+  ];
 
-    // ── Pengar ──
+  const DIVISION_PENGAR_TEMPLATES = [
     (n1, _n2, _o, dividend, divisor) =>
       `${n1} ska dela ${dividend}\u00a0kr lika med ${divisor} kompisar. Hur mycket får varje kompis?`,
 
@@ -132,6 +130,8 @@ const Templates = (() => {
   ];
 
   const PENGAR_SUBTRAKTION_TEMPLATES = [
+    (n1, _n2, _o, a, b) =>
+      `${n1} hade ${a} kronor. Hen köpte något för ${b} kronor. Hur mycket har ${n1} kvar?`,
     (n1, _n2, _o, a, b) =>
       `${n1} har ${a}\u00a0kr och köper en bok för ${b}\u00a0kr. Hur mycket har ${n1} kvar?`,
     (n1, _n2, _o, a, b) =>
@@ -325,16 +325,15 @@ const Templates = (() => {
    * Lägger till en irrelevant mening i en textuppgift ("för mycket information").
    * Distraktorn innehåller ett tal som INTE används i beräkningen.
    */
-  function _addExtraInfo(text, name1) {
+  function _addExtraInfo(text, name1, obj) {
+    const d = pickRandom([3, 4, 6, 7, 8, 11, 13]);
     const extras = [
-      `${name1} är 9 år gammal. `,
-      `Det finns 25 elever i klassen. `,
-      `${name1} bor 3 kilometer från skolan. `,
-      `Det är måndag idag. `,
-      `I lekstugan finns 12 stolar. `,
-      `${name1} har 2 syskon. `,
-      `Skolan öppnar klockan 8. `,
-      `I trädgården finns 7 träd. `,
+      `Det finns ${d} sorters ${obj.svPlural}. `,
+      `Varje ${obj.sv} kostar ${d}\u00a0kr. `,
+      `${obj.svPlural} finns i ${d} olika färger. `,
+      `Det tar ${d} minuter att räkna alla ${obj.svPlural}. `,
+      `${name1} samlar på ${obj.svPlural} sedan ${d} år tillbaka. `,
+      `Det finns plats för ${d} ${obj.svPlural} till på hyllan. `,
     ];
     const extra = pickRandom(extras);
     // Infoga distraktorn mitt i texten (efter första meningen)
@@ -377,23 +376,30 @@ const Templates = (() => {
         const addPool = pickRandom([ADDITION_TEMPLATES, ADDITION_TEMPLATES, PENGAR_ADDITION_TEMPLATES, TID_ADDITION_TEMPLATES]);
         text = pickRandom(addPool)(name1, name2, obj, problem.a, problem.b);
         // 20% chans: lägg till irrelevant information (bara för objektmallar)
-        if (addPool === ADDITION_TEMPLATES && Math.random() < 0.2) text = _addExtraInfo(text, name1);
-        break;
+        if (addPool === ADDITION_TEMPLATES && Math.random() < 0.2) text = _addExtraInfo(text, name1, obj);
+        const addUnit = addPool === PENGAR_ADDITION_TEMPLATES ? 'kr' : addPool === TID_ADDITION_TEMPLATES ? 'min' : obj.svPlural;
+        return { ...problem, isTextProblem: true, textTemplate: text, answer: `${problem.answer} ${addUnit}` };
       }
       case 'subtraktion': {
         const subPool = pickRandom([SUBTRAKTION_TEMPLATES, SUBTRAKTION_TEMPLATES, PENGAR_SUBTRAKTION_TEMPLATES, TID_SUBTRAKTION_TEMPLATES]);
         text = pickRandom(subPool)(name1, name2, obj, problem.a, problem.b);
-        if (subPool === SUBTRAKTION_TEMPLATES && Math.random() < 0.2) text = _addExtraInfo(text, name1);
-        break;
+        if (subPool === SUBTRAKTION_TEMPLATES && Math.random() < 0.2) text = _addExtraInfo(text, name1, obj);
+        const subUnit = subPool === PENGAR_SUBTRAKTION_TEMPLATES ? 'kr' : subPool === TID_SUBTRAKTION_TEMPLATES ? 'min' : obj.svPlural;
+        return { ...problem, isTextProblem: true, textTemplate: text, answer: `${problem.answer} ${subUnit}` };
       }
       case 'multiplikation': {
-        const multPools = [MULTIPLIKATION_TEMPLATES, MULTIPLIKATION_TEMPLATES, PENGAR_MULTIPLIKATION_TEMPLATES];
-        text = pickRandom(pickRandom(multPools))(name1, name2, obj, problem.a, problem.b);
-        break;
+        const multPool = pickRandom([MULTIPLIKATION_TEMPLATES, MULTIPLIKATION_TEMPLATES, PENGAR_MULTIPLIKATION_TEMPLATES]);
+        text = pickRandom(multPool)(name1, name2, obj, problem.a, problem.b);
+        const multUnit = multPool === PENGAR_MULTIPLIKATION_TEMPLATES ? 'kr' : obj.svPlural;
+        return { ...problem, isTextProblem: true, textTemplate: text, answer: `${problem.answer} ${multUnit}` };
       }
-      case 'division':
-        text = pickRandom(DIVISION_TEMPLATES)(name1, name2, obj, problem.a, problem.b);
-        break;
+      case 'division': {
+        const divPool = pickRandom([DIVISION_OBJECT_TEMPLATES, DIVISION_OBJECT_TEMPLATES, DIVISION_PENGAR_TEMPLATES]);
+        text = pickRandom(divPool)(name1, name2, obj, problem.a, problem.b);
+        const divUnit = divPool === DIVISION_PENGAR_TEMPLATES ? 'kr' : obj.svPlural;
+        const divAnswer = String(problem.answer).includes('rest') ? String(problem.answer) : `${problem.answer} ${divUnit}`;
+        return { ...problem, isTextProblem: true, textTemplate: text, answer: divAnswer };
+      }
       case 'geometri': {
         const shapeMap = GEOMETRI_TEMPLATES[problem.shape];
         if (!shapeMap) return problem;
@@ -445,7 +451,7 @@ const Templates = (() => {
     if (gens.length === 0) gens.push(() => genAddSub(max, names, obj)); // fallback
 
     const result = pickRandom(gens)();
-    return { type: 'flersteg', ...result, isTextProblem: true };
+    return { type: 'flersteg', ...result, isTextProblem: true, answer: `${result.answer} ${obj.svPlural}` };
   }
 
   return { canWrap, wrapInTemplate, generateFlersteg };
