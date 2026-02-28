@@ -9,10 +9,30 @@ const Templates = (() => {
   //  Namnlista
   // =========================================================
   const NAMES = [
-    'Emma', 'Liam', 'Maja', 'Noah', 'Ella', 'Oscar', 'Julia', 'Felix',
-    'Sara', 'Erik', 'Astrid', 'Leo', 'Linnea', 'Hugo', 'Wilma', 'Anton',
-    'Alice', 'Nils', 'Sofia', 'Gustav', 'Saga', 'Elias', 'Vera', 'Axel',
-    'Stella', 'Oliver', 'Ebba', 'William', 'Agnes', 'Theo',
+    // Svenska namn
+    { name: 'Emma',    pronoun: 'hon' }, { name: 'Liam',    pronoun: 'han' },
+    { name: 'Maja',    pronoun: 'hon' }, { name: 'Noah',    pronoun: 'han' },
+    { name: 'Ella',    pronoun: 'hon' }, { name: 'Oscar',   pronoun: 'han' },
+    { name: 'Julia',   pronoun: 'hon' }, { name: 'Felix',   pronoun: 'han' },
+    { name: 'Sara',    pronoun: 'hon' }, { name: 'Erik',    pronoun: 'han' },
+    { name: 'Astrid',  pronoun: 'hon' }, { name: 'Leo',     pronoun: 'han' },
+    { name: 'Linnea',  pronoun: 'hon' }, { name: 'Hugo',    pronoun: 'han' },
+    { name: 'Wilma',   pronoun: 'hon' }, { name: 'Anton',   pronoun: 'han' },
+    { name: 'Alice',   pronoun: 'hon' }, { name: 'Nils',    pronoun: 'han' },
+    { name: 'Sofia',   pronoun: 'hon' }, { name: 'Gustav',  pronoun: 'han' },
+    { name: 'Saga',    pronoun: 'hon' }, { name: 'Elias',   pronoun: 'han' },
+    { name: 'Vera',    pronoun: 'hon' }, { name: 'Axel',    pronoun: 'han' },
+    { name: 'Stella',  pronoun: 'hon' }, { name: 'Oliver',  pronoun: 'han' },
+    { name: 'Ebba',    pronoun: 'hon' }, { name: 'William', pronoun: 'han' },
+    { name: 'Agnes',   pronoun: 'hon' }, { name: 'Theo',    pronoun: 'han' },
+    // Flerspråkiga namn
+    { name: 'Ali',     pronoun: 'han' }, { name: 'Fatima',  pronoun: 'hon' },
+    { name: 'Youssef', pronoun: 'han' }, { name: 'Aisha',   pronoun: 'hon' },
+    { name: 'Amir',    pronoun: 'han' }, { name: 'Noor',    pronoun: 'hon' },
+    { name: 'Reza',    pronoun: 'han' }, { name: 'Zahra',   pronoun: 'hon' },
+    { name: 'Omid',    pronoun: 'han' }, { name: 'Leyla',   pronoun: 'hon' },
+    { name: 'Abdi',    pronoun: 'han' }, { name: 'Fadumo',  pronoun: 'hon' },
+    { name: 'Walid',   pronoun: 'han' }, { name: 'Selam',   pronoun: 'hon' },
   ];
 
   // =========================================================
@@ -57,8 +77,8 @@ const Templates = (() => {
     (n1, n2, o, a, b) =>
       `Det finns ${n(a, o)} i korgen. ${n1} lägger i ${n(b, o)} till. Hur många ${o.svPlural} finns det nu?`,
 
-    (n1, _n2, o, a, b) =>
-      `${n1} samlar ${o.svPlural}. På måndag hittar hen ${a} och på tisdag ${b}. Hur många ${o.svPlural} har ${n1} totalt?`,
+    (n1, _n2, o, a, b, p1) =>
+      `${n1} samlar ${o.svPlural}. På måndag hittar ${p1} ${a} och på tisdag ${b}. Hur många ${o.svPlural} har ${n1} totalt?`,
 
     (n1, n2, o, a, b) =>
       `${n1} plockar ${n(a, o)} och ${n2} plockar ${n(b, o)}. Hur många ${o.svPlural} har de plockat tillsammans?`,
@@ -130,8 +150,8 @@ const Templates = (() => {
   ];
 
   const PENGAR_SUBTRAKTION_TEMPLATES = [
-    (n1, _n2, _o, a, b) =>
-      `${n1} hade ${a} kronor. Hen köpte något för ${b} kronor. Hur mycket har ${n1} kvar?`,
+    (n1, _n2, _o, a, b, p1) =>
+      `${n1} hade ${a} kronor. ${cap(p1)} köpte något för ${b} kronor. Hur mycket har ${n1} kvar?`,
     (n1, _n2, _o, a, b) =>
       `${n1} har ${a}\u00a0kr och köper en bok för ${b}\u00a0kr. Hur mycket har ${n1} kvar?`,
     (n1, _n2, _o, a, b) =>
@@ -166,14 +186,14 @@ const Templates = (() => {
   ];
 
   const TID_SUBTRAKTION_TEMPLATES = [
-    (n1, _n2, _o, a, b) =>
-      `${n1} ska träna ${a} minuter. Hen har tränat i ${b} minuter. Hur många minuter är det kvar?`,
+    (n1, _n2, _o, a, b, p1) =>
+      `${n1} ska träna ${a} minuter. ${cap(p1)} har tränat i ${b} minuter. Hur många minuter är det kvar?`,
     (_n1, _n2, _o, a, b) =>
       `En film är ${a} minuter lång. Det är ${a - b} minuter kvar. Hur länge har filmen spelat?`,
     (n1, _n2, _o, a, b) =>
       `${n1} ska städa i ${a} minuter och har städat i ${b} minuter. Hur lång tid är det kvar?`,
-    (n1, _n2, _o, a, b) =>
-      `${n1} ska vara ute i ${a} minuter. Hen har redan varit ute ${b} minuter. Hur länge är det kvar?`,
+    (n1, _n2, _o, a, b, p1) =>
+      `${n1} ska vara ute i ${a} minuter. ${cap(p1)} har redan varit ute ${b} minuter. Hur länge är det kvar?`,
   ];
 
   // =========================================================
@@ -321,6 +341,8 @@ const Templates = (() => {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
   /**
    * Lägger till en irrelevant mening i en textuppgift ("för mycket information").
    * Distraktorn innehåller ett tal som INTE används i beräkningen.
@@ -345,10 +367,10 @@ const Templates = (() => {
   }
 
   function twoDistinctNames() {
-    const n1 = pickRandom(NAMES);
-    let n2   = pickRandom(NAMES);
-    while (n2 === n1) n2 = pickRandom(NAMES);
-    return [n1, n2];
+    const p1 = pickRandom(NAMES);
+    let p2   = pickRandom(NAMES);
+    while (p2.name === p1.name) p2 = pickRandom(NAMES);
+    return [p1.name, p1.pronoun, p2.name, p2.pronoun];
   }
 
   // =========================================================
@@ -367,14 +389,14 @@ const Templates = (() => {
    * Slår in ett problem i en svensk textuppgift.
    */
   function wrapInTemplate(problem, _grade) {
-    const [name1, name2] = twoDistinctNames();
+    const [name1, pronoun1, name2] = twoDistinctNames();
     const obj = pickRandom(OBJECTS);
 
     let text;
     switch (problem.type) {
       case 'addition': {
         const addPool = pickRandom([ADDITION_TEMPLATES, ADDITION_TEMPLATES, PENGAR_ADDITION_TEMPLATES, TID_ADDITION_TEMPLATES]);
-        text = pickRandom(addPool)(name1, name2, obj, problem.a, problem.b);
+        text = pickRandom(addPool)(name1, name2, obj, problem.a, problem.b, pronoun1);
         // 20% chans: lägg till irrelevant information (bara för objektmallar)
         if (addPool === ADDITION_TEMPLATES && Math.random() < 0.2) text = _addExtraInfo(text, name1, obj);
         const addUnit = addPool === PENGAR_ADDITION_TEMPLATES ? 'kr' : addPool === TID_ADDITION_TEMPLATES ? 'min' : obj.svPlural;
@@ -382,20 +404,20 @@ const Templates = (() => {
       }
       case 'subtraktion': {
         const subPool = pickRandom([SUBTRAKTION_TEMPLATES, SUBTRAKTION_TEMPLATES, PENGAR_SUBTRAKTION_TEMPLATES, TID_SUBTRAKTION_TEMPLATES]);
-        text = pickRandom(subPool)(name1, name2, obj, problem.a, problem.b);
+        text = pickRandom(subPool)(name1, name2, obj, problem.a, problem.b, pronoun1);
         if (subPool === SUBTRAKTION_TEMPLATES && Math.random() < 0.2) text = _addExtraInfo(text, name1, obj);
         const subUnit = subPool === PENGAR_SUBTRAKTION_TEMPLATES ? 'kr' : subPool === TID_SUBTRAKTION_TEMPLATES ? 'min' : obj.svPlural;
         return { ...problem, isTextProblem: true, textTemplate: text, answer: `${problem.answer} ${subUnit}` };
       }
       case 'multiplikation': {
         const multPool = pickRandom([MULTIPLIKATION_TEMPLATES, MULTIPLIKATION_TEMPLATES, PENGAR_MULTIPLIKATION_TEMPLATES]);
-        text = pickRandom(multPool)(name1, name2, obj, problem.a, problem.b);
+        text = pickRandom(multPool)(name1, name2, obj, problem.a, problem.b, pronoun1);
         const multUnit = multPool === PENGAR_MULTIPLIKATION_TEMPLATES ? 'kr' : obj.svPlural;
         return { ...problem, isTextProblem: true, textTemplate: text, answer: `${problem.answer} ${multUnit}` };
       }
       case 'division': {
         const divPool = pickRandom([DIVISION_OBJECT_TEMPLATES, DIVISION_OBJECT_TEMPLATES, DIVISION_PENGAR_TEMPLATES]);
-        text = pickRandom(divPool)(name1, name2, obj, problem.a, problem.b);
+        text = pickRandom(divPool)(name1, name2, obj, problem.a, problem.b, pronoun1);
         const divUnit = divPool === DIVISION_PENGAR_TEMPLATES ? 'kr' : obj.svPlural;
         const divAnswer = String(problem.answer).includes('rest') ? String(problem.answer) : `${problem.answer} ${divUnit}`;
         return { ...problem, isTextProblem: true, textTemplate: text, answer: divAnswer };
@@ -435,7 +457,7 @@ const Templates = (() => {
   function generateFlersteg(settings) {
     const grade = settings.grade;
     const max = grade <= 1 ? 10 : grade <= 2 ? 20 : grade <= 3 ? 50 : 100;
-    const [name1, name2] = twoDistinctNames();
+    const [name1, , name2] = twoDistinctNames();
     const obj = pickRandom(OBJECTS);
     const names = [name1, name2];
 
