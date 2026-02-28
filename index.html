@@ -22,7 +22,7 @@
     </div>
 
     <!-- ── GRUNDINSTÄLLNINGAR ─────────────────────────── -->
-    <div class="menu-group-label">Grundinställningar</div>
+    <div class="menu-group-label" id="grundinstallningar-group-label">Grundinställningar</div>
 
     <section class="menu-section">
       <label class="section-label" for="grade-select">Årskurs</label>
@@ -146,6 +146,7 @@
           <span>Flerstegsaddition (Åk 3+)</span>
         </label>
       </div>
+      <p id="addsub-implicit-hint" class="implicit-hint hidden">Inget valt — Standard används</p>
     </section>
 
     <!-- ── SUBINSTÄLLNINGAR: MULT / DIV ──────────────── -->
@@ -180,6 +181,7 @@
           <span>Stora tal (flersiffrigt)</span>
         </label>
       </div>
+      <p id="multdiv-implicit-hint" class="implicit-hint hidden">Inget valt — Alla tabeller används</p>
       <label class="check-label check-label--sep" id="division-rest-label">
         <input type="checkbox" id="division-rest-check">
         <span>Division med rest</span>
@@ -293,7 +295,7 @@
     <section class="menu-section">
       <label class="check-label check-label--featured">
         <input type="checkbox" id="extra-enabled-check">
-        <span>Aktivera extrauppgift</span>
+        <span>Aktivera extrauppgift<br><small>En sidopanel med fördjupningsuppgift visas efter vald fördröjning</small></span>
       </label>
       <div id="extra-task-options" class="hidden">
         <label class="section-label" for="extra-type-select">Typ</label>

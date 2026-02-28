@@ -867,6 +867,14 @@ body.extra-visible #stage {
   color: var(--clr-accent, #e63946);
 }
 
+/* === Implicit standardhint === */
+.implicit-hint {
+  margin: 0.35rem 0 0 0;
+  font-size: 0.71rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.38);
+}
+
 /* === Responsiv justering === */
 /* === Öppna utsagor – blank === */
 /* overflow: hidden gör att baseline alltid = underkant av elementet (CSS-spec),

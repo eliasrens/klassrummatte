@@ -34,11 +34,12 @@ const Menu = (() => {
         }
       });
 
-      // Matematikområden startar öppen bara om klass redan är vald
+      // Grundinställningar öppen vid första besök; Matematikområden öppen annars
       const gradeAlreadySelected = Settings.get().gradeSelected;
-      if (label.id !== 'matematikarea-group-label' || !gradeAlreadySelected) {
-        collapseMenuLabel(label);
-      }
+      const keepOpen = gradeAlreadySelected
+        ? label.id === 'matematikarea-group-label'
+        : label.id === 'grundinstallningar-group-label';
+      if (!keepOpen) collapseMenuLabel(label);
     });
   }
 
@@ -59,16 +60,23 @@ const Menu = (() => {
   }
 
   function updateSpecificTablesVisibility() {
-    const multDivMode = Settings.get().multDivMode;
     const tablesBasicChecked = document.querySelector('#multdiv-mode-checkboxes input[value="tables-basic"]').checked;
-    // Show specific tables when tables-basic is checked OR nothing is selected (implicit tables-basic)
-    const show = tablesBasicChecked || multDivMode.length === 0;
-    document.getElementById('specific-tables-wrap').classList.toggle('hidden', !show);
+    document.getElementById('specific-tables-wrap').classList.toggle('hidden', !tablesBasicChecked);
   }
 
   function updateAddSubVaxlingVisibility() {
     const uppstallningChecked = document.querySelector('#addsub-mode-checkboxes input[value="uppstallning"]').checked;
     document.getElementById('addsub-vaxling-wrap').classList.toggle('hidden', !uppstallningChecked);
+  }
+
+  function updateAddSubImplicitHint() {
+    const anyChecked = document.querySelectorAll('#addsub-mode-checkboxes > label input:checked').length > 0;
+    document.getElementById('addsub-implicit-hint').classList.toggle('hidden', anyChecked);
+  }
+
+  function updateMultDivImplicitHint() {
+    const anyChecked = document.querySelectorAll('#multdiv-mode-checkboxes > label input:checked').length > 0;
+    document.getElementById('multdiv-implicit-hint').classList.toggle('hidden', anyChecked);
   }
 
   function updateProblemlosningCheckbox() {
@@ -176,6 +184,7 @@ const Menu = (() => {
     document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
       cb.checked = s.addSubMode.includes(cb.value);
     });
+    updateAddSubImplicitHint();
 
     document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(cb => {
       cb.checked = (s.addSubVaxling || ['med']).includes(cb.value);
@@ -185,6 +194,7 @@ const Menu = (() => {
     document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
       cb.checked = s.multDivMode.includes(cb.value);
     });
+    updateMultDivImplicitHint();
 
     document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(cb => {
       cb.checked = s.specificTables.includes(parseInt(cb.value, 10));
@@ -253,6 +263,7 @@ const Menu = (() => {
         const checked = [...document.querySelectorAll('#addsub-mode-checkboxes > label input:checked')].map(c => c.value);
         Settings.setAddSubMode(checked);
         updateAddSubVaxlingVisibility();
+        updateAddSubImplicitHint();
       });
     });
 
@@ -275,6 +286,7 @@ const Menu = (() => {
           Settings.setSpecificTables(cb.checked ? [1,2,3,4,5,6,7,8,9] : []);
         }
         updateSpecificTablesVisibility();
+        updateMultDivImplicitHint();
       });
     });
 
@@ -361,6 +373,15 @@ const Menu = (() => {
       document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setAreas([]);
 
+      document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setAddSubMode([]);
+
+      document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setMultDivMode([]);
+
+      document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setSpecificTables([]);
+
       document.getElementById('problemlosning-check').checked = false;
       Settings.setProblemlosning(false);
       document.getElementById('flersteg-wrap').classList.add('hidden');
@@ -383,6 +404,9 @@ const Menu = (() => {
       document.getElementById('multiple-count-wrap').classList.add('hidden');
 
       updateConditionalSections();
+      updateSpecificTablesVisibility();
+      updateAddSubImplicitHint();
+      updateMultDivImplicitHint();
       updateBildstodCheckbox();
     });
   }
