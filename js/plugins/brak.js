@@ -103,6 +103,26 @@ function buildFractionGrid(numerator, denominator, whole) {
   return svg;
 }
 
+// Privat – skapar answer-span med bråkform (eller text för heltal/blandade tal)
+function buildBrakAnswerSpan(answerStr) {
+  const span = document.createElement('span');
+  span.className = 'answer-value answer-hidden';
+  if (!answerStr.includes('/')) {
+    span.textContent = `\u00a0${answerStr}`;
+    return span;
+  }
+  const mixedMatch = answerStr.match(/^(\d+) (\d+)\/(\d+)$/);
+  if (mixedMatch) {
+    span.appendChild(document.createTextNode(`\u00a0${mixedMatch[1]}\u00a0`));
+    span.appendChild(PluginUtils.buildFractionEl(parseInt(mixedMatch[2]), parseInt(mixedMatch[3])));
+  } else {
+    const [num, den] = answerStr.split('/').map(Number);
+    span.appendChild(document.createTextNode('\u00a0'));
+    span.appendChild(PluginUtils.buildFractionEl(num, den));
+  }
+  return span;
+}
+
 // Wrappar ett bråkelement i en host-container för inline-bildstöd
 function _hostWrap(idx, fracEl) {
   const span = document.createElement('span');
@@ -354,10 +374,7 @@ class BrakPlugin extends BasePlugin {
       const eq  = document.createElement('span');
       eq.textContent = '=';
       expr.appendChild(eq);
-      const ans = document.createElement('span');
-      ans.className = 'answer-value answer-hidden';
-      ans.textContent = problem.answer;
-      expr.appendChild(ans);
+      expr.appendChild(buildBrakAnswerSpan(problem.answer));
       wrap.appendChild(q);
       wrap.appendChild(expr);
       container.appendChild(wrap);
@@ -375,10 +392,7 @@ class BrakPlugin extends BasePlugin {
       const eq  = document.createElement('span');
       eq.textContent = '=';
       expr.appendChild(eq);
-      const ans = document.createElement('span');
-      ans.className = 'answer-value answer-hidden';
-      ans.textContent = problem.answer;
-      expr.appendChild(ans);
+      expr.appendChild(buildBrakAnswerSpan(problem.answer));
       wrap.appendChild(q);
       wrap.appendChild(expr);
       container.appendChild(wrap);
@@ -386,10 +400,7 @@ class BrakPlugin extends BasePlugin {
     }
 
     // Inline-typer: name, add/sub-same-den, add/sub-diff-den, fraction-of-whole
-    const ans = document.createElement('span');
-    ans.className = 'answer-value answer-hidden';
-    ans.textContent = ` ${problem.answer}`;
-    container.appendChild(ans);
+    container.appendChild(buildBrakAnswerSpan(problem.answer));
   }
 
   showAnswer(problem, container, btn) {
@@ -400,8 +411,13 @@ class BrakPlugin extends BasePlugin {
       container.querySelectorAll('.brak-bildstod-answer').forEach(e => { e.style.display = ''; e.classList.remove('brak-bildstod-answer'); });
       return;
     }
-    // Endast 'compare' saknar inline-svar – visa answer-box
-    PluginUtils.appendAnswerBox(problem.answer, container);
+    // 'compare' – bygg svarslåda med bråkform
+    const box = document.createElement('div');
+    box.className = 'answer-box';
+    box.appendChild(document.createTextNode('Svar:\u00a0'));
+    const [num, den] = problem.answer.split('/').map(Number);
+    box.appendChild(PluginUtils.buildFractionEl(num, den));
+    container.appendChild(box);
   }
 
   isSameProblem(a, b) {
