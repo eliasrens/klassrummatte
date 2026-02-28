@@ -4,7 +4,6 @@
 
 const App = (() => {
 
-  const BILDSTOD_DELAY_MS = 10000;
 
   const DISCUSSION_PROMPTS = [
     'Förklara för din granne hur du tänkte.',
@@ -185,7 +184,7 @@ const App = (() => {
 
     if (!settings.multipleProblems && currentProblem &&
         settings.bildstod && Bildstod.hasBildstodSupport(currentProblem, settings)) {
-      const delay = settings.bildstodInstant ? 80 : BILDSTOD_DELAY_MS;
+      const delay = (settings.bildstodDelay ?? 10) * 1000;
       bildstodTimer = setTimeout(() => {
         Bildstod.appendBildstod(currentProblem, settings, problemDisplay, problemVisible);
       }, delay);

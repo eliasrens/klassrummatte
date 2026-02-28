@@ -194,10 +194,7 @@ const Menu = (() => {
 
     document.getElementById('bildstod-check').checked = s.bildstod;
     document.getElementById('bildstod-options').classList.toggle('hidden', !s.bildstod);
-    const timingVal = s.bildstodInstant ? 'instant' : 'delayed';
-    document.querySelectorAll('input[name="bildstod-timing"]').forEach(r => {
-      r.checked = r.value === timingVal;
-    });
+    document.getElementById('bildstod-delay-select').value = s.bildstodDelay ?? 10;
     const klockaModeVal = Settings.getKlockaDisplayMode();
     document.querySelectorAll('input[name="klocka-mode"]').forEach(r => {
       r.checked = r.value === klockaModeVal;
@@ -296,10 +293,8 @@ const Menu = (() => {
       document.getElementById('bildstod-options').classList.toggle('hidden', !e.target.checked);
     });
 
-    document.querySelectorAll('input[name="bildstod-timing"]').forEach(r => {
-      r.addEventListener('change', () => {
-        Settings.setBildstodInstant(r.value === 'instant');
-      });
+    document.getElementById('bildstod-delay-select').addEventListener('change', e => {
+      Settings.setBildstodDelay(e.target.value);
     });
 
     document.querySelectorAll('input[name="klocka-mode"]').forEach(r => {

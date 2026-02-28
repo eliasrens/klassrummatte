@@ -1,5 +1,19 @@
 // js/plugins/brak.js
 
+const FRACTION_NAMES = {
+  '1/2': 'en halv',
+  '1/3': 'en tredjedel',
+  '2/3': 'två tredjedelar',
+  '1/4': 'en fjärdedel',
+  '3/4': 'tre fjärdedelar',
+  '1/5': 'en femtedel',
+  '2/5': 'två femtedelar',
+  '3/5': 'tre femtedelar',
+  '4/5': 'fyra femtedelar',
+  '1/6': 'en sjättedel',
+  '5/6': 'fem sjättedelar',
+};
+
 // Privat hjälpfunktion – cirkel-SVG som bildstöd för bråk
 function buildFractionCircle(numerator, denominator) {
   const CX = 50, CY = 50, R = 46;
@@ -38,6 +52,57 @@ function buildFractionCircle(numerator, denominator) {
   return svg;
 }
 
+// Rutnät-SVG som bildstöd för "bråk av heltal" – grupperade rader
+function buildFractionGrid(numerator, denominator, whole) {
+  const groupSize = whole / denominator; // rutor per grupp
+
+  // Välj antal kolumner: hitta störs jämnt delbart med groupSize som är ≤ 6,
+  // annars behåll groupSize (för värden ≤ 7)
+  let cols = groupSize;
+  if (groupSize > 7) {
+    for (let c = 6; c >= 2; c--) {
+      if (groupSize % c === 0) { cols = c; break; }
+    }
+  }
+  const rowsPerGroup = groupSize / cols;
+
+  const S   = 14; // rutstorlek
+  const GS  = 2;  // gap inom grupp
+  const GG  = 6;  // gap mellan grupper
+  const PAD = 4;  // kantutfyllnad
+
+  const groupW  = cols * S + (cols - 1) * GS;
+  const groupH  = rowsPerGroup * S + (rowsPerGroup - 1) * GS;
+  const totalW  = groupW + 2 * PAD;
+  const totalH  = denominator * groupH + (denominator - 1) * GG + 2 * PAD;
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+  svg.classList.add('brak-grid-svg');
+
+  for (let g = 0; g < denominator; g++) {
+    const fill   = g < numerator ? '#e63946' : '#e5e7eb';
+    const stroke = '#9ca3af';
+    const groupY = PAD + g * (groupH + GG);
+
+    for (let sq = 0; sq < groupSize; sq++) {
+      const row = Math.floor(sq / cols);
+      const col = sq % cols;
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x',      PAD + col * (S + GS));
+      rect.setAttribute('y',      groupY + row * (S + GS));
+      rect.setAttribute('width',  S);
+      rect.setAttribute('height', S);
+      rect.setAttribute('fill',   fill);
+      rect.setAttribute('stroke', stroke);
+      rect.setAttribute('stroke-width', '1');
+      rect.setAttribute('rx', '2');
+      svg.appendChild(rect);
+    }
+  }
+  return svg;
+}
+
 // Wrappar ett bråkelement i en host-container för inline-bildstöd
 function _hostWrap(idx, fracEl) {
   const span = document.createElement('span');
@@ -73,7 +138,7 @@ class BrakPlugin extends BasePlugin {
     }
 
     if (level === 'same-den') {
-      const qt = PluginUtils.pickRandom(['add-same-den', 'sub-same-den', 'compare', 'simplify']);
+      const qt = PluginUtils.pickRandom(['add-same-den', 'sub-same-den', 'compare', 'simplify', 'fraction-of-whole']);
       return this._genByType(qt);
     }
 
@@ -108,9 +173,12 @@ class BrakPlugin extends BasePlugin {
   }
 
   _genName() {
-    const options = [[1,2],[1,4],[3,4],[1,3],[2,3],[1,5],[2,5],[3,5]];
+    const options = [[1,2],[1,4],[3,4],[1,3],[2,3],[1,5],[2,5],[3,5],[4,5],[1,6],[5,6]];
     const [num, den] = PluginUtils.pickRandom(options);
-    return { type: 'brak', questionType: 'name', numerator: num, denominator: den, answer: `${num}/${den}` };
+    const fracKey   = `${num}/${den}`;
+    const wordName  = FRACTION_NAMES[fracKey];
+    const nameStyle = PluginUtils.pickRandom(['frac-to-word', 'word-to-frac']);
+    return { type: 'brak', questionType: 'name', nameStyle, numerator: num, denominator: den, wordName, answer: fracKey };
   }
 
   _genAddSubSameDen(op) {
@@ -218,8 +286,23 @@ class BrakPlugin extends BasePlugin {
     const qt = problem.questionType;
 
     if (qt === 'name') {
-      container.appendChild(PluginUtils.buildFractionEl(problem.numerator, problem.denominator));
-      PluginUtils.appendText(container, ' =');
+      if (problem.nameStyle === 'word-to-frac') {
+        PluginUtils.appendText(container, `${problem.wordName}\u00a0=`);
+        const ans = document.createElement('span');
+        ans.className = 'answer-value answer-hidden';
+        ans.style.marginLeft = '0.4em';
+        ans.appendChild(PluginUtils.buildFractionEl(problem.numerator, problem.denominator));
+        container.appendChild(ans);
+      } else {
+        // frac-to-word: visa bråkform, svara med svenska ord
+        container.appendChild(PluginUtils.buildFractionEl(problem.numerator, problem.denominator));
+        PluginUtils.appendText(container, '\u00a0=');
+        const ans = document.createElement('span');
+        ans.className = 'answer-value answer-hidden';
+        ans.textContent = `\u00a0${problem.wordName || problem.answer}`;
+        container.appendChild(ans);
+      }
+      return;
 
     } else if (qt === 'add-same-den' || qt === 'sub-same-den') {
       const op = qt === 'add-same-den' ? ' + ' : ' \u2212 ';
@@ -327,18 +410,21 @@ class BrakPlugin extends BasePlugin {
 
   hasBildstodSupport(problem) {
     if (problem.questionType === 'name')         return problem.denominator <= 10;
-    if (problem.questionType === 'add-same-den') return problem.denominator <= 8;
-    if (problem.questionType === 'sub-same-den') return problem.denominator <= 8;
-    if (problem.questionType === 'add-diff-den') return problem.a.denominator <= 8 && problem.b.denominator <= 8;
-    if (problem.questionType === 'sub-diff-den') return problem.a.denominator <= 8 && problem.b.denominator <= 8;
-    if (problem.questionType === 'compare')      return problem.a.denominator <= 10 && problem.b.denominator <= 10;
+    if (problem.questionType === 'add-same-den') return problem.denominator <= 10;
+    if (problem.questionType === 'sub-same-den') return problem.denominator <= 10;
+    if (problem.questionType === 'add-diff-den') return problem.a.denominator <= 10 && problem.b.denominator <= 10;
+    if (problem.questionType === 'sub-diff-den') return problem.a.denominator <= 10 && problem.b.denominator <= 10;
+    if (problem.questionType === 'compare')          return problem.a.denominator <= 10 && problem.b.denominator <= 10;
+    if (problem.questionType === 'fraction-of-whole') return true;
     return false;
   }
 
   buildBildstod(problem) {
     if (problem.questionType === 'name') {
-      // Enkel cirkel – visas ovanför hela uppgiften via wrapper
-      return _cirkelMedEtikett(problem.numerator, problem.denominator);
+      return buildFractionCircle(problem.numerator, problem.denominator);
+    }
+    if (problem.questionType === 'fraction-of-whole') {
+      return buildFractionGrid(problem.numerator, problem.denominator, problem.whole);
     }
     if (problem.questionType === 'add-same-den' || problem.questionType === 'sub-same-den') {
       return {

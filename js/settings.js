@@ -14,7 +14,7 @@ const Settings = (() => {
     extraType: 'uppstallning-add',
     extraDelay: 10,
     bildstod: false,
-    bildstodInstant: false,
+    bildstodDelay: 10,
     divisionRest: false,
     geometriTypes: ['area', 'perimeter'],
     multDivMode: ['tables-basic'],
@@ -72,7 +72,7 @@ const Settings = (() => {
   function getExtraType()      { return state.extraType; }
   function isProblemlosning()  { return state.problemlosning; }
   function isBildstod()        { return state.bildstod; }
-  function isBildstodInstant() { return state.bildstodInstant; }
+  function getBildstodDelay()  { return state.bildstodDelay ?? 10; }
   function getGeometriTypes()  { return [...(state.geometriTypes || ['area','perimeter'])]; }
   function getAddSubMode()     { return [...(state.addSubMode  || ['standard'])]; }
   function getAddSubVaxling()  { return [...(state.addSubVaxling || ['med'])]; }
@@ -85,7 +85,7 @@ const Settings = (() => {
   function setExtraDelay(n)        { state.extraDelay = parseInt(n, 10); save(); }
   function setProblemlosning(b)    { state.problemlosning = !!b; save(); }
   function setBildstod(b)          { state.bildstod = !!b; save(); }
-  function setBildstodInstant(b)   { state.bildstodInstant = !!b; save(); }
+  function setBildstodDelay(n)     { state.bildstodDelay = parseInt(n, 10); save(); }
   function setDivisionRest(b)      { state.divisionRest = !!b; save(); }
   function setGeometriTypes(arr)   { state.geometriTypes = [...arr]; save(); }
   function setMultDivMode(arr)     { state.multDivMode = [...arr]; save(); }
@@ -109,9 +109,9 @@ const Settings = (() => {
   return {
     get,
     getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning,
-    isBildstod, isBildstodInstant, getGeometriTypes, getAddSubMode, getAddSubVaxling,
+    isBildstod, getBildstodDelay, getGeometriTypes, getAddSubMode, getAddSubVaxling,
     setGrade, setAreas, setExtraEnabled, setExtraType, setExtraDelay, setProblemlosning,
-    setBildstod, setBildstodInstant, setDivisionRest, setGeometriTypes,
+    setBildstod, setBildstodDelay, setDivisionRest, setGeometriTypes,
     setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setFlersteg,
     setGradeSelected, setMultipleProblems, setMultipleCount,
     getKlockaDisplayMode, setKlockaDisplayMode,

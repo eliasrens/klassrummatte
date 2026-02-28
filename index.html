@@ -230,14 +230,14 @@
         <span>Bildstöd<br><small>Prickar/figurer som visuellt stöd</small></span>
       </label>
       <div id="bildstod-options" class="hidden">
-        <label class="check-label">
-          <input type="radio" name="bildstod-timing" value="instant">
-          <span>Visa direkt</span>
-        </label>
-        <label class="check-label">
-          <input type="radio" name="bildstod-timing" value="delayed" checked>
-          <span>Visa efter 10 sek</span>
-        </label>
+        <div class="specific-tables-label">Visa bildstöd:</div>
+        <select id="bildstod-delay-select">
+          <option value="0">Direkt</option>
+          <option value="5">Efter 5 sekunder</option>
+          <option value="10" selected>Efter 10 sekunder</option>
+          <option value="20">Efter 20 sekunder</option>
+          <option value="30">Efter 30 sekunder</option>
+        </select>
       </div>
     </section>
 
