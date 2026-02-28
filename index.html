@@ -22,8 +22,8 @@
       <button id="clear-areas-btn" class="clear-areas-btn" title="Återställer alla inställningar utom vald klass">Återställ allt</button>
     </div>
 
-    <!-- ── GRUNDINSTÄLLNINGAR ─────────────────────────── -->
-    <div class="menu-group-label" id="grundinstallningar-group-label">Grundinställningar</div>
+    <!-- ── LEKTIONSINSTÄLLNINGAR ──────────────────────── -->
+    <div class="menu-group-label" id="grundinstallningar-group-label">Lektionsinställningar</div>
 
     <section class="menu-section">
       <label class="section-label" for="grade-select">Årskurs</label>
@@ -35,6 +35,14 @@
         <option value="4">Åk 4</option>
         <option value="5">Åk 5</option>
         <option value="6">Åk 6</option>
+      </select>
+      <label class="section-label" for="session-limit-select" style="margin-top:0.75rem">Uppgifter per genomgång</label>
+      <select id="session-limit-select">
+        <option value="unlimited">Obegränsat</option>
+        <option value="5">5 uppgifter</option>
+        <option value="10">10 uppgifter</option>
+        <option value="15">15 uppgifter</option>
+        <option value="20">20 uppgifter</option>
       </select>
     </section>
 
@@ -277,17 +285,6 @@
         <input type="checkbox" id="discussion-check">
         <span>Diskussionsstöd<br><small>Visar en samtalsfråga vid varje uppgift</small></span>
       </label>
-    </section>
-
-    <section class="menu-section">
-      <div class="specific-tables-label">Uppgifter per genomgång:</div>
-      <select id="session-limit-select">
-        <option value="unlimited">Obegränsat</option>
-        <option value="5">5 uppgifter</option>
-        <option value="10">10 uppgifter</option>
-        <option value="15">15 uppgifter</option>
-        <option value="20">20 uppgifter</option>
-      </select>
     </section>
 
     <!-- ── EXTRAUPPGIFT ───────────────────────────────── -->
