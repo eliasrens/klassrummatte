@@ -17,9 +17,9 @@ const Settings = (() => {
     bildstodDelay: 10,
     divisionRest: false,
     geometriTypes: ['area', 'perimeter'],
-    multDivMode: ['tables-basic'],
-    specificTables: [1,2,3,4,5,6,7,8,9],
-    addSubMode: ['standard'],
+    multDivMode: [],
+    specificTables: [],
+    addSubMode: [],
     addSubVaxling: ['med'],
     flersteg: false,
     multipleProblems: false,
@@ -60,9 +60,9 @@ const Settings = (() => {
       ...state,
       areas:         [...state.areas],
       geometriTypes: [...(state.geometriTypes  || ['area','perimeter'])],
-      multDivMode:   [...(state.multDivMode    || ['tables-basic'])],
+      multDivMode:   [...(state.multDivMode    || [])],
       specificTables:[...(state.specificTables || [1,2,3,4,5,6,7,8,9])],
-      addSubMode:    [...(state.addSubMode     || ['standard'])],
+      addSubMode:    [...(state.addSubMode     || [])],
       addSubVaxling: [...(state.addSubVaxling  || ['med'])],
     };
   }
@@ -74,7 +74,7 @@ const Settings = (() => {
   function isBildstod()        { return state.bildstod; }
   function getBildstodDelay()  { return state.bildstodDelay ?? 10; }
   function getGeometriTypes()  { return [...(state.geometriTypes || ['area','perimeter'])]; }
-  function getAddSubMode()     { return [...(state.addSubMode  || ['standard'])]; }
+  function getAddSubMode()     { return [...(state.addSubMode  || [])]; }
   function getAddSubVaxling()  { return [...(state.addSubVaxling || ['med'])]; }
 
   // Setters – sparar direkt

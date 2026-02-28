@@ -19,7 +19,7 @@ class DivisionPlugin extends BasePlugin {
       return { type: 'addition', a, b, operator: '+', answer: a + b };
     }
 
-    const multDivMode    = settings.multDivMode    || ['tables-basic'];
+    const multDivMode    = settings.multDivMode?.length ? settings.multDivMode : ['tables-basic'];
     const specificTables = settings.specificTables || [1,2,3,4,5,6,7,8,9];
     const withRest       = settings.divisionRest   || false;
     const mode = PluginUtils.pickRandom(multDivMode);

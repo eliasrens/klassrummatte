@@ -9,7 +9,7 @@ class MultiplikationPlugin extends BasePlugin {
   generate(settings) {
     const grade = settings.grade;
     const c = PluginUtils.cfg(grade);
-    const multDivMode    = settings.multDivMode    || ['tables-basic'];
+    const multDivMode    = settings.multDivMode?.length ? settings.multDivMode : ['tables-basic'];
     const specificTables = settings.specificTables || [1,2,3,4,5,6,7,8,9];
     const mode = PluginUtils.pickRandom(multDivMode);
 

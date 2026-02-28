@@ -59,8 +59,11 @@ const Menu = (() => {
   }
 
   function updateSpecificTablesVisibility() {
+    const multDivMode = Settings.get().multDivMode;
     const tablesBasicChecked = document.querySelector('#multdiv-mode-checkboxes input[value="tables-basic"]').checked;
-    document.getElementById('specific-tables-wrap').classList.toggle('hidden', !tablesBasicChecked);
+    // Show specific tables when tables-basic is checked OR nothing is selected (implicit tables-basic)
+    const show = tablesBasicChecked || multDivMode.length === 0;
+    document.getElementById('specific-tables-wrap').classList.toggle('hidden', !show);
   }
 
   function updateAddSubVaxlingVisibility() {
@@ -171,7 +174,7 @@ const Menu = (() => {
     });
 
     document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
-      cb.checked = (s.addSubMode || ['standard']).includes(cb.value);
+      cb.checked = s.addSubMode.includes(cb.value);
     });
 
     document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(cb => {
@@ -180,11 +183,11 @@ const Menu = (() => {
     updateAddSubVaxlingVisibility();
 
     document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
-      cb.checked = (s.multDivMode || ['tables-basic']).includes(cb.value);
+      cb.checked = s.multDivMode.includes(cb.value);
     });
 
     document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(cb => {
-      cb.checked = (s.specificTables || [1,2,3,4,5,6,7,8,9]).includes(parseInt(cb.value, 10));
+      cb.checked = s.specificTables.includes(parseInt(cb.value, 10));
     });
     updateSpecificTablesVisibility();
 
@@ -248,8 +251,7 @@ const Menu = (() => {
     document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
       cb.addEventListener('change', () => {
         const checked = [...document.querySelectorAll('#addsub-mode-checkboxes > label input:checked')].map(c => c.value);
-        if (checked.length > 0) Settings.setAddSubMode(checked);
-        else cb.checked = true;
+        Settings.setAddSubMode(checked);
         updateAddSubVaxlingVisibility();
       });
     });
@@ -265,8 +267,13 @@ const Menu = (() => {
     document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
       cb.addEventListener('change', () => {
         const checked = [...document.querySelectorAll('#multdiv-mode-checkboxes > label input:checked')].map(c => c.value);
-        if (checked.length > 0) Settings.setMultDivMode(checked);
-        else cb.checked = true;
+        Settings.setMultDivMode(checked);
+        if (cb.value === 'tables-basic') {
+          document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(tcb => {
+            tcb.checked = cb.checked;
+          });
+          Settings.setSpecificTables(cb.checked ? [1,2,3,4,5,6,7,8,9] : []);
+        }
         updateSpecificTablesVisibility();
       });
     });

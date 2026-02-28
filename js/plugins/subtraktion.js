@@ -9,7 +9,7 @@ class SubtraktionPlugin extends BasePlugin {
   generate(settings) {
     const grade = settings.grade;
     const c = PluginUtils.cfg(grade);
-    const modes = (settings.addSubMode || ['standard']).filter(m => {
+    const modes = (settings.addSubMode?.length ? settings.addSubMode : ['standard']).filter(m => {
       if (m === 'uppstallning' && grade < 2) return false;
       if (m === 'decimaler'    && grade < 4) return false;
       if (m === 'flersteg') return false; // Ingen flerstegs-subtraktion
