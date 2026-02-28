@@ -201,8 +201,9 @@ const Menu = (() => {
     });
     updateSpecificTablesVisibility();
 
-    document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
-      cb.checked = s.geometriTypes.includes(cb.value);
+    const geometriModeVal = Settings.getGeometriMode();
+    document.querySelectorAll('input[name="geometri-mode"]').forEach(r => {
+      r.checked = r.value === geometriModeVal;
     });
 
     document.getElementById('bildstod-check').checked = s.bildstod;
@@ -299,12 +300,8 @@ const Menu = (() => {
       });
     });
 
-    document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        const checked = [...document.querySelectorAll('#geometri-type-checkboxes input:checked')].map(c => c.value);
-        if (checked.length > 0) Settings.setGeometriTypes(checked);
-        else cb.checked = true;
-      });
+    document.querySelectorAll('input[name="geometri-mode"]').forEach(r => {
+      r.addEventListener('change', () => Settings.setGeometriMode(r.value));
     });
 
     document.getElementById('bildstod-check').addEventListener('change', e => {

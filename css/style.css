@@ -287,6 +287,17 @@ select option {
   transform: rotate(45deg);
 }
 
+.check-label--has-sub span::after {
+  content: '⚙';
+  font-size: 0.6em;
+  margin-left: 0.3em;
+  opacity: 0.2;
+  vertical-align: middle;
+}
+.check-label--has-sub input:checked ~ span::after {
+  opacity: 0.55;
+}
+
 .check-label--mixed {
   margin-top: 0.3rem;
   border-top: 1px solid var(--menu-border);

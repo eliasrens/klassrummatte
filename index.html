@@ -55,10 +55,10 @@
         <div class="area-category">
           <div class="area-category-label">Aritmetik</div>
           <div class="area-grid-2col">
-            <label class="check-label"><input type="checkbox" value="addition"><span>Addition</span></label>
-            <label class="check-label"><input type="checkbox" value="subtraktion"><span>Subtraktion</span></label>
-            <label class="check-label"><input type="checkbox" value="multiplikation"><span>Multiplikation</span></label>
-            <label class="check-label"><input type="checkbox" value="division"><span>Division</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="addition"><span>Addition</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="subtraktion"><span>Subtraktion</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="multiplikation"><span>Multiplikation</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="division"><span>Division</span></label>
           </div>
         </div>
 
@@ -92,7 +92,7 @@
         <div class="area-category">
           <div class="area-category-label">Geometri</div>
           <div class="area-grid-2col">
-            <label class="check-label"><input type="checkbox" value="geometri"><span>Geometri</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="geometri"><span>Geometri</span></label>
             <label class="check-label"><input type="checkbox" value="koordinatsystem"><span>Koordinatsystem <small>(Åk 4+)</small></span></label>
             <label class="check-label"><input type="checkbox" value="symmetri"><span>Symmetri <small>(Åk 1–5)</small></span></label>
           </div>
@@ -101,7 +101,7 @@
         <div class="area-category">
           <div class="area-category-label">Mått &amp; tid</div>
           <div class="area-grid-2col">
-            <label class="check-label"><input type="checkbox" value="klocka"><span>Klocka</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="klocka"><span>Klocka</span></label>
             <label class="check-label"><input type="checkbox" value="matt-langd"><span>Mått – längd</span></label>
             <label class="check-label"><input type="checkbox" value="matt-volym"><span>Mått – volym</span></label>
             <label class="check-label"><input type="checkbox" value="matt-vikt"><span>Mått – vikt</span></label>
@@ -118,7 +118,7 @@
           </div>
         </div>
 
-        <label class="check-label check-label--mixed">
+        <label class="check-label check-label--mixed check-label--has-sub">
           <input type="checkbox" value="blandad">
           <span>Blandad repetition</span>
         </label>
@@ -201,14 +201,18 @@
     <div class="menu-group-label" id="geometri-group-label">Geometri – frågetyp</div>
 
     <section class="menu-section" id="geometri-section">
-      <div id="geometri-type-checkboxes">
+      <div id="geometri-type-radios">
         <label class="check-label">
-          <input type="checkbox" value="area" checked>
-          <span>Area</span>
+          <input type="radio" name="geometri-mode" value="mixed">
+          <span>Blandat <small>(area &amp; omkrets)</small></span>
         </label>
         <label class="check-label">
-          <input type="checkbox" value="perimeter" checked>
-          <span>Omkrets</span>
+          <input type="radio" name="geometri-mode" value="area">
+          <span>Bara area</span>
+        </label>
+        <label class="check-label">
+          <input type="radio" name="geometri-mode" value="perimeter">
+          <span>Bara omkrets</span>
         </label>
       </div>
     </section>

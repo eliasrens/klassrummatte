@@ -55,7 +55,8 @@ class GeometriPlugin extends BasePlugin {
     }
 
     const maxSide = grade <= 2 ? 5 : grade <= 4 ? 20 : 50;
-    const types   = (settings.geometriTypes && settings.geometriTypes.length > 0) ? settings.geometriTypes : ['area', 'perimeter'];
+    const gMode = settings.geometriMode || 'mixed';
+    const types = gMode === 'mixed' ? ['area', 'perimeter'] : [gMode];
 
     // ── Vinkel ────────────────────────────────────────────────
     if (shape === 'angle') {

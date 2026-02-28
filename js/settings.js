@@ -16,7 +16,7 @@ const Settings = (() => {
     bildstod: false,
     bildstodDelay: 10,
     divisionRest: false,
-    geometriTypes: ['area', 'perimeter'],
+    geometriMode: 'mixed',
     multDivMode: [],
     specificTables: [],
     addSubMode: [],
@@ -40,6 +40,13 @@ const Settings = (() => {
         if (saved.grade !== undefined && !saved.gradeSelected) {
           state.gradeSelected = true;
         }
+        // Migrate old geometriTypes array → geometriMode string
+        if (saved.geometriTypes && !saved.geometriMode) {
+          const t = saved.geometriTypes;
+          state.geometriMode = (t.includes('area') && t.includes('perimeter')) ? 'mixed'
+                             : t.includes('area') ? 'area'
+                             : 'perimeter';
+        }
       }
     } catch (_) {
       state = { ...DEFAULTS };
@@ -59,7 +66,6 @@ const Settings = (() => {
     return {
       ...state,
       areas:         [...state.areas],
-      geometriTypes: [...(state.geometriTypes  || ['area','perimeter'])],
       multDivMode:   [...(state.multDivMode    || [])],
       specificTables:[...(state.specificTables || [1,2,3,4,5,6,7,8,9])],
       addSubMode:    [...(state.addSubMode     || [])],
@@ -73,7 +79,7 @@ const Settings = (() => {
   function isProblemlosning()  { return state.problemlosning; }
   function isBildstod()        { return state.bildstod; }
   function getBildstodDelay()  { return state.bildstodDelay ?? 10; }
-  function getGeometriTypes()  { return [...(state.geometriTypes || ['area','perimeter'])]; }
+  function getGeometriMode()   { return state.geometriMode || 'mixed'; }
   function getAddSubMode()     { return [...(state.addSubMode  || [])]; }
   function getAddSubVaxling()  { return [...(state.addSubVaxling || ['med'])]; }
 
@@ -87,7 +93,7 @@ const Settings = (() => {
   function setBildstod(b)          { state.bildstod = !!b; save(); }
   function setBildstodDelay(n)     { state.bildstodDelay = parseInt(n, 10); save(); }
   function setDivisionRest(b)      { state.divisionRest = !!b; save(); }
-  function setGeometriTypes(arr)   { state.geometriTypes = [...arr]; save(); }
+  function setGeometriMode(v)      { state.geometriMode = v; save(); }
   function setMultDivMode(arr)     { state.multDivMode = [...arr]; save(); }
   function setSpecificTables(arr)  { state.specificTables = [...arr]; save(); }
   function setAddSubMode(arr)      { state.addSubMode = [...arr]; save(); }
@@ -109,9 +115,9 @@ const Settings = (() => {
   return {
     get,
     getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning,
-    isBildstod, getBildstodDelay, getGeometriTypes, getAddSubMode, getAddSubVaxling,
+    isBildstod, getBildstodDelay, getGeometriMode, getAddSubMode, getAddSubVaxling,
     setGrade, setAreas, setExtraEnabled, setExtraType, setExtraDelay, setProblemlosning,
-    setBildstod, setBildstodDelay, setDivisionRest, setGeometriTypes,
+    setBildstod, setBildstodDelay, setDivisionRest, setGeometriMode,
     setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setFlersteg,
     setGradeSelected, setMultipleProblems, setMultipleCount,
     getKlockaDisplayMode, setKlockaDisplayMode,
