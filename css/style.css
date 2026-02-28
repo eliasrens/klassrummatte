@@ -136,6 +136,12 @@ body.menu-open #settings-menu {
   transform: translateX(0);
 }
 
+.menu-header {
+  display: flex;
+  align-items: baseline;
+  border-bottom: 1px solid var(--menu-border);
+  margin-bottom: 0.5rem;
+}
 #settings-menu h2 {
   font-size: 1rem;
   font-weight: 600;
@@ -143,8 +149,7 @@ body.menu-open #settings-menu {
   text-transform: uppercase;
   color: rgba(255,255,255,0.5);
   padding: 3.5rem 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--menu-border);
-  margin-bottom: 0.5rem;
+  flex: 1;
 }
 
 /* Grupprubrik i menyn */
@@ -847,11 +852,10 @@ body.extra-visible #stage {
 }
 
 .clear-areas-btn {
-  margin-left: auto;
-  margin-right: 0.4rem;
-  padding: 0.25em 0.75em;
-  font-size: 0.78rem;
-  font-weight: 700;
+  margin-right: 0.75rem;
+  padding: 0.15em 0.55em;
+  font-size: 0.72rem;
+  font-weight: 600;
   color: var(--menu-text);
   background: transparent;
   border: 1px solid currentColor;
