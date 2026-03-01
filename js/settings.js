@@ -17,6 +17,7 @@ const Settings = (() => {
     bildstodDelay: 10,
     divisionRest: false,
     geometriMode: 'mixed',
+    geometriExtra: [],
     multDivMode: [],
     specificTables: [],
     addSubMode: [],
@@ -94,6 +95,8 @@ const Settings = (() => {
   function setBildstodDelay(n)     { state.bildstodDelay = parseInt(n, 10); save(); }
   function setDivisionRest(b)      { state.divisionRest = !!b; save(); }
   function setGeometriMode(v)      { state.geometriMode = v; save(); }
+  function getGeometriExtra()      { return [...(state.geometriExtra || [])]; }
+  function setGeometriExtra(arr)   { state.geometriExtra = [...arr]; save(); }
   function setMultDivMode(arr)     { state.multDivMode = [...arr]; save(); }
   function setSpecificTables(arr)  { state.specificTables = [...arr]; save(); }
   function setAddSubMode(arr)      { state.addSubMode = [...arr]; save(); }
@@ -123,5 +126,6 @@ const Settings = (() => {
     getKlockaDisplayMode, setKlockaDisplayMode,
     getSessionLimit, setSessionLimit,
     isDiscussionEnabled, setDiscussionEnabled,
+    getGeometriExtra, setGeometriExtra,
   };
 })();

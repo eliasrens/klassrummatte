@@ -85,6 +85,20 @@ body {
 body.menu-open #menu-toggle {
   border: 1px solid rgba(255, 255, 255, 0.25);
 }
+#menu-toggle.menu-configured::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-3);
+  box-shadow: 0 0 0 2px var(--menu-bg);
+}
+body.menu-open #menu-toggle.menu-configured::after {
+  display: none;
+}
 body.menu-open #menu-toggle .burger-line:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
 }

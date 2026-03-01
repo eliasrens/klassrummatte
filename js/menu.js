@@ -79,6 +79,12 @@ const Menu = (() => {
     document.getElementById('multdiv-implicit-hint').classList.toggle('hidden', anyChecked);
   }
 
+  function updateMenuConfiguredIndicator() {
+    const s = Settings.get();
+    const isConfigured = s.gradeSelected && s.areas.length > 0;
+    document.getElementById('menu-toggle').classList.toggle('menu-configured', isConfigured);
+  }
+
   function updateProblemlosningCheckbox() {
     const areas   = Settings.getAreas();
     const canHave = areas.some(a => Templates.canWrap(a));
@@ -206,6 +212,13 @@ const Menu = (() => {
       r.checked = r.value === geometriModeVal;
     });
 
+    const gExtra = Settings.getGeometriExtra();
+    document.getElementById('geometri-extra-check').checked = gExtra.length > 0;
+    document.getElementById('geometri-extra-wrap').classList.toggle('hidden', gExtra.length === 0);
+    document.querySelectorAll('#geometri-extra-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = gExtra.includes(cb.value);
+    });
+
     document.getElementById('bildstod-check').checked = s.bildstod;
     document.getElementById('bildstod-options').classList.toggle('hidden', !s.bildstod);
     document.getElementById('bildstod-delay-select').value = s.bildstodDelay ?? 10;
@@ -230,6 +243,7 @@ const Menu = (() => {
     updateConditionalSections();
     updateAreaCheckboxAvailability();
     updateBildstodCheckbox();
+    updateMenuConfiguredIndicator();
   }
 
   // =========================================================
@@ -248,6 +262,7 @@ const Menu = (() => {
       }
       updateAreaCheckboxAvailability();
       updateBildstodCheckbox();
+      updateMenuConfiguredIndicator();
     });
 
     document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
@@ -256,6 +271,7 @@ const Menu = (() => {
         Settings.setAreas(checked);
         updateConditionalSections();
         updateBildstodCheckbox();
+        updateMenuConfiguredIndicator();
       });
     });
 
@@ -302,6 +318,25 @@ const Menu = (() => {
 
     document.querySelectorAll('input[name="geometri-mode"]').forEach(r => {
       r.addEventListener('change', () => Settings.setGeometriMode(r.value));
+    });
+
+    document.getElementById('geometri-extra-check').addEventListener('change', function () {
+      document.getElementById('geometri-extra-wrap').classList.toggle('hidden', !this.checked);
+      if (this.checked) {
+        const all = [...document.querySelectorAll('#geometri-extra-checkboxes input[type=checkbox]')];
+        all.forEach(cb => { cb.checked = true; });
+        Settings.setGeometriExtra(all.map(cb => cb.value));
+      } else {
+        document.querySelectorAll('#geometri-extra-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+        Settings.setGeometriExtra([]);
+      }
+    });
+
+    document.querySelectorAll('#geometri-extra-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#geometri-extra-checkboxes input:checked')].map(c => c.value);
+        Settings.setGeometriExtra(checked);
+      });
     });
 
     document.getElementById('bildstod-check').addEventListener('change', e => {
@@ -379,6 +414,11 @@ const Menu = (() => {
       document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setSpecificTables([]);
 
+      document.getElementById('geometri-extra-check').checked = false;
+      document.getElementById('geometri-extra-wrap').classList.add('hidden');
+      document.querySelectorAll('#geometri-extra-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setGeometriExtra([]);
+
       document.getElementById('problemlosning-check').checked = false;
       Settings.setProblemlosning(false);
       document.getElementById('flersteg-wrap').classList.add('hidden');
@@ -405,6 +445,7 @@ const Menu = (() => {
       updateAddSubImplicitHint();
       updateMultDivImplicitHint();
       updateBildstodCheckbox();
+      updateMenuConfiguredIndicator();
     });
   }
 
