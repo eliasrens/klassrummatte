@@ -79,6 +79,7 @@ const Problems = (() => {
       case 'uppstallning-add':   return PluginUtils.genUppstallning('add', c);
       case 'uppstallning-sub':   return PluginUtils.genUppstallning('sub', c);
       case 'uppstallning-mult':  return PluginUtils.genUppstallning('mult', c);
+      case 'uppstallning-div':   return PluginUtils.genUppstallning('div', c);
       case 'geometri-area':      return PluginManager.get('geometri').generate(settings, 'area');
       case 'geometri-perimeter': return PluginManager.get('geometri').generate(settings, 'perimeter');
       case 'klocka':             return PluginManager.get('klocka').generate(settings);

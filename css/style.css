@@ -548,7 +548,7 @@ body.extra-visible #stage {
 
 /* === Uppställning === */
 .uppstallning {
-  font-family: 'Courier New', 'Lucida Console', monospace;
+  font-family: 'Lucida Console', 'Lucida Sans Typewriter', 'Courier New', monospace;
   display: inline-flex;
   flex-direction: column;
   align-items: flex-end;
@@ -577,6 +577,7 @@ body.extra-visible #stage {
 
 .uppstallning-answer {
   opacity: 0; /* Svaret är dolt tills "Visa svar" klickas */
+  color: var(--accent);
   transition: opacity 0.3s ease;
 }
 
@@ -611,6 +612,11 @@ body.extra-visible #stage {
   font-weight: 700;
   text-align: center;
 }
+
+/* Klocka i flerfrågesläget */
+.problem-cell .clock-svg      { width: clamp(101px, 16vw, 158px); height: clamp(101px, 16vw, 158px); }
+.problem-cell .clock-question { font-size: clamp(1.15rem, 2.3vw, 1.58rem); }
+.problem-cell .clock-container { gap: 0.3rem; }
 
 /* Extra-klocka (mindre) */
 #extra-display .clock-svg {
@@ -1204,6 +1210,12 @@ body.extra-visible .session-counter {
   padding-top:    clamp(2.5rem, 6vh, 7rem);
   padding-bottom: clamp(2.5rem, 6vh, 7rem);
 }
+/* Vänsterkolumn: stort högerpadding → innehållet trycks bort från linjen */
+.problems-grid--4 .problem-cell:nth-child(odd)  { padding-left: clamp(2rem, 3vw, 3rem); padding-right: clamp(5rem, 8vw, 9rem); }
+/* Högerkolumn: stort vänsterpadding → innehållet trycks bort från linjen */
+.problems-grid--4 .problem-cell:nth-child(even) { padding-left: clamp(5rem, 8vw, 9rem); padding-right: clamp(2rem, 3vw, 3rem); }
+/* Answer-box i flerfrågesläget: håll den inuti sin cell */
+.problem-cell .answer-box { top: auto; bottom: 0.5rem; }
 
 /* 3-col: prevent arithmetic expression wrapping */
 .problems-grid--3 .problem-cell > span { white-space: nowrap; }

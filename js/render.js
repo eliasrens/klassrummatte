@@ -83,6 +83,20 @@ const Renderer = (() => {
   function renderExtraProblem(problem, container) {
     container.innerHTML = '';
     if (!problem) return;
+    if (problem.type === 'uppstallning-div') {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:inline-flex;align-items:center;gap:0.4em;';
+      wrap.appendChild(PluginUtils.buildFractionEl(problem.a, problem.b));
+      const eq = document.createElement('span');
+      eq.textContent = '\u00a0=\u00a0';
+      wrap.appendChild(eq);
+      const ans = document.createElement('span');
+      ans.className = 'uppstallning-answer';
+      ans.textContent = String(problem.answer);
+      wrap.appendChild(ans);
+      container.appendChild(wrap);
+      return;
+    }
     if (problem.type.startsWith('uppstallning')) {
       PluginUtils.renderUppstallning(problem, container);
       return;

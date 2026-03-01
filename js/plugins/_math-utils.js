@@ -155,6 +155,12 @@ const PluginMathUtils = (() => {
       const b = randInt(minVal, a - minVal > 0 ? a - minVal : a);
       return { type: 'uppstallning-sub', a, b, operator: '−', answer: a - b };
     }
+    if (subtype === 'div') {
+      const b      = randInt(2, 9);
+      const answer = randInt(2, Math.min(99, Math.floor(maxVal / b)));
+      const a      = b * answer;
+      return { type: 'uppstallning-div', a, b, operator: '÷', answer };
+    }
     const a = randInt(11, Math.min(99, maxVal));
     const b = randInt(2, 9);
     return { type: 'uppstallning-mult', a, b, operator: '·', answer: a * b };

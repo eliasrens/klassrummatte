@@ -317,6 +317,11 @@ const Menu = (() => {
       cb.addEventListener('change', () => {
         const checked = [...document.querySelectorAll('#addsub-mode-checkboxes > label input:checked')].map(c => c.value);
         Settings.setAddSubMode(checked);
+        // När uppstallning bockas i: markera båda växlingsalternativen automatiskt
+        if (cb.value === 'uppstallning' && cb.checked) {
+          document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(v => { v.checked = true; });
+          Settings.setAddSubVaxling(['med', 'utan']);
+        }
         updateAddSubVaxlingVisibility();
         updateAddSubImplicitHint();
       });
@@ -434,6 +439,9 @@ const Menu = (() => {
 
       document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setAddSubMode([]);
+
+      document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = cb.value === 'med'; });
+      Settings.setAddSubVaxling(['med']);
 
       document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setMultDivMode([]);
