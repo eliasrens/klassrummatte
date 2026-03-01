@@ -143,7 +143,8 @@ const Menu = (() => {
     const showMultDiv  = areas.some(a => a === 'multiplikation' || a === 'division');
     const showGeometri = areas.includes('geometri');
     const showDivRest  = areas.includes('division');
-    const showKlocka   = areas.some(a => a === 'klocka');
+    const showKlocka    = areas.some(a => a === 'klocka');
+    const showPrioritet = areas.includes('prioritet');
 
     function setSection(labelId, sectionId, show) {
       const lbl = document.getElementById(labelId);
@@ -160,7 +161,8 @@ const Menu = (() => {
     setSection('addsub-group-label',  'addsub-section',  showAddSub);
     setSection('multdiv-group-label',  'multdiv-section',  showMultDiv);
     setSection('geometri-group-label', 'geometri-section', showGeometri);
-    setSection('klocka-group-label',   'klocka-section',   showKlocka);
+    setSection('klocka-group-label',     'klocka-section',     showKlocka);
+    setSection('prioritet-group-label',  'prioritet-section',  showPrioritet);
     document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
     updateProblemlosningCheckbox();
   }
@@ -236,6 +238,10 @@ const Menu = (() => {
       cb.checked = (s.addSubVaxling || ['med']).includes(cb.value);
     });
     updateAddSubVaxlingVisibility();
+
+    document.querySelectorAll('#prioritet-ops-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = (s.prioritetOps || ['mult', 'div']).includes(cb.value);
+    });
 
     document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
       cb.checked = s.multDivMode.includes(cb.value);
@@ -332,6 +338,14 @@ const Menu = (() => {
         const checked = [...document.querySelectorAll('#addsub-vaxling-checkboxes input:checked')].map(c => c.value);
         if (checked.length > 0) Settings.setAddSubVaxling(checked);
         else cb.checked = true;
+      });
+    });
+
+    document.querySelectorAll('#prioritet-ops-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#prioritet-ops-checkboxes input:checked')].map(c => c.value);
+        if (checked.length > 0) Settings.setPrioritetOps(checked);
+        else cb.checked = true; // minst ett måste vara valt
       });
     });
 
@@ -442,6 +456,9 @@ const Menu = (() => {
 
       document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = cb.value === 'med'; });
       Settings.setAddSubVaxling(['med']);
+
+      document.querySelectorAll('#prioritet-ops-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = true; });
+      Settings.setPrioritetOps(['mult', 'div']);
 
       document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setMultDivMode([]);
