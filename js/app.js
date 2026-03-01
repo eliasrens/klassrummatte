@@ -49,6 +49,22 @@ const App = (() => {
       document.getElementById('menu-overlay')
     );
 
+    // Helskärmsknapp
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    });
+    document.addEventListener('fullscreenchange', () => {
+      const isFs = !!document.fullscreenElement;
+      fullscreenBtn.classList.toggle('is-fullscreen', isFs);
+      fullscreenBtn.setAttribute('aria-label', isFs ? 'Avsluta helskärm' : 'Helskärmsläge');
+      fullscreenBtn.setAttribute('title',      isFs ? 'Avsluta helskärm' : 'Helskärmsläge');
+    });
+
     bindStageEvents();
 
     showAnswerBtn.addEventListener('click', e => {

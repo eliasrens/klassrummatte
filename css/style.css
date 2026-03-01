@@ -110,6 +110,44 @@ body.menu-open #menu-toggle .burger-line:nth-child(3) {
   transform: translateY(-7px) rotate(-45deg);
 }
 
+/* === Helskärmsknapp === */
+#fullscreen-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 300;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: var(--radius);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--transition), background var(--transition), right var(--transition);
+}
+
+body.extra-visible #fullscreen-btn {
+  right: calc(var(--extra-width) + 1rem);
+}
+
+#fullscreen-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#fullscreen-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.fs-icon-compress { display: none; }
+#fullscreen-btn.is-fullscreen .fs-icon-expand  { display: none; }
+#fullscreen-btn.is-fullscreen .fs-icon-compress { display: block; }
+
 /* === Overlay (bakom meny) === */
 #menu-overlay {
   position: fixed;
@@ -1018,7 +1056,7 @@ body.extra-visible .show-answer-btn {
 .session-counter {
   position: absolute;
   top: 1rem;
-  right: 1.5rem;
+  right: calc(44px + 2rem);
   font-size: clamp(1.2rem, 2.5vw, 1.8rem);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
@@ -1028,7 +1066,7 @@ body.extra-visible .show-answer-btn {
 }
 
 body.extra-visible .session-counter {
-  right: calc(var(--extra-width) + 1.5rem);
+  right: calc(var(--extra-width) + 44px + 2rem);
 }
 
 /* === Diskussionsstöd === */
