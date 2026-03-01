@@ -12,26 +12,30 @@ const Renderer = (() => {
       p.textContent = problem.textTemplate;
       cell.appendChild(p);
 
-      const OPS = { add: '+', sub: '\u2212', mult: '\u00d7' };
+      const OPS = { add: '+', sub: '\u2212', mult: '\u00b7' };
+      const _sp = (cls, txt) => { const e = document.createElement('span'); e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
       const stepsDiv = document.createElement('div');
       stepsDiv.className = 'flersteg-steps';
 
       // Steg 1: a [op1] b = [intermediate – dolt]
       const step1 = document.createElement('div');
       step1.className = 'flersteg-step';
-      step1.innerHTML =
-        `<span class="flersteg-label">Steg\u00a01:</span>` +
-        `<span class="flersteg-op-str">${problem.a}\u00a0${OPS[problem.op1]}\u00a0${problem.b}\u00a0=\u00a0</span>` +
-        `<span class="answer-value answer-hidden flersteg-inter">${problem.intermediate}</span>`;
+      step1.appendChild(_sp('flersteg-label', 'Steg\u00a01:'));
+      if (problem.op1 === 'div') {
+        step1.appendChild(PluginUtils.buildFractionEl(problem.a, problem.b));
+        step1.appendChild(_sp('flersteg-op-str', '\u00a0=\u00a0'));
+      } else {
+        step1.appendChild(_sp('flersteg-op-str', `${problem.a}\u00a0${OPS[problem.op1]}\u00a0${problem.b}\u00a0=\u00a0`));
+      }
+      step1.appendChild(_sp('answer-value answer-hidden flersteg-inter', String(problem.intermediate)));
 
       // Steg 2: [intermediate – dolt] [op2] c = [svar – dolt]
       const step2 = document.createElement('div');
       step2.className = 'flersteg-step';
-      step2.innerHTML =
-        `<span class="flersteg-label">Steg\u00a02:</span>` +
-        `<span class="answer-value answer-hidden flersteg-inter-copy">${problem.intermediate}</span>` +
-        `<span class="flersteg-op-str">\u00a0${OPS[problem.op2]}\u00a0${problem.c}\u00a0=\u00a0</span>` +
-        `<span class="answer-value answer-hidden flersteg-final">${problem.answer}</span>`;
+      step2.appendChild(_sp('flersteg-label', 'Steg\u00a02:'));
+      step2.appendChild(_sp('answer-value answer-hidden flersteg-inter-copy', String(problem.intermediate)));
+      step2.appendChild(_sp('flersteg-op-str', `\u00a0${OPS[problem.op2]}\u00a0${problem.c}\u00a0=\u00a0`));
+      step2.appendChild(_sp('answer-value answer-hidden flersteg-final', String(problem.answer)));
 
       stepsDiv.appendChild(step1);
       stepsDiv.appendChild(step2);

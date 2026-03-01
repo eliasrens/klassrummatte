@@ -64,7 +64,7 @@ class NegativaTalPlugin extends BasePlugin {
       const dirText = problem.dir === 'stiger'
         ? `${problem.ctx} ${problem.start}°C och temperaturen stiger med ${problem.change} grader.`
         : `${problem.ctx} ${problem.start}°C och temperaturen sjunker med ${problem.change} grader.`;
-      p.textContent = dirText + ' Vad är temperaturen nu?';
+      p.innerHTML = dirText + '<br>Vad är temperaturen nu?';
       container.appendChild(p);
 
     } else {

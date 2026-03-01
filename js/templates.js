@@ -334,6 +334,30 @@ const Templates = (() => {
     return { op1: 'mult', op2: 'sub', a, b, c, intermediate: total, answer: total - c, textTemplate: tmpl() };
   }
 
+  function genDivAdd(max, names, obj) {
+    const divisor  = ri(2, Math.min(5, Math.max(2, max >> 2)));
+    const quotient = ri(2, Math.min(9, Math.max(2, (max / divisor) | 0)));
+    const dividend = divisor * quotient;
+    const c = ri(1, Math.max(1, Math.min(10, max >> 2)));
+    const tmpl = pickRandom([
+      () => `${n(dividend, obj)} delas lika i ${divisor} högar. Sedan läggs ${n(c, obj)} till i en hög. Hur många ${obj.svPlural} är det i den högen nu?`,
+      () => `${names[0]} delar ${n(dividend, obj)} lika på ${divisor} tallrikar. ${names[1]} lägger sedan ${n(c, obj)} till på en tallrik. Hur många ${obj.svPlural} finns på den tallriken?`,
+    ]);
+    return { op1: 'div', op2: 'add', a: dividend, b: divisor, c, intermediate: quotient, answer: quotient + c, textTemplate: tmpl() };
+  }
+
+  function genDivSub(max, names, obj) {
+    const divisor  = ri(2, Math.min(5, Math.max(2, max >> 2)));
+    const quotient = ri(3, Math.min(9, Math.max(3, (max / divisor) | 0)));
+    const dividend = divisor * quotient;
+    const c = ri(1, quotient - 1);
+    const tmpl = pickRandom([
+      () => `${n(dividend, obj)} delas lika i ${divisor} högar. ${names[0]} tar ${n(c, obj)} från en hög. Hur många ${obj.svPlural} är kvar i den högen?`,
+      () => `${names[0]} delar ${n(dividend, obj)} lika på ${divisor} kompisar. En kompis ger sedan bort ${n(c, obj)}. Hur många ${obj.svPlural} har den kompisen kvar?`,
+    ]);
+    return { op1: 'div', op2: 'sub', a: dividend, b: divisor, c, intermediate: quotient, answer: quotient - c, textTemplate: tmpl() };
+  }
+
   // =========================================================
   //  Hjälpfunktioner
   // =========================================================
@@ -465,11 +489,12 @@ const Templates = (() => {
     const hasAdd  = areas.length === 0 || areas.some(a => a === 'addition'       || a === 'blandad');
     const hasSub  = areas.length === 0 || areas.some(a => a === 'subtraktion'    || a === 'blandad');
     const hasMult = areas.length === 0 || areas.some(a => a === 'multiplikation' || a === 'blandad');
+    const hasDiv  = areas.length === 0 || areas.some(a => a === 'division'       || a === 'blandad');
 
     const gens = [];
-    if (hasAdd && hasSub)  { gens.push(() => genAddSub(max, names, obj)); gens.push(() => genSubAdd(max, names, obj)); }
-    if (hasMult && hasAdd) { gens.push(() => genMultAdd(max, names, obj)); }
-    if (hasMult && hasSub) { gens.push(() => genMultSub(max, names, obj)); }
+    if (hasAdd && hasSub) { gens.push(() => genAddSub(max, names, obj)); gens.push(() => genSubAdd(max, names, obj)); }
+    if (hasMult)          { gens.push(() => genMultAdd(max, names, obj)); gens.push(() => genMultSub(max, names, obj)); }
+    if (hasDiv)           { gens.push(() => genDivAdd(max, names, obj));  gens.push(() => genDivSub(max, names, obj)); }
     if (gens.length === 0) gens.push(() => genAddSub(max, names, obj)); // fallback
 
     const result = pickRandom(gens)();
