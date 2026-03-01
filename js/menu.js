@@ -79,6 +79,40 @@ const Menu = (() => {
     document.getElementById('multdiv-implicit-hint').classList.toggle('hidden', anyChecked);
   }
 
+  function updateGeometriImplicitHint() {
+    const anyChecked = document.querySelectorAll('#geometri-type-checkboxes input:checked').length > 0;
+    document.getElementById('geometri-implicit-hint').classList.toggle('hidden', anyChecked);
+  }
+
+  function updateKlockaImplicitHint() {
+    const anyChecked = document.querySelectorAll('#klocka-type-checkboxes input:checked').length > 0;
+    document.getElementById('klocka-implicit-hint').classList.toggle('hidden', anyChecked);
+  }
+
+  function updateAddSubModeAvailability() {
+    const s = Settings.get();
+    const grade = s.grade;
+    const hasAddition = s.areas.includes('addition') || s.areas.includes('blandad');
+
+    const decimalerCb = document.querySelector('#addsub-mode-checkboxes input[value="decimaler"]');
+    const decUnavail  = s.gradeSelected && grade < 4;
+    decimalerCb.disabled = decUnavail;
+    if (decUnavail && decimalerCb.checked) {
+      decimalerCb.checked = false;
+      const checked = [...document.querySelectorAll('#addsub-mode-checkboxes > label input:checked')].map(c => c.value);
+      Settings.setAddSubMode(checked);
+    }
+
+    const flerstegCb    = document.querySelector('#addsub-mode-checkboxes input[value="flersteg"]');
+    const flerstegUnavail = !hasAddition;
+    flerstegCb.disabled = flerstegUnavail;
+    if (flerstegUnavail && flerstegCb.checked) {
+      flerstegCb.checked = false;
+      const checked = [...document.querySelectorAll('#addsub-mode-checkboxes > label input:checked')].map(c => c.value);
+      Settings.setAddSubMode(checked);
+    }
+  }
+
   function updateMenuConfiguredIndicator() {
     const s = Settings.get();
     const isConfigured = s.gradeSelected && s.areas.length > 0;
@@ -191,6 +225,7 @@ const Menu = (() => {
       cb.checked = s.addSubMode.includes(cb.value);
     });
     updateAddSubImplicitHint();
+    updateAddSubModeAvailability();
 
     document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(cb => {
       cb.checked = (s.addSubVaxling || ['med']).includes(cb.value);
@@ -207,25 +242,20 @@ const Menu = (() => {
     });
     updateSpecificTablesVisibility();
 
-    const geometriModeVal = Settings.getGeometriMode();
-    document.querySelectorAll('input[name="geometri-mode"]').forEach(r => {
-      r.checked = r.value === geometriModeVal;
+    const gTypes = Settings.getGeometriTypes();
+    document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = gTypes.includes(cb.value);
     });
-
-    const gExtra = Settings.getGeometriExtra();
-    document.getElementById('geometri-extra-check').checked = gExtra.length > 0;
-    document.getElementById('geometri-extra-wrap').classList.toggle('hidden', gExtra.length === 0);
-    document.querySelectorAll('#geometri-extra-checkboxes input[type=checkbox]').forEach(cb => {
-      cb.checked = gExtra.includes(cb.value);
-    });
+    updateGeometriImplicitHint();
 
     document.getElementById('bildstod-check').checked = s.bildstod;
     document.getElementById('bildstod-options').classList.toggle('hidden', !s.bildstod);
     document.getElementById('bildstod-delay-select').value = s.bildstodDelay ?? 10;
-    const klockaModeVal = Settings.getKlockaDisplayMode();
-    document.querySelectorAll('input[name="klocka-mode"]').forEach(r => {
-      r.checked = r.value === klockaModeVal;
+    const kTypes = Settings.getKlockaTypes();
+    document.querySelectorAll('#klocka-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = kTypes.includes(cb.value);
     });
+    updateKlockaImplicitHint();
 
     document.getElementById('problemlosning-check').checked = s.problemlosning;
     document.getElementById('flersteg-check').checked = s.flersteg || false;
@@ -262,6 +292,7 @@ const Menu = (() => {
       }
       updateAreaCheckboxAvailability();
       updateBildstodCheckbox();
+      updateAddSubModeAvailability();
       updateMenuConfiguredIndicator();
     });
 
@@ -271,6 +302,7 @@ const Menu = (() => {
         Settings.setAreas(checked);
         updateConditionalSections();
         updateBildstodCheckbox();
+        updateAddSubModeAvailability();
         updateMenuConfiguredIndicator();
       });
     });
@@ -316,26 +348,11 @@ const Menu = (() => {
       });
     });
 
-    document.querySelectorAll('input[name="geometri-mode"]').forEach(r => {
-      r.addEventListener('change', () => Settings.setGeometriMode(r.value));
-    });
-
-    document.getElementById('geometri-extra-check').addEventListener('change', function () {
-      document.getElementById('geometri-extra-wrap').classList.toggle('hidden', !this.checked);
-      if (this.checked) {
-        const all = [...document.querySelectorAll('#geometri-extra-checkboxes input[type=checkbox]')];
-        all.forEach(cb => { cb.checked = true; });
-        Settings.setGeometriExtra(all.map(cb => cb.value));
-      } else {
-        document.querySelectorAll('#geometri-extra-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
-        Settings.setGeometriExtra([]);
-      }
-    });
-
-    document.querySelectorAll('#geometri-extra-checkboxes input[type=checkbox]').forEach(cb => {
+    document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
       cb.addEventListener('change', () => {
-        const checked = [...document.querySelectorAll('#geometri-extra-checkboxes input:checked')].map(c => c.value);
-        Settings.setGeometriExtra(checked);
+        const checked = [...document.querySelectorAll('#geometri-type-checkboxes input:checked')].map(c => c.value);
+        Settings.setGeometriTypes(checked);
+        updateGeometriImplicitHint();
       });
     });
 
@@ -348,8 +365,12 @@ const Menu = (() => {
       Settings.setBildstodDelay(e.target.value);
     });
 
-    document.querySelectorAll('input[name="klocka-mode"]').forEach(r => {
-      r.addEventListener('change', () => Settings.setKlockaDisplayMode(r.value));
+    document.querySelectorAll('#klocka-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#klocka-type-checkboxes input:checked')].map(c => c.value);
+        Settings.setKlockaTypes(checked);
+        updateKlockaImplicitHint();
+      });
     });
 
     document.getElementById('problemlosning-check').addEventListener('change', e => {
@@ -414,10 +435,11 @@ const Menu = (() => {
       document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setSpecificTables([]);
 
-      document.getElementById('geometri-extra-check').checked = false;
-      document.getElementById('geometri-extra-wrap').classList.add('hidden');
-      document.querySelectorAll('#geometri-extra-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
-      Settings.setGeometriExtra([]);
+      document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setGeometriTypes([]);
+
+      document.querySelectorAll('#klocka-type-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setKlockaTypes([]);
 
       document.getElementById('problemlosning-check').checked = false;
       Settings.setProblemlosning(false);

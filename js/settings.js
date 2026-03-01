@@ -16,8 +16,7 @@ const Settings = (() => {
     bildstod: false,
     bildstodDelay: 10,
     divisionRest: false,
-    geometriMode: 'mixed',
-    geometriExtra: [],
+    geometriTypes: ['area', 'perimeter'],
     multDivMode: [],
     specificTables: [],
     addSubMode: [],
@@ -25,7 +24,7 @@ const Settings = (() => {
     flersteg: false,
     multipleProblems: false,
     multipleCount: 2,
-    klockaDisplayMode: 'mixed',
+    klockaTypes: ['analog', 'digital'],
     sessionLimit: 'unlimited',
     discussionEnabled: false,
   };
@@ -41,12 +40,19 @@ const Settings = (() => {
         if (saved.grade !== undefined && !saved.gradeSelected) {
           state.gradeSelected = true;
         }
-        // Migrate old geometriTypes array → geometriMode string
-        if (saved.geometriTypes && !saved.geometriMode) {
-          const t = saved.geometriTypes;
-          state.geometriMode = (t.includes('area') && t.includes('perimeter')) ? 'mixed'
-                             : t.includes('area') ? 'area'
-                             : 'perimeter';
+        // Migrate klockaDisplayMode (string) → klockaTypes (array)
+        if (saved.klockaDisplayMode && !Array.isArray(saved.klockaTypes)) {
+          state.klockaTypes = saved.klockaDisplayMode === 'analog'  ? ['analog']
+                            : saved.klockaDisplayMode === 'digital' ? ['digital']
+                            : ['analog', 'digital'];
+        }
+        // Migrate geometriMode (string) + geometriExtra (array) → geometriTypes (array)
+        if (saved.geometriMode && !Array.isArray(saved.geometriTypes)) {
+          const base = saved.geometriMode === 'area' ? ['area']
+                     : saved.geometriMode === 'perimeter' ? ['perimeter']
+                     : ['area', 'perimeter'];
+          const extra = Array.isArray(saved.geometriExtra) ? saved.geometriExtra : [];
+          state.geometriTypes = [...base, ...extra.filter(v => ['kropp','klassificering','vinklar','volym'].includes(v))];
         }
       }
     } catch (_) {
@@ -80,7 +86,7 @@ const Settings = (() => {
   function isProblemlosning()  { return state.problemlosning; }
   function isBildstod()        { return state.bildstod; }
   function getBildstodDelay()  { return state.bildstodDelay ?? 10; }
-  function getGeometriMode()   { return state.geometriMode || 'mixed'; }
+  function getGeometriTypes()  { return [...(state.geometriTypes || ['area', 'perimeter'])]; }
   function getAddSubMode()     { return [...(state.addSubMode  || [])]; }
   function getAddSubVaxling()  { return [...(state.addSubVaxling || ['med'])]; }
 
@@ -94,9 +100,7 @@ const Settings = (() => {
   function setBildstod(b)          { state.bildstod = !!b; save(); }
   function setBildstodDelay(n)     { state.bildstodDelay = parseInt(n, 10); save(); }
   function setDivisionRest(b)      { state.divisionRest = !!b; save(); }
-  function setGeometriMode(v)      { state.geometriMode = v; save(); }
-  function getGeometriExtra()      { return [...(state.geometriExtra || [])]; }
-  function setGeometriExtra(arr)   { state.geometriExtra = [...arr]; save(); }
+  function setGeometriTypes(arr)   { state.geometriTypes = [...arr]; save(); }
   function setMultDivMode(arr)     { state.multDivMode = [...arr]; save(); }
   function setSpecificTables(arr)  { state.specificTables = [...arr]; save(); }
   function setAddSubMode(arr)      { state.addSubMode = [...arr]; save(); }
@@ -105,8 +109,8 @@ const Settings = (() => {
   function setGradeSelected(b)     { state.gradeSelected = !!b; save(); }
   function setMultipleProblems(b)  { state.multipleProblems = !!b; save(); }
   function setMultipleCount(n)         { state.multipleCount = parseInt(n, 10); save(); }
-  function getKlockaDisplayMode()      { return state.klockaDisplayMode || 'mixed'; }
-  function setKlockaDisplayMode(v)     { state.klockaDisplayMode = v; save(); }
+  function getKlockaTypes()            { return [...(state.klockaTypes || ['analog', 'digital'])]; }
+  function setKlockaTypes(arr)         { state.klockaTypes = [...arr]; save(); }
   function getSessionLimit()           { return state.sessionLimit || 'unlimited'; }
   function setSessionLimit(v)          { state.sessionLimit = v; save(); }
   function isDiscussionEnabled()       { return !!state.discussionEnabled; }
@@ -118,14 +122,13 @@ const Settings = (() => {
   return {
     get,
     getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning,
-    isBildstod, getBildstodDelay, getGeometriMode, getAddSubMode, getAddSubVaxling,
+    isBildstod, getBildstodDelay, getGeometriTypes, getAddSubMode, getAddSubVaxling,
     setGrade, setAreas, setExtraEnabled, setExtraType, setExtraDelay, setProblemlosning,
-    setBildstod, setBildstodDelay, setDivisionRest, setGeometriMode,
+    setBildstod, setBildstodDelay, setDivisionRest, setGeometriTypes,
     setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setFlersteg,
     setGradeSelected, setMultipleProblems, setMultipleCount,
-    getKlockaDisplayMode, setKlockaDisplayMode,
+    getKlockaTypes, setKlockaTypes,
     getSessionLimit, setSessionLimit,
     isDiscussionEnabled, setDiscussionEnabled,
-    getGeometriExtra, setGeometriExtra,
   };
 })();

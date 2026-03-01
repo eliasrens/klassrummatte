@@ -201,52 +201,25 @@
     <div class="menu-group-label" id="geometri-group-label">Geometri – frågetyp</div>
 
     <section class="menu-section" id="geometri-section">
-      <div id="geometri-type-radios">
-        <label class="check-label">
-          <input type="radio" name="geometri-mode" value="mixed">
-          <span>Blandat <small>(area &amp; omkrets)</small></span>
-        </label>
-        <label class="check-label">
-          <input type="radio" name="geometri-mode" value="area">
-          <span>Bara area</span>
-        </label>
-        <label class="check-label">
-          <input type="radio" name="geometri-mode" value="perimeter">
-          <span>Bara omkrets</span>
-        </label>
+      <div id="geometri-type-checkboxes">
+        <label class="check-label"><input type="checkbox" value="area"><span>Area</span></label>
+        <label class="check-label"><input type="checkbox" value="perimeter"><span>Omkrets</span></label>
+        <label class="check-label"><input type="checkbox" value="kropp"><span>Namnge kroppar <small>(Åk 3+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="klassificering"><span>Klassificera figurer <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="vinklar"><span>Vinklar <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="volym"><span>Volym <small>(Åk 5+)</small></span></label>
       </div>
-      <label class="check-label check-label--sep">
-        <input type="checkbox" id="geometri-extra-check">
-        <span>Figurer &amp; vinklar</span>
-      </label>
-      <div id="geometri-extra-wrap" class="specific-tables-wrap hidden">
-        <div class="specific-tables-label">Inkludera:</div>
-        <div id="geometri-extra-checkboxes">
-          <label class="check-label"><input type="checkbox" value="kropp"><span>Namnge kroppar</span></label>
-          <label class="check-label"><input type="checkbox" value="klassificering"><span>Klassificera figurer</span></label>
-          <label class="check-label"><input type="checkbox" value="vinklar"><span>Vinklar</span></label>
-          <label class="check-label"><input type="checkbox" value="volym"><span>Volym</span></label>
-        </div>
-      </div>
+      <p id="geometri-implicit-hint" class="implicit-hint hidden">Inget valt — Area och omkrets används</p>
     </section>
 
     <div class="menu-group-label" id="klocka-group-label">Klocka – visningsläge</div>
 
     <section class="menu-section" id="klocka-section">
-      <div id="klocka-mode-radios">
-        <label class="check-label">
-          <input type="radio" name="klocka-mode" value="mixed">
-          <span>Blandat <small>(analogt &amp; digitalt)</small></span>
-        </label>
-        <label class="check-label">
-          <input type="radio" name="klocka-mode" value="analog">
-          <span>Bara analogt</span>
-        </label>
-        <label class="check-label">
-          <input type="radio" name="klocka-mode" value="digital">
-          <span>Bara digitalt</span>
-        </label>
+      <div id="klocka-type-checkboxes">
+        <label class="check-label"><input type="checkbox" value="analog"><span>Analogt</span></label>
+        <label class="check-label"><input type="checkbox" value="digital"><span>Digitalt</span></label>
       </div>
+      <p id="klocka-implicit-hint" class="implicit-hint hidden">Inget valt — Blandat används</p>
     </section>
 
     <!-- ── PEDAGOGISKA VERKTYG ────────────────────────── -->

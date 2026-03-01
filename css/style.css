@@ -1317,6 +1317,10 @@ body.extra-visible .session-counter {
   font-size: clamp(1.8rem, 5vw, 4rem);
   font-weight: 700;
 }
+.negtal-expr + .answer-value {
+  font-size: clamp(1.8rem, 5vw, 4rem);
+  font-weight: 700;
+}
 .negtal-line {
   width: clamp(260px, 55vw, 480px);
   height: auto;

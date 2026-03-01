@@ -17,16 +17,22 @@ class GeometriPlugin extends BasePlugin {
       return { type: 'addition', a, b, operator: '+', answer: a + b };
     }
 
-    const gMode  = settings.geometriMode || 'mixed';
-    const gExtra = settings.geometriExtra || [];
-    const shapePool = ['square', 'rectangle'];
-    if (level === 'with-triangle' || level === 'with-circle') shapePool.push('triangle');
-    if (level === 'with-circle') shapePool.push('circle');
-    if (gExtra.includes('kropp')          && grade >= 3) shapePool.push('kropp');
-    if (gExtra.includes('klassificering') && grade >= 4) shapePool.push('classify');
-    if (gExtra.includes('vinklar')        && grade >= 4) shapePool.push('angle');
-    if (gExtra.includes('vinklar')        && grade >= 5) shapePool.push('angle-sum');
-    if (gExtra.includes('volym')          && grade >= 5) shapePool.push('cuboid');
+    const gTypes = (settings.geometriTypes && settings.geometriTypes.length > 0)
+                 ? settings.geometriTypes : ['area', 'perimeter'];
+    const hasArea      = gTypes.includes('area');
+    const hasPerimeter = gTypes.includes('perimeter');
+    const shapePool = [];
+    if (hasArea || hasPerimeter) {
+      shapePool.push('square', 'rectangle');
+      if (hasArea && (level === 'with-triangle' || level === 'with-circle')) shapePool.push('triangle');
+      if (level === 'with-circle') shapePool.push('circle');
+    }
+    if (gTypes.includes('kropp')          && grade >= 3) shapePool.push('kropp');
+    if (gTypes.includes('klassificering') && grade >= 4) shapePool.push('classify');
+    if (gTypes.includes('vinklar')        && grade >= 4) shapePool.push('angle');
+    if (gTypes.includes('vinklar')        && grade >= 5) shapePool.push('angle-sum');
+    if (gTypes.includes('volym')          && grade >= 5) shapePool.push('cuboid');
+    if (shapePool.length === 0) shapePool.push('square', 'rectangle'); // säkerhetsfallback
 
     const shape   = PluginUtils.pickRandom(shapePool);
 
@@ -57,7 +63,7 @@ class GeometriPlugin extends BasePlugin {
     }
 
     const maxSide = grade <= 2 ? 5 : grade <= 4 ? 20 : 50;
-    const types = gMode === 'mixed' ? ['area', 'perimeter'] : [gMode];
+    const types = (hasArea && hasPerimeter) ? ['area', 'perimeter'] : hasArea ? ['area'] : ['perimeter'];
 
     // ── Vinkel ────────────────────────────────────────────────
     if (shape === 'angle') {
