@@ -486,10 +486,10 @@ const Templates = (() => {
     const names = [name1, name2];
 
     const areas = settings.areas.length > 0 ? settings.areas : [];
-    const hasAdd  = areas.length === 0 || areas.some(a => a === 'addition'       || a === 'blandad');
-    const hasSub  = areas.length === 0 || areas.some(a => a === 'subtraktion'    || a === 'blandad');
-    const hasMult = areas.length === 0 || areas.some(a => a === 'multiplikation' || a === 'blandad');
-    const hasDiv  = areas.length === 0 || areas.some(a => a === 'division'       || a === 'blandad');
+    const hasAdd  = areas.length === 0 || areas.includes('addition');
+    const hasSub  = areas.length === 0 || areas.includes('subtraktion');
+    const hasMult = areas.length === 0 || areas.includes('multiplikation');
+    const hasDiv  = areas.length === 0 || areas.includes('division');
 
     const gens = [];
     if (hasAdd && hasSub) { gens.push(() => genAddSub(max, names, obj)); gens.push(() => genSubAdd(max, names, obj)); }

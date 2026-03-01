@@ -55,8 +55,7 @@ const Menu = (() => {
         || (a.includes('multiplikation') && g <= 3)
         || a.includes('matt-langd')
         || a.includes('matt-volym')
-        || a.includes('brak')
-        || a.includes('blandad');
+        || a.includes('brak');
   }
 
   function updateSpecificTablesVisibility() {
@@ -67,6 +66,11 @@ const Menu = (() => {
   function updateAddSubVaxlingVisibility() {
     const uppstallningChecked = document.querySelector('#addsub-mode-checkboxes input[value="uppstallning"]').checked;
     document.getElementById('addsub-vaxling-wrap').classList.toggle('hidden', !uppstallningChecked);
+  }
+
+  function updateAreaImplicitHint() {
+    const anyChecked = document.querySelectorAll('#area-checkboxes input:checked').length > 0;
+    document.getElementById('area-implicit-hint').classList.toggle('hidden', anyChecked);
   }
 
   function updateAddSubImplicitHint() {
@@ -92,7 +96,7 @@ const Menu = (() => {
   function updateAddSubModeAvailability() {
     const s = Settings.get();
     const grade = s.grade;
-    const hasAddition = s.areas.includes('addition') || s.areas.includes('blandad');
+    const hasAddition = s.areas.includes('addition');
 
     const decimalerCb = document.querySelector('#addsub-mode-checkboxes input[value="decimaler"]');
     const decUnavail  = s.gradeSelected && grade < 4;
@@ -135,10 +139,10 @@ const Menu = (() => {
 
   function updateConditionalSections() {
     const areas        = Settings.getAreas();
-    const showAddSub   = areas.some(a => a === 'addition'  || a === 'subtraktion' || a === 'blandad');
-    const showMultDiv  = areas.some(a => a === 'multiplikation' || a === 'division' || a === 'blandad');
-    const showGeometri = areas.some(a => a === 'geometri'       || a === 'blandad');
-    const showDivRest  = areas.some(a => a === 'division'       || a === 'blandad');
+    const showAddSub   = areas.some(a => a === 'addition'  || a === 'subtraktion');
+    const showMultDiv  = areas.some(a => a === 'multiplikation' || a === 'division');
+    const showGeometri = areas.includes('geometri');
+    const showDivRest  = areas.includes('division');
     const showKlocka   = areas.some(a => a === 'klocka');
 
     function setSection(labelId, sectionId, show) {
@@ -220,6 +224,7 @@ const Menu = (() => {
     document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
       cb.checked = s.areas.includes(cb.value);
     });
+    updateAreaImplicitHint();
 
     document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
       cb.checked = s.addSubMode.includes(cb.value);
@@ -300,6 +305,7 @@ const Menu = (() => {
       cb.addEventListener('change', () => {
         const checked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value);
         Settings.setAreas(checked);
+        updateAreaImplicitHint();
         updateConditionalSections();
         updateBildstodCheckbox();
         updateAddSubModeAvailability();
@@ -462,6 +468,7 @@ const Menu = (() => {
       Settings.setMultipleProblems(false);
       document.getElementById('multiple-count-wrap').classList.add('hidden');
 
+      updateAreaImplicitHint();
       updateConditionalSections();
       updateSpecificTablesVisibility();
       updateAddSubImplicitHint();

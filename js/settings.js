@@ -46,6 +46,10 @@ const Settings = (() => {
                             : saved.klockaDisplayMode === 'digital' ? ['digital']
                             : ['analog', 'digital'];
         }
+        // Migrate: ta bort 'blandad' från sparade areas
+        if (Array.isArray(state.areas) && state.areas.includes('blandad')) {
+          state.areas = state.areas.filter(a => a !== 'blandad');
+        }
         // Migrate geometriMode (string) + geometriExtra (array) → geometriTypes (array)
         if (saved.geometriMode && !Array.isArray(saved.geometriTypes)) {
           const base = saved.geometriMode === 'area' ? ['area']

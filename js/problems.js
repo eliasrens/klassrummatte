@@ -20,14 +20,7 @@ const Problems = (() => {
     const areas = settings.areas.length > 0 ? settings.areas : fallback;
     let area;
 
-    if (areas.includes('blandad')) {
-      const candidates = areas.filter(a => a !== 'blandad');
-      area = candidates.length > 0
-        ? PluginUtils.pickRandom(candidates)
-        : PluginUtils.pickRandom(['addition', 'subtraktion', 'multiplikation', 'division']);
-    } else {
-      area = PluginUtils.pickRandom(areas);
-    }
+    area = PluginUtils.pickRandom(areas);
 
     // 'oppna-utsagor' är checkbox-värdet i HTML, 'oppna-utsaga' är plugin-typen
     const pluginType = area === 'oppna-utsagor' ? 'oppna-utsaga' : area;
@@ -51,12 +44,6 @@ const Problems = (() => {
     const count = settings.multipleCount || 2;
     const fallback = settings.grade >= 5 ? BASE_GR56 : settings.grade >= 4 ? BASE_GR4 : BASE_GR13;
     let rawAreas = settings.areas.length > 0 ? settings.areas : fallback;
-
-    // Expandera 'blandad' till konkreta områden
-    if (rawAreas.includes('blandad')) {
-      const extra = ['addition', 'subtraktion', 'multiplikation', 'division'];
-      rawAreas = [...new Set([...rawAreas.filter(a => a !== 'blandad'), ...extra])];
-    }
 
     let selectedAreas;
     if (rawAreas.length >= count) {
