@@ -75,7 +75,7 @@ class SannolikhetPlugin extends BasePlugin {
       container.appendChild(_buildKulpase(problem.red, problem.blue));
       const q = document.createElement('p');
       q.className = 'sann-question';
-      q.textContent = `Påsen har ${problem.red} röda och ${problem.blue} blå kulor. Hur sannolikt är det att du drar en röd kula?`;
+      q.innerHTML = `Påsen har ${problem.red} röda och ${problem.blue} blå kulor.<br>Hur sannolikt är det att du drar en röd kula?`;
       container.appendChild(q);
 
     } else if (problem.questionType === 'word') {
@@ -85,7 +85,7 @@ class SannolikhetPlugin extends BasePlugin {
       container.appendChild(q);
       const hint = document.createElement('p');
       hint.className = 'sann-hint';
-      hint.textContent = 'Omöjligt · Osannolikt · Lika sannolikt · Sannolikt · Säkert';
+      hint.innerHTML = 'Omöjligt<br>Osannolikt<br>Lika sannolikt<br>Sannolikt<br>Säkert';
       container.appendChild(hint);
 
     } else {
