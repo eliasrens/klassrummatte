@@ -89,14 +89,26 @@ const App = (() => {
       if (currentExtraProblem.type.startsWith('uppstallning')) {
         const row = extraDisplay.querySelector('.uppstallning-answer');
         if (row) row.classList.add('shown');
+        extraAnswerBtn.disabled    = true;
+        extraAnswerBtn.textContent = '✓';
+      } else if (currentExtraProblem.type === 'brak') {
+        const fracStr  = currentExtraProblem.answer;
+        const brakPlug = PluginManager.get('brak');
+        const word     = brakPlug ? brakPlug.getFractionName(fracStr) : null;
+        const ans = document.createElement('p');
+        ans.className   = 'extra-answer-reveal';
+        ans.textContent = word ? `Svar: ${word} (${fracStr})` : `Svar: ${fracStr}`;
+        extraDisplay.appendChild(ans);
+        extraAnswerBtn.disabled    = true;
+        extraAnswerBtn.textContent = '✓';
       } else {
         const ans = document.createElement('p');
         ans.className = 'extra-answer-reveal';
         ans.textContent = `Svar: ${currentExtraProblem.answer}`;
         extraDisplay.appendChild(ans);
+        extraAnswerBtn.disabled    = true;
+        extraAnswerBtn.textContent = '✓';
       }
-      extraAnswerBtn.disabled    = true;
-      extraAnswerBtn.textContent = '✓';
     });
   }
 
@@ -243,6 +255,25 @@ const App = (() => {
     const extra = Problems.generateExtraProblem(settings);
     currentExtraProblem = extra;
     Renderer.renderExtraProblem(extra, extraDisplay);
+
+    // Bildstöd för bråk i extra-panelen (respekterar bildstöd-inställningen)
+    if (settings.bildstod && extra && extra.type === 'brak') {
+      const plugin = PluginManager.get('brak');
+      if (plugin && plugin.hasBildstodSupport(extra, settings)) {
+        const el = plugin.buildBildstod(extra, settings);
+        if (el) {
+          if (!(el instanceof Node) && el.type === 'inject') {
+            el.targets.forEach(({ selector, circle }) => {
+              const host = extraDisplay.querySelector(selector);
+              if (host) { circle.classList.add('brak-circle-anim'); host.prepend(circle); }
+            });
+          } else {
+            extraDisplay.prepend(el);
+          }
+        }
+      }
+    }
+
     extraAnswerBtn.disabled    = false;
     extraAnswerBtn.textContent = 'Visa svar';
     extraPanel.classList.remove('hidden');

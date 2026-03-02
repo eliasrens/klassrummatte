@@ -544,6 +544,7 @@ body.extra-visible #stage {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+  position: relative; /* ankare för .answer-box vid bråk */
 }
 
 /* === Uppställning === */

@@ -83,6 +83,13 @@ const Problems = (() => {
       case 'geometri-area':      return PluginManager.get('geometri').generate(settings, 'area');
       case 'geometri-perimeter': return PluginManager.get('geometri').generate(settings, 'perimeter');
       case 'klocka':             return PluginManager.get('klocka').generate(settings);
+      case 'brak': {
+        // Extra-panelen är smal – undvik 'order' (tar för mycket plats)
+        // 'compare' finns från åk 4 (same-den); lägre årskurser får 'name'
+        const brakLevel = PluginUtils.cfg(settings.grade).fractions;
+        const extraBrakTypes = (!brakLevel || brakLevel === 'intro') ? ['name'] : ['compare'];
+        return PluginManager.get('brak').generate({ ...settings, brakTypes: extraBrakTypes });
+      }
       default:                   return PluginUtils.genUppstallning('add', c);
     }
   }

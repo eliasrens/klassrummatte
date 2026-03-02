@@ -93,6 +93,23 @@ const Menu = (() => {
     document.getElementById('klocka-implicit-hint').classList.toggle('hidden', anyChecked);
   }
 
+  function getBrakPoolForGrade(grade) {
+    const level = PluginUtils.cfg(grade).fractions;
+    if (!level)               return ['name'];
+    if (level === 'intro')    return ['name', 'order-same-den', 'order-diff-den'];
+    if (level === 'same-den') return ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'compare', 'simplify', 'fraction-of-whole'];
+    if (level === 'diff-den') return ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'add-diff-den', 'sub-diff-den', 'compare', 'simplify', 'fraction-of-whole'];
+    return ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'add-diff-den', 'sub-diff-den', 'compare', 'simplify', 'fraction-of-whole', 'to-mixed'];
+  }
+
+  function updateBrakTypeAvailability() {
+    const s = Settings.get();
+    const pool = s.gradeSelected ? getBrakPoolForGrade(s.grade) : null;
+    document.querySelectorAll('#brak-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.disabled = pool ? !pool.includes(cb.value) : false;
+    });
+  }
+
   function updateAddSubModeAvailability() {
     const s = Settings.get();
     const grade = s.grade;
@@ -144,6 +161,7 @@ const Menu = (() => {
     const showGeometri = areas.includes('geometri');
     const showDivRest  = areas.includes('division');
     const showKlocka    = areas.some(a => a === 'klocka');
+    const showBrak      = areas.includes('brak');
     const showPrioritet = areas.includes('prioritet');
 
     function setSection(labelId, sectionId, show) {
@@ -162,8 +180,10 @@ const Menu = (() => {
     setSection('multdiv-group-label',  'multdiv-section',  showMultDiv);
     setSection('geometri-group-label', 'geometri-section', showGeometri);
     setSection('klocka-group-label',     'klocka-section',     showKlocka);
+    setSection('brak-group-label',       'brak-section',       showBrak);
     setSection('prioritet-group-label',  'prioritet-section',  showPrioritet);
     document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
+    updateBrakTypeAvailability();
     updateProblemlosningCheckbox();
   }
 
@@ -243,6 +263,13 @@ const Menu = (() => {
       cb.checked = (s.prioritetOps || ['mult', 'div']).includes(cb.value);
     });
 
+    const brakAll = ['name','order-same-den','order-diff-den','add-same-den','sub-same-den','compare','fraction-of-whole','simplify','add-diff-den','sub-diff-den','to-mixed'];
+    document.querySelectorAll('#brak-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = (s.brakTypes && s.brakTypes.length > 0) ? s.brakTypes.includes(cb.value) : true;
+    });
+    document.getElementById('brak-implicit-hint').classList.toggle('hidden',
+      !(s.brakTypes && s.brakTypes.length > 0 && s.brakTypes.length < brakAll.length));
+
     document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
       cb.checked = s.multDivMode.includes(cb.value);
     });
@@ -304,6 +331,7 @@ const Menu = (() => {
       updateAreaCheckboxAvailability();
       updateBildstodCheckbox();
       updateAddSubModeAvailability();
+      updateBrakTypeAvailability();
       updateMenuConfiguredIndicator();
     });
 
@@ -346,6 +374,17 @@ const Menu = (() => {
         const checked = [...document.querySelectorAll('#prioritet-ops-checkboxes input:checked')].map(c => c.value);
         if (checked.length > 0) Settings.setPrioritetOps(checked);
         else cb.checked = true; // minst ett måste vara valt
+      });
+    });
+
+    const brakAll = ['name','order-same-den','order-diff-den','add-same-den','sub-same-den','compare','fraction-of-whole','simplify','add-diff-den','sub-diff-den','to-mixed'];
+    document.querySelectorAll('#brak-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#brak-type-checkboxes input:not(:disabled):checked')].map(c => c.value);
+        if (checked.length > 0) Settings.setBrakTypes(checked);
+        else cb.checked = true; // minst ett måste vara valt
+        const enabledCount = document.querySelectorAll('#brak-type-checkboxes input:not(:disabled)').length;
+        document.getElementById('brak-implicit-hint').classList.toggle('hidden', checked.length >= enabledCount);
       });
     });
 
@@ -459,6 +498,10 @@ const Menu = (() => {
 
       document.querySelectorAll('#prioritet-ops-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = true; });
       Settings.setPrioritetOps(['mult', 'div']);
+
+      document.querySelectorAll('#brak-type-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = true; });
+      Settings.setBrakTypes([]);
+      document.getElementById('brak-implicit-hint').classList.add('hidden');
 
       document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setMultDivMode([]);

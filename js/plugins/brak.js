@@ -153,29 +153,69 @@ class BrakPlugin extends BasePlugin {
   generate(settings) {
     const level = PluginUtils.cfg(settings.grade).fractions;
 
-    if (!level || level === 'intro') {
-      return this._genName();
-    }
+    // Bygg årsklasslämplig pool
+    let pool;
+    if (!level)                    { pool = ['name']; }
+    else if (level === 'intro')    { pool = ['name', 'order-same-den', 'order-diff-den']; }
+    else if (level === 'same-den') { pool = ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'compare', 'simplify', 'fraction-of-whole']; }
+    else if (level === 'diff-den') { pool = ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'add-diff-den', 'sub-diff-den', 'compare', 'simplify', 'fraction-of-whole']; }
+    else                           { pool = ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'add-diff-den', 'sub-diff-den', 'compare', 'simplify', 'fraction-of-whole', 'to-mixed']; }
 
-    if (level === 'same-den') {
-      const qt = PluginUtils.pickRandom(['add-same-den', 'sub-same-den', 'compare', 'simplify', 'fraction-of-whole']);
-      return this._genByType(qt);
-    }
+    // Filtrera mot lärarens val (tom = alla i poolen)
+    const selected = settings.brakTypes && settings.brakTypes.length > 0 ? settings.brakTypes : pool;
+    const available = pool.filter(t => selected.includes(t));
 
-    if (level === 'diff-den') {
-      const qt = PluginUtils.pickRandom([
-        'add-same-den', 'sub-same-den', 'add-diff-den', 'sub-diff-den',
-        'compare', 'simplify', 'fraction-of-whole',
-      ]);
-      return this._genByType(qt);
-    }
-
-    // 'full' – åk 6: alla typer inklusive blandade tal
-    const qt = PluginUtils.pickRandom([
-      'add-diff-den', 'sub-diff-den', 'compare', 'simplify',
-      'fraction-of-whole', 'to-mixed',
-    ]);
+    const qt = PluginUtils.pickRandom(available.length > 0 ? available : pool);
+    if (qt === 'order-same-den' || qt === 'order-diff-den') return this._genOrder(qt, settings.grade);
     return this._genByType(qt);
+  }
+
+  _genOrder(type, grade) {
+    const count = grade <= 3 ? 3 : grade <= 5 ? 4 : 5;
+    let picked;
+
+    if (type === 'order-same-den') {
+      // Välj en nämnare som ger tillräckligt med unika täljare (den > count)
+      const validDens = [4, 5, 6, 8, 10].filter(d => d > count);
+      const den = PluginUtils.pickRandom(validDens);
+      const numPool = Array.from({ length: den - 1 }, (_, i) => i + 1); // 1..den-1
+      const shuffledNums = [...numPool].sort(() => Math.random() - 0.5);
+      picked = shuffledNums.slice(0, count).map(n => [n, den]);
+    } else {
+      // order-diff-den: blandade nämnare
+      if (grade <= 3) {
+        // Åk 3: relaterade nämnare – ena är multipel av den andra – lättare att jämföra
+        const families = [
+          [[1,2],[1,4],[3,4]],
+          [[1,2],[1,6],[5,6]],
+          [[1,3],[2,3],[1,6],[5,6]],
+          [[1,4],[3,4],[1,8],[3,8],[5,8],[7,8]],
+          [[1,5],[2,5],[3,5],[4,5],[1,10],[3,10],[7,10]],
+        ];
+        const family = PluginUtils.pickRandom(families);
+        picked = [...family].sort(() => Math.random() - 0.5).slice(0, count);
+      } else {
+        const fracPool = grade <= 5
+          ? [[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5],[3,5],[4,5],[1,6],[5,6]]
+          : [[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5],[3,5],[4,5],[1,6],[5,6],[1,8],[3,8],[5,8],[7,8],[1,10],[3,10],[7,10]];
+        picked = [...fracPool].sort(() => Math.random() - 0.5).slice(0, count);
+      }
+    }
+
+    const sorted = [...picked].sort((a, b) => a[0] / a[1] - b[0] / b[1]);
+    // Visa i slumpad ordning – försök undvika redan sorterad
+    let display = [...picked].sort(() => Math.random() - 0.5);
+    let tries = 0;
+    while (tries++ < 8 && display.every((f, i) => f[0] === sorted[i][0] && f[1] === sorted[i][1])) {
+      display = [...picked].sort(() => Math.random() - 0.5);
+    }
+    return {
+      type: 'brak',
+      questionType: type,
+      fractions: display.map(([n, d]) => ({ numerator: n, denominator: d })),
+      sortedFractions: sorted.map(([n, d]) => ({ numerator: n, denominator: d })),
+      answer: sorted.map(([n, d]) => `${n}/${d}`).join(' < '),
+    };
   }
 
   _genByType(qt) {
@@ -397,6 +437,36 @@ class BrakPlugin extends BasePlugin {
       wrap.appendChild(expr);
       container.appendChild(wrap);
       return;
+
+    } else if (qt === 'order-same-den' || qt === 'order-diff-den') {
+      const wrap = document.createElement('div');
+      wrap.className = 'brak-question-wrap';
+      // Frågetexten ligger UNDER bråkraden – annars kolliderar bildstöd-cirklarna
+      const row = document.createElement('div');
+      row.className = 'brak-compare-row';
+      problem.fractions.forEach((frac, i) => {
+        row.appendChild(_hostWrap(i, PluginUtils.buildFractionEl(frac.numerator, frac.denominator)));
+      });
+      const q = document.createElement('p');
+      q.className = 'brak-subtext';
+      q.textContent = 'Storleksordna:';
+      // Svar: sorterad rad, dold tills läraren klickar "Visa svar"
+      const ansRow = document.createElement('div');
+      ansRow.className = 'brak-compare-row answer-value';
+      ansRow.style.display = 'none';
+      problem.sortedFractions.forEach((frac, i) => {
+        if (i > 0) {
+          const lt = document.createElement('span');
+          lt.textContent = '\u00a0<\u00a0';
+          ansRow.appendChild(lt);
+        }
+        ansRow.appendChild(PluginUtils.buildFractionEl(frac.numerator, frac.denominator));
+      });
+      wrap.appendChild(row);
+      wrap.appendChild(q);
+      wrap.appendChild(ansRow);
+      container.appendChild(wrap);
+      return;
     }
 
     // Inline-typer: name, add/sub-same-den, add/sub-diff-den, fraction-of-whole
@@ -407,6 +477,7 @@ class BrakPlugin extends BasePlugin {
     if (btn) { btn.disabled = true; btn.textContent = '✓'; }
     const el = container.querySelector('.answer-value');
     if (el) {
+      if (el.style.display === 'none') el.style.display = ''; // 'order' uses display:none
       el.classList.remove('answer-hidden');
       container.querySelectorAll('.brak-bildstod-answer').forEach(e => { e.style.display = ''; e.classList.remove('brak-bildstod-answer'); });
       return;
@@ -420,6 +491,8 @@ class BrakPlugin extends BasePlugin {
     container.appendChild(box);
   }
 
+  getFractionName(key) { return FRACTION_NAMES[key] || null; }
+
   isSameProblem(a, b) {
     if (a.questionType !== b.questionType) return false;
     return a.answer === b.answer;
@@ -427,6 +500,7 @@ class BrakPlugin extends BasePlugin {
 
   hasBildstodSupport(problem) {
     if (problem.questionType === 'name')         return problem.denominator <= 10;
+    if (problem.questionType === 'order-same-den' || problem.questionType === 'order-diff-den') return true;
     if (problem.questionType === 'add-same-den') return problem.denominator <= 10;
     if (problem.questionType === 'sub-same-den') return problem.denominator <= 10;
     if (problem.questionType === 'add-diff-den') return problem.a.denominator <= 10 && problem.b.denominator <= 10;
@@ -469,6 +543,15 @@ class BrakPlugin extends BasePlugin {
           { selector: '.brak-frac-host[data-idx="0"]', circle: buildFractionCircle(problem.a.numerator, problem.a.denominator) },
           { selector: '.brak-frac-host[data-idx="1"]', circle: buildFractionCircle(problem.b.numerator, problem.b.denominator) },
         ],
+      };
+    }
+    if (problem.questionType === 'order-same-den' || problem.questionType === 'order-diff-den') {
+      return {
+        type: 'inject',
+        targets: problem.fractions.map((frac, i) => ({
+          selector: `.brak-frac-host[data-idx="${i}"]`,
+          circle: buildFractionCircle(frac.numerator, frac.denominator),
+        })),
       };
     }
     if (problem.questionType === 'simplify') {

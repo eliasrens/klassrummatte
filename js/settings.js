@@ -22,6 +22,7 @@ const Settings = (() => {
     addSubMode: [],
     addSubVaxling: ['med'],
     prioritetOps: ['mult', 'div'],
+    brakTypes: [],
     flersteg: false,
     multipleProblems: false,
     multipleCount: 2,
@@ -83,6 +84,7 @@ const Settings = (() => {
       addSubMode:    [...(state.addSubMode     || [])],
       addSubVaxling: [...(state.addSubVaxling  || ['med'])],
       prioritetOps:  [...(state.prioritetOps   || ['mult', 'div'])],
+      brakTypes:     [...(state.brakTypes      || [])],
     };
   }
   function getGrade()          { return state.grade; }
@@ -112,6 +114,7 @@ const Settings = (() => {
   function setAddSubMode(arr)      { state.addSubMode = [...arr]; save(); }
   function setAddSubVaxling(arr)   { state.addSubVaxling = [...arr]; save(); }
   function setPrioritetOps(arr)    { state.prioritetOps  = [...arr]; save(); }
+  function setBrakTypes(arr)       { state.brakTypes     = [...arr]; save(); }
   function setFlersteg(b)          { state.flersteg = !!b; save(); }
   function setGradeSelected(b)     { state.gradeSelected = !!b; save(); }
   function setMultipleProblems(b)  { state.multipleProblems = !!b; save(); }
@@ -132,7 +135,7 @@ const Settings = (() => {
     isBildstod, getBildstodDelay, getGeometriTypes, getAddSubMode, getAddSubVaxling,
     setGrade, setAreas, setExtraEnabled, setExtraType, setExtraDelay, setProblemlosning,
     setBildstod, setBildstodDelay, setDivisionRest, setGeometriTypes,
-    setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setPrioritetOps, setFlersteg,
+    setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setPrioritetOps, setBrakTypes, setFlersteg,
     setGradeSelected, setMultipleProblems, setMultipleCount,
     getKlockaTypes, setKlockaTypes,
     getSessionLimit, setSessionLimit,

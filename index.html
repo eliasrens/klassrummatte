@@ -230,6 +230,26 @@
       <p id="klocka-implicit-hint" class="implicit-hint hidden">Inget valt — Blandat används</p>
     </section>
 
+    <!-- ── SUBINSTÄLLNINGAR: BRÅK ───────────────────── -->
+    <div class="menu-group-label" id="brak-group-label">Bråk – delmoment</div>
+
+    <section class="menu-section" id="brak-section">
+      <div id="brak-type-checkboxes">
+        <label class="check-label"><input type="checkbox" value="name" checked><span>Namnge bråk</span></label>
+        <label class="check-label"><input type="checkbox" value="order-same-den" checked><span>Storleksordna – lika nämnare <small>(Åk 3+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="order-diff-den" checked><span>Storleksordna – olika nämnare <small>(Åk 3+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="add-same-den" checked><span>Addition – lika nämnare <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="sub-same-den" checked><span>Subtraktion – lika nämnare <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="compare" checked><span>Jämföra bråk <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="fraction-of-whole" checked><span>Bråk av heltal <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="simplify" checked><span>Förenkla bråk <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="add-diff-den" checked><span>Addition – olika nämnare <small>(Åk 5+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="sub-diff-den" checked><span>Subtraktion – olika nämnare <small>(Åk 5+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="to-mixed" checked><span>Blandat tal <small>(Åk 6)</small></span></label>
+      </div>
+      <p id="brak-implicit-hint" class="implicit-hint hidden">Inget valt — Alla delmoment för vald åk används</p>
+    </section>
+
     <!-- ── SUBINSTÄLLNINGAR: PRIORITET ──────────────── -->
     <div class="menu-group-label" id="prioritet-group-label">Prioritetsregler – räknesätt</div>
 
@@ -313,6 +333,7 @@
           <option value="geometri-area">Geometri – area</option>
           <option value="geometri-perimeter">Geometri – omkrets</option>
           <option value="klocka">Klocka</option>
+          <option value="brak">Bråk</option>
         </select>
         <label class="section-label" for="extra-delay-select">Visas efter</label>
         <select id="extra-delay-select">
