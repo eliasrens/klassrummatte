@@ -176,12 +176,15 @@ const Menu = (() => {
       }
     }
 
-    setSection('addsub-group-label',  'addsub-section',  showAddSub);
-    setSection('multdiv-group-label',  'multdiv-section',  showMultDiv);
-    setSection('geometri-group-label', 'geometri-section', showGeometri);
-    setSection('klocka-group-label',     'klocka-section',     showKlocka);
-    setSection('brak-group-label',       'brak-section',       showBrak);
-    setSection('prioritet-group-label',  'prioritet-section',  showPrioritet);
+    const showCustom = areas.includes('custom');
+
+    setSection('addsub-group-label',         'addsub-section',         showAddSub);
+    setSection('multdiv-group-label',        'multdiv-section',        showMultDiv);
+    setSection('geometri-group-label',       'geometri-section',       showGeometri);
+    setSection('klocka-group-label',         'klocka-section',         showKlocka);
+    setSection('brak-group-label',           'brak-section',           showBrak);
+    setSection('prioritet-group-label',      'prioritet-section',      showPrioritet);
+    setSection('custom-problem-group-label', 'custom-problem-section', showCustom);
     document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
     updateBrakTypeAvailability();
     updateProblemlosningCheckbox();

@@ -941,6 +941,66 @@ body.extra-visible #stage {
   color: var(--clr-accent, #e63946);
 }
 
+/* === Egen uppgift – menyinmatning === */
+.custom-field {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.4em 0.5em;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: var(--menu-bg);
+  color: var(--menu-text);
+  border: 1px solid var(--menu-border);
+  border-radius: 4px;
+  margin-bottom: 0.45rem;
+  resize: vertical;
+}
+.custom-field:focus {
+  outline: 2px solid var(--clr-accent, #e63946);
+  outline-offset: 1px;
+}
+.custom-problem-btn {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.45em 0.6em;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  background: var(--clr-accent, #e63946);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.custom-problem-btn:hover  { opacity: 0.85; }
+.custom-problem-btn:active { opacity: 0.7;  }
+.muted-label { font-weight: 400; opacity: 0.65; }
+
+.custom-format-hint {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  margin: 0 0 0.45rem;
+  line-height: 1.4;
+}
+
+.custom-counter {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  margin: 0.3rem 0 0;
+}
+
+/* === Scen: egenskriven uppgift === */
+.custom-problem-text {
+  font-size: clamp(1.6rem, 4.5vw, 3.2rem);
+  text-align: center;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.45;
+}
+
 /* === Implicit standardhint === */
 .implicit-hint {
   margin: 0.35rem 0 0 0;

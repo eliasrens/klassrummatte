@@ -130,6 +130,11 @@
           </div>
         </div>
 
+        <div class="area-category">
+          <div class="area-category-label">Egna uppgifter</div>
+          <label class="check-label"><input type="checkbox" value="custom"><span>Skriv egna uppgifter<br><small>Aktiverar avsnittet nedan</small></span></label>
+        </div>
+
       </div>
       <p id="area-implicit-hint" class="implicit-hint hidden">Inget markerat — blandar automatiskt mellan alla områden</p>
     </section>
@@ -313,6 +318,19 @@
         <input type="checkbox" id="discussion-check">
         <span>Diskussionsstöd<br><small>Visar en samtalsfråga vid varje uppgift</small></span>
       </label>
+    </section>
+
+    <!-- ── EGEN UPPGIFT ──────────────────────────────── -->
+    <div class="menu-group-label hidden" id="custom-problem-group-label">Skriv egna uppgifter</div>
+
+    <section class="menu-section hidden" id="custom-problem-section">
+      <p class="custom-format-hint">Skriv <strong>Svar: X</strong> sist i varje uppgift – nästa rad startar automatiskt en ny. Tomrader ignoreras.</p>
+      <textarea id="custom-problem-textarea" class="custom-field" rows="5" placeholder="T.ex.:
+Vad är 3 × 8?
+Svar: 24
+Vilket är det minsta primtalet?
+Svar: 2"></textarea>
+      <p id="custom-counter" class="custom-counter">0 uppg. sparade</p>
     </section>
 
     <!-- ── EXTRAUPPGIFT ───────────────────────────────── -->
