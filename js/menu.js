@@ -483,6 +483,11 @@ const Menu = (() => {
       Settings.setDiscussionEnabled(e.target.checked);
     });
 
+    document.getElementById('livemode-check').addEventListener('change', e => {
+      if (e.target.checked) { LiveMode.enable(); }
+      else                  { LiveMode.disable(); }
+    });
+
     document.getElementById('session-limit-select').addEventListener('change', e => {
       Settings.setSessionLimit(e.target.value);
       App.resetSession();
@@ -530,6 +535,9 @@ const Menu = (() => {
 
       document.getElementById('discussion-check').checked = false;
       Settings.setDiscussionEnabled(false);
+
+      document.getElementById('livemode-check').checked = false;
+      LiveMode.disable();
 
       document.getElementById('session-limit-select').value = 'unlimited';
       Settings.setSessionLimit('unlimited');

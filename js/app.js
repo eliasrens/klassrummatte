@@ -333,6 +333,9 @@ const App = (() => {
         Bildstod.appendBildstod(currentProblem, settings, problemDisplay, problemVisible);
       }, delay);
     }
+
+    // Live-läge: starta en ny svarssession för denna uppgift
+    if (LiveMode.isActive()) LiveMode.startRound();
   }
 
   function clearExtraTask() {
