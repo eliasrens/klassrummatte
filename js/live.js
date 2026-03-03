@@ -9,10 +9,9 @@ const LiveMode = (() => {
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzbW5lZ3JveHJ0aGJnY3dtcm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1Njk0NTksImV4cCI6MjA4ODE0NTQ1OX0.IAvYwVmbiBBfVf-IWLe70jP-OAqtdQkLRcJVOr0a7X4';
 
   let db             = null;
-  let sessionChannel = null;  // Broadcast-kanal (konstant per lektion)
-  let answerChannel  = null;  // Svarsprenumeration (byts per omgång)
+  let sessionChannel = null;  // Hanterar broadcast + svarsprenumeration
   let sessionCode    = null;  // Konstant under hela lektionen
-  let currentRoundId = null;  // Ändras vid varje ny uppgift
+  let currentRoundId = null;  // Uppdateras vid varje ny uppgift
   let answers        = {};    // { normaliserat svar: antal }
   let active         = false;
 
@@ -92,20 +91,26 @@ const LiveMode = (() => {
       });
     }
 
-    // Öppna broadcast-kanalen som elevernas sidor lyssnar på
+    // En kanal för hela lektionen: broadcast till elever + ta emot svar.
+    // Prenumerationen etableras direkt så att inga svar missas.
     sessionChannel = getDb()
       .channel(`session-${sessionCode}`)
+      .on('postgres_changes', {
+        event:  'INSERT',
+        schema: 'public',
+        table:  'live_answers',
+      }, payload => {
+        // currentRoundId hämtas dynamiskt – alltid rätt omgång
+        if (!currentRoundId) return;
+        if (payload.new.session_code !== sessionCode) return;
+        const ans = (payload.new.answer || '').trim().toLowerCase();
+        if (ans) { answers[ans] = (answers[ans] || 0) + 1; renderAnswers(); }
+      })
       .subscribe();
   }
 
-  async function startRound() {
+  function startRound() {
     if (!active) return;
-
-    // Avsluta föregående svarsprenumeration
-    if (answerChannel) {
-      try { await getDb().removeChannel(answerChannel); } catch (_) {}
-      answerChannel = null;
-    }
 
     currentRoundId = generateCode(8);
     answers        = {};
@@ -113,21 +118,6 @@ const LiveMode = (() => {
 
     // Visa svarsöverlägget
     document.getElementById('live-answers-overlay')?.classList.remove('hidden');
-
-    // Prenumerera på svar – filtreras klient-sidigt på round_id
-    const roundId = currentRoundId;
-    answerChannel = getDb()
-      .channel(`answers-${roundId}`)
-      .on('postgres_changes', {
-        event:  'INSERT',
-        schema: 'public',
-        table:  'live_answers',
-      }, payload => {
-        if (payload.new.round_id !== roundId) return;
-        const ans = (payload.new.answer || '').trim().toLowerCase();
-        if (ans) { answers[ans] = (answers[ans] || 0) + 1; renderAnswers(); }
-      })
-      .subscribe();
 
     // Meddela elevernas sidor om ny omgång
     if (sessionChannel) {
@@ -141,10 +131,6 @@ const LiveMode = (() => {
 
   function disable() {
     active = false;
-    if (answerChannel) {
-      try { getDb().removeChannel(answerChannel); } catch (_) {}
-      answerChannel = null;
-    }
     if (sessionChannel) {
       try { getDb().removeChannel(sessionChannel); } catch (_) {}
       sessionChannel = null;
