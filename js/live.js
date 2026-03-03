@@ -114,15 +114,16 @@ const LiveMode = (() => {
     // Visa svarsöverlägget
     document.getElementById('live-answers-overlay')?.classList.remove('hidden');
 
-    // Prenumerera på svar för just denna omgång
+    // Prenumerera på svar – filtreras klient-sidigt på round_id
+    const roundId = currentRoundId;
     answerChannel = getDb()
-      .channel(`answers-${currentRoundId}`)
+      .channel(`answers-${roundId}`)
       .on('postgres_changes', {
         event:  'INSERT',
         schema: 'public',
         table:  'live_answers',
-        filter: `round_id=eq.${currentRoundId}`,
       }, payload => {
+        if (payload.new.round_id !== roundId) return;
         const ans = (payload.new.answer || '').trim().toLowerCase();
         if (ans) { answers[ans] = (answers[ans] || 0) + 1; renderAnswers(); }
       })
