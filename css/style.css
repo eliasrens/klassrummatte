@@ -1220,10 +1220,10 @@ body.extra-visible .session-counter {
   font-size: 1.1rem;
 }
 
-/* Svar-moln – höger sida, nedertill */
+/* Svar-moln – höger sida, ovanför "Visa svar"-knappen */
 .live-answers-overlay {
   position: absolute;
-  bottom: 1.5rem;
+  bottom: calc(4vh + 3rem);
   right: 1.5rem;
   max-width: 50%;
   text-align: right;
