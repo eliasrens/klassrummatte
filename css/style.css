@@ -1223,8 +1223,8 @@ body.extra-visible .session-counter {
 /* Svar-moln – övre högra hörnet */
 .live-answers-overlay {
   position: absolute;
-  top: 3.75rem;
-  right: 4.5rem;
+  top: 15%;
+  right: 8%;
   max-width: 45%;
   text-align: right;
   z-index: 15;
