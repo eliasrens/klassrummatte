@@ -54,7 +54,8 @@ class DivisionPlugin extends BasePlugin {
       const quotient  = PluginUtils.randInt(1, 9);
       const remainder = PluginUtils.randInt(1, divisor - 1);
       const dividend  = divisor * quotient + remainder;
-      return { type: 'division', a: dividend, b: divisor, operator: '÷', answer: quotient, remainder, hasRemainder: true, bildstodEligible: false, rows: divisor, cols: quotient };
+      const bildstodEligible = (grade || 3) <= 4 && dividend <= 50;
+      return { type: 'division', a: dividend, b: divisor, operator: '÷', answer: quotient, remainder, hasRemainder: true, bildstodEligible, rows: divisor, cols: quotient };
     }
 
     const quotient = PluginUtils.randInt(1, 10);
@@ -73,7 +74,9 @@ class DivisionPlugin extends BasePlugin {
     container.appendChild(eq);
     const ans = document.createElement('span');
     ans.className = 'answer-value answer-hidden';
-    ans.textContent = ` ${problem.answer}`;
+    ans.textContent = problem.hasRemainder
+      ? ` ${problem.answer}, rest ${problem.remainder}`
+      : ` ${problem.answer}`;
     container.appendChild(ans);
   }
 
@@ -86,9 +89,10 @@ class DivisionPlugin extends BasePlugin {
   }
 
   buildBildstod(problem, settings) {
-    if (problem.bildstodEligible && settings.grade <= 4)
-      return PluginUtils.buildDivisionGrid(problem.rows, problem.cols);
-    return null;
+    if (!problem.bildstodEligible || settings.grade > 4) return null;
+    if (problem.hasRemainder)
+      return PluginUtils.buildDivisionGridWithRemainder(problem.rows, problem.cols, problem.remainder);
+    return PluginUtils.buildDivisionGrid(problem.rows, problem.cols);
   }
 }
 
