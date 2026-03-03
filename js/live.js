@@ -9,7 +9,8 @@ const LiveMode = (() => {
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzbW5lZ3JveHJ0aGJnY3dtcm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1Njk0NTksImV4cCI6MjA4ODE0NTQ1OX0.IAvYwVmbiBBfVf-IWLe70jP-OAqtdQkLRcJVOr0a7X4';
 
   let db             = null;
-  let sessionChannel = null;  // Hanterar broadcast + svarsprenumeration
+  let sessionChannel = null;  // Broadcast-kanal (lärare → elever)
+  let answerChannel  = null;  // Svarsprenumeration (postgres_changes)
   let sessionCode    = null;  // Konstant under hela lektionen
   let currentRoundId = null;  // Uppdateras vid varje ny uppgift
   let answers        = {};    // { normaliserat svar: antal }
@@ -91,19 +92,21 @@ const LiveMode = (() => {
       });
     }
 
-    // En kanal för hela lektionen: broadcast till elever + ta emot svar.
-    // Prenumerationen etableras direkt så att inga svar missas.
+    // Broadcast-kanal: läraren skickar new_round till elevernas sidor
     sessionChannel = getDb()
       .channel(`session-${sessionCode}`)
+      .subscribe();
+
+    // Separat kanal för att ta emot svar – utan filter för maximal tillförlitlighet
+    answerChannel = getDb()
+      .channel(`answers-${sessionCode}`)
       .on('postgres_changes', {
         event:  'INSERT',
         schema: 'public',
         table:  'live_answers',
       }, payload => {
-        // currentRoundId hämtas dynamiskt – alltid rätt omgång
         if (!currentRoundId) return;
-        if (payload.new.session_code !== sessionCode) return;
-        const ans = (payload.new.answer || '').trim().toLowerCase();
+        const ans = (payload.new?.answer || '').trim().toLowerCase();
         if (ans) { answers[ans] = (answers[ans] || 0) + 1; renderAnswers(); }
       })
       .subscribe();
@@ -131,6 +134,10 @@ const LiveMode = (() => {
 
   function disable() {
     active = false;
+    if (answerChannel) {
+      try { getDb().removeChannel(answerChannel); } catch (_) {}
+      answerChannel = null;
+    }
     if (sessionChannel) {
       try { getDb().removeChannel(sessionChannel); } catch (_) {}
       sessionChannel = null;
