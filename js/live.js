@@ -92,21 +92,14 @@ const LiveMode = (() => {
       });
     }
 
-    // Broadcast-kanal: läraren skickar new_round till elevernas sidor
+    // En kanal för hela lektionen.
+    // Läraren broadcastar new_round → elever svarar med student_answer → läraren visar molnet.
     sessionChannel = getDb()
       .channel(`session-${sessionCode}`)
-      .subscribe();
-
-    // Separat kanal för att ta emot svar – utan filter för maximal tillförlitlighet
-    answerChannel = getDb()
-      .channel(`answers-${sessionCode}`)
-      .on('postgres_changes', {
-        event:  'INSERT',
-        schema: 'public',
-        table:  'live_answers',
-      }, payload => {
+      .on('broadcast', { event: 'student_answer' }, ({ payload }) => {
         if (!currentRoundId) return;
-        const ans = (payload.new?.answer || '').trim().toLowerCase();
+        if (payload.round_id !== currentRoundId) return;
+        const ans = (payload.answer || '').trim().toLowerCase();
         if (ans) { answers[ans] = (answers[ans] || 0) + 1; renderAnswers(); }
       })
       .subscribe();

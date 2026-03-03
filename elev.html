@@ -181,7 +181,8 @@
 
       // Prenumerera på broadcast-kanalen för sessionen
       const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      db.channel(`session-${code}`)
+      const channel = db.channel(`session-${code}`);
+      channel
         .on('broadcast', { event: 'new_round' }, ({ payload }) => {
           currentRoundId = payload.round_id;
           // Återställ formulär
@@ -220,6 +221,12 @@
           });
 
           if (res.ok || res.status === 201) {
+            // Broadcasta svaret direkt till lärarsidan
+            channel.send({
+              type:    'broadcast',
+              event:   'student_answer',
+              payload: { answer, round_id: currentRoundId },
+            });
             showState('answered-wrap');
           } else {
             throw new Error(`HTTP ${res.status}`);
