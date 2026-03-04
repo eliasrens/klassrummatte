@@ -18,14 +18,12 @@ const Answer = (() => {
       if (stepsDiv) stepsDiv.style.display = '';
       problemDisplay.querySelectorAll('.flersteg-inter, .flersteg-inter-copy, .flersteg-final')
         .forEach(el => el.classList.remove('answer-hidden'));
-      showAnswerBtn.disabled    = true;
-      showAnswerBtn.textContent = '\u2713';
+      if (showAnswerBtn) { showAnswerBtn.disabled = true; showAnswerBtn.textContent = '\u2713'; }
       return;
     }
 
     if (problem.isTextProblem) {
-      showAnswerBtn.disabled    = true;
-      showAnswerBtn.textContent = '✓';
+      if (showAnswerBtn) { showAnswerBtn.disabled = true; showAnswerBtn.textContent = '✓'; }
       PluginUtils.appendAnswerBox(problem.answer, problemDisplay);
       return;
     }
