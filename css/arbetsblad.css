@@ -1,0 +1,561 @@
+/* ============================================================
+   Klassrummatte – Arbetsblad (stencil-verktyg)
+   Print-optimerad A4-layout
+   ============================================================ */
+
+/* === Sida & bakgrund ======================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #d8d6d0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #1a1a2e;
+  min-height: 100vh;
+}
+
+/* === Konfigurations-panel ================================== */
+#config-panel {
+  background: #1a1a2e;
+  color: #f0eeea;
+  padding: 1rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+.config-logo {
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.config-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.45);
+}
+
+.config-group input[type="text"],
+.config-group select {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #f0eeea;
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.config-group input[type="text"]:focus,
+.config-group select:focus {
+  border-color: rgba(255,255,255,0.4);
+}
+
+.config-group select option { background: #1a1a2e; }
+
+.config-areas-toggle {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #f0eeea;
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Område-panel */
+#areas-popup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #252540;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 1rem 2rem;
+  display: none;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  z-index: 200;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+#areas-popup.open { display: flex; }
+
+.areas-category { min-width: 140px; }
+
+.areas-cat-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 0.35rem;
+}
+
+.areas-cat-label + label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  padding: 0.1rem 0;
+}
+
+#areas-popup label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  padding: 0.1rem 0;
+}
+
+#areas-popup input[type="checkbox"] { accent-color: #457b9d; }
+
+/* Knappar */
+.config-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-end;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.btn-generate {
+  background: #457b9d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.btn-generate:hover { background: #5a9bbf; }
+
+.btn-print {
+  background: rgba(255,255,255,0.1);
+  color: #f0eeea;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.btn-print:hover { background: rgba(255,255,255,0.18); }
+
+.config-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+.config-toggle-row input { accent-color: #457b9d; cursor: pointer; }
+
+.print-hint {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.3);
+  align-self: center;
+  max-width: 14rem;
+  line-height: 1.3;
+}
+
+/* Tomt-tillstånd */
+#empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: rgba(26,26,46,0.4);
+}
+
+#empty-state p { font-size: 1.1rem; }
+
+/* === A4-ark ================================================ */
+.ab-sheet-wrap {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.ab-sheet {
+  width: 210mm;
+  background: #fff;
+  box-shadow: 0 4px 40px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Topplinje i accentfärg */
+.ab-sheet::before {
+  content: '';
+  display: block;
+  height: 6px;
+  background: linear-gradient(90deg, #457b9d, #2a9d8f);
+  flex-shrink: 0;
+}
+
+.ab-sheet-inner {
+  padding: 1.4cm 1.6cm 1cm;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === Header =============================================== */
+.ab-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.8cm;
+  padding-bottom: 0.4cm;
+  border-bottom: 1.5px solid #e0deda;
+}
+
+.ab-header-left {}
+
+.ab-brand {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 0.1rem;
+}
+
+.ab-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.2;
+}
+
+.ab-subtitle {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.15rem;
+}
+
+.ab-header-fields {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.ab-field-line {
+  font-size: 0.8rem;
+  color: #374151;
+  border-bottom: 1px solid #9ca3af;
+  padding-bottom: 1px;
+  min-width: 5cm;
+  text-align: right;
+}
+
+.ab-field-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-bottom: 0.05rem;
+}
+
+/* === Problem-grid ========================================= */
+.ab-problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35cm;
+}
+
+.ab-problem-grid--3col {
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.35cm;
+}
+
+/* === Problem-kort ========================================= */
+.ab-problem-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.3cm 0.4cm;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  min-height: 0;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.ab-problem-num {
+  position: absolute;
+  top: 0.2cm;
+  left: 0.2cm;
+  width: 1.2rem;
+  height: 1.2rem;
+  background: #457b9d;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.58rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+/* Problem-innehåll: centrerat i kortet */
+.ab-problem-content {
+  --problem-size: 1.15rem;
+  --problem-size-text: 0.85rem;
+  flex: 1 1 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  overflow: hidden;
+  min-height: 1.2cm;
+  white-space: nowrap;
+}
+
+.ab-problem-content .problem-display,
+.ab-problem-content > div {
+  font-size: inherit;
+}
+
+/* Textuppgifts-kort */
+.ab-problem-card--text {
+  padding: 0.2cm 0.3cm;
+}
+
+.ab-problem-card--text .ab-problem-num {
+  position: static;
+  float: left;
+  margin-right: 0.3rem;
+  margin-top: 0.1rem;
+}
+
+.ab-problem-card--text .ab-problem-content {
+  flex: 1 1 100%;
+  justify-content: flex-start;
+  align-items: flex-start;
+  min-height: 0;
+  white-space: normal;
+  overflow: visible;
+}
+
+/* Svarsdel för textuppgifter: rityta vänster, rutnät höger */
+.ab-answer-space--text {
+  flex-direction: row !important;
+  gap: 0.3cm;
+  align-items: flex-start;
+  margin-top: 0.1cm;
+}
+
+.ab-draw-area {
+  flex: 1;
+}
+
+.ab-text-grid-wrap {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Textuppgift */
+.ab-text-problem {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #374151;
+  text-align: left;
+  white-space: normal;
+}
+
+/* === Svarsutrymme ========================================= */
+.ab-answer-space {
+  flex: 0 0 100%;   /* tvingar till egen rad i kortets flex-wrap */
+  margin-top: 0.2cm;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2cm;
+}
+
+.ab-answer-line {
+  border-bottom: 1.5px dashed #d1d5db;
+  height: 0.55cm;
+}
+
+/* Rutnät (mattebok-stil) – HTML-tabell med synliga cellkanter.
+   Alla rutor är alltid kompletta oavsett bredd. */
+.ab-answer-grid {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.15cm;
+}
+
+.ab-answer-grid td {
+  border: 1px solid #9ca3af;
+  height: 5mm;
+  padding: 0;
+}
+
+/* Litet rutnät för textuppgifter (4×4) */
+.ab-answer-grid--small { width: auto; margin-top: 0; }
+.ab-answer-grid--small td { width: 5mm; height: 5mm; }
+
+/* "Svar: ____" under rutnätet */
+.ab-answer-svar {
+  font-size: 0.75rem;
+  color: #374151;
+  margin-top: 0.1cm;
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.ab-answer-svar-line {
+  flex: 1;
+  border-bottom: 1.5px solid #9ca3af;
+  display: inline-block;
+  min-width: 3cm;
+}
+
+.ab-answer-key {
+  font-size: 0.8rem;
+  color: #e63946;
+  font-weight: 600;
+  margin-top: 0.1cm;
+}
+
+/* Regenerera-knapp */
+.ab-regen-btn {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.3rem;
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: opacity 0.15s;
+  line-height: 1;
+  padding: 0.15rem;
+}
+
+.ab-regen-btn:hover { opacity: 0.9; }
+
+/* === Footer =============================================== */
+.ab-footer {
+  margin-top: 0.6cm;
+  padding-top: 0.3cm;
+  border-top: 1px solid #f0eeea;
+  font-size: 0.65rem;
+  color: #d1d5db;
+  text-align: center;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+/* === Svarsnyckelsida ====================================== */
+.ab-answer-sheet {
+  margin-top: 0;
+  page-break-before: always;
+  break-before: page;
+}
+
+/* === Teman ================================================ */
+
+/* Enkel – bläcksparande, utan färger */
+.ab-sheet.theme-enkel::before { display: none; }
+.ab-sheet.theme-enkel .ab-problem-num {
+  background: transparent;
+  color: #374151;
+  border: 1.5px solid #374151;
+}
+.ab-sheet.theme-enkel .ab-header { border-bottom-color: #9ca3af; }
+
+/* Lekfull – roterande kantfärger */
+.ab-sheet.theme-lekfull::before { display: none; }
+.ab-sheet.theme-lekfull .ab-problem-card { border-radius: 8px; border-width: 0; border-left-width: 5px; }
+.ab-sheet.theme-lekfull .ab-problem-card:nth-child(4n+1) { border-left-color: #457b9d; }
+.ab-sheet.theme-lekfull .ab-problem-card:nth-child(4n+2) { border-left-color: #2a9d8f; }
+.ab-sheet.theme-lekfull .ab-problem-card:nth-child(4n+3) { border-left-color: #e9c46a; }
+.ab-sheet.theme-lekfull .ab-problem-card:nth-child(4n+0) { border-left-color: #e63946; }
+.ab-sheet.theme-lekfull .ab-problem-num { border-radius: 4px; }
+
+/* === Kolumn-varianter ===================================== */
+.ab-problem-grid--2col { grid-template-columns: 1fr 1fr; gap: 0.35cm; }
+.ab-problem-grid--3col { grid-template-columns: 1fr 1fr 1fr; gap: 0.35cm; }
+.ab-problem-grid--4col { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.28cm; }
+.ab-problem-grid--4col .ab-problem-card { padding: 0.25cm 0.3cm; }
+.ab-problem-grid--4col .ab-answer-grid td { height: 4mm; }
+
+/* === Flera sidor ========================================== */
+/* JS skapar en .ab-sheet per sida – denna class ger visuell separation */
+.ab-sheet--next-page { margin-top: 2rem; }
+
+/* === Ram-tema ============================================= */
+.ab-sheet.theme-ram::before { display: none; }
+.ab-sheet.theme-ram .ab-sheet-inner {
+  border: 3px solid #457b9d;
+  border-radius: 8px;
+  padding: 1cm 1.2cm 0.8cm;
+}
+.ab-sheet.theme-ram .ab-header { border-bottom-color: #457b9d; }
+.ab-sheet.theme-ram .ab-problem-num { background: #457b9d; }
+.ab-sheet.theme-ram .ab-footer { border-top-color: #457b9d; color: #457b9d; }
+
+/* === Print ================================================ */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .no-print { display: none !important; }
+
+  body { background: white; margin: 0; padding: 0; }
+
+  .ab-sheet-wrap { padding: 0; display: block; }
+
+  /* Varje .ab-sheet är en hel sida.
+     display: block krävs – Chrome ignorerar break-before: page på flex-containers. */
+  .ab-sheet       { width: 100%; box-shadow: none; display: block; }
+  .ab-sheet-inner { padding: 0; display: block; }
+
+  /* Sida 2 och framåt börjar på ny papperssida */
+  .ab-sheet--next-page { break-before: page; page-break-before: always; margin-top: 0; }
+
+  /* Varje uppgiftskort bryts aldrig mitt i */
+  .ab-problem-card { break-inside: avoid; page-break-inside: avoid; }
+
+  /* Ram-temat i utskrift */
+  .ab-sheet.theme-ram .ab-sheet-inner { border: 3px solid #457b9d; padding: 0.4cm 0.5cm; }
+}
+
+@page { size: A4 portrait; margin: 1cm 1.5cm; }
