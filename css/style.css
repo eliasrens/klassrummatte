@@ -721,6 +721,16 @@ body.extra-visible #stage {
   align-items: center;
 }
 
+.division-grid-row--rest {
+  border-top: 2px dashed rgba(255,255,255,0.3);
+  padding-top: clamp(0.2rem, 0.5vw, 0.4rem);
+  margin-top: clamp(0.1rem, 0.3vw, 0.2rem);
+}
+
+.dot--rest {
+  opacity: 0.6;
+}
+
 /* === Bildstöd – prickar (addition, subtraktion, multiplikation) === */
 .bildstod-dots {
   display: flex;

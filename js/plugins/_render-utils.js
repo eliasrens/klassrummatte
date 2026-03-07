@@ -163,7 +163,7 @@ const PluginRenderUtils = (() => {
     return null;
   }
 
-  function buildDivisionGrid(rows, cols) {
+  function buildDivisionGrid(rows, cols, remainder) {
     const grid = document.createElement('div');
     grid.className = 'division-grid';
     for (let r = 0; r < rows; r++) {
@@ -176,6 +176,18 @@ const PluginRenderUtils = (() => {
         row.appendChild(dot);
       }
       grid.appendChild(row);
+    }
+    // Extra ofullständig rad för rest
+    if (remainder && remainder > 0) {
+      const restRow = document.createElement('div');
+      restRow.className = 'division-grid-row division-grid-row--rest';
+      for (let c = 0; c < remainder; c++) {
+        const dot = document.createElement('span');
+        dot.className = 'dot dot--rest';
+        dot.style.background = DOT_COLOR_GREY;
+        restRow.appendChild(dot);
+      }
+      grid.appendChild(restRow);
     }
     return grid;
   }
