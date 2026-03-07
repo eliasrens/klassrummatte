@@ -49,6 +49,17 @@ const Renderer = (() => {
       p.className = 'text-problem';
       p.textContent = problem.textTemplate;
       cell.appendChild(p);
+      // Klocka och vissa bråk: visa även den vanliga visuella uppgiften (urta, cirkel, rutnät)
+      if (problem.type === 'klocka') {
+        const plugin = PluginManager.get('klocka');
+        if (plugin) plugin.render(problem, cell);
+        return;
+      }
+      if (problem.type === 'brak' && problem.questionType && ['name', 'fraction-of-whole'].includes(problem.questionType)) {
+        const plugin = PluginManager.get('brak');
+        if (plugin) plugin.render(problem, cell);
+        return;
+      }
       return;
     }
     const plugin = PluginManager.get(problem.type);

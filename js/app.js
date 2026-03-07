@@ -32,6 +32,11 @@ const App = (() => {
   let currentExtraProblem  = null;
   let sessionCurrent       = 0;
 
+  // Global hook för livesession (lärarvy + Firebase)
+  window.KlassrumsSession = window.KlassrumsSession || {
+    currentProblem: null,
+  };
+
   // =========================================================
   //  Init
   // =========================================================
@@ -116,7 +121,20 @@ const App = (() => {
   //  Scen-events
   // =========================================================
   function bindStageEvents() {
-    stage.addEventListener('click', handleStageClick);
+    const nextBtn = document.getElementById('next-problem-btn');
+    if (nextBtn) {
+      nextBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        handleStageClick();
+      });
+    }
+    if (clickHint) {
+      clickHint.style.cursor = 'pointer';
+      clickHint.addEventListener('click', e => {
+        e.stopPropagation();
+        handleStageClick();
+      });
+    }
     stage.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleStageClick(); }
     });
@@ -140,6 +158,10 @@ const App = (() => {
       // Starta uttoning
       problemDisplay.classList.remove('visible');
       showAnswerBtn.classList.remove('problem-visible');
+      const sendBtn = document.getElementById('send-to-students-btn');
+      if (sendBtn) sendBtn.classList.remove('problem-visible');
+      const nextBtn = document.getElementById('next-problem-btn');
+      if (nextBtn) nextBtn.classList.remove('problem-visible');
       clearExtraTask();
       clearBildstod();
       problemVisible = false;
@@ -160,6 +182,17 @@ const App = (() => {
     clearExtraTask();
     clearBildstod();
 
+    // Töm tidigare elevsvar på lärarvyn när en ny uppgift startas
+    const submissionsMain = document.getElementById('session-submissions-main');
+    const submissionsList = document.getElementById('session-submissions-list');
+    if (submissionsMain) {
+      submissionsMain.innerHTML = '';
+      submissionsMain.classList.add('hidden');
+    }
+    if (submissionsList) {
+      submissionsList.innerHTML = '';
+    }
+
     const settings = Settings.get();
 
     if (settings.multipleProblems) {
@@ -167,6 +200,7 @@ const App = (() => {
       currentProblems = Problems.generateMultipleProblems(settings);
       currentProblem  = null;
       Renderer.renderMultiple(currentProblems, problemDisplay);
+      window.KlassrumsSession.currentProblem = null;
     } else {
       problemDisplay.classList.remove('multi-mode');
       // Förhindra samma uppgift två gånger i rad
@@ -180,6 +214,7 @@ const App = (() => {
       currentProblem = problem;
       currentProblems = [];
       Renderer.renderProblem(problem, problemDisplay);
+      window.KlassrumsSession.currentProblem = currentProblem;
     }
 
     // Återställ svar-knappen
@@ -190,6 +225,14 @@ const App = (() => {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       problemDisplay.classList.add('visible');
       showAnswerBtn.classList.add('problem-visible');
+      const nextBtn = document.getElementById('next-problem-btn');
+      if (nextBtn) nextBtn.classList.add('problem-visible');
+      const sendBtn = document.getElementById('send-to-students-btn');
+      if (sendBtn && window.KlassrumsSessionTeacher && window.KlassrumsSessionTeacher.hasActiveSession()) {
+        sendBtn.classList.add('problem-visible');
+      } else if (sendBtn) {
+        sendBtn.classList.remove('problem-visible');
+      }
     }));
 
     clickHint.classList.add('hidden-hint');
@@ -217,7 +260,6 @@ const App = (() => {
         Bildstod.appendBildstod(currentProblem, settings, problemDisplay, problemVisible);
       }, delay);
     }
-
   }
 
   function clearExtraTask() {

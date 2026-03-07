@@ -93,6 +93,17 @@ const Menu = (() => {
     document.getElementById('klocka-implicit-hint').classList.toggle('hidden', anyChecked);
   }
 
+  function updateCustomProblemsStatus() {
+    const el = document.getElementById('custom-problems-status');
+    if (!el) return;
+    const list = Settings.getCustomProblems();
+    if (list.length === 0) {
+      el.textContent = '';
+    } else {
+      el.textContent = `${list.length} uppgift${list.length === 1 ? '' : 'er'} importerade.`;
+    }
+  }
+
   function getBrakPoolForGrade(grade) {
     const level = PluginUtils.cfg(grade).fractions;
     if (!level)               return ['name'];
@@ -176,12 +187,12 @@ const Menu = (() => {
       }
     }
 
-    setSection('addsub-group-label',         'addsub-section',         showAddSub);
-    setSection('multdiv-group-label',        'multdiv-section',        showMultDiv);
-    setSection('geometri-group-label',       'geometri-section',       showGeometri);
-    setSection('klocka-group-label',         'klocka-section',         showKlocka);
-    setSection('brak-group-label',           'brak-section',           showBrak);
-    setSection('prioritet-group-label',      'prioritet-section',      showPrioritet);
+    setSection('addsub-group-label',    'addsub-section',    showAddSub);
+    setSection('multdiv-group-label',   'multdiv-section',   showMultDiv);
+    setSection('geometri-group-label',  'geometri-section',  showGeometri);
+    setSection('klocka-group-label',    'klocka-section',    showKlocka);
+    setSection('brak-group-label',      'brak-section',      showBrak);
+    setSection('prioritet-group-label', 'prioritet-section', showPrioritet);
     document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
     updateBrakTypeAvailability();
     updateProblemlosningCheckbox();
@@ -308,6 +319,8 @@ const Menu = (() => {
     document.getElementById('multiple-count-wrap').classList.toggle('hidden', !s.multipleProblems);
     document.getElementById('discussion-check').checked     = s.discussionEnabled || false;
     document.getElementById('session-limit-select').value   = s.sessionLimit || 'unlimited';
+    document.getElementById('custom-problems-check').checked = Settings.isCustomProblemsEnabled();
+    updateCustomProblemsStatus();
     updateConditionalSections();
     updateAreaCheckboxAvailability();
     updateBildstodCheckbox();
@@ -483,6 +496,47 @@ const Menu = (() => {
     document.getElementById('session-limit-select').addEventListener('change', e => {
       Settings.setSessionLimit(e.target.value);
       App.resetSession();
+    });
+
+    document.getElementById('custom-problems-check').addEventListener('change', e => {
+      Settings.setCustomProblemsEnabled(e.target.checked);
+    });
+
+    document.getElementById('custom-download-template-btn').addEventListener('click', () => {
+      CustomProblems.downloadTemplate();
+    });
+
+    document.getElementById('custom-problems-file-input').addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const text = (ev.target && ev.target.result) || '';
+        const result = CustomProblems.importFromCsvText(text);
+        updateCustomProblemsStatus();
+        const statusEl = document.getElementById('custom-problems-status');
+        if (result.success) {
+          statusEl.textContent = `${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade.`;
+        } else {
+          statusEl.textContent = result.error || 'Import misslyckades.';
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
+      e.target.value = '';
+    });
+
+    document.getElementById('custom-import-paste-btn').addEventListener('click', () => {
+      const textarea = document.getElementById('custom-problems-paste');
+      const text = (textarea && textarea.value) || '';
+      const result = CustomProblems.importFromCsvText(text);
+      updateCustomProblemsStatus();
+      const statusEl = document.getElementById('custom-problems-status');
+      if (result.success) {
+        statusEl.textContent = `${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade.`;
+        if (textarea) textarea.value = '';
+      } else {
+        statusEl.textContent = result.error || 'Import misslyckades.';
+      }
     });
 
     document.getElementById('clear-areas-btn').addEventListener('click', e => {

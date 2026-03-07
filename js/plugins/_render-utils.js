@@ -180,45 +180,6 @@ const PluginRenderUtils = (() => {
     return grid;
   }
 
-  function buildDivisionGridWithRemainder(rows, cols, remainder) {
-    const wrap = document.createElement('div');
-    wrap.className = 'division-grid-rest-wrap';
-
-    // Huvudgrid: rows rader × cols prickar per rad
-    const grid = document.createElement('div');
-    grid.className = 'division-grid';
-    for (let r = 0; r < rows; r++) {
-      const row = document.createElement('div');
-      row.className = 'division-grid-row';
-      for (let c = 0; c < cols; c++) {
-        const dot = document.createElement('span');
-        dot.className = 'dot';
-        dot.style.background = CIRCLE_COLORS[r % CIRCLE_COLORS.length];
-        row.appendChild(dot);
-      }
-      grid.appendChild(row);
-    }
-    wrap.appendChild(grid);
-
-    // Streckad separator
-    const sep = document.createElement('div');
-    sep.className = 'division-rest-sep';
-    wrap.appendChild(sep);
-
-    // Restprickar (grå) – centrerade vertikalt
-    const restCol = document.createElement('div');
-    restCol.className = 'division-rest-dots';
-    for (let i = 0; i < remainder; i++) {
-      const dot = document.createElement('span');
-      dot.className = 'dot';
-      dot.style.background = DOT_COLOR_GREY;
-      restCol.appendChild(dot);
-    }
-    wrap.appendChild(restCol);
-
-    return wrap;
-  }
-
   function canBuildMattBildstod(problem) {
     const { from, factor } = problem.conversion;
     return Number.isInteger(from) && from >= 1 && from <= 10 &&
@@ -264,7 +225,7 @@ const PluginRenderUtils = (() => {
     renderArithmetic, renderDecimaler, renderUppstallning, renderMatt,
     CIRCLE_COLORS, DOT_COLOR_A, DOT_COLOR_B, DOT_COLOR_GREY,
     makeDotWrap, addDot,
-    buildArithmeticDots, buildDivisionGrid, buildDivisionGridWithRemainder,
+    buildArithmeticDots, buildDivisionGrid,
     canBuildMattBildstod, buildMattBildstodEl,
   };
 })();

@@ -17,10 +17,29 @@ const Problems = (() => {
     }
 
     const fallback = settings.grade >= 5 ? BASE_GR56 : settings.grade >= 4 ? BASE_GR4 : BASE_GR13;
-    const areas = settings.areas.length > 0 ? settings.areas : fallback;
-    let area;
+    const customList = Settings.getCustomProblems();
+    let areas;
+    if (settings.customProblemsEnabled && customList.length > 0 && settings.areas.length === 0) {
+      // Endast "Egna uppgifter" ikryssat, inga matematikområden – visa bara importerade uppgifter
+      areas = ['egna'];
+    } else {
+      areas = settings.areas.length > 0 ? settings.areas : fallback;
+      if (settings.customProblemsEnabled && customList.length > 0) {
+        areas = [...areas, 'egna'];
+      }
+    }
+    const area = PluginUtils.pickRandom(areas);
 
-    area = PluginUtils.pickRandom(areas);
+    // Egna uppgifter: plocka slumpmässigt från importerad lista
+    if (area === 'egna' && customList.length > 0) {
+      const p = PluginUtils.pickRandom(customList);
+      return {
+        type: 'egna',
+        isTextProblem: true,
+        textTemplate: p.question,
+        answer: p.answer,
+      };
+    }
 
     // 'oppna-utsagor' är checkbox-värdet i HTML, 'oppna-utsaga' är plugin-typen
     const pluginType = area === 'oppna-utsagor' ? 'oppna-utsaga' : area;
@@ -43,7 +62,16 @@ const Problems = (() => {
   function generateMultipleProblems(settings) {
     const count = settings.multipleCount || 2;
     const fallback = settings.grade >= 5 ? BASE_GR56 : settings.grade >= 4 ? BASE_GR4 : BASE_GR13;
-    let rawAreas = settings.areas.length > 0 ? settings.areas : fallback;
+    const customList = Settings.getCustomProblems();
+    let rawAreas;
+    if (settings.customProblemsEnabled && customList.length > 0 && settings.areas.length === 0) {
+      rawAreas = ['egna'];
+    } else {
+      rawAreas = settings.areas.length > 0 ? settings.areas : fallback;
+      if (settings.customProblemsEnabled && customList.length > 0) {
+        rawAreas = [...rawAreas, 'egna'];
+      }
+    }
 
     let selectedAreas;
     if (rawAreas.length >= count) {
@@ -56,6 +84,10 @@ const Problems = (() => {
     }
 
     return selectedAreas.map(area => {
+      if (area === 'egna' && customList.length > 0) {
+        const p = PluginUtils.pickRandom(customList);
+        return { type: 'egna', isTextProblem: true, textTemplate: p.question, answer: p.answer };
+      }
       const pluginType = area === 'oppna-utsagor' ? 'oppna-utsaga' : area;
       const plugin = PluginManager.get(pluginType);
       if (!plugin) return null;

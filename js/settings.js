@@ -4,11 +4,13 @@
 
 const Settings = (() => {
   const STORAGE_KEY = 'klassrummatte-settings';
+  const CUSTOM_PROBLEMS_KEY = 'klassrummatte-custom-problems';
 
   const DEFAULTS = {
     grade: 3,
     gradeSelected: false,
     areas: [],
+    customProblemsEnabled: false,
     problemlosning: false,
     extraEnabled: false,
     extraType: 'uppstallning-add',
@@ -101,6 +103,22 @@ const Settings = (() => {
   // Setters – sparar direkt
   function setGrade(g)             { state.grade = parseInt(g, 10); save(); }
   function setAreas(arr)           { state.areas = [...arr]; save(); }
+  function isCustomProblemsEnabled() { return !!state.customProblemsEnabled; }
+  function setCustomProblemsEnabled(b) { state.customProblemsEnabled = !!b; save(); }
+  function getCustomProblems() {
+    try {
+      const raw = localStorage.getItem(CUSTOM_PROBLEMS_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) {
+      return [];
+    }
+  }
+  function setCustomProblems(arr) {
+    try {
+      localStorage.setItem(CUSTOM_PROBLEMS_KEY, JSON.stringify(Array.isArray(arr) ? arr : []));
+    } catch (_) {}
+  }
   function setExtraEnabled(b)      { state.extraEnabled = !!b; save(); }
   function setExtraType(t)         { state.extraType = t; save(); }
   function setExtraDelay(n)        { state.extraDelay = parseInt(n, 10); save(); }
@@ -125,12 +143,14 @@ const Settings = (() => {
   function setSessionLimit(v)          { state.sessionLimit = v; save(); }
   function isDiscussionEnabled()       { return !!state.discussionEnabled; }
   function setDiscussionEnabled(b)     { state.discussionEnabled = !!b; save(); }
+
   // Initiering
   load();
 
   return {
     get,
     getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning,
+    isCustomProblemsEnabled, setCustomProblemsEnabled, getCustomProblems, setCustomProblems,
     isBildstod, getBildstodDelay, getGeometriTypes, getAddSubMode, getAddSubVaxling,
     setGrade, setAreas, setExtraEnabled, setExtraType, setExtraDelay, setProblemlosning,
     setBildstod, setBildstodDelay, setDivisionRest, setGeometriTypes,

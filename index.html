@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Klassrummatte</title>
   <link rel="stylesheet" href="css/style.css">
+  <!-- Firebase (compat SDK, utan bundler/ES-moduler) -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
 </head>
 <body>
 
@@ -77,7 +83,7 @@
         <div class="area-category">
           <div class="area-category-label">Algebra</div>
           <div class="area-grid-2col">
-            <label class="check-label check-label--has-sub"><input type="checkbox" value="prioritet"><span>Prioritetsregler</span></label>
+            <label class="check-label"><input type="checkbox" value="prioritet"><span>Prioritetsregler</span></label>
             <label class="check-label"><input type="checkbox" value="oppna-utsagor"><span>Öppna utsagor</span></label>
           </div>
         </div>
@@ -85,7 +91,7 @@
         <div class="area-category">
           <div class="area-category-label">Tal &amp; samband</div>
           <div class="area-grid-2col">
-            <label class="check-label check-label--has-sub"><input type="checkbox" value="brak"><span>Bråk</span></label>
+            <label class="check-label"><input type="checkbox" value="brak"><span>Bråk</span></label>
             <label class="check-label"><input type="checkbox" value="procent"><span>Procent <small>(Åk 4+)</small></span></label>
           </div>
         </div>
@@ -260,6 +266,25 @@
       </div>
     </section>
 
+    <!-- ── EGNA UPPGIFTER ─────────────────────────────── -->
+    <div class="menu-group-label" id="egna-uppgifter-group-label">Egna uppgifter</div>
+    <section class="menu-section" id="egna-uppgifter-section">
+      <label class="check-label check-label--featured">
+        <input type="checkbox" id="custom-problems-check">
+        <span>Använd egna uppgifter<br><small>Blanda in importerade problemlösningsuppgifter</small></span>
+      </label>
+      <div class="specific-tables-wrap" style="margin-top:0.5rem">
+        <p class="implicit-hint" style="margin-bottom:0.5rem">Importera från CSV/Excel (kolumnerna <strong>Fråga</strong> och <strong>Svar</strong>). Valfri kolumn: <strong>Område</strong>.</p>
+        <button type="button" id="custom-download-template-btn" class="clear-areas-btn" style="margin-bottom:0.35rem">Ladda ner mall (CSV)</button>
+        <label class="section-label" style="display:block; margin-top:0.5rem">Importera fil</label>
+        <input type="file" id="custom-problems-file-input" accept=".csv,.txt,text/csv" style="font-size:0.85rem; max-width:100%">
+        <label class="section-label" style="display:block; margin-top:0.75rem">eller klistra in CSV</label>
+        <textarea id="custom-problems-paste" rows="4" placeholder="Fråga,Svar,Område&#10;Emma har 12 pennor...&#10;" style="width:100%; font-size:0.85rem; resize:vertical; box-sizing:border-box"></textarea>
+        <button type="button" id="custom-import-paste-btn" class="clear-areas-btn" style="margin-top:0.35rem">Importera från text</button>
+        <p id="custom-problems-status" class="implicit-hint" style="margin-top:0.5rem"></p>
+      </div>
+    </section>
+
     <!-- ── PEDAGOGISKA VERKTYG ────────────────────────── -->
     <div class="menu-group-label">Pedagogiska verktyg</div>
 
@@ -306,6 +331,23 @@
           <option value="4">4 uppgifter</option>
         </select>
       </div>
+    </section>
+
+    <!-- ── LIVESESSION (LÄRARE) ─────────────────────────── -->
+    <div class="menu-group-label">Livesession (elevsvar)</div>
+
+    <section class="menu-section">
+      <label class="section-label">Styr elevsession</label>
+      <button id="session-start-btn" class="clear-areas-btn" type="button">Starta livesession</button>
+      <p id="session-code-text" class="implicit-hint hidden"></p>
+      <button id="session-send-problem-btn" class="clear-areas-btn" type="button" disabled style="margin-top:0.5rem">
+        Skicka aktuell uppgift till elever
+      </button>
+    </section>
+
+    <section class="menu-section" id="session-submissions-section" style="display:none">
+      <label class="section-label">Elevsvar (senaste uppgift)</label>
+      <ul id="session-submissions-list" style="list-style:none; padding-left:0; max-height:160px; overflow-y:auto; font-size:0.8rem;"></ul>
     </section>
 
     <section class="menu-section">
@@ -365,11 +407,34 @@
   <main id="stage" role="button" tabindex="0" aria-label="Tryck för ny uppgift">
     <div id="session-counter" class="session-counter" aria-live="polite"></div>
     <div id="problem-display" class="hidden" aria-live="polite"></div>
+    <div id="session-submissions-main" class="session-submissions-main hidden" aria-live="polite"></div>
     <div id="discussion-prompt" class="discussion-prompt hidden"></div>
     <p id="click-hint">Tryck för att börja</p>
+    <button id="next-problem-btn" class="show-answer-btn next-problem-btn" type="button" tabindex="-1">
+      Nästa uppgift
+    </button>
     <button id="show-answer-btn" class="show-answer-btn" aria-label="Visa svar" tabindex="-1">Visa svar</button>
-
+    <button id="send-to-students-btn" class="show-answer-btn send-to-students-btn" aria-label="Skicka uppgift till elever" tabindex="-1" disabled>
+      Skicka till elever
+    </button>
   </main>
+
+  <!-- Popup för elevsvar -->
+  <div id="submission-modal" class="submission-modal hidden" aria-modal="true" role="dialog">
+    <div class="submission-modal-backdrop"></div>
+    <div class="submission-modal-content">
+      <button id="submission-modal-close" class="submission-modal-close" type="button" aria-label="Stäng">×</button>
+      <div class="submission-modal-header">
+        <h2 id="submission-modal-title">Elevsvar</h2>
+        <p id="submission-modal-meta"></p>
+      </div>
+      <div id="submission-modal-body" class="submission-modal-body"></div>
+      <div class="submission-modal-footer">
+        <button id="submission-modal-prev" type="button">&larr; Föregående</button>
+        <button id="submission-modal-next" type="button">Nästa &rarr;</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Extrauppgiftspanel (höger) -->
   <aside id="extra-panel" class="hidden" aria-label="Extrauppgift">
@@ -411,6 +476,7 @@
 
   <!-- Befintliga moduler (tunna fasader) -->
   <script src="js/settings.js"></script>
+  <script src="js/custom-problems.js"></script>
   <script src="js/templates.js"></script>
   <script src="js/problems.js"></script>
   <script src="js/render.js"></script>
@@ -418,5 +484,6 @@
   <script src="js/answer.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/session-teacher.js"></script>
 </body>
 </html>

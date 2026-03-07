@@ -282,6 +282,124 @@ const Templates = (() => {
   ];
 
   // =========================================================
+  //  Mallar – vikt, tid, area (mått)
+  // =========================================================
+  const MATT_VIKT_TEMPLATES = [
+    (n1, c) => `${n1} väger en väska. Den väger ${c.from} ${c.fromUnit}. Hur mycket är det i ${c.toUnit}?`,
+    (_n1, c) => `En påse potatis väger ${c.from} ${c.fromUnit}. Hur mycket är det i ${c.toUnit}?`,
+    (n1, c) => `${n1} har en melon som väger ${c.from} ${c.fromUnit}. Hur tung är den i ${c.toUnit}?`,
+    (n1, c) => `${n1} köper ${c.from} ${c.fromUnit} äpplen. Hur mycket är det i ${c.toUnit}?`,
+  ];
+
+  const MATT_TID_TEMPLATES = [
+    (n1, c) => `${n1} sover ${c.from} ${c.fromUnit} varje natt. Hur länge är det i ${c.toUnit}?`,
+    (_n1, c) => `En film är ${c.from} ${c.fromUnit} lång. Hur lång är den i ${c.toUnit}?`,
+    (n1, c) => `${n1} tränar i ${c.from} ${c.fromUnit}. Hur länge är det i ${c.toUnit}?`,
+    (n1, c) => `${n1} läser i ${c.from} ${c.fromUnit}. Hur länge läser ${n1} i ${c.toUnit}?`,
+    (_n1, c) => `En resa tar ${c.from} ${c.fromUnit}. Hur lång tid är det i ${c.toUnit}?`,
+  ];
+
+  const MATT_AREA_TEMPLATES = [
+    (n1, c) => `${n1} mäter en yta. Den är ${c.from} ${c.fromUnit}. Hur stor är den i ${c.toUnit}?`,
+    (_n1, c) => `Ett bord har arean ${c.from} ${c.fromUnit}. Hur stor är den i ${c.toUnit}?`,
+    (n1, c) => `${n1} ska måla en vägg med arean ${c.from} ${c.fromUnit}. Hur stor är den i ${c.toUnit}?`,
+    (_n1, c) => `En trädgårdsland är ${c.from} ${c.fromUnit}. Hur stor är den i ${c.toUnit}?`,
+  ];
+
+  // =========================================================
+  //  Mallar – klocka (tid på dygnet)
+  // =========================================================
+  function fmtTime(hours, minutes) {
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  }
+
+  const KLOCKA_READ_TEMPLATES = [
+    (n1, h, m) => `${n1} tittar på klockan. Vad är klockan?`,
+    (n1, h, m) => `${n1} ser att klockan visar en tid. Vad är klockan?`,
+    (_n1, h, m) => `Klockan visar en tid. Vad är klockan?`,
+  ];
+
+  const KLOCKA_ADD_MINUTES_TEMPLATES = [
+    (n1, h, m, add) => `${n1} ser att klockan är ${fmtTime(h, m)}. Vad blir klockan om ${add} minuter?`,
+    (n1, h, m, add) => `Klockan är ${fmtTime(h, m)}. Vad är klockan om ${add} minuter?`,
+    (n1, h, m, add) => `${n1} ska möta en kompis om ${add} minuter. Klockan är nu ${fmtTime(h, m)}. Vilken tid blir det då?`,
+  ];
+
+  const KLOCKA_DIFF_TEMPLATES = [
+    (n1, ctx, endStr) => `${n1} undrar. ${ctx} klockan ${endStr}. Hur lång tid är det?`,
+    (_n1, ctx, endStr) => `${ctx} klockan ${endStr}. Hur lång tid är det?`,
+  ];
+
+  // =========================================================
+  //  Mallar – procent
+  // =========================================================
+  const PROCENT_OF_WHOLE_TEMPLATES = [
+    (n1, pct, whole) => `${n1} ska räkna ut ${pct}% av ${whole}. Vad blir det?`,
+    (n1, pct, whole) => `Vad är ${pct}% av ${whole}? ${n1} ska räkna ut det.`,
+    (_n1, pct, whole) => `I en klass med ${whole} elever ska man räkna ut ${pct}%. Hur många elever är det?`,
+  ];
+
+  const PROCENT_PART_TO_PCT_TEMPLATES = [
+    (n1, part, whole) => `${n1} har ${part} rätt av ${whole} på ett prov. Hur många procent är det?`,
+    (n1, part, whole) => `${n1} har läst ${part} av ${whole} sidor i boken. Hur många procent har ${n1} läst?`,
+    (_n1, part, whole) => `Av ${whole} bollar är ${part} röda. Hur många procent är röda?`,
+  ];
+
+  const PROCENT_PCT_TO_FRAC_TEMPLATES = [
+    (n1, pct) => `${n1} ska skriva ${pct}% i bråkform. Vad blir det?`,
+    (_n1, pct) => `Vad är ${pct}% i bråkform?`,
+  ];
+
+  const PROCENT_PCT_TO_DEC_TEMPLATES = [
+    (n1, pct) => `${n1} ska skriva ${pct}% i decimalform. Vad blir det?`,
+    (_n1, pct) => `Vad är ${pct}% i decimalform?`,
+  ];
+
+  const PROCENT_TO_PCT_TEMPLATES = [
+    (n1) => `${n1} ska skriva talet i procent. Vad blir det?`,
+    (_n1) => `Skriv talet i procent. Vad blir det?`,
+  ];
+
+  const PROCENT_REVERSE_TEMPLATES = [
+    (n1, finalPrice, pct) => `${n1} ser att priset är ${finalPrice} kr efter ${pct}% rea. Vad var originalpriset?`,
+    (_n1, finalPrice, pct) => `Efter ${pct}% rabatt kostar det ${finalPrice} kr. Vad kostade det från början?`,
+  ];
+
+  // =========================================================
+  //  Mallar – bråk (vissa frågetyper)
+  // =========================================================
+  const BRAK_FRACTION_OF_WHOLE_TEMPLATES = [
+    (n1, num, den, whole, obj) => `${n1} ska ta ${num}/${den} av ${whole} ${obj.svPlural}. Hur många ${obj.svPlural} blir det?`,
+    (n1, num, den, whole) => `${n1} räknar: Vad är ${num}/${den} av ${whole}?`,
+    (_n1, num, den, whole, obj) => `En låda innehåller ${whole} ${obj.svPlural}. Hur många ${obj.svPlural} är ${num}/${den} av dem?`,
+  ];
+
+  const BRAK_ADD_SAME_DEN_TEMPLATES = [
+    (n1, a, b, den) => `${n1} räknar: ${a}/${den} + ${b}/${den}. Vad blir summan?`,
+    (n1, a, b, den) => `${n1} lägger ihop ${a}/${den} och ${b}/${den}. Vad får ${n1}?`,
+  ];
+
+  const BRAK_SUB_SAME_DEN_TEMPLATES = [
+    (n1, a, b, den) => `${n1} räknar: ${a}/${den} − ${b}/${den}. Vad blir skillnaden?`,
+    (n1, a, b, den) => `${n1} har ${a}/${den} och ger bort ${b}/${den}. Hur mycket har ${n1} kvar?`,
+  ];
+
+  const BRAK_COMPARE_TEMPLATES = [
+    (n1, a, b) => `${n1} ska jämföra bråken. Vilket är störst: ${a.numerator}/${a.denominator} eller ${b.numerator}/${b.denominator}?`,
+    (_n1, a, b) => `Vilket bråk är störst: ${a.numerator}/${a.denominator} eller ${b.numerator}/${b.denominator}?`,
+  ];
+
+  const BRAK_SIMPLIFY_TEMPLATES = [
+    (n1, num, den) => `${n1} ska förenkla bråket ${num}/${den}. Vad blir det förenklat?`,
+    (_n1, num, den) => `Förenkla bråket ${num}/${den}.`,
+  ];
+
+  const BRAK_NAME_TEMPLATES = [
+    (n1, num, den, wordName) => `${n1} tittar på ett bråk: ${num}/${den}. Vad heter det bråket?`,
+    (n1, num, den, wordName) => `Hur skriver man "${wordName}" i bråkform?`,
+  ];
+
+  // =========================================================
   //  Flerstegsgeneratorer (privata)
   // =========================================================
   function ri(min, max) { return PluginUtils.randInt(min, max); }
@@ -406,7 +524,8 @@ const Templates = (() => {
    */
   function canWrap(area) {
     return ['addition', 'subtraktion', 'multiplikation', 'division',
-            'geometri', 'matt-langd', 'matt-volym'].includes(area);
+            'geometri', 'matt-langd', 'matt-volym', 'matt-vikt', 'matt-tid', 'matt-area',
+            'klocka', 'procent', 'brak'].includes(area);
   }
 
   /**
@@ -466,6 +585,81 @@ const Templates = (() => {
         text = pickRandom(MATT_VOLYM_TEMPLATES)(name1, problem.conversion);
         const ans = `${problem.answer} ${problem.conversion.toUnit}`;
         return { ...problem, isTextProblem: true, textTemplate: text, answer: ans };
+      }
+      case 'matt-vikt': {
+        text = pickRandom(MATT_VIKT_TEMPLATES)(name1, problem.conversion);
+        const ansV = `${problem.answer} ${problem.conversion.toUnit}`;
+        return { ...problem, isTextProblem: true, textTemplate: text, answer: ansV };
+      }
+      case 'matt-tid': {
+        text = pickRandom(MATT_TID_TEMPLATES)(name1, problem.conversion);
+        const ansT = `${problem.answer} ${problem.conversion.toUnit}`;
+        return { ...problem, isTextProblem: true, textTemplate: text, answer: ansT };
+      }
+      case 'matt-area': {
+        text = pickRandom(MATT_AREA_TEMPLATES)(name1, problem.conversion);
+        const ansA = `${problem.answer} ${problem.conversion.toUnit}`;
+        return { ...problem, isTextProblem: true, textTemplate: text, answer: ansA };
+      }
+      case 'klocka': {
+        if (problem.questionType === 'read') {
+          text = pickRandom(KLOCKA_READ_TEMPLATES)(name1, problem.hours, problem.minutes);
+        } else if (problem.questionType === 'add-minutes') {
+          text = pickRandom(KLOCKA_ADD_MINUTES_TEMPLATES)(name1, problem.hours, problem.minutes, problem.minutesToAdd);
+        } else if (problem.questionType === 'diff') {
+          text = pickRandom(KLOCKA_DIFF_TEMPLATES)(name1, problem.context, problem.endStr);
+        } else {
+          return problem;
+        }
+        return { ...problem, isTextProblem: true, textTemplate: text, answer: problem.answer };
+      }
+      case 'procent': {
+        const qt = problem.questionType;
+        if (qt === 'pct-of-whole') {
+          text = pickRandom(PROCENT_OF_WHOLE_TEMPLATES)(name1, problem.percent, problem.whole);
+        } else if (qt === 'part-to-pct') {
+          text = pickRandom(PROCENT_PART_TO_PCT_TEMPLATES)(name1, problem.part, problem.whole);
+        } else if (qt === 'pct-to-frac') {
+          text = pickRandom(PROCENT_PCT_TO_FRAC_TEMPLATES)(name1, problem.percent);
+        } else if (qt === 'pct-to-dec') {
+          text = pickRandom(PROCENT_PCT_TO_DEC_TEMPLATES)(name1, problem.percent);
+        } else if (qt === 'frac-to-pct' || qt === 'dec-to-pct') {
+          text = pickRandom(PROCENT_TO_PCT_TEMPLATES)(name1);
+        } else if (qt === 'reverse-pct') {
+          text = pickRandom(PROCENT_REVERSE_TEMPLATES)(name1, problem.finalPrice, problem.percent);
+        } else {
+          return problem;
+        }
+        return { ...problem, isTextProblem: true, textTemplate: text, answer: problem.answer };
+      }
+      case 'brak': {
+        const bqt = problem.questionType;
+        if (bqt === 'fraction-of-whole') {
+          const obj = pickRandom(OBJECTS);
+          text = pickRandom(BRAK_FRACTION_OF_WHOLE_TEMPLATES)(name1, problem.numerator, problem.denominator, problem.whole, obj);
+          return { ...problem, isTextProblem: true, textTemplate: text, answer: problem.answer };
+        }
+        if (bqt === 'add-same-den') {
+          text = pickRandom(BRAK_ADD_SAME_DEN_TEMPLATES)(name1, problem.a, problem.b, problem.denominator);
+          return { ...problem, isTextProblem: true, textTemplate: text, answer: problem.answer };
+        }
+        if (bqt === 'sub-same-den') {
+          text = pickRandom(BRAK_SUB_SAME_DEN_TEMPLATES)(name1, problem.a, problem.b, problem.denominator);
+          return { ...problem, isTextProblem: true, textTemplate: text, answer: problem.answer };
+        }
+        if (bqt === 'compare') {
+          text = pickRandom(BRAK_COMPARE_TEMPLATES)(name1, problem.a, problem.b);
+          return { ...problem, isTextProblem: true, textTemplate: text, answer: problem.answer };
+        }
+        if (bqt === 'simplify') {
+          text = pickRandom(BRAK_SIMPLIFY_TEMPLATES)(name1, problem.numerator, problem.denominator);
+          return { ...problem, isTextProblem: true, textTemplate: text, answer: problem.answer };
+        }
+        if (bqt === 'name') {
+          text = pickRandom(BRAK_NAME_TEMPLATES)(name1, problem.numerator, problem.denominator, problem.wordName);
+          return { ...problem, isTextProblem: true, textTemplate: text, answer: problem.answer };
+        }
+        return problem;
       }
       default:
         return problem;

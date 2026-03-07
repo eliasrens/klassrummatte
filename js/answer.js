@@ -7,6 +7,7 @@ const Answer = (() => {
   function isSameProblem(a, b) {
     if (!a || !b || a.type !== b.type) return false;
     if (a.type === 'flersteg') return a.intermediate === b.intermediate && a.answer === b.answer;
+    if (a.type === 'egna') return a.textTemplate === b.textTemplate && a.answer === b.answer;
     const plugin = PluginManager.get(a.type);
     return plugin ? plugin.isSameProblem(a, b) : false;
   }
@@ -18,12 +19,14 @@ const Answer = (() => {
       if (stepsDiv) stepsDiv.style.display = '';
       problemDisplay.querySelectorAll('.flersteg-inter, .flersteg-inter-copy, .flersteg-final')
         .forEach(el => el.classList.remove('answer-hidden'));
-      if (showAnswerBtn) { showAnswerBtn.disabled = true; showAnswerBtn.textContent = '\u2713'; }
+      showAnswerBtn.disabled    = true;
+      showAnswerBtn.textContent = '\u2713';
       return;
     }
 
     if (problem.isTextProblem) {
-      if (showAnswerBtn) { showAnswerBtn.disabled = true; showAnswerBtn.textContent = '✓'; }
+      showAnswerBtn.disabled    = true;
+      showAnswerBtn.textContent = '✓';
       PluginUtils.appendAnswerBox(problem.answer, problemDisplay);
       return;
     }
