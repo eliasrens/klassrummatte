@@ -120,6 +120,60 @@ body {
 
 #areas-popup input[type="checkbox"] { accent-color: #457b9d; }
 
+/* Underkategorier per område */
+.ab-area-item { margin-bottom: 0.25rem; }
+
+.ab-subcats {
+  margin: 0.2rem 0 0.1rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ab-subcats.hidden { display: none; }
+
+.ab-subcat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.55);
+}
+
+.ab-subcat-row input[type="number"] {
+  width: 3.2rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #f0eeea;
+  border-radius: 4px;
+  padding: 0.2rem 0.35rem;
+  font-size: 0.8rem;
+  font-family: inherit;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.ab-subcat-row input[type="number"]::-webkit-inner-spin-button,
+.ab-subcat-row input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+.ab-subcat-row input[type="number"]:focus {
+  border-color: rgba(255,255,255,0.4);
+}
+
+.ab-total-row {
+  width: 100%;
+  text-align: right;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 0.3rem;
+}
+
 /* Knappar */
 .config-actions {
   display: flex;
@@ -515,6 +569,220 @@ body {
 .ab-sheet.theme-ram .ab-header { border-bottom-color: #457b9d; }
 .ab-sheet.theme-ram .ab-problem-num { background: #457b9d; }
 .ab-sheet.theme-ram .ab-footer { border-top-color: #457b9d; color: #457b9d; }
+
+/* === Starten (veckouppgifter) ============================= */
+
+/* Färgval-knappar i config */
+.starten-color-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.starten-color-btn {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 2px;
+  cursor: pointer;
+  background: none;
+  transition: border-color 0.15s;
+}
+
+.starten-color-btn span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.starten-color-btn--active {
+  border-color: #fff;
+}
+
+.starten-color-btn:hover { border-color: rgba(255,255,255,0.5); }
+.starten-color-btn--active:hover { border-color: #fff; }
+
+/* Kompakt header för Starten */
+.starten-header {
+  margin-bottom: 0.3cm;
+  padding-bottom: 0.2cm;
+}
+
+.starten-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #374151;
+}
+
+.starten-table tr { border-bottom: 2px solid #374151; }
+.starten-table tr:last-child { border-bottom: none; }
+
+.starten-table td {
+  border-right: none;
+  padding: 0.25cm 0.2cm;
+  vertical-align: top;
+}
+
+.starten-table .starten-day {
+  border-right: 2px solid #374151;
+}
+
+/* Dag-cell med gradient (CSS custom properties för teman) */
+.starten-table {
+  --sh1: 204; --sh2: 172;
+}
+
+.starten-day {
+  width: 4.5rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #fff;
+  vertical-align: middle !important;
+  text-align: center;
+  background: linear-gradient(135deg, hsl(var(--sh1), 38%, 44%), hsl(var(--sh2), 58%, 39%));
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.starten-table tr:nth-child(odd) .starten-day {
+  background: linear-gradient(135deg, hsl(var(--sh1), 41%, 39%), hsl(var(--sh2), 60%, 35%));
+}
+
+/* Accent-linje ovanpå arket */
+.ab-sheet.starten-vinrod::before,
+.ab-sheet.starten-lila::before,
+.ab-sheet.starten-skog::before,
+.ab-sheet.starten-korall::before,
+.ab-sheet.starten-guld::before {
+  background: linear-gradient(90deg, hsl(var(--sh1), 38%, 44%), hsl(var(--sh2), 58%, 39%));
+}
+
+/* Färgteman – custom properties på sheet-nivå (för ::before + problem-num) och tabell */
+.ab-sheet.starten-vinrod, .starten-table.starten-vinrod  { --sh1: 350; --sh2: 318; }
+.ab-sheet.starten-lila,   .starten-table.starten-lila    { --sh1: 275; --sh2: 243; }
+.ab-sheet.starten-skog,   .starten-table.starten-skog    { --sh1: 140; --sh2: 108; }
+.ab-sheet.starten-korall, .starten-table.starten-korall  { --sh1: 15;  --sh2: 343; }
+.ab-sheet.starten-guld,   .starten-table.starten-guld    { --sh1: 40;  --sh2: 8; }
+
+/* Standard arbetsblad: nummerbubbla + header-linje i temafärg */
+.ab-sheet[class*="starten-"] .ab-problem-num {
+  background: hsl(var(--sh1), 38%, 44%);
+}
+.ab-sheet[class*="starten-"] .ab-header {
+  border-bottom-color: hsl(var(--sh1), 30%, 70%);
+}
+
+/* Uppställningsproblem-cell */
+.starten-problem { text-align: center; }
+
+.starten-problem-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin-bottom: 0.12cm;
+  white-space: nowrap;
+}
+
+/* Rutnät i uppställningscell */
+.starten-grid {
+  border-spacing: 0;
+  border-collapse: separate;
+  border: 1px solid #9ca3af;
+  margin: 0 auto;
+}
+
+.starten-grid td {
+  border-right: 1px solid #9ca3af;
+  border-bottom: 1px solid #9ca3af;
+  border-top: none;
+  border-left: none;
+  width: 7mm;
+  height: 8.5mm;
+  padding: 0;
+}
+
+.starten-grid td:last-child { border-right: none; }
+.starten-grid tr:last-child td { border-bottom: none; }
+
+.starten-grid .starten-grid-answer td {
+  border-top: 3px solid #1a1a2e;
+}
+
+/* Bråk/division-cell */
+.starten-brak {
+  width: 7rem;
+  vertical-align: middle !important;
+  padding-left: 0.3cm;
+  padding-right: 0.3cm;
+}
+
+.starten-brak-line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.6cm;
+}
+
+.starten-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.starten-frac-num {
+  border-bottom: 1.5px solid #1a1a2e;
+  padding: 0 0.2rem 0.05rem;
+}
+
+.starten-frac-den {
+  padding: 0.05rem 0.2rem 0;
+}
+
+.starten-eq {
+  font-size: 0.95rem;
+  color: #1a1a2e;
+}
+
+.starten-op {
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+.starten-blank {
+  display: inline-block;
+  width: 1.5cm;
+  border-bottom: 1.5px solid #9ca3af;
+}
+
+.starten-mult-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.starten-blank--short {
+  width: 1cm;
+}
+
+/* Regenera-knapp per cell */
+.starten-regen {
+  background: none;
+  border: none;
+  font-size: 0.7rem;
+  cursor: pointer;
+  opacity: 0.25;
+  transition: opacity 0.15s;
+  padding: 0.1rem;
+  display: block;
+  margin: 0.1cm auto 0;
+}
+
+.starten-regen:hover { opacity: 0.85; }
 
 /* === Print ================================================ */
 @media print {

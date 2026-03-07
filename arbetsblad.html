@@ -14,6 +14,14 @@
     <span class="config-logo">Klassrummatte</span>
 
     <div class="config-group">
+      <span class="config-label">Läge</span>
+      <select id="ab-mode">
+        <option value="standard">Arbetsblad</option>
+        <option value="starten">Starten (veckouppgifter)</option>
+      </select>
+    </div>
+
+    <div class="config-group">
       <span class="config-label">Rubrik</span>
       <input type="text" id="ab-title" placeholder="T.ex. Multiplikation" style="width:14rem">
     </div>
@@ -31,17 +39,30 @@
     </div>
 
     <div class="config-group">
-      <span class="config-label">Antal sidor</span>
-      <select id="ab-pages">
-        <option value="1" selected>1 sida</option>
-        <option value="2">2 sidor</option>
-        <option value="3">3 sidor</option>
-        <option value="4">4 sidor</option>
-        <option value="5">5 sidor</option>
-      </select>
+      <span class="config-label">Färgskala</span>
+      <div class="starten-color-row" id="ab-starten-colors">
+        <button class="starten-color-btn starten-color-btn--active" data-theme="" title="Blågrön">
+          <span style="background:linear-gradient(135deg,hsl(204,38%,44%),hsl(172,58%,39%))"></span>
+        </button>
+        <button class="starten-color-btn" data-theme="vinrod" title="Vinröd">
+          <span style="background:linear-gradient(135deg,hsl(350,38%,44%),hsl(318,58%,39%))"></span>
+        </button>
+        <button class="starten-color-btn" data-theme="lila" title="Lila">
+          <span style="background:linear-gradient(135deg,hsl(275,38%,44%),hsl(243,58%,39%))"></span>
+        </button>
+        <button class="starten-color-btn" data-theme="skog" title="Skog">
+          <span style="background:linear-gradient(135deg,hsl(140,38%,44%),hsl(108,58%,39%))"></span>
+        </button>
+        <button class="starten-color-btn" data-theme="korall" title="Korall">
+          <span style="background:linear-gradient(135deg,hsl(15,38%,44%),hsl(343,58%,39%))"></span>
+        </button>
+        <button class="starten-color-btn" data-theme="guld" title="Guld">
+          <span style="background:linear-gradient(135deg,hsl(40,38%,44%),hsl(8,58%,39%))"></span>
+        </button>
+      </div>
     </div>
 
-    <div class="config-group">
+    <div class="config-group ab-standard-only">
       <span class="config-label">Kolumner</span>
       <select id="ab-cols">
         <option value="2">2 per rad</option>
@@ -50,7 +71,7 @@
       </select>
     </div>
 
-    <div class="config-group">
+    <div class="config-group ab-standard-only">
       <span class="config-label">Design</span>
       <select id="ab-theme">
         <option value="">Klassisk</option>
@@ -60,17 +81,12 @@
       </select>
     </div>
 
-    <div class="config-group">
+    <div class="config-group ab-standard-only">
       <span class="config-label">Matematikområden</span>
       <button class="config-areas-toggle" id="ab-areas-toggle">Välj områden ▾</button>
     </div>
 
-    <label class="config-toggle-row">
-      <input type="checkbox" id="ab-problemlosning">
-      Problemlösning (textuppgifter)
-    </label>
-
-    <label class="config-toggle-row">
+    <label class="config-toggle-row ab-standard-only">
       <input type="checkbox" id="ab-show-answers">
       Inkludera svarsnyckel
     </label>
@@ -81,51 +97,8 @@
       <span class="print-hint">Tips: Avmarkera "Sidhuvuden och sidfötter" i utskriftsdialogen för att dölja webbläsarens URL.</span>
     </div>
 
-    <!-- Område-popup (inuti config-panel för korrekt absolut-positionering) -->
-    <div id="areas-popup">
-    <div class="areas-category">
-      <div class="areas-cat-label">Aritmetik</div>
-      <label><input type="checkbox" value="addition"      checked> Addition</label>
-      <label><input type="checkbox" value="subtraktion"   checked> Subtraktion</label>
-      <label><input type="checkbox" value="multiplikation" checked> Multiplikation</label>
-      <label><input type="checkbox" value="division"      checked> Division</label>
-    </div>
-    <div class="areas-category">
-      <div class="areas-cat-label">Algebra</div>
-      <label><input type="checkbox" value="prioritet"> Prioriteringsregler</label>
-      <label><input type="checkbox" value="oppna-utsagor"> Öppna utsagor</label>
-      <label><input type="checkbox" value="talfoljd"> Talföljd</label>
-    </div>
-    <div class="areas-category">
-      <div class="areas-cat-label">Tal & samband</div>
-      <label><input type="checkbox" value="brak"> Bråk</label>
-      <label><input type="checkbox" value="procent"> Procent</label>
-      <label><input type="checkbox" value="tallinje"> Tallinje</label>
-      <label><input type="checkbox" value="talsorter"> Talsorter</label>
-      <label><input type="checkbox" value="negativa-tal"> Negativa tal</label>
-      <label><input type="checkbox" value="romerska"> Romerska siffror</label>
-    </div>
-    <div class="areas-category">
-      <div class="areas-cat-label">Geometri</div>
-      <label><input type="checkbox" value="geometri"> Geometri</label>
-      <label><input type="checkbox" value="symmetri"> Symmetri</label>
-      <label><input type="checkbox" value="koordinatsystem"> Koordinatsystem</label>
-    </div>
-    <div class="areas-category">
-      <div class="areas-cat-label">Mått & tid</div>
-      <label><input type="checkbox" value="klocka"> Klocka</label>
-      <label><input type="checkbox" value="matt-langd"> Längd</label>
-      <label><input type="checkbox" value="matt-volym"> Volym</label>
-      <label><input type="checkbox" value="matt-vikt"> Vikt</label>
-      <label><input type="checkbox" value="matt-tid"> Tid</label>
-      <label><input type="checkbox" value="matt-area"> Area-mått</label>
-    </div>
-    <div class="areas-category">
-      <div class="areas-cat-label">Statistik</div>
-      <label><input type="checkbox" value="statistik"> Statistik</label>
-      <label><input type="checkbox" value="sannolikhet"> Sannolikhet</label>
-    </div>
-  </div>
+    <!-- Område-popup (byggs dynamiskt av arbetsblad.js) -->
+    <div id="areas-popup"></div>
   </div><!-- /config-panel -->
 
   <!-- ── Tomt tillstånd ─────────────────────────────────────── -->
