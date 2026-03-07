@@ -176,15 +176,12 @@ const Menu = (() => {
       }
     }
 
-    const showCustom = areas.includes('custom');
-
     setSection('addsub-group-label',         'addsub-section',         showAddSub);
     setSection('multdiv-group-label',        'multdiv-section',        showMultDiv);
     setSection('geometri-group-label',       'geometri-section',       showGeometri);
     setSection('klocka-group-label',         'klocka-section',         showKlocka);
     setSection('brak-group-label',           'brak-section',           showBrak);
     setSection('prioritet-group-label',      'prioritet-section',      showPrioritet);
-    setSection('custom-problem-group-label', 'custom-problem-section', showCustom);
     document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
     updateBrakTypeAvailability();
     updateProblemlosningCheckbox();
@@ -483,11 +480,6 @@ const Menu = (() => {
       Settings.setDiscussionEnabled(e.target.checked);
     });
 
-    document.getElementById('livemode-check').addEventListener('change', e => {
-      if (e.target.checked) { LiveMode.enable(); }
-      else                  { LiveMode.disable(); }
-    });
-
     document.getElementById('session-limit-select').addEventListener('change', e => {
       Settings.setSessionLimit(e.target.value);
       App.resetSession();
@@ -535,9 +527,6 @@ const Menu = (() => {
 
       document.getElementById('discussion-check').checked = false;
       Settings.setDiscussionEnabled(false);
-
-      document.getElementById('livemode-check').checked = false;
-      LiveMode.disable();
 
       document.getElementById('session-limit-select').value = 'unlimited';
       Settings.setSessionLimit('unlimited');

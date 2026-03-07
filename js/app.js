@@ -31,7 +31,6 @@ const App = (() => {
   let currentProblems      = [];   // används i multi-mode
   let currentExtraProblem  = null;
   let sessionCurrent       = 0;
-  let customCycleIndex     = -1; // cyklar igenom egna uppgifter vid scen-klick
 
   // =========================================================
   //  Init
@@ -67,21 +66,12 @@ const App = (() => {
     });
 
     bindStageEvents();
-    bindCustomProblem();
 
     showAnswerBtn.addEventListener('click', e => {
       e.stopPropagation();
       if (!problemVisible) return;
       const settings = Settings.get();
-      if (currentProblem && currentProblem.type === 'custom') {
-        if (!currentProblem.answer) return;
-        const box = document.createElement('div');
-        box.className = 'answer-box';
-        box.textContent = `Svar: ${currentProblem.answer}`;
-        problemDisplay.appendChild(box);
-        showAnswerBtn.disabled    = true;
-        showAnswerBtn.textContent = '✓';
-      } else if (settings.multipleProblems && currentProblems.length > 0) {
+      if (settings.multipleProblems && currentProblems.length > 0) {
         const cells = problemDisplay.querySelectorAll('.problem-cell');
         currentProblems.forEach((p, i) => {
           if (cells[i]) Answer.showAnswer(p, cells[i], null);
@@ -119,90 +109,6 @@ const App = (() => {
         extraAnswerBtn.disabled    = true;
         extraAnswerBtn.textContent = '✓';
       }
-    });
-  }
-
-  // =========================================================
-  //  Egna uppgifter
-  // =========================================================
-
-  // Parser: "Svar: X" avslutar en uppgift – kan stå på egen rad eller sist på frågeraden.
-  function parseCustomProblems(rawText) {
-    if (!rawText || !rawText.trim()) return [];
-    const problems = [];
-    const lines    = rawText.split('\n');
-    let currentLines = [];
-
-    for (const line of lines) {
-      const clean = line.replace(/\r$/, ''); // hantera Windows-radslut
-      // Matcha "Svar: X" var som helst på raden (t.ex. "Fråga? Svar: 42" eller "Svar: 42")
-      const m = clean.match(/^(.*?)[Ss]var:\s*(.+?)\s*$/);
-      if (m) {
-        const before = m[1].trim();
-        const answer = m[2].trim();
-        if (before) currentLines.push(before);
-        const text = currentLines.join('\n').trim();
-        if (text) problems.push({ type: 'custom', text, answer });
-        currentLines = [];
-      } else if (clean.trim()) {
-        currentLines.push(clean.trimEnd());
-      }
-    }
-    // Ev. sista uppgift utan svar-rad
-    const lastText = currentLines.join('\n').trim();
-    if (lastText) problems.push({ type: 'custom', text: lastText, answer: '' });
-
-    return problems;
-  }
-
-  // Visa en egengjord uppgift på scenen
-  function displayCustomProblem(prob) {
-    clearExtraTask();
-    clearBildstod();
-    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-    problemDisplay.classList.remove('visible');
-    problemDisplay.innerHTML = '';
-
-    currentProblem  = prob;
-    lastProblem     = null;
-    currentProblems = [];
-
-    const p = document.createElement('p');
-    p.className   = 'custom-problem-text';
-    p.textContent = prob.text;
-    problemDisplay.appendChild(p);
-
-    showAnswerBtn.disabled    = !prob.answer;
-    showAnswerBtn.textContent = prob.answer ? 'Visa svar' : '–';
-
-    problemDisplay.classList.remove('hidden');
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      problemDisplay.classList.add('visible');
-      showAnswerBtn.classList.add('problem-visible');
-    }));
-    clickHint.classList.add('hidden-hint');
-    problemVisible = true;
-  }
-
-  function bindCustomProblem() {
-    const textarea = document.getElementById('custom-problem-textarea');
-    const counter  = document.getElementById('custom-counter');
-    if (!textarea) return;
-
-    function updateCounter() {
-      const n = parseCustomProblems(textarea.value).length;
-      counter.textContent = n === 0 ? '0 uppg. sparade' : `${n} uppg. sparade`;
-    }
-
-    // Ladda sparad text
-    textarea.value = Settings.getCustomText();
-    updateCounter();
-
-    // Spara direkt vid redigering; börja om cykeln från uppgift 1
-    textarea.addEventListener('input', () => {
-      customCycleIndex = -1;
-      updateCounter();
-      Settings.setCustomText(textarea.value);
     });
   }
 
@@ -254,29 +160,7 @@ const App = (() => {
     clearExtraTask();
     clearBildstod();
 
-    const settings      = Settings.get();
-    const hasCustomArea = settings.areas.includes('custom');
-    const mathAreas     = settings.areas.filter(a => a !== 'custom');
-    settings.areas      = mathAreas; // ta bort 'custom' så generatorer inte ser det
-
-    // Egna uppgifter – cykla i ordning (enbart egna) eller blanda med matematik (blandläge)
-    if (!settings.multipleProblems && hasCustomArea) {
-      const parsed = parseCustomProblems(Settings.getCustomText());
-      if (parsed.length > 0) {
-        if (mathAreas.length === 0) {
-          // Enbart egna uppgifter: cykla i ordning
-          customCycleIndex = (customCycleIndex + 1) % parsed.length;
-          displayCustomProblem(parsed[customCycleIndex]);
-          return;
-        }
-        // Blandläge: egna uppgifter viktas lika som ett matematikområde
-        const nAreas = mathAreas.length;
-        if (Math.random() * (nAreas + parsed.length) < parsed.length) {
-          displayCustomProblem(PluginUtils.pickRandom(parsed));
-          return;
-        }
-      }
-    }
+    const settings = Settings.get();
 
     if (settings.multipleProblems) {
       problemDisplay.classList.add('multi-mode');
@@ -334,8 +218,6 @@ const App = (() => {
       }, delay);
     }
 
-    // Live-läge: starta en ny svarssession för denna uppgift
-    if (LiveMode.isActive()) LiveMode.startRound();
   }
 
   function clearExtraTask() {

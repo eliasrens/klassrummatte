@@ -130,11 +130,6 @@
           </div>
         </div>
 
-        <div class="area-category">
-          <div class="area-category-label">Egna uppgifter</div>
-          <label class="check-label"><input type="checkbox" value="custom"><span>Skriv egna uppgifter<br><small>Aktiverar avsnittet nedan</small></span></label>
-        </div>
-
       </div>
       <p id="area-implicit-hint" class="implicit-hint hidden">Inget markerat — blandar automatiskt mellan alla områden</p>
     </section>
@@ -320,19 +315,6 @@
       </label>
     </section>
 
-    <!-- ── EGEN UPPGIFT ──────────────────────────────── -->
-    <div class="menu-group-label hidden" id="custom-problem-group-label">Skriv egna uppgifter</div>
-
-    <section class="menu-section hidden" id="custom-problem-section">
-      <p class="custom-format-hint">Skriv <strong>Svar: X</strong> sist i varje uppgift – nästa rad startar automatiskt en ny. Tomrader ignoreras.</p>
-      <textarea id="custom-problem-textarea" class="custom-field" rows="5" placeholder="T.ex.:
-Vad är 3 × 8?
-Svar: 24
-Vilket är det minsta primtalet?
-Svar: 2"></textarea>
-      <p id="custom-counter" class="custom-counter">0 uppg. sparade</p>
-    </section>
-
     <!-- ── ARBETSBLAD ────────────────────────────────── -->
     <div class="menu-group-label">Verktyg</div>
     <section class="menu-section">
@@ -340,17 +322,6 @@ Svar: 2"></textarea>
         <span style="font-size:1.1rem">📄</span>
         <span>Skapa arbetsblad<br><small>Generera en utskriftsvänlig stencil med slumpmässiga uppgifter</small></span>
       </a>
-    </section>
-
-    <!-- ── LIVE-LÄGE ─────────────────────────────────── -->
-    <div class="menu-group-label" id="livemode-group-label">Live-läge</div>
-
-    <section class="menu-section" id="livemode-section">
-      <label class="check-label check-label--featured">
-        <input type="checkbox" id="livemode-check">
-        <span>Aktivera live-läge<br><small>Eleverna svarar via QR-kod – svar visas i realtid på skärmen</small></span>
-      </label>
-      <p class="custom-format-hint" style="margin-top:0.5rem">Eleverna skannar QR-koden en gång och svarar på varje uppgift direkt på sin telefon. Kräver uppkoppling.</p>
     </section>
 
     <!-- ── EXTRAUPPGIFT ───────────────────────────────── -->
@@ -398,17 +369,6 @@ Svar: 2"></textarea>
     <p id="click-hint">Tryck för att börja</p>
     <button id="show-answer-btn" class="show-answer-btn" aria-label="Visa svar" tabindex="-1">Visa svar</button>
 
-    <!-- Live-läge: kompakt QR-märke (nedre vänster-hörnet) -->
-    <div id="live-qr-badge" class="live-qr-badge hidden">
-      <div id="live-qr"></div>
-      <div class="live-code-label">Kod: <strong id="live-code-text">----</strong></div>
-    </div>
-
-    <!-- Live-läge: svar-moln (höger sida) -->
-    <div id="live-answers-overlay" class="live-answers-overlay hidden">
-      <div id="live-answers" class="live-answers"></div>
-      <div id="live-count" class="live-count"></div>
-    </div>
   </main>
 
   <!-- Extrauppgiftspanel (höger) -->
@@ -417,10 +377,6 @@ Svar: 2"></textarea>
     <div id="extra-display"></div>
     <button id="extra-answer-btn" class="extra-answer-btn">Visa svar</button>
   </aside>
-
-  <!-- CDN: Supabase + QR-kod (krävs för live-läge) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
 
   <!-- Plugin-system (laddas före fasaderna) -->
   <script src="js/plugins/_math-utils.js"></script>
@@ -460,7 +416,6 @@ Svar: 2"></textarea>
   <script src="js/render.js"></script>
   <script src="js/bildstod.js"></script>
   <script src="js/answer.js"></script>
-  <script src="js/live.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/app.js"></script>
 </body>

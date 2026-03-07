@@ -29,8 +29,6 @@ const Settings = (() => {
     klockaTypes: ['analog', 'digital'],
     sessionLimit: 'unlimited',
     discussionEnabled: false,
-    customText: '',
-    customBlend: false,
   };
 
   let state = { ...DEFAULTS };
@@ -127,11 +125,6 @@ const Settings = (() => {
   function setSessionLimit(v)          { state.sessionLimit = v; save(); }
   function isDiscussionEnabled()       { return !!state.discussionEnabled; }
   function setDiscussionEnabled(b)     { state.discussionEnabled = !!b; save(); }
-  function getCustomText()             { return state.customText || ''; }
-  function setCustomText(s)            { state.customText = String(s); save(); }
-  function isCustomBlend()             { return !!state.customBlend; }
-  function setCustomBlend(b)           { state.customBlend = !!b; save(); }
-
   // Initiering
   load();
 
@@ -146,6 +139,5 @@ const Settings = (() => {
     getKlockaTypes, setKlockaTypes,
     getSessionLimit, setSessionLimit,
     isDiscussionEnabled, setDiscussionEnabled,
-    getCustomText, setCustomText, isCustomBlend, setCustomBlend,
   };
 })();
