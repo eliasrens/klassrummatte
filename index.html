@@ -136,6 +136,13 @@
           </div>
         </div>
 
+        <div class="area-category">
+          <div class="area-category-label">Övrigt</div>
+          <div class="area-grid-2col">
+            <label class="check-label check-label--has-sub"><input type="checkbox" id="custom-problems-check" value="egna-uppgifter"><span>Egna uppgifter</span></label>
+          </div>
+        </div>
+
       </div>
       <p id="area-implicit-hint" class="implicit-hint hidden">Inget markerat — blandar automatiskt mellan alla områden</p>
     </section>
@@ -266,23 +273,17 @@
       </div>
     </section>
 
-    <!-- ── EGNA UPPGIFTER ─────────────────────────────── -->
-    <div class="menu-group-label" id="egna-uppgifter-group-label">Egna uppgifter</div>
-    <section class="menu-section" id="egna-uppgifter-section">
-      <label class="check-label check-label--featured">
-        <input type="checkbox" id="custom-problems-check">
-        <span>Använd egna uppgifter<br><small>Blanda in importerade problemlösningsuppgifter</small></span>
-      </label>
-      <div class="specific-tables-wrap" style="margin-top:0.5rem">
-        <p class="implicit-hint" style="margin-bottom:0.5rem">Importera från CSV/Excel (kolumnerna <strong>Fråga</strong> och <strong>Svar</strong>). Valfri kolumn: <strong>Område</strong>.</p>
-        <button type="button" id="custom-download-template-btn" class="clear-areas-btn" style="margin-bottom:0.35rem">Ladda ner mall (CSV)</button>
-        <label class="section-label" style="display:block; margin-top:0.5rem">Importera fil</label>
-        <input type="file" id="custom-problems-file-input" accept=".csv,.txt,text/csv" style="font-size:0.85rem; max-width:100%">
-        <label class="section-label" style="display:block; margin-top:0.75rem">eller klistra in CSV</label>
-        <textarea id="custom-problems-paste" rows="4" placeholder="Fråga,Svar,Område&#10;Emma har 12 pennor...&#10;" style="width:100%; font-size:0.85rem; resize:vertical; box-sizing:border-box"></textarea>
-        <button type="button" id="custom-import-paste-btn" class="clear-areas-btn" style="margin-top:0.35rem">Importera från text</button>
-        <p id="custom-problems-status" class="implicit-hint" style="margin-top:0.5rem"></p>
-      </div>
+    <!-- ── EGNA UPPGIFTER (sub-section, visas när checkboxen i area-listan är ibockad) ── -->
+    <div class="menu-group-label hidden" id="egna-uppgifter-group-label">Egna uppgifter – import</div>
+    <section class="menu-section hidden" id="egna-uppgifter-section">
+      <p class="implicit-hint" style="margin-bottom:0.5rem">Importera från CSV/Excel (kolumnerna <strong>Fråga</strong> och <strong>Svar</strong>). Valfri kolumn: <strong>Område</strong>.</p>
+      <button type="button" id="custom-download-template-btn" class="clear-areas-btn" style="margin-bottom:0.35rem">Ladda ner mall (CSV)</button>
+      <label class="section-label" style="display:block; margin-top:0.5rem">Importera fil</label>
+      <input type="file" id="custom-problems-file-input" accept=".csv,.txt,text/csv" style="font-size:0.85rem; max-width:100%">
+      <label class="section-label" style="display:block; margin-top:0.75rem">eller klistra in CSV</label>
+      <textarea id="custom-problems-paste" rows="4" placeholder="Fråga,Svar,Område&#10;Emma har 12 pennor...&#10;" style="width:100%; font-size:0.85rem; resize:vertical; box-sizing:border-box"></textarea>
+      <button type="button" id="custom-import-paste-btn" class="clear-areas-btn" style="margin-top:0.35rem">Importera från text</button>
+      <p id="custom-problems-status" class="implicit-hint" style="margin-top:0.5rem"></p>
     </section>
 
     <!-- ── PEDAGOGISKA VERKTYG ────────────────────────── -->

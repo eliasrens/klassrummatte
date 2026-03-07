@@ -125,7 +125,7 @@ const App = (() => {
     if (nextBtn) {
       nextBtn.addEventListener('click', e => {
         e.stopPropagation();
-        handleStageClick();
+        handleStageClick(e, true);
       });
     }
     if (clickHint) {
@@ -135,17 +135,21 @@ const App = (() => {
         handleStageClick();
       });
     }
+    stage.addEventListener('click', e => handleStageClick(e));
     stage.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleStageClick(); }
     });
   }
 
-  function handleStageClick(e) {
+  function handleStageClick(e, fromButton) {
     if (e && (
       e.target.closest('#settings-menu') ||
       e.target.closest('#menu-toggle') ||
       e.target.closest('#extra-panel')
     )) return;
+
+    // Under aktiv livesession: bara "Nästa uppgift"-knappen byter uppgift
+    if (!fromButton && problemVisible && window.KlassrumsSessionTeacher && window.KlassrumsSessionTeacher.hasActiveSession()) return;
 
     if (document.body.classList.contains('menu-open')) {
       Menu.closeMenu();
@@ -225,14 +229,11 @@ const App = (() => {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       problemDisplay.classList.add('visible');
       showAnswerBtn.classList.add('problem-visible');
+      const liveActive = window.KlassrumsSessionTeacher && window.KlassrumsSessionTeacher.hasActiveSession();
       const nextBtn = document.getElementById('next-problem-btn');
-      if (nextBtn) nextBtn.classList.add('problem-visible');
+      if (nextBtn) nextBtn.classList.toggle('problem-visible', !!liveActive);
       const sendBtn = document.getElementById('send-to-students-btn');
-      if (sendBtn && window.KlassrumsSessionTeacher && window.KlassrumsSessionTeacher.hasActiveSession()) {
-        sendBtn.classList.add('problem-visible');
-      } else if (sendBtn) {
-        sendBtn.classList.remove('problem-visible');
-      }
+      if (sendBtn) sendBtn.classList.toggle('problem-visible', !!liveActive);
     }));
 
     clickHint.classList.add('hidden-hint');

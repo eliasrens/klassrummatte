@@ -174,6 +174,7 @@ const Menu = (() => {
     const showKlocka    = areas.some(a => a === 'klocka');
     const showBrak      = areas.includes('brak');
     const showPrioritet = areas.includes('prioritet');
+    const showEgna     = Settings.isCustomProblemsEnabled();
 
     function setSection(labelId, sectionId, show) {
       const lbl = document.getElementById(labelId);
@@ -193,6 +194,7 @@ const Menu = (() => {
     setSection('klocka-group-label',    'klocka-section',    showKlocka);
     setSection('brak-group-label',      'brak-section',      showBrak);
     setSection('prioritet-group-label', 'prioritet-section', showPrioritet);
+    setSection('egna-uppgifter-group-label', 'egna-uppgifter-section', showEgna);
     document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
     updateBrakTypeAvailability();
     updateProblemlosningCheckbox();
@@ -225,7 +227,7 @@ const Menu = (() => {
     });
 
     if (changed) {
-      const checked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value);
+      const checked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value).filter(v => v !== 'egna-uppgifter');
       Settings.setAreas(checked);
       updateConditionalSections();
       updateBildstodCheckbox();
@@ -255,7 +257,11 @@ const Menu = (() => {
     document.getElementById('grade-select').value = s.gradeSelected ? s.grade : '';
 
     document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
-      cb.checked = s.areas.includes(cb.value);
+      if (cb.value === 'egna-uppgifter') {
+        cb.checked = Settings.isCustomProblemsEnabled();
+      } else {
+        cb.checked = s.areas.includes(cb.value);
+      }
     });
     updateAreaImplicitHint();
 
@@ -319,7 +325,6 @@ const Menu = (() => {
     document.getElementById('multiple-count-wrap').classList.toggle('hidden', !s.multipleProblems);
     document.getElementById('discussion-check').checked     = s.discussionEnabled || false;
     document.getElementById('session-limit-select').value   = s.sessionLimit || 'unlimited';
-    document.getElementById('custom-problems-check').checked = Settings.isCustomProblemsEnabled();
     updateCustomProblemsStatus();
     updateConditionalSections();
     updateAreaCheckboxAvailability();
@@ -350,8 +355,12 @@ const Menu = (() => {
 
     document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
       cb.addEventListener('change', () => {
-        const checked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value);
-        Settings.setAreas(checked);
+        const allChecked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value);
+        // 'egna-uppgifter' är inte ett riktigt plugin-område – hanteras separat
+        const areas = allChecked.filter(v => v !== 'egna-uppgifter');
+        const customEnabled = allChecked.includes('egna-uppgifter');
+        Settings.setAreas(areas);
+        Settings.setCustomProblemsEnabled(customEnabled);
         updateAreaImplicitHint();
         updateConditionalSections();
         updateBildstodCheckbox();
@@ -498,10 +507,6 @@ const Menu = (() => {
       App.resetSession();
     });
 
-    document.getElementById('custom-problems-check').addEventListener('change', e => {
-      Settings.setCustomProblemsEnabled(e.target.checked);
-    });
-
     document.getElementById('custom-download-template-btn').addEventListener('click', () => {
       CustomProblems.downloadTemplate();
     });
@@ -543,6 +548,7 @@ const Menu = (() => {
       e.stopPropagation();
       document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setAreas([]);
+      Settings.setCustomProblemsEnabled(false);
 
       document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setAddSubMode([]);

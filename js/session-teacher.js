@@ -77,6 +77,14 @@
       if (stageSendBtn) stageSendBtn.disabled = !enabled;
     }
 
+    function updateLiveButtons(active) {
+      const nextBtn = $('next-problem-btn');
+      const problemDisplay = $('problem-display');
+      const problemVisible = problemDisplay && problemDisplay.classList.contains('visible');
+      if (nextBtn) nextBtn.classList.toggle('problem-visible', active && problemVisible);
+      if (stageSendBtn) stageSendBtn.classList.toggle('problem-visible', active && problemVisible);
+    }
+
     async function sendCurrentProblem() {
       if (!sessionId) {
         alert('Starta en livesession först.');
@@ -137,6 +145,8 @@
         setSendEnabled(true);
         submissionsSection.style.display = 'block';
         attachSubmissionsListener();
+        // Visa "Nästa uppgift"-knappen om en uppgift redan visas
+        updateLiveButtons(true);
       } catch (err) {
         console.error('Kunde inte starta session', err);
         alert('Kunde inte starta livesession. Kontrollera internetanslutning och Firestore.');
