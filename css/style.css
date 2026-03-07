@@ -1269,7 +1269,9 @@ body.extra-visible .session-counter {
 /* Högerkolumn: stort vänsterpadding → innehållet trycks bort från linjen */
 .problems-grid--4 .problem-cell:nth-child(even) { padding-left: clamp(5rem, 8vw, 9rem); padding-right: clamp(2rem, 3vw, 3rem); }
 /* Answer-box i flerfrågesläget: håll den inuti sin cell */
-.problem-cell .answer-box { top: auto; bottom: 0.5rem; }
+.problem-cell .answer-box { top: auto; bottom: 0.3rem; }
+/* Textproblem i multi-mode: extra padding för svarsrutan */
+.problem-cell:has(.text-problem) { padding-bottom: clamp(3rem, 6vh, 5.5rem); }
 
 /* 3-col: prevent arithmetic expression wrapping */
 .problems-grid--3 .problem-cell > span { white-space: nowrap; }
