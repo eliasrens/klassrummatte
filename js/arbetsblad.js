@@ -115,33 +115,40 @@ const Arbetsblad = (() => {
       const ansSpace = document.createElement('div');
       ansSpace.className = 'ab-answer-space ab-answer-space--text';
 
-      // Vänster: tom rityta
-      const drawArea = document.createElement('div');
-      drawArea.className = 'ab-draw-area';
-      ansSpace.appendChild(drawArea);
+      if (showAns && problem) {
+        const key = document.createElement('div');
+        key.className = 'ab-answer-key';
+        key.textContent = `Svar: ${problem.answer}`;
+        ansSpace.appendChild(key);
+      } else {
+        // Vänster: tom rityta
+        const drawArea = document.createElement('div');
+        drawArea.className = 'ab-draw-area';
+        ansSpace.appendChild(drawArea);
 
-      // Höger: rutnät + svarslinje
-      const gridWrap = document.createElement('div');
-      gridWrap.className = 'ab-text-grid-wrap';
+        // Höger: rutnät + svarslinje
+        const gridWrap = document.createElement('div');
+        gridWrap.className = 'ab-text-grid-wrap';
 
-      const table = document.createElement('table');
-      table.className = 'ab-answer-grid ab-answer-grid--small';
-      const ROWS = 4, COLS = 4;
-      for (let r = 0; r < ROWS; r++) {
-        const tr = document.createElement('tr');
-        for (let c = 0; c < COLS; c++) {
-          tr.appendChild(document.createElement('td'));
+        const table = document.createElement('table');
+        table.className = 'ab-answer-grid ab-answer-grid--small';
+        const ROWS = 4, COLS = 4;
+        for (let r = 0; r < ROWS; r++) {
+          const tr = document.createElement('tr');
+          for (let c = 0; c < COLS; c++) {
+            tr.appendChild(document.createElement('td'));
+          }
+          table.appendChild(tr);
         }
-        table.appendChild(tr);
+        gridWrap.appendChild(table);
+
+        const svarLine = document.createElement('div');
+        svarLine.className = 'ab-answer-svar';
+        svarLine.innerHTML = 'Svar: <span class="ab-answer-svar-line"></span>';
+        gridWrap.appendChild(svarLine);
+
+        ansSpace.appendChild(gridWrap);
       }
-      gridWrap.appendChild(table);
-
-      const svarLine = document.createElement('div');
-      svarLine.className = 'ab-answer-svar';
-      svarLine.innerHTML = 'Svar: <span class="ab-answer-svar-line"></span>';
-      gridWrap.appendChild(svarLine);
-
-      ansSpace.appendChild(gridWrap);
       card.appendChild(ansSpace);
     } else {
       card.appendChild(content);
@@ -278,6 +285,18 @@ const Arbetsblad = (() => {
   // =========================================================
   //  Publik API
   // =========================================================
+  function isDuplicate(problem, list) {
+    if (!problem) return false;
+    const plugin = PluginManager.get(problem.type);
+    if (plugin && typeof plugin.isSameProblem === 'function') {
+      return list.some(existing => existing && plugin.isSameProblem(problem, existing));
+    }
+    // Fallback: jämför answer + type
+    return list.some(existing => existing &&
+      existing.type === problem.type &&
+      String(existing.answer) === String(problem.answer));
+  }
+
   function generate() {
     const cfg      = readConfig();
     const settings = makeSettings(cfg);
@@ -285,8 +304,17 @@ const Arbetsblad = (() => {
 
     for (let i = 0; i < cfg.count; i++) {
       let p = null;
-      for (let attempt = 0; attempt < 5 && !p; attempt++) {
-        p = generateOne(settings);
+      for (let attempt = 0; attempt < 10 && !p; attempt++) {
+        const candidate = generateOne(settings);
+        if (candidate && !isDuplicate(candidate, sheetProblems)) {
+          p = candidate;
+        }
+      }
+      // Om inga unika hittades efter 10 försök, ta vad som helst
+      if (!p) {
+        for (let attempt = 0; attempt < 3 && !p; attempt++) {
+          p = generateOne(settings);
+        }
       }
       sheetProblems.push(p);
     }
@@ -306,11 +334,8 @@ const Arbetsblad = (() => {
   }
 
   // =========================================================
-  //  Initiering
-  // =========================================================
-  // =========================================================
-  //  Utskrift via dold iframe – all CSS inlinas direkt, inga
-  //  externa filer att ladda → fungerar även med file://.
+  //  Utskrift via dold iframe – laddar CSS via <link>,
+  //  fungerar på både file:// och https://.
   // =========================================================
   function printViaIframe() {
     const wrap = document.getElementById('ab-sheet');
@@ -357,12 +382,24 @@ const Arbetsblad = (() => {
     };
   }
 
+  function updateColsVisibility() {
+    const colsGroup = document.getElementById('ab-cols')?.closest('.config-group');
+    const isProblemlosning = document.getElementById('ab-problemlosning')?.checked;
+    if (colsGroup) {
+      colsGroup.style.opacity = isProblemlosning ? '0.4' : '1';
+      colsGroup.style.pointerEvents = isProblemlosning ? 'none' : '';
+    }
+  }
+
   function init() {
     document.getElementById('ab-generate-btn')
       ?.addEventListener('click', generate);
 
     document.getElementById('ab-print-btn')
       ?.addEventListener('click', printViaIframe);
+
+    document.getElementById('ab-problemlosning')
+      ?.addEventListener('change', updateColsVisibility);
 
     const areaToggle = document.getElementById('ab-areas-toggle');
     const areaPopup  = document.getElementById('areas-popup');
