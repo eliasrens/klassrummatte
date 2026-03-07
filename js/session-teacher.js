@@ -18,6 +18,43 @@
     return String(Math.floor(1000 + Math.random() * 9000));
   }
 
+  /** Kontrollerar om en sessionskod redan används (undviker kollision vid flera lärare). */
+  async function isCodeTaken(code) {
+    const snap = await db.collection('sessions').where('code', '==', code).limit(1).get();
+    return !snap.empty;
+  }
+
+  /** Skapar en session med en kod som inte redan används. */
+  async function createSessionWithUniqueCode() {
+    const maxTries = 10;
+    for (let i = 0; i < maxTries; i++) {
+      const code = genCode();
+      if (!(await isCodeTaken(code))) {
+        const now = new Date();
+        const docRef = await db.collection('sessions').add({
+          code,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          createdAtLocal: now.toISOString(),
+          activeProblem: null,
+          problemIndex: 0,
+        });
+        return { docRef, code };
+      }
+    }
+    return null; // osannolikt – 10 kollisioner i rad
+  }
+
+  /** Raderar en session och alla dess elevsvar (submissions). Rensar Firestore. */
+  async function deleteSession(sid) {
+    if (!sid) return;
+    const sessionRef = db.collection('sessions').doc(sid);
+    const subsSnap = await sessionRef.collection('submissions').get();
+    const batch = db.batch();
+    subsSnap.docs.forEach((d) => batch.delete(d.ref));
+    batch.delete(sessionRef);
+    await batch.commit();
+  }
+
   function $(id) {
     return document.getElementById(id);
   }
@@ -82,19 +119,17 @@
 
     startBtn.addEventListener('click', async () => {
       try {
-        if (sessionId) {
-          // Startknappen fungerar som "starta om" – skapa ny session
+        const oldSessionId = sessionId;
+        if (oldSessionId) {
           if (unsubSubmissions) { unsubSubmissions(); unsubSubmissions = null; }
+          await deleteSession(oldSessionId);
         }
-        const code = genCode();
-        const now = new Date();
-        const docRef = await db.collection('sessions').add({
-          code,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          createdAtLocal: now.toISOString(),
-          activeProblem: null,
-          problemIndex: 0,
-        });
+        const result = await createSessionWithUniqueCode();
+        if (!result) {
+          alert('Kunde inte skapa unik sessionskod. Försök igen.');
+          return;
+        }
+        const { docRef, code } = result;
         sessionId = docRef.id;
         problemIndex = 0;
         codeText.textContent = `Sessionskod för elever: ${code}`;
