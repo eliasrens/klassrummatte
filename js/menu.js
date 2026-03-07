@@ -1,0 +1,615 @@
+// js/menu.js
+// Menyhantering: hamburgarmeny, hopfällbara grupper och inställnings-UI.
+// Beror på Settings-modulen för att läsa/skriva inställningar.
+
+const Menu = (() => {
+
+  // =========================================================
+  //  Öppna/stänga menyn
+  // =========================================================
+  function toggleMenu() { document.body.classList.toggle('menu-open'); }
+  function closeMenu()  { document.body.classList.remove('menu-open'); }
+
+  // =========================================================
+  //  Hopfällbara menygrupper
+  // =========================================================
+  function collapseMenuLabel(label) {
+    label.classList.add('is-collapsed');
+    let el = label.nextElementSibling;
+    while (el && !el.classList.contains('menu-group-label')) {
+      el.classList.add('section-collapsed');
+      el = el.nextElementSibling;
+    }
+  }
+
+  function bindMenuCollapse() {
+    document.querySelectorAll('#settings-menu .menu-group-label').forEach(label => {
+      label.classList.add('is-collapsible');
+      label.addEventListener('click', () => {
+        const collapsed = label.classList.toggle('is-collapsed');
+        let el = label.nextElementSibling;
+        while (el && !el.classList.contains('menu-group-label')) {
+          el.classList.toggle('section-collapsed', collapsed);
+          el = el.nextElementSibling;
+        }
+      });
+
+      // Grundinställningar öppen vid första besök; Matematikområden öppen annars
+      const gradeAlreadySelected = Settings.get().gradeSelected;
+      const keepOpen = gradeAlreadySelected
+        ? label.id === 'matematikarea-group-label'
+        : label.id === 'grundinstallningar-group-label';
+      if (!keepOpen) collapseMenuLabel(label);
+    });
+  }
+
+  // =========================================================
+  //  Villkorliga sektioner och bildstöd-tillgänglighet
+  // =========================================================
+  function couldHaveBildstod(settings) {
+    const g = settings.grade;
+    const a = settings.areas;
+    return (a.includes('division')       && g <= 4)
+        || (a.includes('addition')       && g <= 3)
+        || (a.includes('subtraktion')    && g <= 3)
+        || (a.includes('multiplikation') && g <= 3)
+        || a.includes('matt-langd')
+        || a.includes('matt-volym')
+        || a.includes('brak');
+  }
+
+  function updateSpecificTablesVisibility() {
+    const tablesBasicChecked = document.querySelector('#multdiv-mode-checkboxes input[value="tables-basic"]').checked;
+    document.getElementById('specific-tables-wrap').classList.toggle('hidden', !tablesBasicChecked);
+  }
+
+  function updateAddSubVaxlingVisibility() {
+    const uppstallningChecked = document.querySelector('#addsub-mode-checkboxes input[value="uppstallning"]').checked;
+    document.getElementById('addsub-vaxling-wrap').classList.toggle('hidden', !uppstallningChecked);
+  }
+
+  function updateAreaImplicitHint() {
+    const anyChecked = document.querySelectorAll('#area-checkboxes input:checked').length > 0;
+    document.getElementById('area-implicit-hint').classList.toggle('hidden', anyChecked);
+  }
+
+  function updateAddSubImplicitHint() {
+    const anyChecked = document.querySelectorAll('#addsub-mode-checkboxes > label input:checked').length > 0;
+    document.getElementById('addsub-implicit-hint').classList.toggle('hidden', anyChecked);
+  }
+
+  function updateMultDivImplicitHint() {
+    const anyChecked = document.querySelectorAll('#multdiv-mode-checkboxes > label input:checked').length > 0;
+    document.getElementById('multdiv-implicit-hint').classList.toggle('hidden', anyChecked);
+  }
+
+  function updateGeometriImplicitHint() {
+    const anyChecked = document.querySelectorAll('#geometri-type-checkboxes input:checked').length > 0;
+    document.getElementById('geometri-implicit-hint').classList.toggle('hidden', anyChecked);
+  }
+
+  function updateKlockaImplicitHint() {
+    const anyChecked = document.querySelectorAll('#klocka-type-checkboxes input:checked').length > 0;
+    document.getElementById('klocka-implicit-hint').classList.toggle('hidden', anyChecked);
+  }
+
+  function updateCustomProblemsStatus() {
+    const el = document.getElementById('custom-problems-status');
+    if (!el) return;
+    const list = Settings.getCustomProblems();
+    if (list.length === 0) {
+      el.textContent = '';
+    } else {
+      el.textContent = `${list.length} uppgift${list.length === 1 ? '' : 'er'} importerade.`;
+    }
+  }
+
+  function getBrakPoolForGrade(grade) {
+    const level = PluginUtils.cfg(grade).fractions;
+    if (!level)               return ['name'];
+    if (level === 'intro')    return ['name', 'order-same-den', 'order-diff-den'];
+    if (level === 'same-den') return ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'compare', 'simplify', 'fraction-of-whole'];
+    if (level === 'diff-den') return ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'add-diff-den', 'sub-diff-den', 'compare', 'simplify', 'fraction-of-whole'];
+    return ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'add-diff-den', 'sub-diff-den', 'compare', 'simplify', 'fraction-of-whole', 'to-mixed'];
+  }
+
+  function updateBrakTypeAvailability() {
+    const s = Settings.get();
+    const pool = s.gradeSelected ? getBrakPoolForGrade(s.grade) : null;
+    document.querySelectorAll('#brak-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.disabled = pool ? !pool.includes(cb.value) : false;
+    });
+  }
+
+  function updateAddSubModeAvailability() {
+    const s = Settings.get();
+    const grade = s.grade;
+    const hasAddition = s.areas.includes('addition');
+
+    const decimalerCb = document.querySelector('#addsub-mode-checkboxes input[value="decimaler"]');
+    const decUnavail  = s.gradeSelected && grade < 4;
+    decimalerCb.disabled = decUnavail;
+    if (decUnavail && decimalerCb.checked) {
+      decimalerCb.checked = false;
+      const checked = [...document.querySelectorAll('#addsub-mode-checkboxes > label input:checked')].map(c => c.value);
+      Settings.setAddSubMode(checked);
+    }
+
+    const flerstegCb    = document.querySelector('#addsub-mode-checkboxes input[value="flersteg"]');
+    const flerstegUnavail = !hasAddition;
+    flerstegCb.disabled = flerstegUnavail;
+    if (flerstegUnavail && flerstegCb.checked) {
+      flerstegCb.checked = false;
+      const checked = [...document.querySelectorAll('#addsub-mode-checkboxes > label input:checked')].map(c => c.value);
+      Settings.setAddSubMode(checked);
+    }
+  }
+
+  function updateMenuConfiguredIndicator() {
+    const s = Settings.get();
+    const isConfigured = s.gradeSelected && s.areas.length > 0;
+    document.getElementById('menu-toggle').classList.toggle('menu-configured', isConfigured);
+  }
+
+  function updateProblemlosningCheckbox() {
+    const areas   = Settings.getAreas();
+    const canHave = areas.some(a => Templates.canWrap(a));
+    const cb      = document.getElementById('problemlosning-check');
+    cb.disabled   = !canHave;
+    if (!canHave && cb.checked) {
+      cb.checked = false;
+      Settings.setProblemlosning(false);
+      document.getElementById('flersteg-wrap').classList.add('hidden');
+      document.getElementById('flersteg-check').checked = false;
+      Settings.setFlersteg(false);
+    }
+  }
+
+  function updateConditionalSections() {
+    const areas        = Settings.getAreas();
+    const showAddSub   = areas.some(a => a === 'addition'  || a === 'subtraktion');
+    const showMultDiv  = areas.some(a => a === 'multiplikation' || a === 'division');
+    const showGeometri = areas.includes('geometri');
+    const showDivRest  = areas.includes('division');
+    const showKlocka    = areas.some(a => a === 'klocka');
+    const showBrak      = areas.includes('brak');
+    const showPrioritet = areas.includes('prioritet');
+
+    function setSection(labelId, sectionId, show) {
+      const lbl = document.getElementById(labelId);
+      const sec = document.getElementById(sectionId);
+      if (show) {
+        lbl.classList.remove('hidden', 'section-collapsed', 'is-collapsed');
+        sec.classList.remove('hidden', 'section-collapsed');
+      } else {
+        lbl.classList.add('hidden');
+        sec.classList.add('hidden');
+      }
+    }
+
+    setSection('addsub-group-label',  'addsub-section',  showAddSub);
+    setSection('multdiv-group-label',  'multdiv-section',  showMultDiv);
+    setSection('geometri-group-label', 'geometri-section', showGeometri);
+    setSection('klocka-group-label',     'klocka-section',     showKlocka);
+    setSection('brak-group-label',       'brak-section',       showBrak);
+    setSection('prioritet-group-label',  'prioritet-section',  showPrioritet);
+    document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
+    updateBrakTypeAvailability();
+    updateProblemlosningCheckbox();
+  }
+
+  // Vilka areas kräver en viss lägsta/högsta årskurs
+  const AREA_GRADE_LIMITS = {
+    'procent':      { min: 4 },
+    'matt-area':    { min: 4 },
+    'negativa-tal': { min: 5 },
+    'romerska':     { min: 4 },
+    'talsorter':    { max: 3 },
+  };
+
+  function updateAreaCheckboxAvailability() {
+    const s = Settings.get();
+    if (!s.gradeSelected) return;
+    const grade = s.grade;
+    let changed = false;
+
+    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
+      const limits = AREA_GRADE_LIMITS[cb.value];
+      if (!limits) { cb.disabled = false; return; }
+      const unavailable = (limits.min && grade < limits.min) || (limits.max && grade > limits.max);
+      cb.disabled = unavailable;
+      if (unavailable && cb.checked) {
+        cb.checked = false;
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      const checked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value);
+      Settings.setAreas(checked);
+      updateConditionalSections();
+      updateBildstodCheckbox();
+    }
+  }
+
+  function updateBildstodCheckbox() {
+    const s       = Settings.get();
+    const canHave = couldHaveBildstod(s);
+    const cb      = document.getElementById('bildstod-check');
+    const lbl     = cb.closest('.check-label--featured');
+    cb.disabled   = !canHave;
+    if (lbl) lbl.classList.toggle('bildstod-unavailable', !canHave);
+    if (!canHave && cb.checked) {
+      cb.checked = false;
+      Settings.setBildstod(false);
+      document.getElementById('bildstod-options').classList.add('hidden');
+    }
+  }
+
+  // =========================================================
+  //  Ladda inställningar till UI
+  // =========================================================
+  function loadSettingsIntoUI() {
+    const s = Settings.get();
+
+    document.getElementById('grade-select').value = s.gradeSelected ? s.grade : '';
+
+    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = s.areas.includes(cb.value);
+    });
+    updateAreaImplicitHint();
+
+    document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
+      cb.checked = s.addSubMode.includes(cb.value);
+    });
+    updateAddSubImplicitHint();
+    updateAddSubModeAvailability();
+
+    document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = (s.addSubVaxling || ['med']).includes(cb.value);
+    });
+    updateAddSubVaxlingVisibility();
+
+    document.querySelectorAll('#prioritet-ops-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = (s.prioritetOps || ['mult', 'div']).includes(cb.value);
+    });
+
+    const brakAll = ['name','order-same-den','order-diff-den','add-same-den','sub-same-den','compare','fraction-of-whole','simplify','add-diff-den','sub-diff-den','to-mixed'];
+    document.querySelectorAll('#brak-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = (s.brakTypes && s.brakTypes.length > 0) ? s.brakTypes.includes(cb.value) : true;
+    });
+    document.getElementById('brak-implicit-hint').classList.toggle('hidden',
+      !(s.brakTypes && s.brakTypes.length > 0 && s.brakTypes.length < brakAll.length));
+
+    document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
+      cb.checked = s.multDivMode.includes(cb.value);
+    });
+    updateMultDivImplicitHint();
+
+    document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = s.specificTables.includes(parseInt(cb.value, 10));
+    });
+    updateSpecificTablesVisibility();
+
+    const gTypes = Settings.getGeometriTypes();
+    document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = gTypes.includes(cb.value);
+    });
+    updateGeometriImplicitHint();
+
+    document.getElementById('bildstod-check').checked = s.bildstod;
+    document.getElementById('bildstod-options').classList.toggle('hidden', !s.bildstod);
+    document.getElementById('bildstod-delay-select').value = s.bildstodDelay ?? 10;
+    const kTypes = Settings.getKlockaTypes();
+    document.querySelectorAll('#klocka-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = kTypes.includes(cb.value);
+    });
+    updateKlockaImplicitHint();
+
+    document.getElementById('problemlosning-check').checked = s.problemlosning;
+    document.getElementById('flersteg-check').checked = s.flersteg || false;
+    document.getElementById('flersteg-wrap').classList.toggle('hidden', !s.problemlosning);
+    document.getElementById('extra-enabled-check').checked  = s.extraEnabled;
+    document.getElementById('extra-type-select').value      = s.extraType;
+    document.getElementById('extra-delay-select').value     = s.extraDelay ?? 10;
+    document.getElementById('extra-task-options').classList.toggle('hidden', !s.extraEnabled);
+    document.getElementById('division-rest-check').checked  = s.divisionRest || false;
+    document.getElementById('multiple-check').checked       = s.multipleProblems || false;
+    document.getElementById('multiple-count-select').value  = s.multipleCount || 2;
+    document.getElementById('multiple-count-wrap').classList.toggle('hidden', !s.multipleProblems);
+    document.getElementById('discussion-check').checked     = s.discussionEnabled || false;
+    document.getElementById('session-limit-select').value   = s.sessionLimit || 'unlimited';
+    document.getElementById('custom-problems-check').checked = Settings.isCustomProblemsEnabled();
+    updateCustomProblemsStatus();
+    updateConditionalSections();
+    updateAreaCheckboxAvailability();
+    updateBildstodCheckbox();
+    updateMenuConfiguredIndicator();
+  }
+
+  // =========================================================
+  //  Binda inställnings-UI
+  // =========================================================
+  function bindSettingsUI() {
+    document.getElementById('grade-select').addEventListener('change', e => {
+      Settings.setGrade(e.target.value);
+      if (!Settings.get().gradeSelected) {
+        Settings.setGradeSelected(true);
+        // Fäll ut Matematikområden automatiskt
+        const matLabel = document.getElementById('matematikarea-group-label');
+        if (matLabel && matLabel.classList.contains('is-collapsed')) {
+          matLabel.click();
+        }
+      }
+      updateAreaCheckboxAvailability();
+      updateBildstodCheckbox();
+      updateAddSubModeAvailability();
+      updateBrakTypeAvailability();
+      updateMenuConfiguredIndicator();
+    });
+
+    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value);
+        Settings.setAreas(checked);
+        updateAreaImplicitHint();
+        updateConditionalSections();
+        updateBildstodCheckbox();
+        updateAddSubModeAvailability();
+        updateMenuConfiguredIndicator();
+      });
+    });
+
+    document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#addsub-mode-checkboxes > label input:checked')].map(c => c.value);
+        Settings.setAddSubMode(checked);
+        // När uppstallning bockas i: markera båda växlingsalternativen automatiskt
+        if (cb.value === 'uppstallning' && cb.checked) {
+          document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(v => { v.checked = true; });
+          Settings.setAddSubVaxling(['med', 'utan']);
+        }
+        updateAddSubVaxlingVisibility();
+        updateAddSubImplicitHint();
+      });
+    });
+
+    document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#addsub-vaxling-checkboxes input:checked')].map(c => c.value);
+        if (checked.length > 0) Settings.setAddSubVaxling(checked);
+        else cb.checked = true;
+      });
+    });
+
+    document.querySelectorAll('#prioritet-ops-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#prioritet-ops-checkboxes input:checked')].map(c => c.value);
+        if (checked.length > 0) Settings.setPrioritetOps(checked);
+        else cb.checked = true; // minst ett måste vara valt
+      });
+    });
+
+    const brakAll = ['name','order-same-den','order-diff-den','add-same-den','sub-same-den','compare','fraction-of-whole','simplify','add-diff-den','sub-diff-den','to-mixed'];
+    document.querySelectorAll('#brak-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#brak-type-checkboxes input:not(:disabled):checked')].map(c => c.value);
+        if (checked.length > 0) Settings.setBrakTypes(checked);
+        else cb.checked = true; // minst ett måste vara valt
+        const enabledCount = document.querySelectorAll('#brak-type-checkboxes input:not(:disabled)').length;
+        document.getElementById('brak-implicit-hint').classList.toggle('hidden', checked.length >= enabledCount);
+      });
+    });
+
+    document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#multdiv-mode-checkboxes > label input:checked')].map(c => c.value);
+        Settings.setMultDivMode(checked);
+        if (cb.value === 'tables-basic') {
+          document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(tcb => {
+            tcb.checked = cb.checked;
+          });
+          Settings.setSpecificTables(cb.checked ? [1,2,3,4,5,6,7,8,9] : []);
+        }
+        updateSpecificTablesVisibility();
+        updateMultDivImplicitHint();
+      });
+    });
+
+    document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#specific-tables-checkboxes input:checked')]
+          .map(c => parseInt(c.value, 10));
+        if (checked.length > 0) Settings.setSpecificTables(checked);
+        else cb.checked = true;
+      });
+    });
+
+    document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#geometri-type-checkboxes input:checked')].map(c => c.value);
+        Settings.setGeometriTypes(checked);
+        updateGeometriImplicitHint();
+      });
+    });
+
+    document.getElementById('bildstod-check').addEventListener('change', e => {
+      Settings.setBildstod(e.target.checked);
+      document.getElementById('bildstod-options').classList.toggle('hidden', !e.target.checked);
+    });
+
+    document.getElementById('bildstod-delay-select').addEventListener('change', e => {
+      Settings.setBildstodDelay(e.target.value);
+    });
+
+    document.querySelectorAll('#klocka-type-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#klocka-type-checkboxes input:checked')].map(c => c.value);
+        Settings.setKlockaTypes(checked);
+        updateKlockaImplicitHint();
+      });
+    });
+
+    document.getElementById('problemlosning-check').addEventListener('change', e => {
+      Settings.setProblemlosning(e.target.checked);
+      document.getElementById('flersteg-wrap').classList.toggle('hidden', !e.target.checked);
+      if (!e.target.checked) {
+        document.getElementById('flersteg-check').checked = false;
+        Settings.setFlersteg(false);
+      }
+    });
+
+    document.getElementById('flersteg-check').addEventListener('change', e => {
+      Settings.setFlersteg(e.target.checked);
+    });
+
+    document.getElementById('extra-enabled-check').addEventListener('change', e => {
+      Settings.setExtraEnabled(e.target.checked);
+      document.getElementById('extra-task-options').classList.toggle('hidden', !e.target.checked);
+    });
+
+    document.getElementById('extra-type-select').addEventListener('change', e => {
+      Settings.setExtraType(e.target.value);
+    });
+
+    document.getElementById('extra-delay-select').addEventListener('change', e => {
+      Settings.setExtraDelay(e.target.value);
+    });
+
+    document.getElementById('division-rest-check').addEventListener('change', e => {
+      Settings.setDivisionRest(e.target.checked);
+    });
+
+    document.getElementById('multiple-check').addEventListener('change', e => {
+      Settings.setMultipleProblems(e.target.checked);
+      document.getElementById('multiple-count-wrap').classList.toggle('hidden', !e.target.checked);
+    });
+
+    document.getElementById('multiple-count-select').addEventListener('change', e => {
+      Settings.setMultipleCount(e.target.value);
+    });
+
+    document.getElementById('discussion-check').addEventListener('change', e => {
+      Settings.setDiscussionEnabled(e.target.checked);
+    });
+
+    document.getElementById('session-limit-select').addEventListener('change', e => {
+      Settings.setSessionLimit(e.target.value);
+      App.resetSession();
+    });
+
+    document.getElementById('custom-problems-check').addEventListener('change', e => {
+      Settings.setCustomProblemsEnabled(e.target.checked);
+    });
+
+    document.getElementById('custom-download-template-btn').addEventListener('click', () => {
+      CustomProblems.downloadTemplate();
+    });
+
+    document.getElementById('custom-problems-file-input').addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const text = (ev.target && ev.target.result) || '';
+        const result = CustomProblems.importFromCsvText(text);
+        updateCustomProblemsStatus();
+        const statusEl = document.getElementById('custom-problems-status');
+        if (result.success) {
+          statusEl.textContent = `${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade.`;
+        } else {
+          statusEl.textContent = result.error || 'Import misslyckades.';
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
+      e.target.value = '';
+    });
+
+    document.getElementById('custom-import-paste-btn').addEventListener('click', () => {
+      const textarea = document.getElementById('custom-problems-paste');
+      const text = (textarea && textarea.value) || '';
+      const result = CustomProblems.importFromCsvText(text);
+      updateCustomProblemsStatus();
+      const statusEl = document.getElementById('custom-problems-status');
+      if (result.success) {
+        statusEl.textContent = `${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade.`;
+        if (textarea) textarea.value = '';
+      } else {
+        statusEl.textContent = result.error || 'Import misslyckades.';
+      }
+    });
+
+    document.getElementById('clear-areas-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setAreas([]);
+
+      document.querySelectorAll('#addsub-mode-checkboxes > label input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setAddSubMode([]);
+
+      document.querySelectorAll('#addsub-vaxling-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = cb.value === 'med'; });
+      Settings.setAddSubVaxling(['med']);
+
+      document.querySelectorAll('#prioritet-ops-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = true; });
+      Settings.setPrioritetOps(['mult', 'div']);
+
+      document.querySelectorAll('#brak-type-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = true; });
+      Settings.setBrakTypes([]);
+      document.getElementById('brak-implicit-hint').classList.add('hidden');
+
+      document.querySelectorAll('#multdiv-mode-checkboxes > label input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setMultDivMode([]);
+
+      document.querySelectorAll('#specific-tables-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setSpecificTables([]);
+
+      document.querySelectorAll('#geometri-type-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setGeometriTypes([]);
+
+      document.querySelectorAll('#klocka-type-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setKlockaTypes([]);
+
+      document.getElementById('problemlosning-check').checked = false;
+      Settings.setProblemlosning(false);
+      document.getElementById('flersteg-wrap').classList.add('hidden');
+      document.getElementById('flersteg-check').checked = false;
+      Settings.setFlersteg(false);
+
+      document.getElementById('extra-enabled-check').checked = false;
+      Settings.setExtraEnabled(false);
+      document.getElementById('extra-task-options').classList.add('hidden');
+
+      document.getElementById('discussion-check').checked = false;
+      Settings.setDiscussionEnabled(false);
+
+      document.getElementById('session-limit-select').value = 'unlimited';
+      Settings.setSessionLimit('unlimited');
+      App.resetSession();
+
+      document.getElementById('multiple-check').checked = false;
+      Settings.setMultipleProblems(false);
+      document.getElementById('multiple-count-wrap').classList.add('hidden');
+
+      updateAreaImplicitHint();
+      updateConditionalSections();
+      updateSpecificTablesVisibility();
+      updateAddSubImplicitHint();
+      updateMultDivImplicitHint();
+      updateBildstodCheckbox();
+      updateMenuConfiguredIndicator();
+    });
+  }
+
+  // =========================================================
+  //  Init – anropas från app.js
+  // =========================================================
+  function init(menuToggleEl, menuOverlayEl) {
+    loadSettingsIntoUI();
+    bindSettingsUI();
+    bindMenuCollapse();
+    menuToggleEl.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
+    menuOverlayEl.addEventListener('click', closeMenu);
+  }
+
+  return { init, toggleMenu, closeMenu };
+})();

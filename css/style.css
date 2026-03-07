@@ -1,0 +1,1750 @@
+/* ============================================================
+   Klassrummatte – Stilmall
+   Optimerad för projektor/storskärm i klassrum
+   ============================================================ */
+
+/* === Variabler === */
+:root {
+  --bg:             #f5f4f0;
+  --text:           #1a1a2e;
+  --text-muted:     #6b7280;
+  --accent:         #e63946;
+  --accent-2:       #457b9d;
+  --accent-3:       #2a9d8f;
+  --accent-warm:    #e9c46a;
+  --menu-bg:        #1a1a2e;
+  --menu-text:      #f0eeea;
+  --menu-border:    rgba(255,255,255,0.1);
+  --menu-hover:     rgba(255,255,255,0.08);
+  --menu-width:     560px;
+  --extra-width:    320px;
+  --problem-size:   clamp(2.4rem, 8vw, 6rem);
+  --problem-size-text: clamp(1.6rem, 4vw, 3rem);
+  --extra-size:     clamp(1.8rem, 3.5vw, 3rem);
+  --radius:         10px;
+  --shadow:         0 4px 24px rgba(0,0,0,0.12);
+  --transition:     0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === Reset & bas === */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Elevsida – tillåt scroll och vanlig layout */
+.student-page-root {
+  overflow: auto;
+  height: auto;
+}
+
+body.student-page {
+  overflow: auto;
+}
+
+body.student-page #stage {
+  position: static;
+  inset: auto;
+  height: auto;
+  min-height: 100vh;
+  cursor: auto;
+}
+
+/* === Hamburgarmeny-knapp === */
+#menu-toggle {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 300;
+  background: var(--menu-bg);
+  color: var(--menu-text);
+  border: none;
+  border-radius: var(--radius);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: background var(--transition), transform var(--transition);
+}
+
+#menu-toggle:hover {
+  background: #2d3563;
+  transform: scale(1.05);
+}
+
+.burger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--menu-text);
+  border-radius: 2px;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+/* Burger → X vid öppen meny */
+body.menu-open #menu-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+#menu-toggle.menu-configured::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-3);
+  box-shadow: 0 0 0 2px var(--menu-bg);
+}
+body.menu-open #menu-toggle.menu-configured::after {
+  display: none;
+}
+body.menu-open #menu-toggle .burger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+body.menu-open #menu-toggle .burger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+body.menu-open #menu-toggle .burger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* === Helskärmsknapp === */
+#fullscreen-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 300;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: var(--radius);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--transition), background var(--transition), right var(--transition);
+}
+
+body.extra-visible #fullscreen-btn {
+  right: calc(var(--extra-width) + 1rem);
+}
+
+#fullscreen-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#fullscreen-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.fs-icon-compress { display: none; }
+#fullscreen-btn.is-fullscreen .fs-icon-expand  { display: none; }
+#fullscreen-btn.is-fullscreen .fs-icon-compress { display: block; }
+
+/* === Overlay (bakom meny) === */
+#menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+body.menu-open #menu-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* === Sidomeny === */
+#settings-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--menu-width);
+  background: var(--menu-bg);
+  color: var(--menu-text);
+  transform: translateX(calc(-1 * var(--menu-width)));
+  transition: transform var(--transition);
+  z-index: 200;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+body.menu-open #settings-menu {
+  transform: translateX(0);
+}
+
+.menu-header {
+  display: flex;
+  align-items: baseline;
+  border-bottom: 1px solid var(--menu-border);
+  margin-bottom: 0.5rem;
+}
+#settings-menu h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  padding: 3.5rem 0.5rem 0.75rem;
+  flex: 1;
+}
+
+/* Grupprubrik i menyn */
+.menu-group-label {
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  padding: 1.1rem 0.5rem 0.3rem;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  margin-bottom: 0.1rem;
+}
+
+.menu-section {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--menu-border);
+}
+
+.section-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 0.6rem;
+}
+
+/* Select */
+select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255,255,255,0.08);
+  color: var(--menu-text);
+  border: 1px solid var(--menu-border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+select:focus {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 1px;
+}
+
+select option {
+  background: #1a1a2e;
+  color: var(--menu-text);
+}
+
+/* Checkboxar */
+#area-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+#multdiv-mode-checkboxes,
+#addsub-mode-checkboxes,
+#geometri-type-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+/* Kategorier i matematikområden */
+.area-category {
+  margin-bottom: 0.05rem;
+}
+
+.area-category-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+  padding: 0.55rem 0.5rem 0.1rem;
+}
+
+.area-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background var(--transition);
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.check-label:hover {
+  background: var(--menu-hover);
+}
+
+.check-label input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.check-label input[type="checkbox"]:checked {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
+.check-label input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 6px;
+  height: 10px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.check-label--has-sub span::after {
+  content: '⚙';
+  font-size: 0.6em;
+  margin-left: 0.3em;
+  opacity: 0.2;
+  vertical-align: middle;
+}
+.check-label--has-sub input:checked ~ span::after {
+  opacity: 0.55;
+}
+
+.check-label--mixed {
+  margin-top: 0.3rem;
+  border-top: 1px solid var(--menu-border);
+  padding-top: 0.6rem;
+  color: rgba(255,255,255,0.7);
+  font-style: italic;
+}
+
+.check-label--featured {
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.check-label small {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  font-style: normal;
+}
+
+#extra-task-options {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--menu-border);
+}
+
+/* === Hjälpklass === */
+.hidden { display: none !important; }
+
+/* === Huvudscen === */
+#stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  /* Ger plats åt extrauppgiftspanelen när den är synlig */
+  transition: padding-right var(--transition);
+}
+
+#stage:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--accent-2);
+}
+
+body.extra-visible #stage {
+  padding-right: var(--extra-width);
+}
+
+/* === Problemvisning === */
+#problem-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 3vw, 3rem);
+  flex-wrap: wrap;
+  padding: clamp(1rem, 4vw, 3rem);
+  font-size: var(--problem-size);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text);
+  position: relative; /* Ankare för bildstöd och svar (absolut positionerade) */
+
+  opacity: 0;
+  transform: scale(0.88) translateY(12px);
+  transition: opacity 0.38s ease, transform 0.38s ease;
+}
+
+#problem-display.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Textuppgifter: lite mindre, med radbrytning */
+#problem-display .text-problem {
+  font-size: var(--problem-size-text);
+  font-weight: 600;
+  max-width: min(900px, 80vw);
+  line-height: 1.55;
+  text-align: center;
+}
+
+/* === Bråkvisning === */
+.fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  font-variant-numeric: lining-nums;
+}
+
+.fraction .numerator {
+  border-bottom: 0.07em solid currentColor;
+  padding: 0 0.15em 0.12em;
+  line-height: 1.1;
+  text-align: center;
+  min-width: 0.8em;
+}
+
+.fraction .denominator {
+  padding: 0.12em 0.15em 0;
+  line-height: 1.1;
+  text-align: center;
+  min-width: 0.8em;
+}
+
+
+/* === Prioriteringsregler === */
+.prioritet-display {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0;
+}
+
+.prioritet-hint {
+  font-size: clamp(0.85rem, 2vw, 1.3rem);
+  font-weight: 400;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: min(720px, 82vw);
+  line-height: 1.45;
+}
+
+/* === Klickhint === */
+#click-hint {
+  position: absolute;
+  bottom: 4vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+  color: var(--text-muted);
+  pointer-events: auto;
+  transition: opacity 0.4s ease;
+  letter-spacing: 0.02em;
+}
+
+#click-hint.hidden-hint {
+  opacity: 0;
+}
+
+/* === Extrauppgiftspanel === */
+#extra-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: var(--extra-width);
+  background: white;
+  border-left: 4px solid var(--accent-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1.5rem;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.45s ease;
+  z-index: 50;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+}
+
+#extra-panel.visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.extra-label {
+  position: absolute;
+  top: 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+#extra-display {
+  font-size: var(--extra-size);
+  font-weight: 700;
+  color: var(--text);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  position: relative; /* ankare för .answer-box vid bråk */
+}
+
+/* === Uppställning === */
+.uppstallning {
+  font-family: 'Lucida Console', 'Lucida Sans Typewriter', 'Courier New', monospace;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1em;
+  font-size: var(--extra-size);
+}
+
+.uppstallning-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  white-space: pre;
+}
+
+.uppstallning-operator {
+  color: var(--accent);
+}
+
+.uppstallning-line {
+  width: 100%;
+  height: 3px;
+  background: var(--text);
+  border-radius: 2px;
+  margin: 0.15em 0;
+}
+
+.uppstallning-answer {
+  opacity: 0; /* Svaret är dolt tills "Visa svar" klickas */
+  color: var(--accent);
+  transition: opacity 0.3s ease;
+}
+
+.uppstallning-answer.shown {
+  opacity: 1;
+}
+
+/* Uppställning i huvudvisningen – ärv font-storlek från #problem-display */
+#problem-display .uppstallning {
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+/* I multi-mode ärver uppställningen grid-cellens --problem-size istället */
+#problem-display.multi-mode .uppstallning {
+  font-size: var(--problem-size);
+}
+
+/* === SVG-klocka === */
+.clock-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.clock-svg {
+  width: clamp(140px, 30vw, 280px);
+  height: clamp(140px, 30vw, 280px);
+}
+
+.clock-question {
+  font-size: clamp(1.4rem, 3.5vw, 2.8rem);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Klocka i flerfrågesläget */
+.problem-cell .clock-svg      { width: clamp(101px, 16vw, 158px); height: clamp(101px, 16vw, 158px); }
+.problem-cell .clock-question { font-size: clamp(1.15rem, 2.3vw, 1.58rem); }
+.problem-cell .clock-container { gap: 0.3rem; }
+
+/* Extra-klocka (mindre) */
+#extra-display .clock-svg {
+  width: clamp(100px, 18vw, 180px);
+  height: clamp(100px, 18vw, 180px);
+}
+
+#extra-display .clock-question {
+  font-size: clamp(1rem, 2vw, 1.6rem);
+}
+
+/* === Geometri === */
+.geometry-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.geometry-shape {
+  font-size: 0.8em;
+  color: var(--accent-2);
+}
+
+.geometry-question {
+  font-size: 0.55em;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 0.3em;
+}
+
+/* === Mått === */
+.matt-display {
+  text-align: center;
+  line-height: 1.4;
+}
+
+.matt-unit {
+  color: var(--accent-2);
+}
+
+/* === Geometri SVG === */
+.geometry-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 2vw, 1.5rem);
+}
+
+.geometry-svg {
+  width: clamp(200px, 45vw, 380px);
+  height: auto;
+  overflow: visible;
+}
+
+.geometry-question {
+  font-size: clamp(1.4rem, 3.5vw, 2.8rem);
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+}
+
+/* Extra-geometri (lite mindre) */
+#extra-display .geometry-svg {
+  width: clamp(140px, 25vw, 240px);
+}
+
+#extra-display .geometry-question {
+  font-size: clamp(1rem, 2vw, 1.6rem);
+}
+
+/* === Division-rutnät (bildstöd) === */
+.division-grid {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.3rem, 0.8vw, 0.6rem);
+  align-items: flex-start;
+}
+
+.division-grid-row {
+  display: flex;
+  gap: clamp(0.3rem, 0.8vw, 0.6rem);
+  align-items: center;
+}
+
+/* === Bildstöd – prickar (addition, subtraktion, multiplikation) === */
+.bildstod-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.25rem, 0.7vw, 0.5rem);
+  max-width: 40vw;
+  align-content: center;
+  justify-content: flex-start;
+  margin-top: 0.5rem;
+}
+
+.bildstod-mult-grid {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.3rem, 0.6vw, 0.5rem);
+  margin-top: 0.5rem;
+}
+
+.bildstod-row {
+  display: flex;
+  gap: clamp(0.3rem, 0.6vw, 0.5rem);
+}
+
+/* Gemensam prick-stil */
+.dot {
+  width: clamp(0.8rem, 2vw, 1.8rem);
+  height: clamp(0.8rem, 2vw, 1.8rem);
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* === Mått bildstöd === */
+.matt-bildstod {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.8rem;
+  justify-content: center;
+}
+
+.matt-block-big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(69,123,157,0.1);
+  border: 2px solid var(--accent-2);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+}
+
+.matt-block-label {
+  font-size: clamp(0.65rem, 1.2vw, 0.9rem);
+  font-weight: 700;
+  color: var(--accent-2);
+  white-space: nowrap;
+}
+
+.matt-block-sublabel {
+  font-size: clamp(0.55rem, 1vw, 0.75rem);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.matt-block-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-width: 120px;
+  justify-content: center;
+}
+
+.matt-block-small {
+  display: block;
+  width: clamp(8px, 1.5vw, 14px);
+  height: clamp(8px, 1.5vw, 14px);
+  border-radius: 3px;
+  background: var(--accent-2);
+  opacity: 0.7;
+}
+
+/* Döljer bildstöd-delar som hör till svaret tills "Visa svar" trycks */
+.brak-bildstod-answer { display: none; }
+
+/* === Bråk bildstöd – rutnät-SVG (fraction-of-whole) === */
+.brak-grid-svg {
+  height: clamp(80px, 16vw, 140px);
+  width: auto;
+  display: block;
+}
+
+/* === Bråk bildstöd – cirkel-SVG === */
+.brak-circle-svg {
+  width: clamp(70px, 13vw, 110px);
+  height: clamp(70px, 13vw, 110px);
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Host-container för inline bildstöd (cirkel ovanför respektive bråk) */
+.brak-frac-host {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  position: relative; /* ankare för absolut cirkel */
+}
+
+/* Cirkeln positioneras absolut ovanför bråket – påverkar inte layoutflödet */
+.brak-frac-host .brak-circle-svg {
+  position: absolute;
+  bottom: calc(100% + 0.4em);
+  left: 50%;
+}
+
+@keyframes brak-circle-appear {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.brak-circle-anim {
+  animation: brak-circle-appear 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* === Bråk – frågetyper (jämförelse, förenkla, blandat tal) === */
+.brak-question-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.brak-compare-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+}
+
+.brak-compare-eller {
+  font-size: clamp(1rem, 2.5vw, 1.8rem);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.brak-subtext {
+  font-size: clamp(0.9rem, 2vw, 1.5rem);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+}
+
+/* === Bildstöd – absolut positionerat till vänster om problemet === */
+@keyframes bildstod-slide-in {
+  from { opacity: 0; transform: translateY(-50%) translateX(-14px); }
+  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+
+.bildstod-container {
+  position: absolute;
+  right: calc(100% + 1.5rem); /* 1.5rem till vänster om problem-display */
+  top: 50%;
+  /* transform hanteras av animationen */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  max-width: min(26vw, 360px);
+}
+
+.bildstod-anim {
+  animation: bildstod-slide-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes bildstod-slide-in-above {
+  from { opacity: 0; transform: translateX(-50%) translateY(-14px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.bildstod-container--above {
+  right: auto;
+  top: auto;
+  bottom: calc(100% + 1rem);
+  left: 50%;
+  flex-direction: row;
+  align-items: flex-end;
+  max-width: none;
+  gap: 0.6rem;
+}
+
+.bildstod-container--above.bildstod-anim {
+  animation: bildstod-slide-in-above 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* === Hopfällbara menygrupper === */
+.menu-group-label.is-collapsible {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-group-label.is-collapsible::after {
+  content: '▾';
+  font-size: 1em;
+  flex-shrink: 0;
+  transition: transform var(--transition);
+}
+
+.menu-group-label.is-collapsible.is-collapsed::after {
+  transform: rotate(-90deg);
+}
+
+.section-collapsed {
+  display: none !important;
+}
+
+.clear-areas-btn {
+  margin-right: 0.75rem;
+  padding: 0.15em 0.55em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--menu-text);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  cursor: pointer;
+  line-height: 1.4;
+  opacity: 0.7;
+  transition: opacity var(--transition), color var(--transition);
+  flex-shrink: 0;
+}
+.clear-areas-btn:hover {
+  opacity: 1;
+  color: var(--clr-accent, #e63946);
+}
+
+/* === Implicit standardhint === */
+.implicit-hint {
+  margin: 0.35rem 0 0 0;
+  font-size: 0.71rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+/* === Responsiv justering === */
+/* === Öppna utsagor – blank === */
+/* overflow: hidden gör att baseline alltid = underkant av elementet (CSS-spec),
+   vilket håller strecket i jämnhöjd med talets botten oavsett om blanken är tom eller fylld */
+.open-blank {
+  display: inline-block;
+  min-width: 1.2em;
+  height: 1.1em;
+  line-height: 1.1em;
+  overflow: hidden;
+  border-bottom: 0.07em solid currentColor;
+  margin: 0 0.08em;
+  vertical-align: baseline;
+  text-align: center;
+}
+
+/* === Radioknappar (bildstöd-timing) === */
+.check-label input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.check-label input[type="radio"]:checked {
+  border-color: var(--accent-2);
+}
+
+.check-label input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-2);
+}
+
+#bildstod-options {
+  margin-top: 0.4rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+/* Separator under en grupp-div i menyn */
+.check-label--sep {
+  margin-top: 0.4rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--menu-border);
+}
+
+/* Bildstöd-checkbox när inget område stöder det */
+.check-label--featured.bildstod-unavailable {
+  opacity: 0.38;
+  pointer-events: none;
+}
+.check-label:has(input:disabled) {
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+/* === Visa svar-knapp === */
+.show-answer-btn {
+  position: absolute;
+  bottom: 4vh;
+  right: 2rem;
+  background: rgba(26, 26, 46, 0.07);
+  border: 1.5px solid rgba(26, 26, 46, 0.13);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 0.35rem 0.85rem;
+  font-size: clamp(0.72rem, 1.3vw, 0.88rem);
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  opacity: 0;
+  pointer-events: none;
+  transition: right var(--transition), opacity 0.3s ease, background 0.2s ease, color 0.2s ease;
+  z-index: 10;
+}
+
+.show-answer-btn.problem-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.show-answer-btn:hover {
+  background: rgba(26, 26, 46, 0.13);
+  color: var(--text);
+}
+
+.show-answer-btn:active {
+  transform: scale(0.97);
+}
+
+body.extra-visible .show-answer-btn {
+  right: calc(var(--extra-width) + 1.5rem);
+}
+
+/* Knapp för att skicka uppgift till elever (placerad till vänster) */
+.send-to-students-btn {
+  right: auto;
+  left: 2rem;
+}
+
+body.extra-visible .send-to-students-btn {
+  left: 2rem;
+}
+
+/* Knapp för nästa uppgift – centrerad nederkant */
+.next-problem-btn {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.next-problem-btn:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+body.extra-visible .next-problem-btn {
+  left: calc(50% - var(--extra-width) / 2);
+}
+
+/* === Sessionsräknare === */
+.session-counter {
+  position: absolute;
+  top: 1rem;
+  right: calc(44px + 2rem);
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  z-index: 10;
+  transition: right var(--transition);
+}
+
+body.extra-visible .session-counter {
+  right: calc(var(--extra-width) + 44px + 2rem);
+}
+
+/* === Diskussionsstöd === */
+.discussion-prompt {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  color: rgba(26, 26, 46, 0.6);
+  font-style: italic;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* === Svar-visning === */
+/* Förregistrerat svar – bevarar layoututrymme, döljer texten tills "Visa svar" klickas */
+.answer-hidden {
+  visibility: hidden;
+}
+
+.answer-value {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.answer-box {
+  /* Absolut under problemet – påverkar inte problemets position */
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4em;
+  background: rgba(230, 57, 70, 0.07);
+  border: 2px solid rgba(230, 57, 70, 0.18);
+  border-radius: 10px;
+  padding: 0.2em 0.7em;
+  font-size: 0.42em;
+}
+
+.answer-box-label {
+  color: var(--text-muted);
+  font-size: 0.82em;
+  font-weight: 600;
+}
+
+.open-blank--answered {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* === Specifika tabellval === */
+.specific-tables-wrap {
+  margin: 0.15rem 0 0.25rem 1.5rem;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-left: 2px solid rgba(255,255,255,0.1);
+}
+
+.specific-tables-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 0.25rem;
+}
+
+.specific-tables-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem;
+}
+
+.check-label--sm {
+  padding: 0.2rem 0.35rem;
+  font-size: 0.88rem;
+  min-width: 2.6rem;
+  justify-content: center;
+}
+
+/* === Flera uppgifter – grid === */
+/* Problem-display fyller hela scenen i multi-mode så att
+   grid-rader kan placeras mot hörnen med space-between */
+#problem-display.multi-mode {
+  align-self: stretch;
+  flex-grow: 1;
+  padding: 0;
+  align-items: stretch;
+}
+
+.problems-grid {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  gap: 0;
+  --problem-size:      clamp(1.87rem, 4.24vw, 3.69rem);
+  --problem-size-text: clamp(1.27rem, 2.64vw, 2.09rem);
+}
+
+.problems-grid--2 { grid-template-columns: 1fr 1fr; }
+.problems-grid--3 { grid-template-columns: 1fr 1fr 1fr; }
+.problems-grid--3 .tallinje-sequence {
+  font-size: clamp(1.37rem, 3.01vw, 2.46rem);
+  gap: clamp(0.13rem, 0.55vw, 0.41rem);
+}
+.problems-grid--4 { grid-template-columns: 1fr 1fr; }
+
+.problem-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: clamp(1.5rem, 3vh, 4rem) clamp(2rem, 3vw, 4rem);
+  border-right:  1px solid rgba(26, 26, 46, 0.1);
+  border-bottom: 1px solid rgba(26, 26, 46, 0.1);
+  font-size: var(--problem-size);
+}
+
+/* Remove right border from last column */
+.problems-grid--2 .problem-cell:nth-child(2n),
+.problems-grid--4 .problem-cell:nth-child(2n) { border-right: none; }
+.problems-grid--3 .problem-cell:nth-child(3n) { border-right: none; }
+
+/* Single-row grids: no bottom border needed */
+.problems-grid--2 .problem-cell,
+.problems-grid--3 .problem-cell { border-bottom: none; }
+
+/* 4-item grid: remove bottom border from last row, more vertical spacing */
+.problems-grid--4 .problem-cell:nth-last-child(-n+2) { border-bottom: none; }
+.problems-grid--4 .problem-cell {
+  padding-top:    clamp(2.5rem, 6vh, 7rem);
+  padding-bottom: clamp(2.5rem, 6vh, 7rem);
+}
+/* Vänsterkolumn: stort högerpadding → innehållet trycks bort från linjen */
+.problems-grid--4 .problem-cell:nth-child(odd)  { padding-left: clamp(2rem, 3vw, 3rem); padding-right: clamp(5rem, 8vw, 9rem); }
+/* Högerkolumn: stort vänsterpadding → innehållet trycks bort från linjen */
+.problems-grid--4 .problem-cell:nth-child(even) { padding-left: clamp(5rem, 8vw, 9rem); padding-right: clamp(2rem, 3vw, 3rem); }
+/* Answer-box i flerfrågesläget: håll den inuti sin cell */
+.problem-cell .answer-box { top: auto; bottom: 0.5rem; }
+
+/* 3-col: prevent arithmetic expression wrapping */
+.problems-grid--3 .problem-cell > span { white-space: nowrap; }
+
+/* Arithmetic cells: right-align so = signs line up within each column */
+.arithmetic-cell { justify-content: flex-end; }
+.arithmetic-cell .answer-value,
+.arithmetic-cell .answer-hidden {
+  display: inline-block;
+  min-width: 3ch;
+}
+
+/* === Extra-panel svar === */
+.extra-answer-btn {
+  position: absolute;
+  bottom: 4vh;
+  right: 1.5rem;
+  padding: 0.35rem 0.85rem;
+  font-size: clamp(0.72rem, 1.3vw, 0.88rem);
+  font-weight: 500;
+  font-family: inherit;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: rgba(26, 26, 46, 0.07);
+  border: 1.5px solid rgba(26, 26, 46, 0.13);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.extra-answer-btn:hover:not(:disabled) {
+  background: rgba(26, 26, 46, 0.13);
+  color: var(--text);
+}
+
+.extra-answer-btn:disabled {
+  cursor: default;
+}
+
+.extra-answer-reveal {
+  margin-top: 0.6rem;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8em;
+  text-align: center;
+}
+
+/* === Tallinje === */
+.tallinje-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 2vw, 1.2rem);
+}
+
+.tallinje-sequence {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(0.2rem, 1vw, 0.5rem);
+  font-size: clamp(1.8rem, 5vw, 3.6rem);
+  font-weight: 700;
+}
+
+.tallinje-box {
+  min-width: 1.4em;
+  text-align: center;
+}
+
+.tallinje-sep {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.tallinje-blank {
+  display: inline-block;
+  min-width: 1.2em;
+  border-bottom: 4px solid var(--text);
+  vertical-align: baseline;
+  text-align: center;
+}
+
+.tallinje-question {
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* === Talsorter === */
+.talsorter-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 2vw, 1.2rem);
+}
+
+.talsorter-display {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.05em;
+  font-size: clamp(2.8rem, 9vw, 6.5rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.talsorter-highlight {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  text-decoration-thickness: 0.08em;
+}
+
+.talsorter-question {
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.talsorter-answer {
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  font-weight: 700;
+}
+
+/* === Elevsvar under uppgift (lärarvy) === */
+.session-submissions-main {
+  position: absolute;
+  bottom: calc(4vh + 3rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: min(960px, 90vw);
+  justify-content: center;
+}
+
+.session-submissions-card {
+  min-width: 120px;
+  max-width: 220px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(15,23,42,0.16);
+  box-shadow: 0 4px 14px rgba(15,23,42,0.08);
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.session-submissions-card:hover {
+  background: #ffffff;
+  border-color: rgba(15,23,42,0.32);
+}
+
+.session-submissions-card-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.session-submissions-card-correct {
+  border-color: var(--accent-3);
+  background: rgba(42, 157, 143, 0.12);
+}
+
+.session-submissions-card-correct::after {
+  content: ' ✓';
+  color: var(--accent-3);
+  font-weight: 700;
+}
+
+/* === Popup för elevsvar (lärarvy) === */
+.submission-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 400;
+}
+
+.submission-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+}
+
+.submission-modal-content {
+  position: relative;
+  max-width: min(1100px, 94vw);
+  width: 100%;
+  max-height: min(880px, 92vh);
+  background: #f9fafb;
+  border-radius: 14px;
+  box-shadow: 0 18px 54px rgba(15,23,42,0.55);
+  padding: 1.2rem 1.4rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  z-index: 1;
+}
+
+.submission-modal-header h2 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.submission-modal-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0.1rem 0 0;
+}
+
+.submission-modal-body {
+  margin-top: 0.4rem;
+  padding: 0.6rem 0.2rem 0.4rem;
+  overflow: auto;
+  flex: 1;
+  display: flex;
+  gap: 1rem;
+}
+
+.submission-modal-text {
+  flex: 1;
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+}
+
+.submission-modal-drawing {
+  flex: 1;
+  max-width: 520px;
+  min-width: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submission-modal-drawing img {
+  max-width: 100%;
+  max-height: 520px;
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(15,23,42,0.35);
+  background: white;
+}
+
+.submission-modal-final {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.05rem;
+}
+
+.submission-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(148,163,184,0.35);
+}
+
+.submission-modal-footer button {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.8);
+  background: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.submission-modal-footer button:hover {
+  background: #e5e7eb;
+}
+
+.submission-modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.7rem;
+  border: none;
+  background: transparent;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .submission-modal-body {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --menu-width: min(520px, 96vw);
+    --extra-width: 240px;
+  }
+}
+
+/* === Negativa tal === */
+.negtal-question {
+  font-size: clamp(1.4rem, 3.5vw, 2.8rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 0.5em;
+}
+.negtal-text {
+  font-size: clamp(1.4rem, 3.5vw, 2.6rem);
+  font-weight: 600;
+  text-align: center;
+  max-width: 34em;
+  line-height: 1.4;
+  margin: 0 auto;
+}
+.negtal-expr {
+  font-size: var(--problem-size);
+  font-weight: 700;
+}
+.negtal-expr + .answer-value {
+  font-size: var(--problem-size);
+  font-weight: 700;
+}
+.negtal-line {
+  width: clamp(260px, 55vw, 480px);
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* === Sannolikhet === */
+.sann-question {
+  font-size: clamp(1.4rem, 3.5vw, 2.8rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 0.5em;
+}
+.sann-hint {
+  font-size: clamp(1rem, 2.2vw, 1.8rem);
+  color: var(--text-muted);
+  text-align: center;
+  margin: 1em 0 0;
+}
+/* Återställ mindre fontstorlek i flerfrågesläget */
+.problem-cell .sann-question { font-size: clamp(0.85rem, 1.8vw, 1.3rem); }
+.problem-cell .sann-hint     { font-size: clamp(0.7rem, 1.2vw, 0.95rem); margin-top: 0.4em; }
+.sann-kulor-svg {
+  width: clamp(90px, 16vw, 160px);
+  height: auto;
+  display: block;
+  margin: 0 auto 0.4em;
+}
+.sann-compare-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+.sann-compare-row {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+  justify-content: center;
+}
+.sann-compare-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+}
+.sann-col-label {
+  font-size: clamp(1rem, 2vw, 1.6rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+  max-width: 10em;
+}
+.problem-cell .sann-col-label { font-size: clamp(0.7rem, 1.2vw, 0.95rem); }
+
+/* === Statistik === */
+.stat-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+}
+.stat-chart-svg {
+  width: clamp(240px, 52vw, 460px);
+  height: auto;
+  display: block;
+}
+.stat-question {
+  font-size: clamp(1rem, 2.3vw, 1.7rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+
+/* === Koordinatsystem === */
+.koord-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+.koord-svg {
+  width: clamp(200px, 40vw, 320px);
+  height: auto;
+  display: block;
+}
+.koord-question {
+  font-size: clamp(1rem, 2.3vw, 1.7rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+
+/* === Flersteg – synliga beräkningssteg === */
+.flersteg-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  margin-top: 0.6em;
+  align-items: flex-start;
+}
+.flersteg-step {
+  display: flex;
+  align-items: center;
+  gap: 0.15em;
+  font-size: clamp(1.1rem, 2.5vw, 1.9rem);
+  font-weight: 600;
+}
+.flersteg-label {
+  font-size: clamp(0.65rem, 1.3vw, 0.95rem);
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 4.5em;
+  padding-right: 0.5em;
+}
+.flersteg-op-str {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* === Symmetri === */
+.sym-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+.sym-svg {
+  width: clamp(160px, 34vw, 300px);
+  height: auto;
+  display: block;
+}
+.sym-question {
+  font-size: clamp(1rem, 2.3vw, 1.7rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+
+/* === Romerska siffror === */
+.rom-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+}
+.rom-value {
+  font-size: clamp(2.8rem, 8vw, 6rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  margin: 0;
+  line-height: 1.1;
+}
+.rom-question {
+  font-size: clamp(1rem, 2.3vw, 1.7rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+.rom-ref {
+  font-size: clamp(0.7rem, 1.4vw, 1rem);
+  color: var(--text-muted);
+  margin: 0.2em 0 0;
+  letter-spacing: 0.03em;
+}

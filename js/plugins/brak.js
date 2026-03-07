@@ -1,0 +1,578 @@
+// js/plugins/brak.js
+
+const FRACTION_NAMES = {
+  '1/2': 'en halv',
+  '1/3': 'en tredjedel',
+  '2/3': 'två tredjedelar',
+  '1/4': 'en fjärdedel',
+  '3/4': 'tre fjärdedelar',
+  '1/5': 'en femtedel',
+  '2/5': 'två femtedelar',
+  '3/5': 'tre femtedelar',
+  '4/5': 'fyra femtedelar',
+  '1/6': 'en sjättedel',
+  '5/6': 'fem sjättedelar',
+};
+
+// Privat hjälpfunktion – cirkel-SVG som bildstöd för bråk
+function buildFractionCircle(numerator, denominator) {
+  const CX = 50, CY = 50, R = 46;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.classList.add('brak-circle-svg');
+
+  if (denominator <= 1) {
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', CX); c.setAttribute('cy', CY); c.setAttribute('r', R);
+    c.setAttribute('fill', numerator >= 1 ? '#e63946' : '#e5e7eb');
+    c.setAttribute('stroke', '#6b7280'); c.setAttribute('stroke-width', '2');
+    svg.appendChild(c);
+    return svg;
+  }
+
+  const sliceAngle = (2 * Math.PI) / denominator;
+  for (let i = 0; i < denominator; i++) {
+    const start = -Math.PI / 2 + i * sliceAngle;
+    const end   = start + sliceAngle;
+    const x1 = CX + R * Math.cos(start), y1 = CY + R * Math.sin(start);
+    const x2 = CX + R * Math.cos(end),   y2 = CY + R * Math.sin(end);
+    const large = sliceAngle > Math.PI ? 1 : 0;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${CX} ${CY} L ${x1.toFixed(3)} ${y1.toFixed(3)} A ${R} ${R} 0 ${large} 1 ${x2.toFixed(3)} ${y2.toFixed(3)} Z`);
+    path.setAttribute('fill', i < numerator ? '#e63946' : '#e5e7eb');
+    path.setAttribute('stroke', '#9ca3af'); path.setAttribute('stroke-width', '1');
+    svg.appendChild(path);
+  }
+
+  const border = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  border.setAttribute('cx', CX); border.setAttribute('cy', CY); border.setAttribute('r', R);
+  border.setAttribute('fill', 'none');
+  border.setAttribute('stroke', '#6b7280'); border.setAttribute('stroke-width', '2');
+  svg.appendChild(border);
+  return svg;
+}
+
+// Rutnät-SVG som bildstöd för "bråk av heltal" – grupperade rader
+function buildFractionGrid(numerator, denominator, whole) {
+  const groupSize = whole / denominator; // rutor per grupp
+
+  // Välj antal kolumner: hitta störs jämnt delbart med groupSize som är ≤ 6,
+  // annars behåll groupSize (för värden ≤ 7)
+  let cols = groupSize;
+  if (groupSize > 7) {
+    for (let c = 6; c >= 2; c--) {
+      if (groupSize % c === 0) { cols = c; break; }
+    }
+  }
+  const rowsPerGroup = groupSize / cols;
+
+  const S   = 14; // rutstorlek
+  const GS  = 2;  // gap inom grupp
+  const GG  = 6;  // gap mellan grupper
+  const PAD = 4;  // kantutfyllnad
+
+  const groupW  = cols * S + (cols - 1) * GS;
+  const groupH  = rowsPerGroup * S + (rowsPerGroup - 1) * GS;
+  const totalW  = groupW + 2 * PAD;
+  const totalH  = denominator * groupH + (denominator - 1) * GG + 2 * PAD;
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+  svg.classList.add('brak-grid-svg');
+
+  for (let g = 0; g < denominator; g++) {
+    const fill   = g < numerator ? '#e63946' : '#e5e7eb';
+    const stroke = '#9ca3af';
+    const groupY = PAD + g * (groupH + GG);
+
+    for (let sq = 0; sq < groupSize; sq++) {
+      const row = Math.floor(sq / cols);
+      const col = sq % cols;
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x',      PAD + col * (S + GS));
+      rect.setAttribute('y',      groupY + row * (S + GS));
+      rect.setAttribute('width',  S);
+      rect.setAttribute('height', S);
+      rect.setAttribute('fill',   fill);
+      rect.setAttribute('stroke', stroke);
+      rect.setAttribute('stroke-width', '1');
+      rect.setAttribute('rx', '2');
+      svg.appendChild(rect);
+    }
+  }
+  return svg;
+}
+
+// Privat – skapar answer-span med bråkform (eller text för heltal/blandade tal)
+function buildBrakAnswerSpan(answerStr) {
+  const span = document.createElement('span');
+  span.className = 'answer-value answer-hidden';
+  if (!answerStr.includes('/')) {
+    span.textContent = `\u00a0${answerStr}`;
+    return span;
+  }
+  const mixedMatch = answerStr.match(/^(\d+) (\d+)\/(\d+)$/);
+  if (mixedMatch) {
+    span.appendChild(document.createTextNode(`\u00a0${mixedMatch[1]}\u00a0`));
+    span.appendChild(PluginUtils.buildFractionEl(parseInt(mixedMatch[2]), parseInt(mixedMatch[3])));
+  } else {
+    const [num, den] = answerStr.split('/').map(Number);
+    span.appendChild(document.createTextNode('\u00a0'));
+    span.appendChild(PluginUtils.buildFractionEl(num, den));
+  }
+  return span;
+}
+
+// Wrappar ett bråkelement i en host-container för inline-bildstöd
+function _hostWrap(idx, fracEl) {
+  const span = document.createElement('span');
+  span.className = 'brak-frac-host';
+  span.dataset.idx = String(idx);
+  span.appendChild(fracEl);
+  return span;
+}
+
+// Cirkel med bråketikett nedanför (privat hjälpfunktion)
+function _cirkelMedEtikett(num, den) {
+  const col = document.createElement('div');
+  col.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:0.25em;';
+  col.appendChild(buildFractionCircle(num, den));
+  const lbl = document.createElement('span');
+  lbl.textContent = `${num}/${den}`;
+  lbl.style.cssText = 'font-size:clamp(0.75rem,1.4vw,1rem); font-weight:700; color:#1a1a2e;';
+  col.appendChild(lbl);
+  return col;
+}
+
+class BrakPlugin extends BasePlugin {
+  constructor() {
+    super();
+    this.type = 'brak';
+  }
+
+  generate(settings) {
+    const level = PluginUtils.cfg(settings.grade).fractions;
+
+    // Bygg årsklasslämplig pool
+    let pool;
+    if (!level)                    { pool = ['name']; }
+    else if (level === 'intro')    { pool = ['name', 'order-same-den', 'order-diff-den']; }
+    else if (level === 'same-den') { pool = ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'compare', 'simplify', 'fraction-of-whole']; }
+    else if (level === 'diff-den') { pool = ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'add-diff-den', 'sub-diff-den', 'compare', 'simplify', 'fraction-of-whole']; }
+    else                           { pool = ['name', 'order-same-den', 'order-diff-den', 'add-same-den', 'sub-same-den', 'add-diff-den', 'sub-diff-den', 'compare', 'simplify', 'fraction-of-whole', 'to-mixed']; }
+
+    // Filtrera mot lärarens val (tom = alla i poolen)
+    const selected = settings.brakTypes && settings.brakTypes.length > 0 ? settings.brakTypes : pool;
+    const available = pool.filter(t => selected.includes(t));
+
+    const qt = PluginUtils.pickRandom(available.length > 0 ? available : pool);
+    if (qt === 'order-same-den' || qt === 'order-diff-den') return this._genOrder(qt, settings.grade);
+    return this._genByType(qt);
+  }
+
+  _genOrder(type, grade) {
+    const count = grade <= 3 ? 3 : grade <= 5 ? 4 : 5;
+    let picked;
+
+    if (type === 'order-same-den') {
+      // Välj en nämnare som ger tillräckligt med unika täljare (den > count)
+      const validDens = [4, 5, 6, 8, 10].filter(d => d > count);
+      const den = PluginUtils.pickRandom(validDens);
+      const numPool = Array.from({ length: den - 1 }, (_, i) => i + 1); // 1..den-1
+      const shuffledNums = [...numPool].sort(() => Math.random() - 0.5);
+      picked = shuffledNums.slice(0, count).map(n => [n, den]);
+    } else {
+      // order-diff-den: blandade nämnare
+      if (grade <= 3) {
+        // Åk 3: relaterade nämnare – ena är multipel av den andra – lättare att jämföra
+        const families = [
+          [[1,2],[1,4],[3,4]],
+          [[1,2],[1,6],[5,6]],
+          [[1,3],[2,3],[1,6],[5,6]],
+          [[1,4],[3,4],[1,8],[3,8],[5,8],[7,8]],
+          [[1,5],[2,5],[3,5],[4,5],[1,10],[3,10],[7,10]],
+        ];
+        const family = PluginUtils.pickRandom(families);
+        picked = [...family].sort(() => Math.random() - 0.5).slice(0, count);
+      } else {
+        const fracPool = grade <= 5
+          ? [[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5],[3,5],[4,5],[1,6],[5,6]]
+          : [[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5],[3,5],[4,5],[1,6],[5,6],[1,8],[3,8],[5,8],[7,8],[1,10],[3,10],[7,10]];
+        picked = [...fracPool].sort(() => Math.random() - 0.5).slice(0, count);
+      }
+    }
+
+    const sorted = [...picked].sort((a, b) => a[0] / a[1] - b[0] / b[1]);
+    // Visa i slumpad ordning – försök undvika redan sorterad
+    let display = [...picked].sort(() => Math.random() - 0.5);
+    let tries = 0;
+    while (tries++ < 8 && display.every((f, i) => f[0] === sorted[i][0] && f[1] === sorted[i][1])) {
+      display = [...picked].sort(() => Math.random() - 0.5);
+    }
+    return {
+      type: 'brak',
+      questionType: type,
+      fractions: display.map(([n, d]) => ({ numerator: n, denominator: d })),
+      sortedFractions: sorted.map(([n, d]) => ({ numerator: n, denominator: d })),
+      answer: sorted.map(([n, d]) => `${n}/${d}`).join(' < '),
+    };
+  }
+
+  _genByType(qt) {
+    switch (qt) {
+      case 'add-same-den':      return this._genAddSubSameDen('+');
+      case 'sub-same-den':      return this._genAddSubSameDen('-');
+      case 'compare':           return this._genCompare();
+      case 'add-diff-den':      return this._genAddSubDiffDen('+');
+      case 'sub-diff-den':      return this._genAddSubDiffDen('-');
+      case 'fraction-of-whole': return this._genFractionOfWhole();
+      case 'simplify':          return this._genSimplify();
+      case 'to-mixed':          return this._genToMixed();
+      default:                  return this._genName();
+    }
+  }
+
+  _genName() {
+    const options = [[1,2],[1,4],[3,4],[1,3],[2,3],[1,5],[2,5],[3,5],[4,5],[1,6],[5,6]];
+    const [num, den] = PluginUtils.pickRandom(options);
+    const fracKey   = `${num}/${den}`;
+    const wordName  = FRACTION_NAMES[fracKey];
+    const nameStyle = PluginUtils.pickRandom(['frac-to-word', 'word-to-frac']);
+    return { type: 'brak', questionType: 'name', nameStyle, numerator: num, denominator: den, wordName, answer: fracKey };
+  }
+
+  _genAddSubSameDen(op) {
+    const den = PluginUtils.pickRandom([2, 3, 4, 5, 6, 8, 10]);
+    let a, b;
+    if (op === '+') {
+      a = PluginUtils.randInt(1, Math.max(1, den - 2));
+      b = PluginUtils.randInt(1, den - a);
+    } else {
+      a = PluginUtils.randInt(2, den - 1);
+      b = PluginUtils.randInt(1, a - 1);
+    }
+    const resultNum = op === '+' ? a + b : a - b;
+    const qt = op === '+' ? 'add-same-den' : 'sub-same-den';
+    return { type: 'brak', questionType: qt, a, b, denominator: den, answer: `${resultNum}/${den}` };
+  }
+
+  _genCompare() {
+    const dens = [2, 3, 4, 5, 6, 8, 10];
+    let num1, den1, num2, den2, attempts = 0;
+    do {
+      den1 = PluginUtils.pickRandom(dens);
+      den2 = PluginUtils.pickRandom(dens);
+      num1 = PluginUtils.randInt(1, den1 - 1);
+      num2 = PluginUtils.randInt(1, den2 - 1);
+      attempts++;
+    } while (num1 * den2 === num2 * den1 && attempts < 20);
+    const answer = num1 * den2 > num2 * den1 ? `${num1}/${den1}` : `${num2}/${den2}`;
+    return {
+      type: 'brak', questionType: 'compare',
+      a: { numerator: num1, denominator: den1 },
+      b: { numerator: num2, denominator: den2 },
+      answer,
+    };
+  }
+
+  _genAddSubDiffDen(op) {
+    const dens = [2, 3, 4, 5, 6, 8, 10];
+    let den1, den2, num1, num2, attempts = 0;
+    do {
+      den1 = PluginUtils.pickRandom(dens);
+      den2 = PluginUtils.pickRandom(dens.filter(d => d !== den1));
+      num1 = PluginUtils.randInt(1, den1 - 1);
+      num2 = PluginUtils.randInt(1, den2 - 1);
+      attempts++;
+    } while (op === '-' && num1 * den2 <= num2 * den1 && attempts < 20);
+
+    const LCD  = PluginUtils.lcm(den1, den2);
+    const n1   = num1 * (LCD / den1);
+    const n2   = num2 * (LCD / den2);
+    const ansN = op === '+' ? n1 + n2 : n1 - n2;
+    const g    = PluginUtils.gcd(Math.abs(ansN), LCD);
+    const rN   = ansN / g, rD = LCD / g;
+    const answer = rD === 1 ? `${rN}` : `${rN}/${rD}`;
+    const qt = op === '+' ? 'add-diff-den' : 'sub-diff-den';
+    return {
+      type: 'brak', questionType: qt,
+      a: { numerator: num1, denominator: den1 },
+      b: { numerator: num2, denominator: den2 },
+      answer,
+    };
+  }
+
+  _genFractionOfWhole() {
+    const options = [
+      { num: 1, den: 2, multiples: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20] },
+      { num: 1, den: 3, multiples: [3, 6, 9, 12, 15, 18, 21] },
+      { num: 2, den: 3, multiples: [3, 6, 9, 12, 15, 18, 21] },
+      { num: 1, den: 4, multiples: [4, 8, 12, 16, 20, 24] },
+      { num: 3, den: 4, multiples: [4, 8, 12, 16, 20, 24] },
+      { num: 1, den: 5, multiples: [5, 10, 15, 20, 25, 30] },
+      { num: 2, den: 5, multiples: [5, 10, 15, 20, 25, 30] },
+      { num: 3, den: 5, multiples: [5, 10, 15, 20, 25, 30] },
+    ];
+    const opt   = PluginUtils.pickRandom(options);
+    const whole = PluginUtils.pickRandom(opt.multiples);
+    const answer = String((opt.num * whole) / opt.den);
+    return { type: 'brak', questionType: 'fraction-of-whole', numerator: opt.num, denominator: opt.den, whole, answer };
+  }
+
+  _genSimplify() {
+    const pairs = [
+      [2,4],[2,6],[2,8],[2,10],
+      [3,6],[3,9],[3,12],
+      [4,6],[4,8],[4,10],[4,12],
+      [5,10],[5,15],[5,20],
+      [6,8],[6,9],[6,10],[6,12],
+      [8,10],[8,12],
+    ];
+    const [num, den] = PluginUtils.pickRandom(pairs);
+    const g = PluginUtils.gcd(num, den);
+    return { type: 'brak', questionType: 'simplify', numerator: num, denominator: den, answer: `${num/g}/${den/g}` };
+  }
+
+  _genToMixed() {
+    const den    = PluginUtils.pickRandom([2, 3, 4, 5, 6, 8]);
+    const wholes = PluginUtils.randInt(1, 2);
+    const rem    = PluginUtils.randInt(1, den - 1);
+    return { type: 'brak', questionType: 'to-mixed', numerator: wholes * den + rem, denominator: den, answer: `${wholes} ${rem}/${den}` };
+  }
+
+  // ── Render ────────────────────────────────────────────────
+
+  render(problem, container) {
+    const qt = problem.questionType;
+
+    if (qt === 'name') {
+      if (problem.nameStyle === 'word-to-frac') {
+        PluginUtils.appendText(container, `${problem.wordName}\u00a0=`);
+        const ans = document.createElement('span');
+        ans.className = 'answer-value answer-hidden';
+        ans.style.marginLeft = '0.4em';
+        ans.appendChild(PluginUtils.buildFractionEl(problem.numerator, problem.denominator));
+        container.appendChild(ans);
+      } else {
+        // frac-to-word: visa bråkform, svara med svenska ord
+        container.appendChild(PluginUtils.buildFractionEl(problem.numerator, problem.denominator));
+        PluginUtils.appendText(container, '\u00a0=');
+        const ans = document.createElement('span');
+        ans.className = 'answer-value answer-hidden';
+        ans.textContent = `\u00a0${problem.wordName || problem.answer}`;
+        container.appendChild(ans);
+      }
+      return;
+
+    } else if (qt === 'add-same-den' || qt === 'sub-same-den') {
+      const op = qt === 'add-same-den' ? ' + ' : ' \u2212 ';
+      container.appendChild(_hostWrap(0, PluginUtils.buildFractionEl(problem.a, problem.denominator)));
+      PluginUtils.appendText(container, op);
+      container.appendChild(_hostWrap(1, PluginUtils.buildFractionEl(problem.b, problem.denominator)));
+      PluginUtils.appendText(container, ' =');
+
+    } else if (qt === 'add-diff-den' || qt === 'sub-diff-den') {
+      const op = qt === 'add-diff-den' ? ' + ' : ' \u2212 ';
+      container.appendChild(_hostWrap(0, PluginUtils.buildFractionEl(problem.a.numerator, problem.a.denominator)));
+      PluginUtils.appendText(container, op);
+      container.appendChild(_hostWrap(1, PluginUtils.buildFractionEl(problem.b.numerator, problem.b.denominator)));
+      PluginUtils.appendText(container, ' =');
+
+    } else if (qt === 'fraction-of-whole') {
+      PluginUtils.appendText(container, 'Vad\u00a0är\u00a0');
+      container.appendChild(PluginUtils.buildFractionEl(problem.numerator, problem.denominator));
+      PluginUtils.appendText(container, `\u00a0av\u00a0${problem.whole}\u00a0=`);
+
+    } else if (qt === 'compare') {
+      const wrap = document.createElement('div');
+      wrap.className = 'brak-question-wrap';
+      const row = document.createElement('div');
+      row.className = 'brak-compare-row';
+      row.appendChild(_hostWrap(0, PluginUtils.buildFractionEl(problem.a.numerator, problem.a.denominator)));
+      const eller = document.createElement('span');
+      eller.className = 'brak-compare-eller';
+      eller.textContent = 'eller';
+      row.appendChild(eller);
+      row.appendChild(_hostWrap(1, PluginUtils.buildFractionEl(problem.b.numerator, problem.b.denominator)));
+      const q = document.createElement('p');
+      q.className = 'brak-subtext';
+      q.textContent = 'Vilket bråk är störst?';
+      wrap.appendChild(row);
+      wrap.appendChild(q);
+      container.appendChild(wrap);
+      return; // svar visas via appendAnswerBox i showAnswer
+
+    } else if (qt === 'simplify') {
+      const wrap = document.createElement('div');
+      wrap.className = 'brak-question-wrap';
+      const q = document.createElement('p');
+      q.className = 'brak-subtext';
+      q.textContent = 'Förenkla:';
+      const expr = document.createElement('div');
+      expr.className = 'brak-compare-row';
+      expr.appendChild(PluginUtils.buildFractionEl(problem.numerator, problem.denominator));
+      const eq  = document.createElement('span');
+      eq.textContent = '=';
+      expr.appendChild(eq);
+      expr.appendChild(buildBrakAnswerSpan(problem.answer));
+      wrap.appendChild(q);
+      wrap.appendChild(expr);
+      container.appendChild(wrap);
+      return;
+
+    } else if (qt === 'to-mixed') {
+      const wrap = document.createElement('div');
+      wrap.className = 'brak-question-wrap';
+      const q = document.createElement('p');
+      q.className = 'brak-subtext';
+      q.textContent = 'Skriv som blandat tal:';
+      const expr = document.createElement('div');
+      expr.className = 'brak-compare-row';
+      expr.appendChild(PluginUtils.buildFractionEl(problem.numerator, problem.denominator));
+      const eq  = document.createElement('span');
+      eq.textContent = '=';
+      expr.appendChild(eq);
+      expr.appendChild(buildBrakAnswerSpan(problem.answer));
+      wrap.appendChild(q);
+      wrap.appendChild(expr);
+      container.appendChild(wrap);
+      return;
+
+    } else if (qt === 'order-same-den' || qt === 'order-diff-den') {
+      const wrap = document.createElement('div');
+      wrap.className = 'brak-question-wrap';
+      // Frågetexten ligger UNDER bråkraden – annars kolliderar bildstöd-cirklarna
+      const row = document.createElement('div');
+      row.className = 'brak-compare-row';
+      problem.fractions.forEach((frac, i) => {
+        row.appendChild(_hostWrap(i, PluginUtils.buildFractionEl(frac.numerator, frac.denominator)));
+      });
+      const q = document.createElement('p');
+      q.className = 'brak-subtext';
+      q.textContent = 'Storleksordna:';
+      // Svar: sorterad rad, dold tills läraren klickar "Visa svar"
+      const ansRow = document.createElement('div');
+      ansRow.className = 'brak-compare-row answer-value';
+      ansRow.style.display = 'none';
+      problem.sortedFractions.forEach((frac, i) => {
+        if (i > 0) {
+          const lt = document.createElement('span');
+          lt.textContent = '\u00a0<\u00a0';
+          ansRow.appendChild(lt);
+        }
+        ansRow.appendChild(PluginUtils.buildFractionEl(frac.numerator, frac.denominator));
+      });
+      wrap.appendChild(row);
+      wrap.appendChild(q);
+      wrap.appendChild(ansRow);
+      container.appendChild(wrap);
+      return;
+    }
+
+    // Inline-typer: name, add/sub-same-den, add/sub-diff-den, fraction-of-whole
+    container.appendChild(buildBrakAnswerSpan(problem.answer));
+  }
+
+  showAnswer(problem, container, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = '✓'; }
+    const el = container.querySelector('.answer-value');
+    if (el) {
+      if (el.style.display === 'none') el.style.display = ''; // 'order' uses display:none
+      el.classList.remove('answer-hidden');
+      container.querySelectorAll('.brak-bildstod-answer').forEach(e => { e.style.display = ''; e.classList.remove('brak-bildstod-answer'); });
+      return;
+    }
+    // 'compare' – bygg svarslåda med bråkform
+    const box = document.createElement('div');
+    box.className = 'answer-box';
+    box.appendChild(document.createTextNode('Svar:\u00a0'));
+    const [num, den] = problem.answer.split('/').map(Number);
+    box.appendChild(PluginUtils.buildFractionEl(num, den));
+    container.appendChild(box);
+  }
+
+  getFractionName(key) { return FRACTION_NAMES[key] || null; }
+
+  isSameProblem(a, b) {
+    if (a.questionType !== b.questionType) return false;
+    return a.answer === b.answer;
+  }
+
+  hasBildstodSupport(problem) {
+    if (problem.questionType === 'name')         return problem.denominator <= 10;
+    if (problem.questionType === 'order-same-den' || problem.questionType === 'order-diff-den') return true;
+    if (problem.questionType === 'add-same-den') return problem.denominator <= 10;
+    if (problem.questionType === 'sub-same-den') return problem.denominator <= 10;
+    if (problem.questionType === 'add-diff-den') return problem.a.denominator <= 10 && problem.b.denominator <= 10;
+    if (problem.questionType === 'sub-diff-den') return problem.a.denominator <= 10 && problem.b.denominator <= 10;
+    if (problem.questionType === 'compare')          return problem.a.denominator <= 10 && problem.b.denominator <= 10;
+    if (problem.questionType === 'fraction-of-whole') return true;
+    if (problem.questionType === 'simplify') return problem.denominator <= 10;
+    return false;
+  }
+
+  buildBildstod(problem) {
+    if (problem.questionType === 'name') {
+      return buildFractionCircle(problem.numerator, problem.denominator);
+    }
+    if (problem.questionType === 'fraction-of-whole') {
+      return buildFractionGrid(problem.numerator, problem.denominator, problem.whole);
+    }
+    if (problem.questionType === 'add-same-den' || problem.questionType === 'sub-same-den') {
+      return {
+        type: 'inject',
+        targets: [
+          { selector: '.brak-frac-host[data-idx="0"]', circle: buildFractionCircle(problem.a, problem.denominator) },
+          { selector: '.brak-frac-host[data-idx="1"]', circle: buildFractionCircle(problem.b, problem.denominator) },
+        ],
+      };
+    }
+    if (problem.questionType === 'add-diff-den' || problem.questionType === 'sub-diff-den') {
+      return {
+        type: 'inject',
+        targets: [
+          { selector: '.brak-frac-host[data-idx="0"]', circle: buildFractionCircle(problem.a.numerator, problem.a.denominator) },
+          { selector: '.brak-frac-host[data-idx="1"]', circle: buildFractionCircle(problem.b.numerator, problem.b.denominator) },
+        ],
+      };
+    }
+    if (problem.questionType === 'compare') {
+      return {
+        type: 'inject',
+        targets: [
+          { selector: '.brak-frac-host[data-idx="0"]', circle: buildFractionCircle(problem.a.numerator, problem.a.denominator) },
+          { selector: '.brak-frac-host[data-idx="1"]', circle: buildFractionCircle(problem.b.numerator, problem.b.denominator) },
+        ],
+      };
+    }
+    if (problem.questionType === 'order-same-den' || problem.questionType === 'order-diff-den') {
+      return {
+        type: 'inject',
+        targets: problem.fractions.map((frac, i) => ({
+          selector: `.brak-frac-host[data-idx="${i}"]`,
+          circle: buildFractionCircle(frac.numerator, frac.denominator),
+        })),
+      };
+    }
+    if (problem.questionType === 'simplify') {
+      const [sNum, sDen] = problem.answer.split('/').map(Number);
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex; align-items:center; gap:0.6em;';
+      wrap.appendChild(buildFractionCircle(problem.numerator, problem.denominator));
+      const eq = document.createElement('span');
+      eq.textContent = '=';
+      eq.style.cssText = 'font-size:1.4em; font-weight:700; color:#1a1a2e;';
+      eq.classList.add('brak-bildstod-answer');
+      eq.style.display = 'none';
+      wrap.appendChild(eq);
+      const ansCircle = buildFractionCircle(sNum, sDen);
+      ansCircle.classList.add('brak-bildstod-answer');
+      ansCircle.style.display = 'none';
+      wrap.appendChild(ansCircle);
+      return wrap;
+    }
+    return null;
+  }
+}
+
+PluginManager.register(new BrakPlugin());

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="sv" class="student-page-root">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klassrummatte – elev</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Firebase (samma som lärarsidan) -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
+</head>
+<body class="student-page">
+
+  <main id="stage">
+    <div style="max-width:640px; width:100%; padding:1.5rem; background:white; border-radius:10px; box-shadow:var(--shadow);">
+      <h1 style="font-size:1.6rem; margin-bottom:0.75rem;">Klassrummatte – elevvy</h1>
+      <p style="font-size:0.95rem; color:var(--text-muted); margin-bottom:1rem;">
+        Ange ditt namn och lärarens sessionskod för att ansluta. När läraren skickar en uppgift visas den här.
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+        <label>
+          <span style="display:block; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:0.2rem;">Namn</span>
+          <input id="student-name" type="text" style="width:100%; padding:0.5rem 0.75rem; border-radius:6px; border:1px solid #d1d5db; font-size:1rem;">
+        </label>
+        <label>
+          <span style="display:block; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:0.2rem;">Sessionskod</span>
+          <input id="session-code-input" type="text" maxlength="6" style="width:100%; padding:0.5rem 0.75rem; border-radius:6px; border:1px solid #d1d5db; font-size:1rem;">
+        </label>
+        <button id="student-connect-btn" type="button" style="margin-top:0.25rem; padding:0.45rem 0.9rem; border-radius:8px; border:none; background:var(--accent-2); color:white; font-weight:600; cursor:pointer;">
+          Anslut till lärare
+        </button>
+        <p id="student-status" style="font-size:0.9rem; color:var(--text-muted); margin-top:0.25rem;"></p>
+      </div>
+
+      <hr style="border:none; border-top:1px solid #e5e7eb; margin:1rem 0;">
+
+      <section>
+        <h2 style="font-size:1.2rem; margin-bottom:0.5rem;">Aktuell uppgift</h2>
+        <div id="student-problem" style="min-height:4rem; padding:0.75rem; border-radius:8px; background:rgba(249,250,251,0.8); border:1px dashed #d1d5db; margin-bottom:0.5rem;">
+          <p style="font-size:0.95rem; color:var(--text-muted); margin:0;">Väntar på att läraren ska skicka en uppgift…</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 style="font-size:1.1rem; margin-bottom:0.4rem;">Din lösning</h2>
+        <textarea id="student-answer" rows="4" style="width:100%; padding:0.6rem 0.75rem; border-radius:8px; border:1px solid #d1d5db; font-size:1rem; resize:vertical;" placeholder="Skriv hur du tänker, räknesätt, uträkningar osv."></textarea>
+
+        <div style="margin-top:0.75rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+            <span style="font-size:0.9rem; font-weight:600; color:var(--text-muted);">Rityta för uträkningar</span>
+            <button id="student-canvas-clear" type="button" style="font-size:0.78rem; padding:0.1rem 0.5rem; border-radius:999px; border:1px solid #d1d5db; background:white; cursor:pointer; color:var(--text-muted);">
+              Rensa
+            </button>
+          </div>
+          <div style="border-radius:8px; overflow:hidden; border:1px solid #d1d5db; background:white;">
+            <canvas id="student-canvas" width="600" height="260" style="width:100%; display:block; touch-action:none; cursor:crosshair;"></canvas>
+          </div>
+          <p style="margin-top:0.25rem; font-size:0.8rem; color:var(--text-muted);">
+            Rita med mus/penna. Både text och rityta skickas in till läraren.
+          </p>
+        </div>
+
+        <label style="display:block; margin-top:0.75rem;">
+          <span style="display:block; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:0.25rem;">Slutgiltigt svar</span>
+          <input id="student-final-answer" type="text" style="width:100%; padding:0.6rem 0.75rem; border-radius:8px; border:2px solid #d1d5db; font-size:1.25rem; font-weight:600;" placeholder="Skriv ditt svar här (går att rätta)">
+        </label>
+
+        <button id="student-submit-btn" type="button" style="margin-top:0.75rem; padding:0.45rem 0.9rem; border-radius:8px; border:none; background:var(--accent); color:white; font-weight:600; cursor:pointer;" disabled>
+          Lämna in svar
+        </button>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/session-student.js"></script>
+</body>
+</html>
+

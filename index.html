@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klassrummatte</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Firebase (compat SDK, utan bundler/ES-moduler) -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
+</head>
+<body>
+
+  <!-- Hamburgarmeny-knapp -->
+  <button id="menu-toggle" aria-label="Öppna inställningar" title="Inställningar">
+    <span class="burger-line"></span>
+    <span class="burger-line"></span>
+    <span class="burger-line"></span>
+  </button>
+
+  <!-- Helskärmsknapp -->
+  <button id="fullscreen-btn" aria-label="Helskärmsläge" title="Helskärmsläge">
+    <svg class="fs-icon-expand" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="5 1 1 1 1 5"/><polyline points="13 1 17 1 17 5"/>
+      <polyline points="5 17 1 17 1 13"/><polyline points="13 17 17 17 17 13"/>
+    </svg>
+    <svg class="fs-icon-compress" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="1 5 5 5 5 1"/><polyline points="17 5 13 5 13 1"/>
+      <polyline points="1 13 5 13 5 17"/><polyline points="17 13 13 13 13 17"/>
+    </svg>
+  </button>
+
+  <!-- Fällbar vänstermeny -->
+  <nav id="settings-menu" aria-label="Inställningar">
+    <div class="menu-header">
+      <h2>Inställningar</h2>
+      <button id="clear-areas-btn" class="clear-areas-btn" title="Återställer alla inställningar utom vald klass">Återställ allt</button>
+    </div>
+
+    <!-- ── LEKTIONSINSTÄLLNINGAR ──────────────────────── -->
+    <div class="menu-group-label" id="grundinstallningar-group-label">Lektionsinställningar</div>
+
+    <section class="menu-section">
+      <label class="section-label" for="grade-select">Årskurs</label>
+      <select id="grade-select">
+        <option value="" disabled>Välj årskurs ...</option>
+        <option value="1">Åk 1</option>
+        <option value="2">Åk 2</option>
+        <option value="3">Åk 3</option>
+        <option value="4">Åk 4</option>
+        <option value="5">Åk 5</option>
+        <option value="6">Åk 6</option>
+      </select>
+      <label class="section-label" for="session-limit-select" style="margin-top:0.75rem">Uppgifter per genomgång</label>
+      <select id="session-limit-select">
+        <option value="unlimited">Obegränsat</option>
+        <option value="5">5 uppgifter</option>
+        <option value="10">10 uppgifter</option>
+        <option value="15">15 uppgifter</option>
+        <option value="20">20 uppgifter</option>
+      </select>
+    </section>
+
+    <!-- ── MATEMATIKOMRÅDEN ───────────────────────────── -->
+    <div class="menu-group-label" id="matematikarea-group-label">Matematikområden</div>
+
+    <section class="menu-section">
+      <div id="area-checkboxes">
+
+        <div class="area-category">
+          <div class="area-category-label">Aritmetik</div>
+          <div class="area-grid-2col">
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="addition"><span>Addition</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="subtraktion"><span>Subtraktion</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="multiplikation"><span>Multiplikation</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="division"><span>Division</span></label>
+          </div>
+        </div>
+
+        <div class="area-category">
+          <div class="area-category-label">Algebra</div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="prioritet"><span>Prioritetsregler</span></label>
+            <label class="check-label"><input type="checkbox" value="oppna-utsagor"><span>Öppna utsagor</span></label>
+          </div>
+        </div>
+
+        <div class="area-category">
+          <div class="area-category-label">Tal &amp; samband</div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="brak"><span>Bråk</span></label>
+            <label class="check-label"><input type="checkbox" value="procent"><span>Procent <small>(Åk 4+)</small></span></label>
+          </div>
+        </div>
+
+        <div class="area-category">
+          <div class="area-category-label">Taluppfattning</div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="tallinje"><span>Tallinje <small>(Åk 1–3)</small></span></label>
+            <label class="check-label"><input type="checkbox" value="talsorter"><span>Talsorter <small>(Åk 1–3)</small></span></label>
+            <label class="check-label"><input type="checkbox" value="talfoljd"><span>Talföljder</span></label>
+            <label class="check-label"><input type="checkbox" value="negativa-tal"><span>Negativa tal <small>(Åk 5–6)</small></span></label>
+            <label class="check-label"><input type="checkbox" value="romerska"><span>Romerska siffror <small>(Åk 4–5)</small></span></label>
+          </div>
+        </div>
+
+        <div class="area-category">
+          <div class="area-category-label">Geometri</div>
+          <div class="area-grid-2col">
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="geometri"><span>Geometri</span></label>
+            <label class="check-label"><input type="checkbox" value="koordinatsystem"><span>Koordinatsystem <small>(Åk 4+)</small></span></label>
+            <label class="check-label"><input type="checkbox" value="symmetri"><span>Symmetri <small>(Åk 1–5)</small></span></label>
+          </div>
+        </div>
+
+        <div class="area-category">
+          <div class="area-category-label">Mått &amp; tid</div>
+          <div class="area-grid-2col">
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="klocka"><span>Klocka</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-langd"><span>Mått – längd</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-volym"><span>Mått – volym</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-vikt"><span>Mått – vikt</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-tid"><span>Mått – tid</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-area"><span>Mått – area <small>(Åk 4+)</small></span></label>
+          </div>
+        </div>
+
+        <div class="area-category">
+          <div class="area-category-label">Statistik &amp; sannolikhet</div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="statistik"><span>Statistik <small>(Åk 4+)</small></span></label>
+            <label class="check-label"><input type="checkbox" value="sannolikhet"><span>Sannolikhet <small>(Åk 5–6)</small></span></label>
+          </div>
+        </div>
+
+      </div>
+      <p id="area-implicit-hint" class="implicit-hint hidden">Inget markerat — blandar automatiskt mellan alla områden</p>
+    </section>
+
+    <!-- ── SUBINSTÄLLNINGAR: ADD / SUB ──────────────── -->
+    <div class="menu-group-label" id="addsub-group-label">Addition &amp; subtraktion – nivå</div>
+
+    <section class="menu-section" id="addsub-section">
+      <div id="addsub-mode-checkboxes">
+        <label class="check-label">
+          <input type="checkbox" value="standard" checked>
+          <span>Standard</span>
+        </label>
+        <label class="check-label">
+          <input type="checkbox" value="uppstallning">
+          <span>Uppställning</span>
+        </label>
+        <div id="addsub-vaxling-wrap" class="specific-tables-wrap hidden">
+          <div class="specific-tables-label">Växling:</div>
+          <div id="addsub-vaxling-checkboxes">
+            <label class="check-label"><input type="checkbox" value="med" checked><span>Med växling</span></label>
+            <label class="check-label"><input type="checkbox" value="utan"><span>Utan växling</span></label>
+          </div>
+        </div>
+        <label class="check-label">
+          <input type="checkbox" value="decimaler">
+          <span>Decimaler (Åk 4+)</span>
+        </label>
+        <label class="check-label">
+          <input type="checkbox" value="flersteg">
+          <span>Flerstegsaddition (Åk 3+)</span>
+        </label>
+      </div>
+      <p id="addsub-implicit-hint" class="implicit-hint hidden">Inget valt — Standard används</p>
+    </section>
+
+    <!-- ── SUBINSTÄLLNINGAR: MULT / DIV ──────────────── -->
+    <div class="menu-group-label" id="multdiv-group-label">Multiplikation &amp; division – nivå</div>
+
+    <section class="menu-section" id="multdiv-section">
+      <div id="multdiv-mode-checkboxes">
+        <label class="check-label">
+          <input type="checkbox" value="tables-basic" checked>
+          <span>Tabeller 1–9</span>
+        </label>
+        <div id="specific-tables-wrap" class="specific-tables-wrap hidden">
+          <div class="specific-tables-label">Välj tabeller:</div>
+          <div id="specific-tables-checkboxes" class="specific-tables-grid">
+            <label class="check-label check-label--sm"><input type="checkbox" value="1" name="specific-table"><span>1</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="2" name="specific-table" checked><span>2</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="3" name="specific-table" checked><span>3</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="4" name="specific-table" checked><span>4</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="5" name="specific-table" checked><span>5</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="6" name="specific-table" checked><span>6</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="7" name="specific-table" checked><span>7</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="8" name="specific-table" checked><span>8</span></label>
+            <label class="check-label check-label--sm"><input type="checkbox" value="9" name="specific-table" checked><span>9</span></label>
+          </div>
+        </div>
+        <label class="check-label">
+          <input type="checkbox" value="tables-ten">
+          <span>Mult/div med 10 och 100</span>
+        </label>
+        <label class="check-label">
+          <input type="checkbox" value="tables-large">
+          <span>Stora tal (flersiffrigt)</span>
+        </label>
+      </div>
+      <p id="multdiv-implicit-hint" class="implicit-hint hidden">Inget valt — Alla tabeller används</p>
+      <label class="check-label check-label--sep" id="division-rest-label">
+        <input type="checkbox" id="division-rest-check">
+        <span>Division med rest</span>
+      </label>
+    </section>
+
+    <!-- ── SUBINSTÄLLNINGAR: GEOMETRI ────────────────── -->
+    <div class="menu-group-label" id="geometri-group-label">Geometri – frågetyp</div>
+
+    <section class="menu-section" id="geometri-section">
+      <div id="geometri-type-checkboxes">
+        <label class="check-label"><input type="checkbox" value="area"><span>Area</span></label>
+        <label class="check-label"><input type="checkbox" value="perimeter"><span>Omkrets</span></label>
+        <label class="check-label"><input type="checkbox" value="kropp"><span>Namnge kroppar <small>(Åk 3+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="klassificering"><span>Klassificera figurer <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="vinklar"><span>Vinklar <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="volym"><span>Volym <small>(Åk 5+)</small></span></label>
+      </div>
+      <p id="geometri-implicit-hint" class="implicit-hint hidden">Inget valt — Area och omkrets används</p>
+    </section>
+
+    <div class="menu-group-label" id="klocka-group-label">Klocka – visningsläge</div>
+
+    <section class="menu-section" id="klocka-section">
+      <div id="klocka-type-checkboxes">
+        <label class="check-label"><input type="checkbox" value="analog"><span>Analogt</span></label>
+        <label class="check-label"><input type="checkbox" value="digital"><span>Digitalt</span></label>
+      </div>
+      <p id="klocka-implicit-hint" class="implicit-hint hidden">Inget valt — Blandat används</p>
+    </section>
+
+    <!-- ── SUBINSTÄLLNINGAR: BRÅK ───────────────────── -->
+    <div class="menu-group-label" id="brak-group-label">Bråk – delmoment</div>
+
+    <section class="menu-section" id="brak-section">
+      <div id="brak-type-checkboxes">
+        <label class="check-label"><input type="checkbox" value="name" checked><span>Namnge bråk</span></label>
+        <label class="check-label"><input type="checkbox" value="order-same-den" checked><span>Storleksordna – lika nämnare <small>(Åk 3+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="order-diff-den" checked><span>Storleksordna – olika nämnare <small>(Åk 3+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="add-same-den" checked><span>Addition – lika nämnare <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="sub-same-den" checked><span>Subtraktion – lika nämnare <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="compare" checked><span>Jämföra bråk <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="fraction-of-whole" checked><span>Bråk av heltal <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="simplify" checked><span>Förenkla bråk <small>(Åk 4+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="add-diff-den" checked><span>Addition – olika nämnare <small>(Åk 5+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="sub-diff-den" checked><span>Subtraktion – olika nämnare <small>(Åk 5+)</small></span></label>
+        <label class="check-label"><input type="checkbox" value="to-mixed" checked><span>Blandat tal <small>(Åk 6)</small></span></label>
+      </div>
+      <p id="brak-implicit-hint" class="implicit-hint hidden">Inget valt — Alla delmoment för vald åk används</p>
+    </section>
+
+    <!-- ── SUBINSTÄLLNINGAR: PRIORITET ──────────────── -->
+    <div class="menu-group-label" id="prioritet-group-label">Prioritetsregler – räknesätt</div>
+
+    <section class="menu-section" id="prioritet-section">
+      <div id="prioritet-ops-checkboxes">
+        <label class="check-label"><input type="checkbox" value="mult" checked><span>Multiplikation</span></label>
+        <label class="check-label"><input type="checkbox" value="div" checked><span>Division <small>(Åk 3+)</small></span></label>
+      </div>
+    </section>
+
+    <!-- ── EGNA UPPGIFTER ─────────────────────────────── -->
+    <div class="menu-group-label" id="egna-uppgifter-group-label">Egna uppgifter</div>
+    <section class="menu-section" id="egna-uppgifter-section">
+      <label class="check-label check-label--featured">
+        <input type="checkbox" id="custom-problems-check">
+        <span>Använd egna uppgifter<br><small>Blanda in importerade problemlösningsuppgifter</small></span>
+      </label>
+      <div class="specific-tables-wrap" style="margin-top:0.5rem">
+        <p class="implicit-hint" style="margin-bottom:0.5rem">Importera från CSV/Excel (kolumnerna <strong>Fråga</strong> och <strong>Svar</strong>). Valfri kolumn: <strong>Område</strong>.</p>
+        <button type="button" id="custom-download-template-btn" class="clear-areas-btn" style="margin-bottom:0.35rem">Ladda ner mall (CSV)</button>
+        <label class="section-label" style="display:block; margin-top:0.5rem">Importera fil</label>
+        <input type="file" id="custom-problems-file-input" accept=".csv,.txt,text/csv" style="font-size:0.85rem; max-width:100%">
+        <label class="section-label" style="display:block; margin-top:0.75rem">eller klistra in CSV</label>
+        <textarea id="custom-problems-paste" rows="4" placeholder="Fråga,Svar,Område&#10;Emma har 12 pennor...&#10;" style="width:100%; font-size:0.85rem; resize:vertical; box-sizing:border-box"></textarea>
+        <button type="button" id="custom-import-paste-btn" class="clear-areas-btn" style="margin-top:0.35rem">Importera från text</button>
+        <p id="custom-problems-status" class="implicit-hint" style="margin-top:0.5rem"></p>
+      </div>
+    </section>
+
+    <!-- ── PEDAGOGISKA VERKTYG ────────────────────────── -->
+    <div class="menu-group-label">Pedagogiska verktyg</div>
+
+    <section class="menu-section">
+      <label class="check-label check-label--featured">
+        <input type="checkbox" id="bildstod-check">
+        <span>Bildstöd<br><small>Prickar/figurer som visuellt stöd</small></span>
+      </label>
+      <div id="bildstod-options" class="hidden">
+        <div class="specific-tables-label">Visa bildstöd:</div>
+        <select id="bildstod-delay-select">
+          <option value="0">Direkt</option>
+          <option value="5">Efter 5 sekunder</option>
+          <option value="10" selected>Efter 10 sekunder</option>
+          <option value="20">Efter 20 sekunder</option>
+          <option value="30">Efter 30 sekunder</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="menu-section">
+      <label class="check-label check-label--featured">
+        <input type="checkbox" id="problemlosning-check">
+        <span>Problemlösning<br><small>Textuppgifter med namn och scenarion</small></span>
+      </label>
+      <div id="flersteg-wrap" class="hidden specific-tables-wrap">
+        <label class="check-label">
+          <input type="checkbox" id="flersteg-check">
+          <span>Flerstegsuppgifter<br><small>Tvåstegsproblem (kräver 2 räknesätt)</small></span>
+        </label>
+      </div>
+    </section>
+
+    <section class="menu-section">
+      <label class="check-label check-label--featured">
+        <input type="checkbox" id="multiple-check">
+        <span>Flera uppgifter<br><small>Visa 2–4 uppgifter samtidigt på skärmen</small></span>
+      </label>
+      <div id="multiple-count-wrap" class="hidden specific-tables-wrap">
+        <div class="specific-tables-label">Antal uppgifter:</div>
+        <select id="multiple-count-select">
+          <option value="2">2 uppgifter</option>
+          <option value="3">3 uppgifter</option>
+          <option value="4">4 uppgifter</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- ── LIVESESSION (LÄRARE) ─────────────────────────── -->
+    <div class="menu-group-label">Livesession (elevsvar)</div>
+
+    <section class="menu-section">
+      <label class="section-label">Styr elevsession</label>
+      <button id="session-start-btn" class="clear-areas-btn" type="button">Starta livesession</button>
+      <p id="session-code-text" class="implicit-hint hidden"></p>
+      <button id="session-send-problem-btn" class="clear-areas-btn" type="button" disabled style="margin-top:0.5rem">
+        Skicka aktuell uppgift till elever
+      </button>
+    </section>
+
+    <section class="menu-section" id="session-submissions-section" style="display:none">
+      <label class="section-label">Elevsvar (senaste uppgift)</label>
+      <ul id="session-submissions-list" style="list-style:none; padding-left:0; max-height:160px; overflow-y:auto; font-size:0.8rem;"></ul>
+    </section>
+
+    <section class="menu-section">
+      <label class="check-label check-label--featured">
+        <input type="checkbox" id="discussion-check">
+        <span>Diskussionsstöd<br><small>Visar en samtalsfråga vid varje uppgift</small></span>
+      </label>
+    </section>
+
+    <!-- ── EXTRAUPPGIFT ───────────────────────────────── -->
+    <div class="menu-group-label">Sidopanel – fördjupning</div>
+
+    <section class="menu-section">
+      <label class="check-label check-label--featured">
+        <input type="checkbox" id="extra-enabled-check">
+        <span>Aktivera extrauppgift<br><small>En sidopanel med fördjupningsuppgift visas efter vald fördröjning</small></span>
+      </label>
+      <div id="extra-task-options" class="hidden">
+        <label class="section-label" for="extra-type-select">Typ</label>
+        <select id="extra-type-select">
+          <option value="uppstallning-add">Uppställning – addition</option>
+          <option value="uppstallning-sub">Uppställning – subtraktion</option>
+          <option value="uppstallning-mult">Uppställning – multiplikation</option>
+          <option value="uppstallning-div">Uppställning – division</option>
+          <option value="geometri-area">Geometri – area</option>
+          <option value="geometri-perimeter">Geometri – omkrets</option>
+          <option value="klocka">Klocka</option>
+          <option value="brak">Bråk</option>
+        </select>
+        <label class="section-label" for="extra-delay-select">Visas efter</label>
+        <select id="extra-delay-select">
+          <option value="0">Visa direkt</option>
+          <option value="5">5 sekunder</option>
+          <option value="10">10 sekunder</option>
+          <option value="15">15 sekunder</option>
+          <option value="20">20 sekunder</option>
+          <option value="30">30 sekunder</option>
+        </select>
+      </div>
+    </section>
+
+  </nav>
+
+  <!-- Overlay bakom menyn -->
+  <div id="menu-overlay"></div>
+
+  <!-- Huvudscen -->
+  <main id="stage" role="button" tabindex="0" aria-label="Tryck för ny uppgift">
+    <div id="session-counter" class="session-counter" aria-live="polite"></div>
+    <div id="problem-display" class="hidden" aria-live="polite"></div>
+    <div id="session-submissions-main" class="session-submissions-main hidden" aria-live="polite"></div>
+    <div id="discussion-prompt" class="discussion-prompt hidden"></div>
+    <p id="click-hint">Tryck för att börja</p>
+    <button id="next-problem-btn" class="show-answer-btn next-problem-btn" type="button" tabindex="-1">
+      Nästa uppgift
+    </button>
+    <button id="show-answer-btn" class="show-answer-btn" aria-label="Visa svar" tabindex="-1">Visa svar</button>
+    <button id="send-to-students-btn" class="show-answer-btn send-to-students-btn" aria-label="Skicka uppgift till elever" tabindex="-1" disabled>
+      Skicka till elever
+    </button>
+  </main>
+
+  <!-- Popup för elevsvar -->
+  <div id="submission-modal" class="submission-modal hidden" aria-modal="true" role="dialog">
+    <div class="submission-modal-backdrop"></div>
+    <div class="submission-modal-content">
+      <button id="submission-modal-close" class="submission-modal-close" type="button" aria-label="Stäng">×</button>
+      <div class="submission-modal-header">
+        <h2 id="submission-modal-title">Elevsvar</h2>
+        <p id="submission-modal-meta"></p>
+      </div>
+      <div id="submission-modal-body" class="submission-modal-body"></div>
+      <div class="submission-modal-footer">
+        <button id="submission-modal-prev" type="button">&larr; Föregående</button>
+        <button id="submission-modal-next" type="button">Nästa &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Extrauppgiftspanel (höger) -->
+  <aside id="extra-panel" class="hidden" aria-label="Extrauppgift">
+    <div class="extra-label">Extrauppgift</div>
+    <div id="extra-display"></div>
+    <button id="extra-answer-btn" class="extra-answer-btn">Visa svar</button>
+  </aside>
+
+  <!-- Plugin-system (laddas före fasaderna) -->
+  <script src="js/plugins/_math-utils.js"></script>
+  <script src="js/plugins/_render-utils.js"></script>
+  <script src="js/plugins/_utils.js"></script>
+  <script src="js/plugins/BasePlugin.js"></script>
+  <script src="js/plugins/PluginManager.js"></script>
+  <script src="js/plugins/addition.js"></script>
+  <script src="js/plugins/subtraktion.js"></script>
+  <script src="js/plugins/multiplikation.js"></script>
+  <script src="js/plugins/division.js"></script>
+  <script src="js/plugins/prioritet.js"></script>
+  <script src="js/plugins/oppna-utsaga.js"></script>
+  <script src="js/plugins/brak.js"></script>
+  <script src="js/plugins/geometri.js"></script>
+  <script src="js/plugins/klocka.js"></script>
+  <script src="js/plugins/matt-langd.js"></script>
+  <script src="js/plugins/matt-volym.js"></script>
+  <script src="js/plugins/matt-vikt.js"></script>
+  <script src="js/plugins/matt-tid.js"></script>
+  <script src="js/plugins/procent.js"></script>
+  <script src="js/plugins/tallinje.js"></script>
+  <script src="js/plugins/talsorter.js"></script>
+  <script src="js/plugins/talfoljd.js"></script>
+  <script src="js/plugins/matt-area.js"></script>
+  <script src="js/plugins/negativa-tal.js"></script>
+  <script src="js/plugins/sannolikhet.js"></script>
+  <script src="js/plugins/statistik.js"></script>
+  <script src="js/plugins/koordinatsystem.js"></script>
+  <script src="js/plugins/symmetri.js"></script>
+  <script src="js/plugins/romerska.js"></script>
+
+  <!-- Befintliga moduler (tunna fasader) -->
+  <script src="js/settings.js"></script>
+  <script src="js/custom-problems.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/problems.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/bildstod.js"></script>
+  <script src="js/answer.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/session-teacher.js"></script>
+</body>
+</html>
