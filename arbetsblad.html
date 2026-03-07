@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klassrummatte – Skapa arbetsblad</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/arbetsblad.css">
+</head>
+<body>
+
+  <!-- ── Konfigurations-panel (dold vid utskrift) ──────────── -->
+  <div id="config-panel" class="no-print">
+    <span class="config-logo">Klassrummatte</span>
+
+    <div class="config-group">
+      <span class="config-label">Rubrik</span>
+      <input type="text" id="ab-title" placeholder="T.ex. Multiplikation" style="width:14rem">
+    </div>
+
+    <div class="config-group">
+      <span class="config-label">Årskurs</span>
+      <select id="ab-grade">
+        <option value="1">Åk 1</option>
+        <option value="2">Åk 2</option>
+        <option value="3" selected>Åk 3</option>
+        <option value="4">Åk 4</option>
+        <option value="5">Åk 5</option>
+        <option value="6">Åk 6</option>
+      </select>
+    </div>
+
+    <div class="config-group">
+      <span class="config-label">Antal sidor</span>
+      <select id="ab-pages">
+        <option value="1" selected>1 sida</option>
+        <option value="2">2 sidor</option>
+        <option value="3">3 sidor</option>
+        <option value="4">4 sidor</option>
+        <option value="5">5 sidor</option>
+      </select>
+    </div>
+
+    <div class="config-group">
+      <span class="config-label">Kolumner</span>
+      <select id="ab-cols">
+        <option value="2">2 per rad</option>
+        <option value="3">3 per rad</option>
+        <option value="4">4 per rad</option>
+      </select>
+    </div>
+
+    <div class="config-group">
+      <span class="config-label">Design</span>
+      <select id="ab-theme">
+        <option value="">Klassisk</option>
+        <option value="theme-enkel">Enkel</option>
+        <option value="theme-lekfull">Lekfull</option>
+        <option value="theme-ram">Ram</option>
+      </select>
+    </div>
+
+    <div class="config-group">
+      <span class="config-label">Matematikområden</span>
+      <button class="config-areas-toggle" id="ab-areas-toggle">Välj områden ▾</button>
+    </div>
+
+    <label class="config-toggle-row">
+      <input type="checkbox" id="ab-problemlosning">
+      Problemlösning (textuppgifter)
+    </label>
+
+    <label class="config-toggle-row">
+      <input type="checkbox" id="ab-show-answers">
+      Inkludera svarsnyckel
+    </label>
+
+    <div class="config-actions">
+      <button class="btn-generate" id="ab-generate-btn">Generera arbetsblad</button>
+      <button class="btn-print"    id="ab-print-btn">Skriv ut / PDF</button>
+      <span class="print-hint">Tips: Avmarkera "Sidhuvuden och sidfötter" i utskriftsdialogen för att dölja webbläsarens URL.</span>
+    </div>
+
+    <!-- Område-popup (inuti config-panel för korrekt absolut-positionering) -->
+    <div id="areas-popup">
+    <div class="areas-category">
+      <div class="areas-cat-label">Aritmetik</div>
+      <label><input type="checkbox" value="addition"      checked> Addition</label>
+      <label><input type="checkbox" value="subtraktion"   checked> Subtraktion</label>
+      <label><input type="checkbox" value="multiplikation" checked> Multiplikation</label>
+      <label><input type="checkbox" value="division"      checked> Division</label>
+    </div>
+    <div class="areas-category">
+      <div class="areas-cat-label">Algebra</div>
+      <label><input type="checkbox" value="prioritet"> Prioriteringsregler</label>
+      <label><input type="checkbox" value="oppna-utsagor"> Öppna utsagor</label>
+      <label><input type="checkbox" value="talfoljd"> Talföljd</label>
+    </div>
+    <div class="areas-category">
+      <div class="areas-cat-label">Tal & samband</div>
+      <label><input type="checkbox" value="brak"> Bråk</label>
+      <label><input type="checkbox" value="procent"> Procent</label>
+      <label><input type="checkbox" value="tallinje"> Tallinje</label>
+      <label><input type="checkbox" value="talsorter"> Talsorter</label>
+      <label><input type="checkbox" value="negativa-tal"> Negativa tal</label>
+      <label><input type="checkbox" value="romerska"> Romerska siffror</label>
+    </div>
+    <div class="areas-category">
+      <div class="areas-cat-label">Geometri</div>
+      <label><input type="checkbox" value="geometri"> Geometri</label>
+      <label><input type="checkbox" value="symmetri"> Symmetri</label>
+      <label><input type="checkbox" value="koordinatsystem"> Koordinatsystem</label>
+    </div>
+    <div class="areas-category">
+      <div class="areas-cat-label">Mått & tid</div>
+      <label><input type="checkbox" value="klocka"> Klocka</label>
+      <label><input type="checkbox" value="matt-langd"> Längd</label>
+      <label><input type="checkbox" value="matt-volym"> Volym</label>
+      <label><input type="checkbox" value="matt-vikt"> Vikt</label>
+      <label><input type="checkbox" value="matt-tid"> Tid</label>
+      <label><input type="checkbox" value="matt-area"> Area-mått</label>
+    </div>
+    <div class="areas-category">
+      <div class="areas-cat-label">Statistik</div>
+      <label><input type="checkbox" value="statistik"> Statistik</label>
+      <label><input type="checkbox" value="sannolikhet"> Sannolikhet</label>
+    </div>
+  </div>
+  </div><!-- /config-panel -->
+
+  <!-- ── Tomt tillstånd ─────────────────────────────────────── -->
+  <div id="empty-state">
+    <p>Välj inställningar och tryck på <strong>Generera arbetsblad</strong></p>
+  </div>
+
+  <!-- ── A4-ark (byggs dynamiskt av arbetsblad.js) ─────────── -->
+  <div class="ab-sheet-wrap hidden" id="ab-sheet"></div>
+
+  <!-- ── Plugin-skript (samma ordning som index.html) ───────── -->
+  <script src="js/plugins/_math-utils.js"></script>
+  <script src="js/plugins/_render-utils.js"></script>
+  <script src="js/plugins/_utils.js"></script>
+  <script src="js/plugins/BasePlugin.js"></script>
+  <script src="js/plugins/PluginManager.js"></script>
+  <script src="js/plugins/addition.js"></script>
+  <script src="js/plugins/subtraktion.js"></script>
+  <script src="js/plugins/multiplikation.js"></script>
+  <script src="js/plugins/division.js"></script>
+  <script src="js/plugins/prioritet.js"></script>
+  <script src="js/plugins/oppna-utsaga.js"></script>
+  <script src="js/plugins/brak.js"></script>
+  <script src="js/plugins/geometri.js"></script>
+  <script src="js/plugins/klocka.js"></script>
+  <script src="js/plugins/matt-langd.js"></script>
+  <script src="js/plugins/matt-volym.js"></script>
+  <script src="js/plugins/matt-vikt.js"></script>
+  <script src="js/plugins/matt-tid.js"></script>
+  <script src="js/plugins/procent.js"></script>
+  <script src="js/plugins/tallinje.js"></script>
+  <script src="js/plugins/talsorter.js"></script>
+  <script src="js/plugins/talfoljd.js"></script>
+  <script src="js/plugins/matt-area.js"></script>
+  <script src="js/plugins/negativa-tal.js"></script>
+  <script src="js/plugins/sannolikhet.js"></script>
+  <script src="js/plugins/statistik.js"></script>
+  <script src="js/plugins/koordinatsystem.js"></script>
+  <script src="js/plugins/symmetri.js"></script>
+  <script src="js/plugins/romerska.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/arbetsblad.js"></script>
+</body>
+</html>
