@@ -11,27 +11,30 @@ const Arbetsblad = (() => {
   // =========================================================
   //  Områdeskonfiguration med underkategorier
   // =========================================================
+  // Områden som stöder autogenererad problemlösning (Templates.canWrap)
+  const PROBLEMLOSNING_AREAS = [
+    'addition', 'subtraktion', 'multiplikation', 'division',
+    'geometri', 'matt-langd', 'matt-volym', 'matt-vikt', 'matt-tid', 'matt-area',
+    'klocka', 'procent', 'brak'
+  ];
+
   const AREA_CONFIG = [
     { cat: 'Aritmetik', areas: [
       { id: 'addition', label: 'Addition', checked: true, subcats: [
         { id: 'standard',       label: 'Standard',       default: 5 },
         { id: 'uppstallning',   label: 'Uppställning',   default: 0 },
-        { id: 'problemlosning', label: 'Problemlösning', default: 0 },
       ]},
       { id: 'subtraktion', label: 'Subtraktion', checked: true, subcats: [
         { id: 'standard',       label: 'Standard',       default: 5 },
         { id: 'uppstallning',   label: 'Uppställning',   default: 0 },
-        { id: 'problemlosning', label: 'Problemlösning', default: 0 },
       ]},
       { id: 'multiplikation', label: 'Multiplikation', checked: true, subcats: [
         { id: 'tables-basic',   label: 'Tabeller',       default: 5 },
         { id: 'tables-large',   label: 'Stora tal',      default: 0 },
-        { id: 'problemlosning', label: 'Problemlösning', default: 0 },
       ]},
       { id: 'division', label: 'Division', checked: true, subcats: [
         { id: 'tables-basic',   label: 'Tabeller',       default: 5 },
         { id: 'tables-large',   label: 'Stora tal',      default: 0 },
-        { id: 'problemlosning', label: 'Problemlösning', default: 0 },
       ]},
     ]},
     { cat: 'Algebra', areas: [
@@ -63,6 +66,14 @@ const Arbetsblad = (() => {
     { cat: 'Statistik', areas: [
       { id: 'statistik',   label: 'Statistik' },
       { id: 'sannolikhet', label: 'Sannolikhet' },
+    ]},
+    { cat: 'Problemlösning', areas: [
+      { id: 'problemlosning-auto', label: 'Autogenererade', subcats: [
+        { id: 'problemlosning', label: 'Antal', default: 0 },
+      ]},
+      { id: 'problemlosning-egna', label: 'Egna uppgifter', subcats: [
+        { id: 'egna', label: 'Antal', default: 0 },
+      ]},
     ]},
   ];
 
@@ -96,6 +107,18 @@ const Arbetsblad = (() => {
         label.appendChild(cb);
         label.appendChild(document.createTextNode(' ' + area.label));
         item.appendChild(label);
+
+        // Visa antal lagrade uppgifter för "Egna uppgifter"
+        if (area.id === 'problemlosning-egna') {
+          const stored = typeof Settings !== 'undefined' ? Settings.getCustomProblems() : [];
+          const hint = document.createElement('span');
+          hint.className = 'ab-egna-hint';
+          hint.style.cssText = 'font-size:0.7rem;color:rgba(255,255,255,0.4);margin-left:0.3rem;';
+          hint.textContent = stored.length > 0
+            ? `(${stored.length} lagrade)`
+            : '(inga importerade)';
+          label.appendChild(hint);
+        }
 
         // Underkategorier
         const subcats = area.subcats || [{ id: 'standard', label: 'Antal', default: 10 }];
@@ -197,13 +220,18 @@ const Arbetsblad = (() => {
     const theme   = document.getElementById('ab-theme').value            || '';
     const title   = document.getElementById('ab-title').value.trim()     || 'Matematik';
     const showAns = document.getElementById('ab-show-answers').checked;
+    const pagesVal = document.getElementById('ab-pages').value;
     const specs   = getSubcatSpecs();
     const total   = specs.reduce((sum, s) => sum + s.count, 0);
-    const hasProblemlosning = specs.some(s => s.subcat === 'problemlosning' && s.count > 0);
+    const hasProblemlosning = specs.some(s =>
+      (s.area === 'problemlosning-auto' || s.area === 'problemlosning-egna') && s.count > 0);
     const cols    = hasProblemlosning ? Math.min(colsRaw, 2) : colsRaw;
-    const perPage = hasProblemlosning ? 8 : 20;
-    const pages   = Math.max(1, Math.ceil(total / perPage));
-    return { grade, count: total, cols, pages, perPage, theme, title, showAns, specs };
+    // Max uppgifter per A4-sida: 6 rader × antal kolumner (5 rader för problemlösning)
+    const perPage = hasProblemlosning ? (cols * 5) : (cols * 6);
+    const pages   = pagesVal === 'auto'
+      ? Math.max(1, Math.ceil(total / perPage))
+      : parseInt(pagesVal) || 1;
+    return { grade, count: total, cols, pages, perPage, theme, title, showAns, specs, pagesVal };
   }
 
   // =========================================================
@@ -224,17 +252,69 @@ const Arbetsblad = (() => {
     };
   }
 
+  // Generera egna (lagrade) uppgifter från Settings/CustomProblems
+  function generateEgnaProblems(count, allProblems) {
+    const stored = typeof Settings !== 'undefined' ? Settings.getCustomProblems() : [];
+    if (!stored || stored.length === 0) return [];
+    const problems = [];
+    const shuffled = stored.slice().sort(() => Math.random() - 0.5);
+    for (let i = 0; i < count; i++) {
+      const p = shuffled[i % shuffled.length];
+      problems.push({
+        type: 'egna',
+        isTextProblem: true,
+        textTemplate: p.question,
+        answer: p.answer,
+      });
+    }
+    return problems;
+  }
+
+  // Generera autogenererade problemlösningsuppgifter (blandar alla areas som stöder Templates.canWrap)
+  function generateAutoProblemlosning(count, grade, allProblems) {
+    const problems = [];
+    const settings = makeBaseSettings(grade);
+    for (let i = 0; i < count; i++) {
+      let p = null;
+      for (let attempt = 0; attempt < 10 && !p; attempt++) {
+        try {
+          // Välj slumpmässigt bland alla områden som stöder problemlösning
+          const area = PROBLEMLOSNING_AREAS[Math.floor(Math.random() * PROBLEMLOSNING_AREAS.length)];
+          const plugin = PluginManager.get(area);
+          if (!plugin) continue;
+          let candidate = plugin.generate(settings);
+          if (candidate && typeof Templates !== 'undefined' && Templates.canWrap(area)) {
+            candidate = Templates.wrapInTemplate(candidate, grade);
+          }
+          if (candidate && !isDuplicate(candidate, [...allProblems, ...problems])) {
+            p = candidate;
+          }
+        } catch (_) {}
+      }
+      if (p) problems.push(p);
+    }
+    return problems;
+  }
+
   function generateForSubcat(spec, grade, allProblems) {
     const area   = spec.area;
     const subcat = spec.subcat;
     const count  = spec.count;
+
+    // Problemlösning – egen kategori
+    if (area === 'problemlosning-auto') {
+      return generateAutoProblemlosning(count, grade, allProblems);
+    }
+    if (area === 'problemlosning-egna') {
+      return generateEgnaProblems(count, allProblems);
+    }
+
     const type   = area === 'oppna-utsagor' ? 'oppna-utsaga' : area;
     const plugin = PluginManager.get(type);
     if (!plugin) return [];
 
     const problems = [];
     const settings = makeBaseSettings(grade);
-    const isProblemlosning = subcat === 'problemlosning';
 
     // Konfigurera settings för denna specifika underkategori
     if (area === 'addition' || area === 'subtraktion') {
@@ -251,9 +331,6 @@ const Arbetsblad = (() => {
       for (let attempt = 0; attempt < 10 && !p; attempt++) {
         try {
           let candidate = plugin.generate(settings);
-          if (candidate && isProblemlosning && typeof Templates !== 'undefined' && Templates.canWrap(area)) {
-            candidate = Templates.wrapInTemplate(candidate, grade);
-          }
           if (candidate && !isDuplicate(candidate, [...allProblems, ...problems])) {
             p = candidate;
           }
@@ -318,47 +395,58 @@ const Arbetsblad = (() => {
         key.textContent = `Svar: ${problem.answer}`;
         ansSpace.appendChild(key);
       } else {
-        const drawArea = document.createElement('div');
-        drawArea.className = 'ab-draw-area';
-        ansSpace.appendChild(drawArea);
-
-        const gridWrap = document.createElement('div');
-        gridWrap.className = 'ab-text-grid-wrap';
+        // Starten-liknande rutnät för beräkning
         const table = document.createElement('table');
-        table.className = 'ab-answer-grid ab-answer-grid--small';
-        for (let r = 0; r < 4; r++) {
+        table.className = 'ab-answer-grid ab-answer-grid--calc';
+        const cols = 5;
+        for (let r = 0; r < 3; r++) {
           const tr = document.createElement('tr');
-          for (let c = 0; c < 4; c++) tr.appendChild(document.createElement('td'));
+          for (let c = 0; c < cols; c++) tr.appendChild(document.createElement('td'));
           table.appendChild(tr);
         }
-        gridWrap.appendChild(table);
+        const lastRow = document.createElement('tr');
+        lastRow.className = 'ab-answer-grid-answer';
+        for (let c = 0; c < cols; c++) lastRow.appendChild(document.createElement('td'));
+        table.appendChild(lastRow);
+        ansSpace.appendChild(table);
+
         const svarLine = document.createElement('div');
         svarLine.className = 'ab-answer-svar';
         svarLine.innerHTML = 'Svar: <span class="ab-answer-svar-line"></span>';
-        gridWrap.appendChild(svarLine);
-        ansSpace.appendChild(gridWrap);
+        ansSpace.appendChild(svarLine);
       }
       card.appendChild(ansSpace);
     } else {
       card.appendChild(content);
       const ansSpace = document.createElement('div');
       ansSpace.className = 'ab-answer-space';
-      const isArithmetic = problem && ['addition', 'subtraktion', 'multiplikation', 'division'].includes(problem.type);
+      const isArithmetic = problem && ['addition', 'subtraktion', 'multiplikation'].includes(problem.type);
       if (showAns && problem) {
         const key = document.createElement('div');
         key.className = 'ab-answer-key';
         key.textContent = `Svar: ${problem.answer}`;
         ansSpace.appendChild(key);
       } else if (isArithmetic) {
+        // Starten-liknande rutnät: dynamiska kolumner, 3 rader + svarsrad
+        const digits = Math.max(
+          String(problem.a).length,
+          String(problem.b).length,
+          String(problem.answer).length
+        ) + 1;
+        const cols = Math.max(digits, 4);
         const table = document.createElement('table');
-        table.className = 'ab-answer-grid';
-        for (let r = 0; r < 5; r++) {
+        table.className = 'ab-answer-grid ab-answer-grid--calc';
+        for (let r = 0; r < 3; r++) {
           const tr = document.createElement('tr');
-          for (let c = 0; c < 10; c++) tr.appendChild(document.createElement('td'));
+          for (let c = 0; c < cols; c++) tr.appendChild(document.createElement('td'));
           table.appendChild(tr);
         }
+        const lastRow = document.createElement('tr');
+        lastRow.className = 'ab-answer-grid-answer';
+        for (let c = 0; c < cols; c++) lastRow.appendChild(document.createElement('td'));
+        table.appendChild(lastRow);
         ansSpace.appendChild(table);
-      } else {
+      } else if (problem && problem.type !== 'division') {
         for (let i = 0; i < 2; i++) {
           const line = document.createElement('div');
           line.className = 'ab-answer-line';
@@ -447,11 +535,6 @@ const Arbetsblad = (() => {
       });
 
       inner.appendChild(grid);
-
-      const footer = document.createElement('footer');
-      footer.className = 'ab-footer';
-      footer.textContent = 'klassrummatte.se';
-      inner.appendChild(footer);
 
       sheet.appendChild(inner);
       wrap.appendChild(sheet);
@@ -649,11 +732,6 @@ const Arbetsblad = (() => {
 
     inner.appendChild(table);
 
-    const footer = document.createElement('footer');
-    footer.className = 'ab-footer';
-    footer.textContent = 'klassrummatte.se';
-    inner.appendChild(footer);
-
     sheet.appendChild(inner);
     wrap.appendChild(sheet);
     wrap.classList.remove('hidden');
@@ -680,11 +758,33 @@ const Arbetsblad = (() => {
       return;
     }
 
+    // Om användaren valt specifikt antal sidor, skala upp antal problem
+    const wantedTotal = cfg.pagesVal !== 'auto'
+      ? cfg.pages * cfg.perPage
+      : 0;
+
     // Generera per underkategori
-    specs.forEach(spec => {
+    const baseSpecs = specs;
+    baseSpecs.forEach(spec => {
       const problems = generateForSubcat(spec, cfg.grade, sheetProblems);
       sheetProblems.push(...problems);
     });
+
+    // Fyll på med fler problem om användaren valt fler sidor
+    if (wantedTotal > 0 && sheetProblems.length < wantedTotal) {
+      let remaining = wantedTotal - sheetProblems.length;
+      while (remaining > 0) {
+        // Fördela jämnt över alla aktiva specs
+        for (const spec of baseSpecs) {
+          if (remaining <= 0) break;
+          const extra = generateForSubcat({ ...spec, count: 1 }, cfg.grade, sheetProblems);
+          if (extra.length > 0) {
+            sheetProblems.push(...extra);
+            remaining--;
+          }
+        }
+      }
+    }
 
     // Blanda ordningen
     for (let i = sheetProblems.length - 1; i > 0; i--) {
@@ -736,8 +836,8 @@ const Arbetsblad = (() => {
   html, body { margin: 0; padding: 0; background: white !important;
                height: auto !important; min-height: 0 !important; overflow: visible !important; }
   .ab-sheet-wrap { display: block !important; padding: 0 !important; }
-  .ab-sheet      { display: block !important; width: 100% !important; box-shadow: none !important; }
-  .ab-sheet-inner{ display: block !important; }
+  .ab-sheet      { display: block !important; width: 100% !important; height: auto !important; box-shadow: none !important; overflow: visible !important; }
+  .ab-sheet-inner{ display: block !important; overflow: visible !important; }
   .ab-sheet + .ab-sheet { page-break-before: always !important; break-before: page !important; margin-top: 0 !important; }
   .ab-regen-btn, .no-print { display: none !important; }
   @page { size: A4 portrait; margin: 1cm 1.5cm; }

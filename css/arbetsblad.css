@@ -11,6 +11,7 @@ body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   color: #1a1a2e;
   min-height: 100vh;
+  overflow-y: auto;
 }
 
 /* === Konfigurations-panel ================================== */
@@ -248,14 +249,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 2rem;
 }
 
 .ab-sheet {
   width: 210mm;
+  height: 297mm;
   background: #fff;
   box-shadow: 0 4px 40px rgba(0,0,0,0.25);
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 /* Topplinje i accentfärg */
@@ -268,10 +273,11 @@ body {
 }
 
 .ab-sheet-inner {
-  padding: 1.4cm 1.6cm 1cm;
+  padding: 1cm 1.2cm 0.6cm;
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* === Header =============================================== */
@@ -279,8 +285,8 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 0.8cm;
-  padding-bottom: 0.4cm;
+  margin-bottom: 0.5cm;
+  padding-bottom: 0.3cm;
   border-bottom: 1.5px solid #e0deda;
 }
 
@@ -333,14 +339,14 @@ body {
 .ab-problem-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.35cm;
+  gap: 0.2cm;
 }
 
 /* === Problem-kort ========================================= */
 .ab-problem-card {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
-  padding: 0.3cm 0.4cm;
+  padding: 0.15cm 0.25cm;
   position: relative;
   display: flex;
   flex-wrap: wrap;
@@ -353,14 +359,14 @@ body {
 
 .ab-problem-num {
   position: absolute;
-  top: 0.2cm;
-  left: 0.2cm;
-  width: 1.2rem;
-  height: 1.2rem;
+  top: 0.1cm;
+  left: 0.15cm;
+  width: 1.1rem;
+  height: 1.1rem;
   background: #457b9d;
   color: #fff;
   border-radius: 50%;
-  font-size: 0.58rem;
+  font-size: 0.55rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -377,9 +383,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.05rem;
+  font-size: 1rem;
   overflow: hidden;
-  min-height: 1.2cm;
+  min-height: 0;
   white-space: nowrap;
 }
 
@@ -409,22 +415,9 @@ body {
   overflow: visible;
 }
 
-/* Svarsdel för textuppgifter: rityta vänster, rutnät höger */
+/* Svarsdel för textuppgifter: rutnät + svarslinje */
 .ab-answer-space--text {
-  flex-direction: row !important;
-  gap: 0.3cm;
-  align-items: flex-start;
   margin-top: 0.1cm;
-}
-
-.ab-draw-area {
-  flex: 1;
-}
-
-.ab-text-grid-wrap {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 /* Textuppgift */
@@ -439,10 +432,10 @@ body {
 /* === Svarsutrymme ========================================= */
 .ab-answer-space {
   flex: 0 0 100%;   /* tvingar till egen rad i kortets flex-wrap */
-  margin-top: 0.2cm;
+  margin-top: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.2cm;
+  gap: 0;
 }
 
 .ab-answer-line {
@@ -462,6 +455,31 @@ body {
   border: 1px solid #9ca3af;
   height: 5mm;
   padding: 0;
+}
+
+/* Starten-liknande beräkningsrutnät (dynamiska kolumner, 3+1 rader) */
+.ab-answer-grid--calc {
+  width: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #9ca3af;
+  margin: 0.1cm auto 0;
+}
+
+.ab-answer-grid--calc td {
+  border-right: 1px solid #9ca3af;
+  border-bottom: 1px solid #9ca3af;
+  border-top: none;
+  border-left: none;
+  width: 7mm;
+  height: 8.5mm;
+}
+
+.ab-answer-grid--calc td:last-child { border-right: none; }
+.ab-answer-grid--calc tr:last-child td { border-bottom: none; }
+
+.ab-answer-grid--calc .ab-answer-grid-answer td {
+  border-top: 3px solid #1a1a2e;
 }
 
 /* Litet rutnät för textuppgifter (4×4) */
@@ -511,8 +529,8 @@ body {
 
 /* === Footer =============================================== */
 .ab-footer {
-  margin-top: 0.6cm;
-  padding-top: 0.3cm;
+  margin-top: auto;
+  padding-top: 0.2cm;
   border-top: 1px solid #f0eeea;
   font-size: 0.65rem;
   color: #d1d5db;
@@ -549,15 +567,15 @@ body {
 .ab-sheet.theme-lekfull .ab-problem-num { border-radius: 4px; }
 
 /* === Kolumn-varianter ===================================== */
-.ab-problem-grid--2col { grid-template-columns: 1fr 1fr; gap: 0.35cm; }
-.ab-problem-grid--3col { grid-template-columns: 1fr 1fr 1fr; gap: 0.35cm; }
-.ab-problem-grid--4col { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.28cm; }
-.ab-problem-grid--4col .ab-problem-card { padding: 0.25cm 0.3cm; }
+.ab-problem-grid--2col { grid-template-columns: 1fr 1fr; gap: 0.2cm; }
+.ab-problem-grid--3col { grid-template-columns: 1fr 1fr 1fr; gap: 0.2cm; }
+.ab-problem-grid--4col { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.15cm; }
+.ab-problem-grid--4col .ab-problem-card { padding: 0.1cm 0.2cm; }
 .ab-problem-grid--4col .ab-answer-grid td { height: 4mm; }
+.ab-problem-grid--4col .ab-answer-grid--calc td { width: 6mm; height: 7mm; }
 
 /* === Flera sidor ========================================== */
-/* JS skapar en .ab-sheet per sida – denna class ger visuell separation */
-.ab-sheet--next-page { margin-top: 2rem; }
+/* JS skapar en .ab-sheet per sida – gap i wrappern ger visuell separation */
 
 /* === Ram-tema ============================================= */
 .ab-sheet.theme-ram::before { display: none; }
@@ -803,7 +821,9 @@ body {
   .ab-sheet-inner { padding: 0; display: block; }
 
   /* Sida 2 och framåt börjar på ny papperssida */
-  .ab-sheet--next-page { break-before: page; page-break-before: always; margin-top: 0; }
+  .ab-sheet--next-page { break-before: page; page-break-before: always; }
+
+  .ab-sheet { height: auto; overflow: visible; }
 
   /* Varje uppgiftskort bryts aldrig mitt i */
   .ab-problem-card { break-inside: avoid; page-break-inside: avoid; }
