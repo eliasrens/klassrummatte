@@ -61,10 +61,41 @@
           <span style="background:linear-gradient(135deg,hsl(40,38%,44%),hsl(8,58%,39%))"></span>
         </button>
       </div>
+      <div class="starten-color-row" id="ab-starten-colors-2">
+        <button class="starten-color-btn" data-theme="hav" title="Hav">
+          <span style="background:linear-gradient(135deg,hsl(215,38%,44%),hsl(190,58%,39%))"></span>
+        </button>
+        <button class="starten-color-btn" data-theme="rosa" title="Rosa">
+          <span style="background:linear-gradient(135deg,hsl(330,38%,44%),hsl(300,58%,39%))"></span>
+        </button>
+        <button class="starten-color-btn" data-theme="lavendel" title="Lavendel">
+          <span style="background:linear-gradient(135deg,hsl(258,38%,44%),hsl(226,58%,39%))"></span>
+        </button>
+        <button class="starten-color-btn" data-theme="oliv" title="Oliv">
+          <span style="background:linear-gradient(135deg,hsl(75,38%,44%),hsl(45,58%,39%))"></span>
+        </button>
+        <button class="starten-color-btn" data-theme="persika" title="Persika">
+          <span style="background:linear-gradient(135deg,hsl(25,38%,44%),hsl(355,58%,39%))"></span>
+        </button>
+        <button class="starten-color-btn" data-theme="stal" title="Stål">
+          <span style="background:linear-gradient(135deg,hsl(200,20%,48%),hsl(220,25%,42%))"></span>
+        </button>
+      </div>
     </div>
 
-    <div class="config-group ab-standard-only">
-      <span class="config-label">Kolumner</span>
+    <div class="config-actions">
+      <button class="btn-generate" id="ab-generate-btn">Generera arbetsblad</button>
+      <button class="btn-print"    id="ab-print-btn">Skriv ut / PDF</button>
+      <span class="print-hint">Tips: Avmarkera "Sidhuvuden och sidfötter" i utskriftsdialogen för att dölja webbläsarens URL.</span>
+    </div>
+  </div><!-- /config-panel -->
+
+  <!-- ── Sidopanel för arbetsblad (standard) ──────────────── -->
+  <div id="ab-sidebar" class="no-print hidden">
+    <h3 class="sidebar-title">Inställningar</h3>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Kolumner</div>
       <select id="ab-cols">
         <option value="2">2 per rad</option>
         <option value="3">3 per rad</option>
@@ -72,13 +103,13 @@
       </select>
     </div>
 
-    <div class="config-group ab-standard-only">
-      <span class="config-label">Matematikområden</span>
-      <button class="config-areas-toggle" id="ab-areas-toggle">Välj områden ▾</button>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Områden</div>
+      <div id="ab-area-checks"></div>
     </div>
 
-    <div class="config-group ab-standard-only">
-      <span class="config-label">Antal sidor</span>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Antal sidor</div>
       <select id="ab-pages">
         <option value="auto" selected>Auto</option>
         <option value="1">1</option>
@@ -89,30 +120,25 @@
       </select>
     </div>
 
-    <label class="config-toggle-row ab-standard-only">
+    <label class="sidebar-toggle-row">
       <input type="checkbox" id="ab-show-answers">
       Inkludera svarsnyckel
     </label>
 
-    <div class="config-actions">
-      <button class="btn-generate" id="ab-generate-btn">Generera arbetsblad</button>
-      <button class="btn-print"    id="ab-print-btn">Skriv ut / PDF</button>
-      <span class="print-hint">Tips: Avmarkera "Sidhuvuden och sidfötter" i utskriftsdialogen för att dölja webbläsarens URL.</span>
+    <div class="sidebar-total">
+      Totalt: <strong id="ab-total-count">0</strong> uppgifter
     </div>
-
-    <!-- Område-popup (byggs dynamiskt av arbetsblad.js) -->
-    <div id="areas-popup"></div>
-  </div><!-- /config-panel -->
+  </div>
 
   <!-- ── Sidopanel för problemlösning (dold vid utskrift) ──── -->
   <div id="pl-sidebar" class="no-print hidden">
-    <h3 class="pl-sidebar-title">Inställningar</h3>
+    <h3 class="sidebar-title">Inställningar</h3>
 
-    <div class="pl-section">
-      <div class="pl-section-label">Källa</div>
-      <label class="pl-radio-row"><input type="radio" name="pl-source" value="auto" checked> Autogenererade</label>
-      <label class="pl-radio-row"><input type="radio" name="pl-source" value="egna"> Egna importerade</label>
-      <label class="pl-radio-row"><input type="radio" name="pl-source" value="mix"> Blandning</label>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Källa</div>
+      <label class="sidebar-radio-row"><input type="radio" name="pl-source" value="auto" checked> Autogenererade</label>
+      <label class="sidebar-radio-row"><input type="radio" name="pl-source" value="egna"> Egna importerade</label>
+      <label class="sidebar-radio-row"><input type="radio" name="pl-source" value="mix"> Blandning</label>
       <div class="pl-egna-info" id="pl-egna-info"></div>
       <div class="pl-import-section hidden" id="pl-import-section">
         <div class="pl-import-hint">Importera från CSV/Excel (kolumnerna <strong>Fråga</strong> och <strong>Svar</strong>).</div>
@@ -126,20 +152,20 @@
       </div>
     </div>
 
-    <div class="pl-section pl-auto-only">
-      <div class="pl-section-label">Områden</div>
+    <div class="sidebar-section pl-auto-only">
+      <div class="sidebar-section-label">Områden</div>
       <div id="pl-area-checks"></div>
     </div>
 
-    <div class="pl-section">
-      <div class="pl-section-label">Layout</div>
-      <label class="pl-radio-row"><input type="radio" name="pl-layout" value="6" checked> 6 per sida (2 × 3)</label>
-      <label class="pl-radio-row"><input type="radio" name="pl-layout" value="4"> 4 per sida (2 × 2)</label>
-      <label class="pl-radio-row"><input type="radio" name="pl-layout" value="2"> 2 per sida (stor)</label>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Layout</div>
+      <label class="sidebar-radio-row"><input type="radio" name="pl-layout" value="6" checked> 6 per sida (2 × 3)</label>
+      <label class="sidebar-radio-row"><input type="radio" name="pl-layout" value="4"> 4 per sida (2 × 2)</label>
+      <label class="sidebar-radio-row"><input type="radio" name="pl-layout" value="2"> 2 per sida (stor)</label>
     </div>
 
-    <div class="pl-section">
-      <div class="pl-section-label">Antal sidor</div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Antal sidor</div>
       <select id="pl-pages">
         <option value="1" selected>1</option>
         <option value="2">2</option>
@@ -149,7 +175,7 @@
       </select>
     </div>
 
-    <label class="pl-toggle-row">
+    <label class="sidebar-toggle-row">
       <input type="checkbox" id="pl-show-answers">
       Inkludera svarsnyckel
     </label>

@@ -6,6 +6,7 @@ const Arbetsblad = (() => {
 
   let sheetProblems = [];  // Aktuell lista med problem
   let startenData   = null; // { grade, rows } för Starten-läge
+  let plConfig      = null; // Senaste PL-config för omrendering vid färgbyte
   let startenColor  = '';   // tema-klass för färgval
 
   // =========================================================
@@ -20,21 +21,16 @@ const Arbetsblad = (() => {
 
   const AREA_CONFIG = [
     { cat: 'Aritmetik', areas: [
-      { id: 'addition', label: 'Addition', checked: true, subcats: [
-        { id: 'standard',       label: 'Standard',       default: 5 },
-        { id: 'uppstallning',   label: 'Uppställning',   default: 0 },
-      ]},
-      { id: 'subtraktion', label: 'Subtraktion', checked: true, subcats: [
-        { id: 'standard',       label: 'Standard',       default: 5 },
-        { id: 'uppstallning',   label: 'Uppställning',   default: 0 },
-      ]},
-      { id: 'multiplikation', label: 'Multiplikation', checked: true, subcats: [
-        { id: 'tables-basic',   label: 'Tabeller',       default: 5 },
+      { id: 'addition',       label: 'Addition' },
+      { id: 'subtraktion',    label: 'Subtraktion' },
+      { id: 'multiplikation', label: 'Multiplikation', subcats: [
+        { id: 'tables-basic',   label: 'Tabeller',       default: 0 },
         { id: 'tables-large',   label: 'Stora tal',      default: 0 },
       ]},
-      { id: 'division', label: 'Division', checked: true, subcats: [
-        { id: 'tables-basic',   label: 'Tabeller',       default: 5 },
+      { id: 'division', label: 'Division', subcats: [
+        { id: 'tables-basic',   label: 'Tabeller',       default: 0 },
         { id: 'tables-large',   label: 'Stora tal',      default: 0 },
+        { id: 'rest',           label: 'Med rest',        default: 0 },
       ]},
     ]},
     { cat: 'Algebra', areas: [
@@ -72,19 +68,16 @@ const Arbetsblad = (() => {
   // =========================================================
   //  Bygg områdes-popup dynamiskt
   // =========================================================
-  function buildAreasPopup() {
-    const popup = document.getElementById('areas-popup');
-    if (!popup) return;
-    popup.innerHTML = '';
+  function buildAbSidebar() {
+    const container = document.getElementById('ab-area-checks');
+    if (!container) return;
+    container.innerHTML = '';
 
     AREA_CONFIG.forEach(category => {
-      const catDiv = document.createElement('div');
-      catDiv.className = 'areas-category';
-
       const catLabel = document.createElement('div');
-      catLabel.className = 'areas-cat-label';
+      catLabel.className = 'sidebar-cat-label';
       catLabel.textContent = category.cat;
-      catDiv.appendChild(catLabel);
+      container.appendChild(catLabel);
 
       category.areas.forEach(area => {
         const item = document.createElement('div');
@@ -92,6 +85,7 @@ const Arbetsblad = (() => {
 
         // Huvudcheckbox
         const label = document.createElement('label');
+        label.className = 'sidebar-check-row';
         const cb = document.createElement('input');
         cb.type = 'checkbox';
         cb.value = area.id;
@@ -100,74 +94,50 @@ const Arbetsblad = (() => {
         label.appendChild(document.createTextNode(' ' + area.label));
         item.appendChild(label);
 
-        // Visa antal lagrade uppgifter för "Egna uppgifter"
-        if (area.id === 'problemlosning-egna') {
-          const stored = typeof Settings !== 'undefined' ? Settings.getCustomProblems() : [];
-          const hint = document.createElement('span');
-          hint.className = 'ab-egna-hint';
-          hint.style.cssText = 'font-size:0.7rem;color:rgba(255,255,255,0.4);margin-left:0.3rem;';
-          hint.textContent = stored.length > 0
-            ? `(${stored.length} lagrade)`
-            : '(inga importerade)';
-          label.appendChild(hint);
+        // Underkategorier (antal-inputs) – bara om explicit definierade
+        if (area.subcats && area.subcats.length > 0) {
+          const subcats = area.subcats;
+          const subcatDiv = document.createElement('div');
+          subcatDiv.className = 'ab-subcats';
+          subcatDiv.dataset.area = area.id;
+          subcatDiv.classList.add('hidden');
+
+          subcats.forEach(sc => {
+            const row = document.createElement('div');
+            row.className = 'ab-subcat-row';
+
+            const span = document.createElement('span');
+            span.textContent = sc.label;
+            row.appendChild(span);
+
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '0';
+            input.max = '99';
+            input.value = sc.default || 0;
+            input.dataset.area = area.id;
+            input.dataset.subcat = sc.id;
+            row.appendChild(input);
+
+            subcatDiv.appendChild(row);
+          });
+
+          cb.addEventListener('change', () => {
+            subcatDiv.classList.toggle('hidden', !cb.checked);
+            updateTotalCount();
+          });
+
+          item.appendChild(subcatDiv);
+        } else {
+          cb.addEventListener('change', () => updateTotalCount());
         }
 
-        // Underkategorier
-        const subcats = area.subcats || [{ id: 'standard', label: 'Antal', default: 10 }];
-        const subcatDiv = document.createElement('div');
-        subcatDiv.className = 'ab-subcats';
-        subcatDiv.dataset.area = area.id;
-        if (!area.checked) subcatDiv.classList.add('hidden');
-
-        subcats.forEach(sc => {
-          const row = document.createElement('div');
-          row.className = 'ab-subcat-row';
-
-          const span = document.createElement('span');
-          span.textContent = sc.label;
-          row.appendChild(span);
-
-          const input = document.createElement('input');
-          input.type = 'number';
-          input.min = '0';
-          input.max = '99';
-          input.value = area.checked ? sc.default : 0;
-          input.dataset.area = area.id;
-          input.dataset.subcat = sc.id;
-          row.appendChild(input);
-
-          subcatDiv.appendChild(row);
-        });
-
-        item.appendChild(subcatDiv);
-
-        // Toggle subcats vid checkbox-ändring
-        cb.addEventListener('change', () => {
-          subcatDiv.classList.toggle('hidden', !cb.checked);
-          if (cb.checked) {
-            // Sätt default-värden
-            subcats.forEach(sc => {
-              const inp = subcatDiv.querySelector(`input[data-subcat="${sc.id}"]`);
-              if (inp && parseInt(inp.value) === 0) inp.value = sc.default;
-            });
-          }
-          updateTotalCount();
-        });
-
-        catDiv.appendChild(item);
+        container.appendChild(item);
       });
-
-      popup.appendChild(catDiv);
     });
 
-    // Totalsumma-rad
-    const totalDiv = document.createElement('div');
-    totalDiv.className = 'ab-total-row';
-    totalDiv.innerHTML = 'Totalt: <strong id="ab-total-count">20</strong> uppgifter';
-    popup.appendChild(totalDiv);
-
     // Lyssna på ändringar i alla antal-inputs
-    popup.querySelectorAll('input[type="number"]').forEach(inp => {
+    container.querySelectorAll('input[type="number"]').forEach(inp => {
       inp.addEventListener('input', updateTotalCount);
     });
 
@@ -175,12 +145,23 @@ const Arbetsblad = (() => {
   }
 
   function updateTotalCount() {
-    const total = getSubcatSpecs().reduce((sum, s) => sum + s.count, 0);
+    const manualTotal = getSubcatSpecs().reduce((sum, s) => sum + s.count, 0);
     const el = document.getElementById('ab-total-count');
-    if (el) el.textContent = total;
-    // Uppdatera knapptext
-    const btn = document.getElementById('ab-areas-toggle');
-    if (btn) btn.textContent = `Välj områden (${total} st) ▾`;
+    if (!el) return;
+    if (manualTotal > 0) {
+      el.textContent = manualTotal;
+    } else {
+      // Auto-fördeling: beräkna från layout
+      const checkedAreas = getCheckedAreas();
+      if (checkedAreas.length > 0) {
+        const cols = parseInt(document.getElementById('ab-cols')?.value) || 2;
+        const pagesVal = document.getElementById('ab-pages')?.value || 'auto';
+        const pages = pagesVal === 'auto' ? 1 : (parseInt(pagesVal) || 1);
+        el.textContent = `~${cols * 5 * pages} (auto)`;
+      } else {
+        el.textContent = '0';
+      }
+    }
   }
 
   // =========================================================
@@ -188,10 +169,10 @@ const Arbetsblad = (() => {
   // =========================================================
   function getSubcatSpecs() {
     const specs = [];
-    const popup = document.getElementById('areas-popup');
-    if (!popup) return specs;
+    const container = document.getElementById('ab-area-checks');
+    if (!container) return specs;
 
-    popup.querySelectorAll('.ab-subcats:not(.hidden)').forEach(subcatDiv => {
+    container.querySelectorAll('.ab-subcats:not(.hidden)').forEach(subcatDiv => {
       const area = subcatDiv.dataset.area;
       subcatDiv.querySelectorAll('input[type="number"]').forEach(inp => {
         const count = parseInt(inp.value) || 0;
@@ -201,6 +182,17 @@ const Arbetsblad = (() => {
       });
     });
     return specs;
+  }
+
+  // Hämta ikryssade områden (utan att titta på antal)
+  function getCheckedAreas() {
+    const container = document.getElementById('ab-area-checks');
+    if (!container) return [];
+    const areas = [];
+    container.querySelectorAll('.sidebar-check-row input[type="checkbox"]:checked').forEach(cb => {
+      areas.push(cb.value);
+    });
+    return areas;
   }
 
   // =========================================================
@@ -326,13 +318,11 @@ const Arbetsblad = (() => {
     const settings = makeBaseSettings(grade);
 
     // Konfigurera settings för denna specifika underkategori
-    if (area === 'addition' || area === 'subtraktion') {
-      if (subcat === 'uppstallning') settings.addSubMode = ['uppstallning'];
-      // 'standard' → tom addSubMode → plugin väljer standard
-    }
+    // addition/subtraktion: alltid standard (ingen uppställning på arbetsblad)
     if (area === 'multiplikation' || area === 'division') {
       if (subcat === 'tables-basic')  settings.multDivMode = ['tables-basic'];
       else if (subcat === 'tables-large') settings.multDivMode = ['tables-large'];
+      else if (subcat === 'rest') { settings.multDivMode = ['tables-basic']; settings.divisionRest = true; }
     }
 
     for (let i = 0; i < count; i++) {
@@ -784,12 +774,24 @@ const Arbetsblad = (() => {
     }
 
     const cfg   = readConfig();
-    const specs = cfg.specs;
+    let specs = cfg.specs;
     sheetProblems = [];
 
+    // Om inga antal angivits men områden är ikryssade → fördela jämnt
     if (specs.length === 0) {
-      alert('Välj minst ett område och ange antal.');
-      return;
+      const checkedAreas = getCheckedAreas();
+      if (checkedAreas.length === 0) {
+        alert('Välj minst ett område.');
+        return;
+      }
+      const total = cfg.perPage * cfg.pages;
+      const perArea = Math.floor(total / checkedAreas.length);
+      const remainder = total % checkedAreas.length;
+      specs = checkedAreas.map((area, i) => ({
+        area,
+        subcat: 'standard',
+        count: perArea + (i < remainder ? 1 : 0),
+      }));
     }
 
     // Om användaren valt specifikt antal sidor, skala upp antal problem
@@ -808,7 +810,6 @@ const Arbetsblad = (() => {
     if (wantedTotal > 0 && sheetProblems.length < wantedTotal) {
       let remaining = wantedTotal - sheetProblems.length;
       while (remaining > 0) {
-        // Fördela jämnt över alla aktiva specs
         for (const spec of baseSpecs) {
           if (remaining <= 0) break;
           const extra = generateForSubcat({ ...spec, count: 1 }, cfg.grade, sheetProblems);
@@ -855,6 +856,7 @@ const Arbetsblad = (() => {
     }
 
     // Rendera med problemlösnings-config
+    plConfig = pl;
     renderPLSheet(pl);
   }
 
@@ -922,7 +924,7 @@ const Arbetsblad = (() => {
       }
 
       const row = document.createElement('label');
-      row.className = 'pl-check-row';
+      row.className = 'sidebar-check-row';
       const cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.value = area;
@@ -1093,28 +1095,25 @@ const Arbetsblad = (() => {
     const mode = document.getElementById('ab-mode').value;
     const isStandard = mode === 'standard';
     const isPL       = mode === 'problemlosning';
-    const isStarten  = mode === 'starten';
 
-    // Visa/dölj standard-only element i config-baren
-    document.querySelectorAll('.ab-standard-only').forEach(el => {
-      el.style.display = isStandard ? '' : 'none';
-    });
+    // Visa/dölj sidopaneler
+    const abSidebar = document.getElementById('ab-sidebar');
+    if (abSidebar) abSidebar.classList.toggle('hidden', !isStandard);
 
-    // Visa/dölj sidopanel
-    const sidebar = document.getElementById('pl-sidebar');
-    if (sidebar) sidebar.classList.toggle('hidden', !isPL);
+    const plSidebar = document.getElementById('pl-sidebar');
+    if (plSidebar) plSidebar.classList.toggle('hidden', !isPL);
 
     // Placeholder i rubrikfältet
     const titleInput = document.getElementById('ab-title');
     if (titleInput && !titleInput.value) {
-      if (isStarten) titleInput.placeholder = 'T.ex. Starten v.12';
+      if (mode === 'starten') titleInput.placeholder = 'T.ex. Starten v.12';
       else if (isPL) titleInput.placeholder = 'T.ex. Problemlösning';
       else titleInput.placeholder = 'T.ex. Multiplikation';
     }
   }
 
   function init() {
-    buildAreasPopup();
+    buildAbSidebar();
     buildPLSidebar();
     initPLImport();
 
@@ -1123,31 +1122,29 @@ const Arbetsblad = (() => {
     updateModeVisibility();
 
     // Färgval-knappar
-    document.getElementById('ab-starten-colors')?.addEventListener('click', e => {
+    const colorHandler = e => {
       const btn = e.target.closest('.starten-color-btn');
       if (!btn) return;
       document.querySelectorAll('.starten-color-btn').forEach(b => b.classList.remove('starten-color-btn--active'));
       btn.classList.add('starten-color-btn--active');
       startenColor = btn.dataset.theme || '';
-      if (startenData) renderStartenFromData();
-    });
+      const currentMode = document.getElementById('ab-mode')?.value;
+      if (currentMode === 'starten' && startenData) renderStartenFromData();
+      else if (currentMode === 'problemlosning' && plConfig) renderPLSheet(plConfig);
+      else if (currentMode === 'standard' && sheetProblems.length) renderSheet();
+    };
+    document.getElementById('ab-starten-colors')?.addEventListener('click', colorHandler);
+    document.getElementById('ab-starten-colors-2')?.addEventListener('click', colorHandler);
+
+    // Uppdatera total vid kolumn/sid-ändring
+    document.getElementById('ab-cols')?.addEventListener('change', updateTotalCount);
+    document.getElementById('ab-pages')?.addEventListener('change', updateTotalCount);
 
     document.getElementById('ab-generate-btn')
       ?.addEventListener('click', generate);
 
     document.getElementById('ab-print-btn')
       ?.addEventListener('click', printViaIframe);
-
-    const areaToggle = document.getElementById('ab-areas-toggle');
-    const areaPopup  = document.getElementById('areas-popup');
-    areaToggle?.addEventListener('click', () => {
-      areaPopup?.classList.toggle('open');
-    });
-    document.addEventListener('click', e => {
-      if (!areaToggle?.contains(e.target) && !areaPopup?.contains(e.target)) {
-        areaPopup?.classList.remove('open');
-      }
-    });
   }
 
   document.addEventListener('DOMContentLoaded', init);

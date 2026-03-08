@@ -70,65 +70,115 @@ body {
 
 .config-group select option { background: #1a1a2e; }
 
-.config-areas-toggle {
+/* === Gemensamma sidebar-stilar (standard + problemlösning) ============== */
+#ab-sidebar,
+#pl-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 15rem;
+  background: #1e1e34;
+  color: #f0eeea;
+  padding: 4.5rem 1.2rem 1.5rem;
+  overflow-y: auto;
+  z-index: 50;
+  box-shadow: 2px 0 16px rgba(0,0,0,0.2);
+  font-size: 0.82rem;
+}
+
+#ab-sidebar.hidden,
+#pl-sidebar.hidden { display: none; }
+
+.sidebar-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 1rem;
+}
+
+.sidebar-section { margin-bottom: 1rem; }
+
+.sidebar-section-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.35rem;
+}
+
+.sidebar-cat-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.3);
+  margin: 0.6rem 0 0.2rem;
+}
+
+.sidebar-cat-label:first-child { margin-top: 0; }
+
+.sidebar-check-row,
+.sidebar-radio-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  padding: 0.15rem 0;
+}
+
+.sidebar-check-row input,
+.sidebar-radio-row input {
+  accent-color: #457b9d;
+  cursor: pointer;
+}
+
+.sidebar-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.sidebar-toggle-row input { accent-color: #457b9d; cursor: pointer; }
+
+.sidebar-total {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 0.8rem;
+}
+
+#ab-sidebar select,
+#pl-sidebar select {
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.15);
   color: #f0eeea;
   border-radius: 6px;
-  padding: 0.4rem 0.7rem;
-  font-size: 0.9rem;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-/* Område-panel */
-#areas-popup {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: #252540;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding: 1rem 2rem;
-  display: none;
-  flex-wrap: wrap;
-  gap: 0.5rem 2rem;
-  z-index: 200;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-}
-
-#areas-popup.open { display: flex; }
-
-.areas-category { min-width: 140px; }
-
-.areas-cat-label {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.35);
-  margin-bottom: 0.35rem;
-}
-
-#areas-popup label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  padding: 0.35rem 0.6rem;
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.8);
-  cursor: pointer;
-  padding: 0.1rem 0;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
 }
 
-#areas-popup input[type="checkbox"] { accent-color: #457b9d; }
+#ab-sidebar select option,
+#pl-sidebar select option { background: #1e1e34; }
 
 /* Underkategorier per område */
-.ab-area-item { margin-bottom: 0.25rem; }
+.ab-area-item { margin-bottom: 0.15rem; }
 
 .ab-subcats {
-  margin: 0.2rem 0 0.1rem 1.4rem;
+  margin: 0.1rem 0 0.1rem 1.4rem;
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.1rem;
 }
 
 .ab-subcats.hidden { display: none; }
@@ -138,18 +188,18 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.55);
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
 }
 
 .ab-subcat-row input[type="number"] {
-  width: 3.2rem;
+  width: 3rem;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.15);
   color: #f0eeea;
   border-radius: 4px;
-  padding: 0.2rem 0.35rem;
-  font-size: 0.8rem;
+  padding: 0.15rem 0.3rem;
+  font-size: 0.78rem;
   font-family: inherit;
   text-align: center;
   outline: none;
@@ -163,16 +213,6 @@ body {
 
 .ab-subcat-row input[type="number"]:focus {
   border-color: rgba(255,255,255,0.4);
-}
-
-.ab-total-row {
-  width: 100%;
-  text-align: right;
-  font-size: 0.82rem;
-  color: rgba(255,255,255,0.5);
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  margin-top: 0.3rem;
 }
 
 /* Knappar */
@@ -234,93 +274,13 @@ body {
   line-height: 1.3;
 }
 
-/* === Problemlösning – sidopanel =========================== */
-#pl-sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 15rem;
-  background: #1e1e34;
-  color: #f0eeea;
-  padding: 4.5rem 1.2rem 1.5rem;
-  overflow-y: auto;
-  z-index: 50;
-  box-shadow: 2px 0 16px rgba(0,0,0,0.2);
-  font-size: 0.82rem;
-}
-
-#pl-sidebar.hidden { display: none; }
-
-.pl-sidebar-title {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 1rem;
-}
-
-.pl-section {
-  margin-bottom: 1rem;
-}
-
-.pl-section-label {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 0.35rem;
-}
-
-.pl-radio-row,
-.pl-check-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.82rem;
-  color: rgba(255,255,255,0.8);
-  cursor: pointer;
-  padding: 0.15rem 0;
-}
-
-.pl-radio-row input,
-.pl-check-row input {
-  accent-color: #457b9d;
-  cursor: pointer;
-}
-
+/* === Problemlösning – specifika stilar ==================== */
 .pl-egna-info {
   font-size: 0.72rem;
   color: rgba(255,255,255,0.35);
   margin-top: 0.25rem;
   font-style: italic;
 }
-
-#pl-sidebar select {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: #f0eeea;
-  border-radius: 6px;
-  padding: 0.35rem 0.6rem;
-  font-size: 0.85rem;
-  font-family: inherit;
-  outline: none;
-  width: 100%;
-}
-
-#pl-sidebar select option { background: #1e1e34; }
-
-.pl-toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.82rem;
-  color: rgba(255,255,255,0.7);
-  cursor: pointer;
-  margin-top: 0.5rem;
-}
-
-.pl-toggle-row input { accent-color: #457b9d; cursor: pointer; }
 
 /* Import-sektion i sidopanelen */
 .pl-import-section {
@@ -390,11 +350,13 @@ body {
 .pl-import-status.error   { color: #e63946; }
 
 /* Sidopanel aktiv → skjut innehållet till höger */
-body:has(#pl-sidebar:not(.hidden)) #ab-content-wrap {
+body:has(#pl-sidebar:not(.hidden)) #ab-content-wrap,
+body:has(#ab-sidebar:not(.hidden)) #ab-content-wrap {
   margin-left: 15rem;
 }
 
-body:has(#pl-sidebar:not(.hidden)) #empty-state {
+body:has(#pl-sidebar:not(.hidden)) #empty-state,
+body:has(#ab-sidebar:not(.hidden)) #empty-state {
   margin-left: 15rem;
 }
 
@@ -759,7 +721,13 @@ body:has(#pl-sidebar:not(.hidden)) #empty-state {
 .ab-sheet.starten-lila::before,
 .ab-sheet.starten-skog::before,
 .ab-sheet.starten-korall::before,
-.ab-sheet.starten-guld::before {
+.ab-sheet.starten-guld::before,
+.ab-sheet.starten-hav::before,
+.ab-sheet.starten-rosa::before,
+.ab-sheet.starten-lavendel::before,
+.ab-sheet.starten-oliv::before,
+.ab-sheet.starten-persika::before,
+.ab-sheet.starten-stal::before {
   background: linear-gradient(90deg, hsl(var(--sh1), 38%, 44%), hsl(var(--sh2), 58%, 39%));
 }
 
@@ -769,6 +737,12 @@ body:has(#pl-sidebar:not(.hidden)) #empty-state {
 .ab-sheet.starten-skog,   .starten-table.starten-skog    { --sh1: 140; --sh2: 108; }
 .ab-sheet.starten-korall, .starten-table.starten-korall  { --sh1: 15;  --sh2: 343; }
 .ab-sheet.starten-guld,   .starten-table.starten-guld    { --sh1: 40;  --sh2: 8; }
+.ab-sheet.starten-hav,      .starten-table.starten-hav      { --sh1: 215; --sh2: 190; }
+.ab-sheet.starten-rosa,     .starten-table.starten-rosa     { --sh1: 330; --sh2: 300; }
+.ab-sheet.starten-lavendel, .starten-table.starten-lavendel { --sh1: 258; --sh2: 226; }
+.ab-sheet.starten-oliv,     .starten-table.starten-oliv     { --sh1: 75;  --sh2: 45; }
+.ab-sheet.starten-persika,  .starten-table.starten-persika  { --sh1: 25;  --sh2: 355; }
+.ab-sheet.starten-stal,     .starten-table.starten-stal     { --sh1: 200; --sh2: 220; }
 
 /* Standard arbetsblad: nummerbubbla + header-linje i temafärg */
 .ab-sheet[class*="starten-"] .ab-problem-num {
@@ -901,7 +875,7 @@ body:has(#pl-sidebar:not(.hidden)) #empty-state {
 
   body { background: white; margin: 0; padding: 0; }
 
-  #pl-sidebar { display: none !important; }
+  #pl-sidebar, #ab-sidebar { display: none !important; }
   #ab-content-wrap { margin-left: 0 !important; }
 
   .ab-sheet-wrap { padding: 0; display: block; }
