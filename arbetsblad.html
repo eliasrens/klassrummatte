@@ -17,6 +17,7 @@
       <span class="config-label">Läge</span>
       <select id="ab-mode">
         <option value="standard">Arbetsblad</option>
+        <option value="problemlosning">Problemlösning</option>
         <option value="starten">Starten (veckouppgifter)</option>
       </select>
     </div>
@@ -72,16 +73,6 @@
     </div>
 
     <div class="config-group ab-standard-only">
-      <span class="config-label">Design</span>
-      <select id="ab-theme">
-        <option value="">Klassisk</option>
-        <option value="theme-enkel">Enkel</option>
-        <option value="theme-lekfull">Lekfull</option>
-        <option value="theme-ram">Ram</option>
-      </select>
-    </div>
-
-    <div class="config-group ab-standard-only">
       <span class="config-label">Matematikområden</span>
       <button class="config-areas-toggle" id="ab-areas-toggle">Välj områden ▾</button>
     </div>
@@ -113,13 +104,67 @@
     <div id="areas-popup"></div>
   </div><!-- /config-panel -->
 
+  <!-- ── Sidopanel för problemlösning (dold vid utskrift) ──── -->
+  <div id="pl-sidebar" class="no-print hidden">
+    <h3 class="pl-sidebar-title">Inställningar</h3>
+
+    <div class="pl-section">
+      <div class="pl-section-label">Källa</div>
+      <label class="pl-radio-row"><input type="radio" name="pl-source" value="auto" checked> Autogenererade</label>
+      <label class="pl-radio-row"><input type="radio" name="pl-source" value="egna"> Egna importerade</label>
+      <label class="pl-radio-row"><input type="radio" name="pl-source" value="mix"> Blandning</label>
+      <div class="pl-egna-info" id="pl-egna-info"></div>
+      <div class="pl-import-section hidden" id="pl-import-section">
+        <div class="pl-import-hint">Importera från CSV/Excel (kolumnerna <strong>Fråga</strong> och <strong>Svar</strong>).</div>
+        <button type="button" id="pl-download-template" class="pl-btn-sm">Ladda ner mall (CSV)</button>
+        <div class="pl-import-label">Importera fil</div>
+        <input type="file" id="pl-file-input" accept=".csv,.txt,text/csv" class="pl-file-input">
+        <div class="pl-import-label">eller klistra in CSV</div>
+        <textarea id="pl-paste" rows="3" placeholder="Fråga,Svar&#10;Emma har 12 pennor..." class="pl-textarea"></textarea>
+        <button type="button" id="pl-import-paste" class="pl-btn-sm">Importera från text</button>
+        <div id="pl-import-status" class="pl-import-status"></div>
+      </div>
+    </div>
+
+    <div class="pl-section pl-auto-only">
+      <div class="pl-section-label">Områden</div>
+      <div id="pl-area-checks"></div>
+    </div>
+
+    <div class="pl-section">
+      <div class="pl-section-label">Layout</div>
+      <label class="pl-radio-row"><input type="radio" name="pl-layout" value="6" checked> 6 per sida (2 × 3)</label>
+      <label class="pl-radio-row"><input type="radio" name="pl-layout" value="4"> 4 per sida (2 × 2)</label>
+      <label class="pl-radio-row"><input type="radio" name="pl-layout" value="2"> 2 per sida (stor)</label>
+    </div>
+
+    <div class="pl-section">
+      <div class="pl-section-label">Antal sidor</div>
+      <select id="pl-pages">
+        <option value="1" selected>1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+
+    <label class="pl-toggle-row">
+      <input type="checkbox" id="pl-show-answers">
+      Inkludera svarsnyckel
+    </label>
+  </div>
+
   <!-- ── Tomt tillstånd ─────────────────────────────────────── -->
   <div id="empty-state">
     <p>Välj inställningar och tryck på <strong>Generera arbetsblad</strong></p>
   </div>
 
-  <!-- ── A4-ark (byggs dynamiskt av arbetsblad.js) ─────────── -->
-  <div class="ab-sheet-wrap hidden" id="ab-sheet"></div>
+  <!-- ── Innehålls-wrapper (sidopanel + ark) ─────────────── -->
+  <div id="ab-content-wrap">
+    <!-- ── A4-ark (byggs dynamiskt av arbetsblad.js) ─────────── -->
+    <div class="ab-sheet-wrap hidden" id="ab-sheet"></div>
+  </div>
 
   <!-- ── Plugin-skript (samma ordning som index.html) ───────── -->
   <script src="js/plugins/_math-utils.js"></script>

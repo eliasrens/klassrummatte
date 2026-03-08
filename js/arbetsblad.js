@@ -67,14 +67,6 @@ const Arbetsblad = (() => {
       { id: 'statistik',   label: 'Statistik' },
       { id: 'sannolikhet', label: 'Sannolikhet' },
     ]},
-    { cat: 'Problemlösning', areas: [
-      { id: 'problemlosning-auto', label: 'Autogenererade', subcats: [
-        { id: 'problemlosning', label: 'Antal', default: 0 },
-      ]},
-      { id: 'problemlosning-egna', label: 'Egna uppgifter', subcats: [
-        { id: 'egna', label: 'Antal', default: 0 },
-      ]},
-    ]},
   ];
 
   // =========================================================
@@ -216,22 +208,38 @@ const Arbetsblad = (() => {
   // =========================================================
   function readConfig() {
     const grade   = parseInt(document.getElementById('ab-grade').value)  || 3;
-    const colsRaw = parseInt(document.getElementById('ab-cols').value)   || 2;
-    const theme   = document.getElementById('ab-theme').value            || '';
+    const cols    = parseInt(document.getElementById('ab-cols').value)   || 2;
+    const themeEl = document.getElementById('ab-theme');
+    const theme   = themeEl ? themeEl.value : '';
     const title   = document.getElementById('ab-title').value.trim()     || 'Matematik';
     const showAns = document.getElementById('ab-show-answers').checked;
     const pagesVal = document.getElementById('ab-pages').value;
     const specs   = getSubcatSpecs();
     const total   = specs.reduce((sum, s) => sum + s.count, 0);
-    const hasProblemlosning = specs.some(s =>
-      (s.area === 'problemlosning-auto' || s.area === 'problemlosning-egna') && s.count > 0);
-    const cols    = hasProblemlosning ? Math.min(colsRaw, 2) : colsRaw;
-    // Max uppgifter per A4-sida: 6 rader × antal kolumner (5 rader för problemlösning)
-    const perPage = hasProblemlosning ? (cols * 5) : (cols * 6);
+    const perPage = cols * 5;
     const pages   = pagesVal === 'auto'
       ? Math.max(1, Math.ceil(total / perPage))
       : parseInt(pagesVal) || 1;
     return { grade, count: total, cols, pages, perPage, theme, title, showAns, specs, pagesVal };
+  }
+
+  // Läs config för problemlösning-läget (från sidopanelen)
+  function readPLConfig() {
+    const grade   = parseInt(document.getElementById('ab-grade').value) || 3;
+    const title   = document.getElementById('ab-title').value.trim()   || 'Problemlösning';
+    const source  = document.querySelector('input[name="pl-source"]:checked')?.value || 'auto';
+    const perPage = parseInt(document.querySelector('input[name="pl-layout"]:checked')?.value) || 6;
+    const pages   = parseInt(document.getElementById('pl-pages').value) || 1;
+    const showAns = document.getElementById('pl-show-answers')?.checked || false;
+    const cols    = 2;
+
+    // Hämta valda områden
+    const selectedAreas = [];
+    document.querySelectorAll('#pl-area-checks input[type="checkbox"]:checked').forEach(cb => {
+      selectedAreas.push(cb.value);
+    });
+
+    return { grade, title, source, perPage, pages, showAns, cols, selectedAreas };
   }
 
   // =========================================================
@@ -270,16 +278,17 @@ const Arbetsblad = (() => {
     return problems;
   }
 
-  // Generera autogenererade problemlösningsuppgifter (blandar alla areas som stöder Templates.canWrap)
-  function generateAutoProblemlosning(count, grade, allProblems) {
+  // Generera autogenererade problemlösningsuppgifter
+  // areas: om angivet, begränsa till dessa områden; annars PROBLEMLOSNING_AREAS
+  function generateAutoProblemlosning(count, grade, allProblems, areas) {
+    const pool = (areas && areas.length > 0) ? areas : PROBLEMLOSNING_AREAS;
     const problems = [];
     const settings = makeBaseSettings(grade);
     for (let i = 0; i < count; i++) {
       let p = null;
       for (let attempt = 0; attempt < 10 && !p; attempt++) {
         try {
-          // Välj slumpmässigt bland alla områden som stöder problemlösning
-          const area = PROBLEMLOSNING_AREAS[Math.floor(Math.random() * PROBLEMLOSNING_AREAS.length)];
+          const area = pool[Math.floor(Math.random() * pool.length)];
           const plugin = PluginManager.get(area);
           if (!plugin) continue;
           let candidate = plugin.generate(settings);
@@ -352,108 +361,119 @@ const Arbetsblad = (() => {
   }
 
   // =========================================================
-  //  Rendering av enskilt uppgiftskort
+  //  Bygg calc-rutnät (starten-stil)
   // =========================================================
-  function renderProblemCard(problem, index, showAns) {
-    const card = document.createElement('div');
-    const isText = problem && problem.isTextProblem;
-    card.className = 'ab-problem-card' + (isText ? ' ab-problem-card--text' : '');
-
-    // Nummerbubbla
-    const num = document.createElement('div');
-    num.className = 'ab-problem-num';
-    num.textContent = index + 1;
-    card.appendChild(num);
-
-    // Problem-innehåll
-    const content = document.createElement('div');
-    content.className = 'ab-problem-content';
-
-    if (!problem) {
-      content.textContent = '—';
-    } else if (problem.isTextProblem) {
-      const p = document.createElement('p');
-      p.className = 'ab-text-problem';
-      p.textContent = problem.textTemplate || '';
-      content.appendChild(p);
-    } else {
-      const plugin = PluginManager.get(problem.type);
-      if (plugin) {
-        try { plugin.render(problem, content); } catch (_) {
-          content.textContent = problem.answer != null ? `= ${problem.answer}` : '—';
-        }
-      }
+  function buildCalcGrid(problem, forceGrid) {
+    const isArithmetic = problem && ['addition', 'subtraktion', 'multiplikation'].includes(problem.type);
+    if (!isArithmetic && !forceGrid) return null;
+    let cols = 4;
+    if (isArithmetic) {
+      const digits = Math.max(
+        String(problem.a).length,
+        String(problem.b).length,
+        String(problem.answer).length
+      ) + 1;
+      cols = Math.max(digits, 4);
     }
+    const table = document.createElement('table');
+    table.className = 'ab-calc-grid';
+    for (let r = 0; r < 3; r++) {
+      const tr = document.createElement('tr');
+      for (let c = 0; c < cols; c++) tr.appendChild(document.createElement('td'));
+      table.appendChild(tr);
+    }
+    const lastRow = document.createElement('tr');
+    lastRow.className = 'ab-calc-grid-answer';
+    for (let c = 0; c < cols; c++) lastRow.appendChild(document.createElement('td'));
+    table.appendChild(lastRow);
+    return table;
+  }
+
+  // =========================================================
+  //  Rendering av en cell i tabellen
+  // =========================================================
+  function renderCell(problem, index, showAns) {
+    const td = document.createElement('td');
+    const isText = problem && problem.isTextProblem;
+    td.className = isText ? 'ab-cell ab-cell--text' : 'ab-cell';
+
     if (isText) {
-      card.appendChild(content);
-      const ansSpace = document.createElement('div');
-      ansSpace.className = 'ab-answer-space ab-answer-space--text';
+      // === Problemlösningslayout ===
+      const inner = document.createElement('div');
+      inner.className = 'ab-cell-inner';
 
-      if (showAns && problem) {
+      // Uppgiftstext med nummer
+      const text = document.createElement('div');
+      text.className = 'ab-cell-problem';
+      const num = document.createElement('span');
+      num.className = 'ab-cell-problem-num';
+      num.textContent = `${index + 1}. `;
+      text.appendChild(num);
+      text.appendChild(document.createTextNode(problem.textTemplate || ''));
+      inner.appendChild(text);
+
+      if (showAns) {
         const key = document.createElement('div');
         key.className = 'ab-answer-key';
         key.textContent = `Svar: ${problem.answer}`;
-        ansSpace.appendChild(key);
+        inner.appendChild(key);
       } else {
-        // Starten-liknande rutnät för beräkning
-        const table = document.createElement('table');
-        table.className = 'ab-answer-grid ab-answer-grid--calc';
-        const cols = 5;
-        for (let r = 0; r < 3; r++) {
+        // Uppställningsrutnät (fast 4 kol, utan svarslinje)
+        const gridCols = 4;
+        const gridRows = 4;
+        const grid = document.createElement('table');
+        grid.className = 'ab-calc-grid ab-calc-grid--text';
+        for (let r = 0; r < gridRows; r++) {
           const tr = document.createElement('tr');
-          for (let c = 0; c < cols; c++) tr.appendChild(document.createElement('td'));
-          table.appendChild(tr);
+          for (let c = 0; c < gridCols; c++) tr.appendChild(document.createElement('td'));
+          grid.appendChild(tr);
         }
-        const lastRow = document.createElement('tr');
-        lastRow.className = 'ab-answer-grid-answer';
-        for (let c = 0; c < cols; c++) lastRow.appendChild(document.createElement('td'));
-        table.appendChild(lastRow);
-        ansSpace.appendChild(table);
+        inner.appendChild(grid);
 
-        const svarLine = document.createElement('div');
-        svarLine.className = 'ab-answer-svar';
-        svarLine.innerHTML = 'Svar: <span class="ab-answer-svar-line"></span>';
-        ansSpace.appendChild(svarLine);
+        // Svarslinje längst ner
+        const svar = document.createElement('div');
+        svar.className = 'ab-cell-svar';
+        svar.innerHTML = 'Svar: <span class="ab-cell-svar-line"></span>';
+        inner.appendChild(svar);
       }
-      card.appendChild(ansSpace);
+
+      td.appendChild(inner);
     } else {
-      card.appendChild(content);
-      const ansSpace = document.createElement('div');
-      ansSpace.className = 'ab-answer-space';
-      const isArithmetic = problem && ['addition', 'subtraktion', 'multiplikation'].includes(problem.type);
+      // === Vanlig uppgiftslayout ===
+      const num = document.createElement('span');
+      num.className = 'ab-cell-num';
+      num.textContent = index + 1;
+      td.appendChild(num);
+
+      const text = document.createElement('div');
+      text.className = 'ab-cell-text';
+      if (!problem) {
+        text.textContent = '—';
+      } else {
+        const plugin = PluginManager.get(problem.type);
+        if (plugin) {
+          try { plugin.render(problem, text); } catch (_) {
+            text.textContent = problem.answer != null ? `= ${problem.answer}` : '—';
+          }
+        }
+      }
+      td.appendChild(text);
+
       if (showAns && problem) {
         const key = document.createElement('div');
         key.className = 'ab-answer-key';
         key.textContent = `Svar: ${problem.answer}`;
-        ansSpace.appendChild(key);
-      } else if (isArithmetic) {
-        // Starten-liknande rutnät: dynamiska kolumner, 3 rader + svarsrad
-        const digits = Math.max(
-          String(problem.a).length,
-          String(problem.b).length,
-          String(problem.answer).length
-        ) + 1;
-        const cols = Math.max(digits, 4);
-        const table = document.createElement('table');
-        table.className = 'ab-answer-grid ab-answer-grid--calc';
-        for (let r = 0; r < 3; r++) {
-          const tr = document.createElement('tr');
-          for (let c = 0; c < cols; c++) tr.appendChild(document.createElement('td'));
-          table.appendChild(tr);
-        }
-        const lastRow = document.createElement('tr');
-        lastRow.className = 'ab-answer-grid-answer';
-        for (let c = 0; c < cols; c++) lastRow.appendChild(document.createElement('td'));
-        table.appendChild(lastRow);
-        ansSpace.appendChild(table);
-      } else if (problem && problem.type !== 'division') {
-        for (let i = 0; i < 2; i++) {
-          const line = document.createElement('div');
-          line.className = 'ab-answer-line';
-          ansSpace.appendChild(line);
+        td.appendChild(key);
+      } else if (problem) {
+        const grid = buildCalcGrid(problem);
+        if (grid) {
+          td.appendChild(grid);
+        } else if (problem.type === 'division' || problem.type === 'multiplikation') {
+          const space = document.createElement('div');
+          space.className = 'ab-cell-space';
+          td.appendChild(space);
         }
       }
-      card.appendChild(ansSpace);
     }
 
     // Regenerera-knapp
@@ -462,9 +482,9 @@ const Arbetsblad = (() => {
     regen.title = 'Byt uppgift';
     regen.textContent = '\u{1F504}';
     regen.addEventListener('click', () => regenerateProblem(index));
-    card.appendChild(regen);
+    td.appendChild(regen);
 
-    return card;
+    return td;
   }
 
   // =========================================================
@@ -501,7 +521,7 @@ const Arbetsblad = (() => {
   }
 
   // =========================================================
-  //  Rendering – en .ab-sheet per sida
+  //  Rendering – en .ab-sheet per sida (tabell-layout)
   // =========================================================
   function renderSheet() {
     const cfg  = readConfig();
@@ -511,15 +531,16 @@ const Arbetsblad = (() => {
     if (!wrap) return;
     wrap.innerHTML = '';
 
-    const PAGE_SIZE  = cfg.perPage || 20;
+    const PAGE_SIZE  = cfg.perPage || 24;
     const totalPages = Math.max(1, Math.ceil(sheetProblems.length / PAGE_SIZE));
+    const numCols    = cfg.cols;
 
     for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
       const pageStart    = pageIdx * PAGE_SIZE;
       const pageProblems = sheetProblems.slice(pageStart, pageStart + PAGE_SIZE);
 
       const sheet = document.createElement('div');
-      sheet.className = 'ab-sheet' + (cfg.theme ? ` ${cfg.theme}` : '') + (startenColor ? ` starten-${startenColor}` : '');
+      sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '');
       if (pageIdx > 0) sheet.classList.add('ab-sheet--next-page');
 
       const inner = document.createElement('div');
@@ -527,15 +548,24 @@ const Arbetsblad = (() => {
 
       if (pageIdx === 0) inner.appendChild(buildHeader(cfg));
 
-      const grid = document.createElement('div');
-      grid.className = `ab-problem-grid ab-problem-grid--${cfg.cols}col`;
+      // Bygg tabell
+      const table = document.createElement('table');
+      table.className = 'ab-table ab-table--' + numCols + 'col';
 
-      pageProblems.forEach((p, i) => {
-        grid.appendChild(renderProblemCard(p, pageStart + i, cfg.showAns));
-      });
+      for (let i = 0; i < pageProblems.length; i += numCols) {
+        const tr = document.createElement('tr');
+        for (let c = 0; c < numCols; c++) {
+          const idx = i + c;
+          if (idx < pageProblems.length) {
+            tr.appendChild(renderCell(pageProblems[idx], pageStart + idx, cfg.showAns));
+          } else {
+            tr.appendChild(document.createElement('td'));
+          }
+        }
+        table.appendChild(tr);
+      }
 
-      inner.appendChild(grid);
-
+      inner.appendChild(table);
       sheet.appendChild(inner);
       wrap.appendChild(sheet);
     }
@@ -748,6 +778,10 @@ const Arbetsblad = (() => {
       renderStartenSheet(grade);
       return;
     }
+    if (mode === 'problemlosning') {
+      generateProblemlosning();
+      return;
+    }
 
     const cfg   = readConfig();
     const specs = cfg.specs;
@@ -795,12 +829,209 @@ const Arbetsblad = (() => {
     renderSheet();
   }
 
+  // =========================================================
+  //  Problemlösning-läge
+  // =========================================================
+  function generateProblemlosning() {
+    const pl = readPLConfig();
+    const total = pl.perPage * pl.pages;
+    sheetProblems = [];
+
+    if (pl.source === 'auto' || pl.source === 'mix') {
+      const autoCount = pl.source === 'mix' ? Math.ceil(total / 2) : total;
+      const autoProblems = generateAutoProblemlosning(autoCount, pl.grade, sheetProblems, pl.selectedAreas);
+      sheetProblems.push(...autoProblems);
+    }
+    if (pl.source === 'egna' || pl.source === 'mix') {
+      const egnaCount = pl.source === 'mix' ? total - sheetProblems.length : total;
+      const egnaProblems = generateEgnaProblems(egnaCount, sheetProblems);
+      sheetProblems.push(...egnaProblems);
+    }
+
+    // Blanda
+    for (let i = sheetProblems.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [sheetProblems[i], sheetProblems[j]] = [sheetProblems[j], sheetProblems[i]];
+    }
+
+    // Rendera med problemlösnings-config
+    renderPLSheet(pl);
+  }
+
+  function renderPLSheet(pl) {
+    const wrap = document.getElementById('ab-sheet');
+    const empty = document.getElementById('empty-state');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+
+    const numCols = pl.cols;
+    const perPage = pl.perPage;
+
+    for (let pageIdx = 0; pageIdx < pl.pages; pageIdx++) {
+      const pageStart    = pageIdx * perPage;
+      const pageProblems = sheetProblems.slice(pageStart, pageStart + perPage);
+
+      const sheet = document.createElement('div');
+      sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '');
+      if (pageIdx > 0) sheet.classList.add('ab-sheet--next-page');
+
+      const inner = document.createElement('div');
+      inner.className = 'ab-sheet-inner';
+
+      if (pageIdx === 0) {
+        inner.appendChild(buildHeader({ grade: pl.grade, title: pl.title }));
+      }
+
+      const table = document.createElement('table');
+      table.className = 'ab-table ab-table--' + numCols + 'col';
+
+      for (let i = 0; i < pageProblems.length; i += numCols) {
+        const tr = document.createElement('tr');
+        for (let c = 0; c < numCols; c++) {
+          const idx = i + c;
+          if (idx < pageProblems.length) {
+            tr.appendChild(renderCell(pageProblems[idx], pageStart + idx, pl.showAns));
+          } else {
+            tr.appendChild(document.createElement('td'));
+          }
+        }
+        table.appendChild(tr);
+      }
+
+      inner.appendChild(table);
+      sheet.appendChild(inner);
+      wrap.appendChild(sheet);
+    }
+
+    wrap.classList.remove('hidden');
+    if (empty) empty.classList.add('hidden');
+  }
+
+  // Bygg sidopanelens områdes-checkboxar
+  function buildPLSidebar() {
+    const container = document.getElementById('pl-area-checks');
+    if (!container) return;
+    container.innerHTML = '';
+
+    PROBLEMLOSNING_AREAS.forEach(area => {
+      // Hitta label från AREA_CONFIG
+      let label = area;
+      for (const cat of AREA_CONFIG) {
+        const found = cat.areas.find(a => a.id === area);
+        if (found) { label = found.label; break; }
+      }
+
+      const row = document.createElement('label');
+      row.className = 'pl-check-row';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = area;
+      cb.checked = false;
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(' ' + label));
+      container.appendChild(row);
+    });
+
+    // Visa info om egna uppgifter
+    const info = document.getElementById('pl-egna-info');
+    if (info) {
+      const stored = typeof Settings !== 'undefined' ? Settings.getCustomProblems() : [];
+      info.textContent = stored.length > 0
+        ? `${stored.length} lagrade uppgifter`
+        : 'Inga importerade uppgifter';
+    }
+
+    // Visa/dölj auto-only sektioner beroende på källa
+    document.querySelectorAll('input[name="pl-source"]').forEach(radio => {
+      radio.addEventListener('change', updatePLSourceVisibility);
+    });
+    updatePLSourceVisibility();
+  }
+
+  function updatePLSourceVisibility() {
+    const source = document.querySelector('input[name="pl-source"]:checked')?.value || 'auto';
+    const showAuto = source === 'auto' || source === 'mix';
+    const showImport = source === 'egna' || source === 'mix';
+    document.querySelectorAll('.pl-auto-only').forEach(el => {
+      el.style.display = showAuto ? '' : 'none';
+    });
+    const importSection = document.getElementById('pl-import-section');
+    if (importSection) importSection.classList.toggle('hidden', !showImport);
+  }
+
+  function initPLImport() {
+    // Ladda ner mall
+    document.getElementById('pl-download-template')?.addEventListener('click', () => {
+      if (typeof CustomProblems !== 'undefined') CustomProblems.downloadTemplate();
+    });
+
+    // Import från fil
+    document.getElementById('pl-file-input')?.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = CustomProblems.importFromCsvText(reader.result);
+        showPLImportStatus(result);
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+
+    // Import från textfält
+    document.getElementById('pl-import-paste')?.addEventListener('click', () => {
+      const text = document.getElementById('pl-paste')?.value || '';
+      if (!text.trim()) return;
+      const result = CustomProblems.importFromCsvText(text);
+      showPLImportStatus(result);
+    });
+  }
+
+  function showPLImportStatus(result) {
+    const el = document.getElementById('pl-import-status');
+    if (!el) return;
+    if (result.success) {
+      el.className = 'pl-import-status success';
+      el.textContent = `${result.problems.length} uppgifter importerade!`;
+    } else {
+      el.className = 'pl-import-status error';
+      el.textContent = result.error;
+    }
+    // Uppdatera info-texten
+    updatePLEgnaInfo();
+  }
+
+  function updatePLEgnaInfo() {
+    const info = document.getElementById('pl-egna-info');
+    if (!info) return;
+    const stored = typeof Settings !== 'undefined' ? Settings.getCustomProblems() : [];
+    info.textContent = stored.length > 0
+      ? `${stored.length} lagrade uppgifter`
+      : 'Inga importerade uppgifter';
+  }
+
   function regenerateProblem(index) {
+    const mode = document.getElementById('ab-mode').value;
+
+    if (mode === 'problemlosning') {
+      const pl = readPLConfig();
+      const source = pl.source;
+      let newProblem = null;
+      if (source === 'egna') {
+        const results = generateEgnaProblems(1, sheetProblems);
+        newProblem = results[0] || null;
+      } else {
+        const results = generateAutoProblemlosning(1, pl.grade, sheetProblems, pl.selectedAreas);
+        newProblem = results[0] || null;
+      }
+      sheetProblems[index] = newProblem;
+      renderPLSheet(pl);
+      return;
+    }
+
     const cfg   = readConfig();
     const specs = cfg.specs;
     if (specs.length === 0) return;
 
-    // Välj en slumpmässig spec att regenerera från
     const spec = specs[Math.floor(Math.random() * specs.length)];
     const results = generateForSubcat({ ...spec, count: 1 }, cfg.grade, sheetProblems);
     sheetProblems[index] = results[0] || null;
@@ -834,10 +1065,12 @@ const Arbetsblad = (() => {
 <link rel="stylesheet" href="css/arbetsblad.css">
 <style>
   html, body { margin: 0; padding: 0; background: white !important;
-               height: auto !important; min-height: 0 !important; overflow: visible !important; }
-  .ab-sheet-wrap { display: block !important; padding: 0 !important; }
-  .ab-sheet      { display: block !important; width: 100% !important; height: auto !important; box-shadow: none !important; overflow: visible !important; }
-  .ab-sheet-inner{ display: block !important; overflow: visible !important; }
+               height: 100% !important; overflow: visible !important; }
+  .ab-sheet-wrap { display: block !important; padding: 0 !important; height: 100%; }
+  .ab-sheet      { display: flex !important; flex-direction: column !important; width: 100% !important; height: 100vh !important; box-shadow: none !important; overflow: visible !important; }
+  .ab-sheet::before { flex-shrink: 0 !important; }
+  .ab-sheet-inner{ display: flex !important; flex-direction: column !important; flex: 1 !important; overflow: visible !important; padding: 0 !important; }
+  .ab-table      { flex: 1 !important; }
   .ab-sheet + .ab-sheet { page-break-before: always !important; break-before: page !important; margin-top: 0 !important; }
   .ab-regen-btn, .no-print { display: none !important; }
   @page { size: A4 portrait; margin: 1cm 1.5cm; }
@@ -858,18 +1091,32 @@ const Arbetsblad = (() => {
   // =========================================================
   function updateModeVisibility() {
     const mode = document.getElementById('ab-mode').value;
-    const isStarten = mode === 'starten';
+    const isStandard = mode === 'standard';
+    const isPL       = mode === 'problemlosning';
+    const isStarten  = mode === 'starten';
+
+    // Visa/dölj standard-only element i config-baren
     document.querySelectorAll('.ab-standard-only').forEach(el => {
-      el.style.display = isStarten ? 'none' : '';
+      el.style.display = isStandard ? '' : 'none';
     });
+
+    // Visa/dölj sidopanel
+    const sidebar = document.getElementById('pl-sidebar');
+    if (sidebar) sidebar.classList.toggle('hidden', !isPL);
+
+    // Placeholder i rubrikfältet
     const titleInput = document.getElementById('ab-title');
     if (titleInput && !titleInput.value) {
-      titleInput.placeholder = isStarten ? 'T.ex. Starten v.12' : 'T.ex. Multiplikation';
+      if (isStarten) titleInput.placeholder = 'T.ex. Starten v.12';
+      else if (isPL) titleInput.placeholder = 'T.ex. Problemlösning';
+      else titleInput.placeholder = 'T.ex. Multiplikation';
     }
   }
 
   function init() {
     buildAreasPopup();
+    buildPLSidebar();
+    initPLImport();
 
     document.getElementById('ab-mode')
       ?.addEventListener('change', updateModeVisibility);
