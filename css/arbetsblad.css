@@ -72,7 +72,8 @@ body {
 
 /* === Gemensamma sidebar-stilar (standard + problemlösning) ============== */
 #ab-sidebar,
-#pl-sidebar {
+#pl-sidebar,
+#st-sidebar {
   position: fixed;
   left: 0;
   top: 0;
@@ -88,7 +89,8 @@ body {
 }
 
 #ab-sidebar.hidden,
-#pl-sidebar.hidden { display: none; }
+#pl-sidebar.hidden,
+#st-sidebar.hidden { display: none; }
 
 .sidebar-title {
   font-size: 0.7rem;
@@ -156,7 +158,8 @@ body {
 }
 
 #ab-sidebar select,
-#pl-sidebar select {
+#pl-sidebar select,
+#st-sidebar select {
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.15);
   color: #f0eeea;
@@ -169,7 +172,8 @@ body {
 }
 
 #ab-sidebar select option,
-#pl-sidebar select option { background: #1e1e34; }
+#pl-sidebar select option,
+#st-sidebar select option { background: #1e1e34; }
 
 /* Underkategorier per område */
 .ab-area-item { margin-bottom: 0.15rem; }
@@ -351,12 +355,14 @@ body {
 
 /* Sidopanel aktiv → skjut innehållet till höger */
 body:has(#pl-sidebar:not(.hidden)) #ab-content-wrap,
-body:has(#ab-sidebar:not(.hidden)) #ab-content-wrap {
+body:has(#ab-sidebar:not(.hidden)) #ab-content-wrap,
+body:has(#st-sidebar:not(.hidden)) #ab-content-wrap {
   margin-left: 15rem;
 }
 
 body:has(#pl-sidebar:not(.hidden)) #empty-state,
-body:has(#ab-sidebar:not(.hidden)) #empty-state {
+body:has(#ab-sidebar:not(.hidden)) #empty-state,
+body:has(#st-sidebar:not(.hidden)) #empty-state {
   margin-left: 15rem;
 }
 
@@ -875,7 +881,7 @@ body:has(#ab-sidebar:not(.hidden)) #empty-state {
 
   body { background: white; margin: 0; padding: 0; }
 
-  #pl-sidebar, #ab-sidebar { display: none !important; }
+  #pl-sidebar, #ab-sidebar, #st-sidebar { display: none !important; }
   #ab-content-wrap { margin-left: 0 !important; }
 
   .ab-sheet-wrap { padding: 0; display: block; }

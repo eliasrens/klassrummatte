@@ -583,24 +583,40 @@ const Arbetsblad = (() => {
   // =========================================================
   const DAYS = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag'];
 
+  function readStartenOps() {
+    const ops = [];
+    if (document.getElementById('st-op-add')?.checked) ops.push('add');
+    if (document.getElementById('st-op-sub')?.checked) ops.push('sub');
+    if (document.getElementById('st-op-mult')?.checked) ops.push('mult');
+    const showDiv = document.getElementById('st-op-div')?.checked ?? true;
+    return { ops: ops.length > 0 ? ops : ['add', 'sub', 'mult'], showDiv };
+  }
+
   function generateStartenProblems(grade) {
     const c = PluginUtils.cfg(grade);
+    const { ops: selectedOps, showDiv } = readStartenOps();
+    const numCols = showDiv ? 3 : 4;
     const rows = [];
     for (let d = 0; d < 5; d++) {
-      // 3 uppställningsproblem: blanda add/sub/mult
-      const ops = ['add', 'sub', 'mult'];
-      // Fisher-Yates shuffle
+      // Fyll uppställningskolumner med valda räknesätt
+      const ops = [];
+      for (let i = 0; i < numCols; i++) {
+        ops.push(selectedOps[i % selectedOps.length]);
+      }
+      // Blanda ordningen
       for (let i = ops.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [ops[i], ops[j]] = [ops[j], ops[i]];
       }
       const uppstallningar = ops.map(op => PluginUtils.genUppstallning(op, c));
 
-      // Division som bråk: täljare / nämnare
-      const divisor  = PluginUtils.randInt(2, 9);
-      const quotient = PluginUtils.randInt(2, 9);
-      const dividend = divisor * quotient;
-      const brak = { dividend, divisor, quotient };
+      // Division som bråk
+      let brak = null;
+      if (showDiv) {
+        const divisor  = PluginUtils.randInt(2, 9);
+        const quotient = PluginUtils.randInt(2, 9);
+        brak = { dividend: divisor * quotient, divisor, quotient };
+      }
 
       rows.push({ uppstallningar, brak });
     }
@@ -612,11 +628,9 @@ const Arbetsblad = (() => {
     const c = PluginUtils.cfg(startenData.grade);
     const row = startenData.rows[dayIdx];
     if (cellIdx < 3) {
-      // Uppställning – behåll samma räknesätt
       const oldType = row.uppstallningar[cellIdx].type.replace('uppstallning-', '');
       row.uppstallningar[cellIdx] = PluginUtils.genUppstallning(oldType, c);
-    } else {
-      // Bråk/division
+    } else if (row.brak) {
       const divisor  = PluginUtils.randInt(2, 9);
       const quotient = PluginUtils.randInt(2, 9);
       row.brak = { dividend: divisor * quotient, divisor, quotient };
@@ -713,40 +727,41 @@ const Arbetsblad = (() => {
         tr.appendChild(td);
       });
 
-      // Bråk/division-cell
-      const tdBrak = document.createElement('td');
-      tdBrak.className = 'starten-brak';
+      // Bråk/division-cell (villkorlig)
+      if (row.brak) {
+        const tdBrak = document.createElement('td');
+        tdBrak.className = 'starten-brak';
 
-      const brakLine = document.createElement('div');
-      brakLine.className = 'starten-brak-line';
-      brakLine.innerHTML =
-        `<span class="starten-frac">` +
-          `<span class="starten-frac-num">${row.brak.dividend}</span>` +
-          `<span class="starten-frac-den">${row.brak.divisor}</span>` +
-        `</span>` +
-        `<span class="starten-eq">=</span>` +
-        `<span class="starten-blank"></span>`;
-      tdBrak.appendChild(brakLine);
+        const brakLine = document.createElement('div');
+        brakLine.className = 'starten-brak-line';
+        brakLine.innerHTML =
+          `<span class="starten-frac">` +
+            `<span class="starten-frac-num">${row.brak.dividend}</span>` +
+            `<span class="starten-frac-den">${row.brak.divisor}</span>` +
+          `</span>` +
+          `<span class="starten-eq">=</span>` +
+          `<span class="starten-blank"></span>`;
+        tdBrak.appendChild(brakLine);
 
-      const multLine = document.createElement('div');
-      multLine.className = 'starten-mult-line';
-      multLine.innerHTML =
-        '<span class="starten-blank starten-blank--short"></span>' +
-        '<span class="starten-op">&middot;</span>' +
-        '<span class="starten-blank starten-blank--short"></span>' +
-        '<span class="starten-eq">=</span>' +
-        '<span class="starten-blank starten-blank--short"></span>';
-      tdBrak.appendChild(multLine);
+        const multLine = document.createElement('div');
+        multLine.className = 'starten-mult-line';
+        multLine.innerHTML =
+          '<span class="starten-blank starten-blank--short"></span>' +
+          '<span class="starten-op">&middot;</span>' +
+          '<span class="starten-blank starten-blank--short"></span>' +
+          '<span class="starten-eq">=</span>' +
+          '<span class="starten-blank starten-blank--short"></span>';
+        tdBrak.appendChild(multLine);
 
-      // Regenera-knapp för bråk
-      const regenBrak = document.createElement('button');
-      regenBrak.className = 'starten-regen no-print';
-      regenBrak.title = 'Byt uppgift';
-      regenBrak.textContent = '\u{1F504}';
-      regenBrak.addEventListener('click', () => regenStartenCell(di, 3));
-      tdBrak.appendChild(regenBrak);
+        const regenBrak = document.createElement('button');
+        regenBrak.className = 'starten-regen no-print';
+        regenBrak.title = 'Byt uppgift';
+        regenBrak.textContent = '\u{1F504}';
+        regenBrak.addEventListener('click', () => regenStartenCell(di, 3));
+        tdBrak.appendChild(regenBrak);
 
-      tr.appendChild(tdBrak);
+        tr.appendChild(tdBrak);
+      }
       table.appendChild(tr);
     });
 
@@ -1095,6 +1110,7 @@ const Arbetsblad = (() => {
     const mode = document.getElementById('ab-mode').value;
     const isStandard = mode === 'standard';
     const isPL       = mode === 'problemlosning';
+    const isStarten  = mode === 'starten';
 
     // Visa/dölj sidopaneler
     const abSidebar = document.getElementById('ab-sidebar');
@@ -1102,6 +1118,9 @@ const Arbetsblad = (() => {
 
     const plSidebar = document.getElementById('pl-sidebar');
     if (plSidebar) plSidebar.classList.toggle('hidden', !isPL);
+
+    const stSidebar = document.getElementById('st-sidebar');
+    if (stSidebar) stSidebar.classList.toggle('hidden', !isStarten);
 
     // Placeholder i rubrikfältet
     const titleInput = document.getElementById('ab-title');
