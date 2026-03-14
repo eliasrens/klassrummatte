@@ -6,6 +6,7 @@ const Arbetsblad = (() => {
 
   let sheetProblems = [];  // Aktuell lista med problem
   let startenData   = null; // { grade, rows } för Starten-läge
+  let batchSheets   = [];   // [{ grade, rows, color, vaxling }] för batch-regen
   let plConfig      = null; // Senaste PL-config för omrendering vid färgbyte
   let startenColor  = '';   // tema-klass för färgval
 
@@ -576,6 +577,28 @@ const Arbetsblad = (() => {
   // =========================================================
   const DAYS = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag'];
 
+  // Fyll numCols platser med selectedOps och rotera vilken som dubbleras per dag
+  function buildBalancedOps(selectedOps, numCols, dayIndex) {
+    const ops = [];
+    if (selectedOps.length >= numCols) {
+      // Fler (eller lika många) ops än kolumner — välj slumpmässigt
+      for (let i = 0; i < numCols; i++) ops.push(selectedOps[i % selectedOps.length]);
+    } else {
+      // Färre ops än kolumner — varje op minst en gång, rotera extra-platser
+      selectedOps.forEach(op => ops.push(op));
+      const extras = numCols - selectedOps.length;
+      for (let i = 0; i < extras; i++) {
+        ops.push(selectedOps[(dayIndex + i) % selectedOps.length]);
+      }
+    }
+    // Blanda ordningen
+    for (let i = ops.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ops[i], ops[j]] = [ops[j], ops[i]];
+    }
+    return ops;
+  }
+
   function readStartenOps() {
     const ops = [];
     if (document.getElementById('st-op-add')?.checked) ops.push('add');
@@ -725,20 +748,21 @@ const Arbetsblad = (() => {
     if (!wrap) return;
     wrap.innerHTML = '';
 
+    batchSheets = [];
     let weekNum = startWeek;
     let sheetIdx = 0;
     periods.forEach(period => {
       for (let w = 0; w < period.weeks; w++) {
         const weekTitle = `${titlePrefix} - Vecka ${weekNum}`;
         const rows = generateStartenProblemsWithOps(grade, period.ops, period.showDiv, period.vaxling);
-        renderSingleStartenSheet(wrap, grade, rows, weekTitle, period.color, sheetIdx > 0);
+        batchSheets.push({ grade, rows, color: period.color, vaxling: period.vaxling, title: weekTitle });
+        renderSingleStartenSheet(wrap, grade, rows, weekTitle, period.color, sheetIdx > 0, sheetIdx);
         weekNum++;
         sheetIdx++;
       }
     });
 
-    // Spara batch-data för eventuell omrendering
-    startenData = null; // Batch använder inte startenData
+    startenData = null;
 
     wrap.classList.remove('hidden');
     if (empty) empty.classList.add('hidden');
@@ -750,15 +774,7 @@ const Arbetsblad = (() => {
     const vaxOpts = vaxling ? { vaxling } : null;
     const rows = [];
     for (let d = 0; d < 5; d++) {
-      const colOps = [];
-      for (let i = 0; i < numCols; i++) {
-        colOps.push(ops[i % ops.length]);
-      }
-      // Blanda
-      for (let i = colOps.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [colOps[i], colOps[j]] = [colOps[j], colOps[i]];
-      }
+      const colOps = buildBalancedOps(ops, numCols, d);
       const uppstallningar = colOps.map(op => PluginUtils.genUppstallning(op, c, vaxOpts));
 
       let brak = null;
@@ -772,7 +788,7 @@ const Arbetsblad = (() => {
     return rows;
   }
 
-  function renderSingleStartenSheet(wrap, grade, startenRows, title, color, pageBreak) {
+  function renderSingleStartenSheet(wrap, grade, startenRows, title, color, pageBreak, sheetIdx) {
     const sheet = document.createElement('div');
     sheet.className = 'ab-sheet' + (color ? ` starten-${color}` : '');
     if (pageBreak) sheet.classList.add('ab-sheet--next-page');
@@ -809,7 +825,7 @@ const Arbetsblad = (() => {
       tdDay.textContent = DAYS[di];
       tr.appendChild(tdDay);
 
-      row.uppstallningar.forEach(problem => {
+      row.uppstallningar.forEach((problem, pi) => {
         const td = document.createElement('td');
         td.className = 'starten-problem';
         const text = document.createElement('div');
@@ -831,6 +847,16 @@ const Arbetsblad = (() => {
         for (let c = 0; c < cols; c++) lastRow.appendChild(document.createElement('td'));
         grid.appendChild(lastRow);
         td.appendChild(grid);
+
+        if (sheetIdx !== undefined) {
+          const regen = document.createElement('button');
+          regen.className = 'starten-regen no-print';
+          regen.title = 'Byt uppgift';
+          regen.textContent = '\u{1F504}';
+          regen.addEventListener('click', () => regenBatchCell(sheetIdx, di, pi));
+          td.appendChild(regen);
+        }
+
         tr.appendChild(td);
       });
 
@@ -857,6 +883,16 @@ const Arbetsblad = (() => {
           '<span class="starten-eq">=</span>' +
           '<span class="starten-blank starten-blank--short"></span>';
         tdBrak.appendChild(multLine);
+
+        if (sheetIdx !== undefined) {
+          const regenBrak = document.createElement('button');
+          regenBrak.className = 'starten-regen no-print';
+          regenBrak.title = 'Byt uppgift';
+          regenBrak.textContent = '\u{1F504}';
+          regenBrak.addEventListener('click', () => regenBatchCell(sheetIdx, di, row.uppstallningar.length));
+          tdBrak.appendChild(regenBrak);
+        }
+
         tr.appendChild(tdBrak);
       }
       table.appendChild(tr);
@@ -873,16 +909,7 @@ const Arbetsblad = (() => {
     const numCols = showDiv ? 3 : 4;
     const rows = [];
     for (let d = 0; d < 5; d++) {
-      // Fyll uppställningskolumner med valda räknesätt
-      const ops = [];
-      for (let i = 0; i < numCols; i++) {
-        ops.push(selectedOps[i % selectedOps.length]);
-      }
-      // Blanda ordningen
-      for (let i = ops.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [ops[i], ops[j]] = [ops[j], ops[i]];
-      }
+      const ops = buildBalancedOps(selectedOps, numCols, d);
       const vaxOpts = vaxling ? { vaxling } : null;
       const uppstallningar = ops.map(op => PluginUtils.genUppstallning(op, c, vaxOpts));
 
@@ -905,7 +932,7 @@ const Arbetsblad = (() => {
     const { vaxling } = readStartenOps();
     const vaxOpts = vaxling ? { vaxling } : null;
     const row = startenData.rows[dayIdx];
-    if (cellIdx < 3) {
+    if (cellIdx < row.uppstallningar.length) {
       const oldType = row.uppstallningar[cellIdx].type.replace('uppstallning-', '');
       row.uppstallningar[cellIdx] = PluginUtils.genUppstallning(oldType, c, vaxOpts);
     } else if (row.brak) {
@@ -914,6 +941,32 @@ const Arbetsblad = (() => {
       row.brak = { dividend: divisor * quotient, divisor, quotient };
     }
     renderStartenFromData();
+  }
+
+  function regenBatchCell(sheetIdx, dayIdx, cellIdx) {
+    const entry = batchSheets[sheetIdx];
+    if (!entry) return;
+    const c = PluginUtils.cfg(entry.grade);
+    const vaxOpts = entry.vaxling ? { vaxling: entry.vaxling } : null;
+    const row = entry.rows[dayIdx];
+    if (cellIdx < row.uppstallningar.length) {
+      const oldType = row.uppstallningar[cellIdx].type.replace('uppstallning-', '');
+      row.uppstallningar[cellIdx] = PluginUtils.genUppstallning(oldType, c, vaxOpts);
+    } else if (row.brak) {
+      const divisor  = PluginUtils.randInt(2, 9);
+      const quotient = PluginUtils.randInt(2, 9);
+      row.brak = { dividend: divisor * quotient, divisor, quotient };
+    }
+    rerenderBatchSheets();
+  }
+
+  function rerenderBatchSheets() {
+    const wrap = document.getElementById('ab-sheet');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    batchSheets.forEach((entry, si) => {
+      renderSingleStartenSheet(wrap, entry.grade, entry.rows, entry.title, entry.color, si > 0, si);
+    });
   }
 
   function renderStartenSheet(grade) {
@@ -1035,7 +1088,7 @@ const Arbetsblad = (() => {
         regenBrak.className = 'starten-regen no-print';
         regenBrak.title = 'Byt uppgift';
         regenBrak.textContent = '\u{1F504}';
-        regenBrak.addEventListener('click', () => regenStartenCell(di, 3));
+        regenBrak.addEventListener('click', () => regenStartenCell(di, row.uppstallningar.length));
         tdBrak.appendChild(regenBrak);
 
         tr.appendChild(tdBrak);
