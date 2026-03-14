@@ -16,7 +16,7 @@ const App = (() => {
   // =========================================================
   //  DOM-referenser
   // =========================================================
-  let stage, problemDisplay, extraPanel, extraDisplay, clickHint, showAnswerBtn, extraAnswerBtn;
+  let stage, problemDisplay, extraPanel, extraDisplay, clickHint, showAnswerBtn, extraAnswerBtn, prevBtn;
 
   // =========================================================
   //  App-state
@@ -31,6 +31,8 @@ const App = (() => {
   let currentProblems      = [];   // används i multi-mode
   let currentExtraProblem  = null;
   let sessionCurrent       = 0;
+  let problemHistory       = [];   // historik för bakåtnavigering
+  let historyIndex         = -1;   // -1 = ingen historik visas
 
   // Global hook för livesession (lärarvy + Firebase)
   window.KlassrumsSession = window.KlassrumsSession || {
@@ -48,6 +50,8 @@ const App = (() => {
     clickHint       = document.getElementById('click-hint');
     showAnswerBtn   = document.getElementById('show-answer-btn');
     extraAnswerBtn  = document.getElementById('extra-answer-btn');
+
+    prevBtn         = document.getElementById('prev-problem-btn');
 
     Menu.init(
       document.getElementById('menu-toggle'),
@@ -86,6 +90,11 @@ const App = (() => {
       } else if (currentProblem) {
         Answer.showAnswer(currentProblem, problemDisplay, showAnswerBtn);
       }
+    });
+
+    prevBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      goBack();
     });
 
     extraAnswerBtn.addEventListener('click', e => {
@@ -145,7 +154,8 @@ const App = (() => {
     if (e && (
       e.target.closest('#settings-menu') ||
       e.target.closest('#menu-toggle') ||
-      e.target.closest('#extra-panel')
+      e.target.closest('#extra-panel') ||
+      e.target.closest('#prev-problem-btn')
     )) return;
 
     // Under aktiv livesession: bara "Nästa uppgift"-knappen byter uppgift
@@ -162,6 +172,7 @@ const App = (() => {
       // Starta uttoning
       problemDisplay.classList.remove('visible');
       showAnswerBtn.classList.remove('problem-visible');
+      prevBtn.classList.remove('problem-visible');
       const sendBtn = document.getElementById('send-to-students-btn');
       if (sendBtn) sendBtn.classList.remove('problem-visible');
       const nextBtn = document.getElementById('next-problem-btn');
@@ -221,6 +232,15 @@ const App = (() => {
       window.KlassrumsSession.currentProblem = currentProblem;
     }
 
+    // Spara i historik
+    problemHistory.push({
+      problem: currentProblem,
+      problems: currentProblems.length > 0 ? currentProblems.slice() : null,
+      multi: settings.multipleProblems,
+    });
+    if (problemHistory.length > 50) problemHistory.shift();
+    historyIndex = -1;
+
     // Återställ svar-knappen
     showAnswerBtn.disabled    = false;
     showAnswerBtn.textContent = 'Visa svar';
@@ -229,6 +249,7 @@ const App = (() => {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       problemDisplay.classList.add('visible');
       showAnswerBtn.classList.add('problem-visible');
+      prevBtn.classList.toggle('problem-visible', problemHistory.length > 1);
       const liveActive = window.KlassrumsSessionTeacher && window.KlassrumsSessionTeacher.hasActiveSession();
       const nextBtn = document.getElementById('next-problem-btn');
       if (nextBtn) nextBtn.classList.toggle('problem-visible', !!liveActive);
@@ -263,6 +284,58 @@ const App = (() => {
     }
   }
 
+  // =========================================================
+  //  Historiknavigering (bakåt)
+  // =========================================================
+  function goBack() {
+    if (problemHistory.length < 2) return;
+
+    // Bestäm index att visa
+    if (historyIndex === -1) {
+      // Första gången bakåt: visa näst sista
+      historyIndex = problemHistory.length - 2;
+    } else if (historyIndex > 0) {
+      historyIndex--;
+    } else {
+      return; // redan längst bak
+    }
+
+    showFromHistory(historyIndex);
+  }
+
+  function showFromHistory(idx) {
+    const entry = problemHistory[idx];
+    if (!entry) return;
+
+    clearExtraTask();
+    clearBildstod();
+    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+
+    if (entry.multi && entry.problems) {
+      problemDisplay.classList.add('multi-mode');
+      currentProblems = entry.problems;
+      currentProblem  = null;
+      Renderer.renderMultiple(currentProblems, problemDisplay);
+    } else {
+      problemDisplay.classList.remove('multi-mode');
+      currentProblem  = entry.problem;
+      currentProblems = [];
+      Renderer.renderProblem(currentProblem, problemDisplay);
+    }
+
+    showAnswerBtn.disabled    = false;
+    showAnswerBtn.textContent = 'Visa svar';
+
+    problemDisplay.classList.remove('hidden');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      problemDisplay.classList.add('visible');
+      showAnswerBtn.classList.add('problem-visible');
+      prevBtn.classList.toggle('problem-visible', idx > 0);
+    }));
+
+    problemVisible = true;
+  }
+
   function clearExtraTask() {
     if (extraTimer)      { clearTimeout(extraTimer);      extraTimer      = null; }
     if (extraClearTimer) { clearTimeout(extraClearTimer); extraClearTimer = null; }
@@ -274,6 +347,8 @@ const App = (() => {
 
   function resetSession() {
     sessionCurrent = 0;
+    problemHistory = [];
+    historyIndex   = -1;
     const el = document.getElementById('session-counter');
     if (el) el.textContent = '';
   }

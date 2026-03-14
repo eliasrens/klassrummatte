@@ -1087,10 +1087,22 @@ body.extra-visible .show-answer-btn {
   right: calc(var(--extra-width) + 1.5rem);
 }
 
-/* Knapp för att skicka uppgift till elever (placerad till vänster) */
+/* Bakåtknapp – nere till höger, bredvid "Visa svar" */
+.prev-problem-btn {
+  right: auto;
+  bottom: 4vh;
+  left: 2rem;
+}
+
+body.extra-visible .prev-problem-btn {
+  left: 2rem;
+}
+
+/* Knapp för att skicka uppgift till elever (placerad till vänster, ovanför bakåt) */
 .send-to-students-btn {
   right: auto;
   left: 2rem;
+  bottom: calc(4vh + 2.5rem);
 }
 
 body.extra-visible .send-to-students-btn {
