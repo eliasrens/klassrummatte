@@ -134,16 +134,35 @@
   <div id="st-sidebar" class="no-print hidden">
     <h3 class="sidebar-title">Starten-inställningar</h3>
 
-    <div class="sidebar-section">
-      <div class="sidebar-section-label">Räknesätt (uppställning)</div>
-      <label class="sidebar-check-row"><input type="checkbox" id="st-op-add" checked> Addition</label>
-      <label class="sidebar-check-row"><input type="checkbox" id="st-op-sub" checked> Subtraktion</label>
-      <label class="sidebar-check-row"><input type="checkbox" id="st-op-mult" checked> Multiplikation</label>
+    <label class="sidebar-toggle-row">
+      <input type="checkbox" id="st-batch-mode"> Skapa flera veckor
+    </label>
+
+    <!-- Enkelt läge (en vecka) -->
+    <div id="st-single-mode">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Räknesätt (uppställning)</div>
+        <label class="sidebar-check-row"><input type="checkbox" id="st-op-add" checked> Addition</label>
+        <label class="sidebar-check-row"><input type="checkbox" id="st-op-sub" checked> Subtraktion</label>
+        <label class="sidebar-check-row"><input type="checkbox" id="st-op-mult" checked> Multiplikation</label>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Division (bråk-kolumn)</div>
+        <label class="sidebar-check-row"><input type="checkbox" id="st-op-div" checked> Visa divisionskolumn</label>
+      </div>
     </div>
 
-    <div class="sidebar-section">
-      <div class="sidebar-section-label">Division (bråk-kolumn)</div>
-      <label class="sidebar-check-row"><input type="checkbox" id="st-op-div" checked> Visa divisionskolumn</label>
+    <!-- Batch-läge (flera veckor) -->
+    <div id="st-batch-wrap" class="hidden">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Startvecka</div>
+        <input type="number" id="st-start-week" value="1" min="1" max="52" class="st-week-input">
+      </div>
+
+      <div id="st-periods"></div>
+
+      <button type="button" id="st-add-period" class="st-add-period-btn">+ Lägg till period</button>
     </div>
   </div>
 

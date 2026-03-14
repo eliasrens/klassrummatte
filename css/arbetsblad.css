@@ -76,12 +76,11 @@ body {
 #st-sidebar {
   position: fixed;
   left: 0;
-  top: 0;
   bottom: 0;
   width: 15rem;
   background: #1e1e34;
   color: #f0eeea;
-  padding: 4.5rem 1.2rem 1.5rem;
+  padding: 1rem 1.2rem 1.5rem;
   overflow-y: auto;
   z-index: 50;
   box-shadow: 2px 0 16px rgba(0,0,0,0.2);
@@ -145,6 +144,14 @@ body {
   color: rgba(255,255,255,0.7);
   cursor: pointer;
   margin-top: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+#st-sidebar > .sidebar-toggle-row {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .sidebar-toggle-row input { accent-color: #457b9d; cursor: pointer; }
@@ -186,6 +193,139 @@ body {
 }
 
 .ab-subcats.hidden { display: none; }
+
+/* === Starten batch-läge: perioder ======================================= */
+#st-single-mode.hidden,
+#st-batch-wrap.hidden { display: none; }
+
+.st-week-input {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #f0eeea;
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  width: 4rem;
+}
+
+.st-period {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.st-period-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.st-period-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.st-period-remove {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.35);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0 0.2rem;
+  line-height: 1;
+}
+.st-period-remove:hover { color: #e63946; }
+
+.st-period-range {
+  margin-bottom: 0.3rem;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.65);
+}
+.st-period-range label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.st-period-range input {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #f0eeea;
+  border-radius: 4px;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.8rem;
+  width: 3rem;
+  font-family: inherit;
+}
+
+.st-period-ops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.st-period-check {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.65);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.st-period-check input { accent-color: #457b9d; cursor: pointer; }
+
+.st-period-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.st-pcolor-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.st-pcolor-btn span {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.st-pcolor-btn--active {
+  border-color: rgba(255,255,255,0.7);
+}
+
+.st-add-period-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px dashed rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.55);
+  border-radius: 6px;
+  padding: 0.35rem;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  margin-top: 0.3rem;
+}
+.st-add-period-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.8);
+}
 
 .ab-subcat-row {
   display: flex;
