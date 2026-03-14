@@ -689,10 +689,20 @@ body:has(#st-sidebar:not(.hidden)) #empty-state {
   margin-right: 0.05rem;
 }
 
-/* Rutnät i problemlösning – placerat till höger */
+/* Rutnät i problemlösning – fyller tillgänglig yta med kvadratiska celler */
 .ab-cell--text .ab-calc-grid--text {
-  margin-left: auto;
-  margin-right: 0;
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 7mm);
+  grid-auto-rows: 7mm;
+  border: 1px solid #8a919b;
+  border-radius: 2px;
+  margin: 0 0 7mm 0;
+  background-image:
+    linear-gradient(to right, #8a919b 1px, transparent 1px),
+    linear-gradient(to bottom, #8a919b 1px, transparent 1px);
+  background-size: 7mm 7mm;
+  background-position: -1px -1px;
 }
 
 /* Beräkningsrutnät i cell (exakt som starten) */

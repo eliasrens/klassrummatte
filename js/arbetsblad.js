@@ -408,16 +408,9 @@ const Arbetsblad = (() => {
         key.textContent = `Svar: ${problem.answer}`;
         inner.appendChild(key);
       } else {
-        // Uppställningsrutnät (fast 4 kol, utan svarslinje)
-        const gridCols = 4;
-        const gridRows = 4;
-        const grid = document.createElement('table');
+        // Rutnät som fyller tillgängligt utrymme med kvadratiska celler
+        const grid = document.createElement('div');
         grid.className = 'ab-calc-grid ab-calc-grid--text';
-        for (let r = 0; r < gridRows; r++) {
-          const tr = document.createElement('tr');
-          for (let c = 0; c < gridCols; c++) tr.appendChild(document.createElement('td'));
-          grid.appendChild(tr);
-        }
         inner.appendChild(grid);
 
         // Svarslinje längst ner
