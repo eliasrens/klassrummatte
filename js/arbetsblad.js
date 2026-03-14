@@ -582,7 +582,9 @@ const Arbetsblad = (() => {
     if (document.getElementById('st-op-sub')?.checked) ops.push('sub');
     if (document.getElementById('st-op-mult')?.checked) ops.push('mult');
     const showDiv = document.getElementById('st-op-div')?.checked ?? true;
-    return { ops: ops.length > 0 ? ops : ['add', 'sub', 'mult'], showDiv };
+    const vaxlingEl = document.querySelector('input[name="st-vaxling"]:checked');
+    const vaxling = vaxlingEl && vaxlingEl.value ? vaxlingEl.value : null;
+    return { ops: ops.length > 0 ? ops : ['add', 'sub', 'mult'], showDiv, vaxling };
   }
 
   // =========================================================
@@ -646,6 +648,17 @@ const Arbetsblad = (() => {
       '<label class="st-period-check"><input type="checkbox" data-op="div" checked> Div</label>';
     div.appendChild(opsDiv);
 
+    // Växling
+    const vaxDiv = document.createElement('div');
+    vaxDiv.className = 'st-period-vaxling';
+    const vaxName = 'st-vax-' + idx;
+    vaxDiv.innerHTML =
+      `<span class="st-period-vax-label">Växling:</span>` +
+      `<label class="st-period-check"><input type="radio" name="${vaxName}" value="" checked> Blandad</label>` +
+      `<label class="st-period-check"><input type="radio" name="${vaxName}" value="utan"> Utan</label>` +
+      `<label class="st-period-check"><input type="radio" name="${vaxName}" value="med"> Med</label>`;
+    div.appendChild(vaxDiv);
+
     // Färg
     const colorDiv = document.createElement('div');
     colorDiv.className = 'st-period-colors';
@@ -687,11 +700,14 @@ const Arbetsblad = (() => {
       const showDiv = !!el.querySelector('.st-period-ops input[data-op="div"]:checked');
       const colorBtn = el.querySelector('.st-pcolor-btn--active');
       const color = colorBtn ? (colorBtn.dataset.theme || '') : '';
+      const vaxEl = el.querySelector('.st-period-vaxling input[type="radio"]:checked');
+      const vaxling = vaxEl && vaxEl.value ? vaxEl.value : null;
       periods.push({
         weeks,
         ops: ops.length > 0 ? ops : ['add', 'sub', 'mult'],
         showDiv,
         color,
+        vaxling,
       });
     });
     return periods;
@@ -714,7 +730,7 @@ const Arbetsblad = (() => {
     periods.forEach(period => {
       for (let w = 0; w < period.weeks; w++) {
         const weekTitle = `${titlePrefix} - Vecka ${weekNum}`;
-        const rows = generateStartenProblemsWithOps(grade, period.ops, period.showDiv);
+        const rows = generateStartenProblemsWithOps(grade, period.ops, period.showDiv, period.vaxling);
         renderSingleStartenSheet(wrap, grade, rows, weekTitle, period.color, sheetIdx > 0);
         weekNum++;
         sheetIdx++;
@@ -728,9 +744,10 @@ const Arbetsblad = (() => {
     if (empty) empty.classList.add('hidden');
   }
 
-  function generateStartenProblemsWithOps(grade, ops, showDiv) {
+  function generateStartenProblemsWithOps(grade, ops, showDiv, vaxling) {
     const c = PluginUtils.cfg(grade);
     const numCols = showDiv ? 3 : 4;
+    const vaxOpts = vaxling ? { vaxling } : null;
     const rows = [];
     for (let d = 0; d < 5; d++) {
       const colOps = [];
@@ -742,7 +759,7 @@ const Arbetsblad = (() => {
         const j = Math.floor(Math.random() * (i + 1));
         [colOps[i], colOps[j]] = [colOps[j], colOps[i]];
       }
-      const uppstallningar = colOps.map(op => PluginUtils.genUppstallning(op, c));
+      const uppstallningar = colOps.map(op => PluginUtils.genUppstallning(op, c, vaxOpts));
 
       let brak = null;
       if (showDiv) {
@@ -852,7 +869,7 @@ const Arbetsblad = (() => {
 
   function generateStartenProblems(grade) {
     const c = PluginUtils.cfg(grade);
-    const { ops: selectedOps, showDiv } = readStartenOps();
+    const { ops: selectedOps, showDiv, vaxling } = readStartenOps();
     const numCols = showDiv ? 3 : 4;
     const rows = [];
     for (let d = 0; d < 5; d++) {
@@ -866,7 +883,8 @@ const Arbetsblad = (() => {
         const j = Math.floor(Math.random() * (i + 1));
         [ops[i], ops[j]] = [ops[j], ops[i]];
       }
-      const uppstallningar = ops.map(op => PluginUtils.genUppstallning(op, c));
+      const vaxOpts = vaxling ? { vaxling } : null;
+      const uppstallningar = ops.map(op => PluginUtils.genUppstallning(op, c, vaxOpts));
 
       // Division som bråk
       let brak = null;
@@ -884,10 +902,12 @@ const Arbetsblad = (() => {
   function regenStartenCell(dayIdx, cellIdx) {
     if (!startenData) return;
     const c = PluginUtils.cfg(startenData.grade);
+    const { vaxling } = readStartenOps();
+    const vaxOpts = vaxling ? { vaxling } : null;
     const row = startenData.rows[dayIdx];
     if (cellIdx < 3) {
       const oldType = row.uppstallningar[cellIdx].type.replace('uppstallning-', '');
-      row.uppstallningar[cellIdx] = PluginUtils.genUppstallning(oldType, c);
+      row.uppstallningar[cellIdx] = PluginUtils.genUppstallning(oldType, c, vaxOpts);
     } else if (row.brak) {
       const divisor  = PluginUtils.randInt(2, 9);
       const quotient = PluginUtils.randInt(2, 9);

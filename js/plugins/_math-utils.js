@@ -142,15 +142,33 @@ const PluginMathUtils = (() => {
   }
 
   // Uppställning för extra-panelen
-  function genUppstallning(subtype, c) {
+  // opts.vaxling: null = random, 'med' = kräv växling, 'utan' = utan växling
+  function genUppstallning(subtype, c, opts) {
     const maxVal = Math.min(c.addMax || 10000, 9999);
     const minVal = Math.max(10, Math.floor(maxVal / 20));
+    const vaxling = opts && opts.vaxling || null;
+
     if (subtype === 'add') {
+      for (let tries = 0; tries < 50; tries++) {
+        const a = randInt(minVal, Math.floor(maxVal * 0.6));
+        const b = randInt(minVal, maxVal - a);
+        if (vaxling === 'med'  && !hasCarry(a, b)) continue;
+        if (vaxling === 'utan' &&  hasCarry(a, b)) continue;
+        return { type: 'uppstallning-add', a, b, operator: '+', answer: a + b };
+      }
+      // Fallback om ingen passade
       const a = randInt(minVal, Math.floor(maxVal * 0.6));
       const b = randInt(minVal, maxVal - a);
       return { type: 'uppstallning-add', a, b, operator: '+', answer: a + b };
     }
     if (subtype === 'sub') {
+      for (let tries = 0; tries < 50; tries++) {
+        const a = randInt(Math.floor(maxVal / 2), maxVal);
+        const b = randInt(minVal, a - minVal > 0 ? a - minVal : a);
+        if (vaxling === 'med'  && !hasBorrow(a, b)) continue;
+        if (vaxling === 'utan' &&  hasBorrow(a, b)) continue;
+        return { type: 'uppstallning-sub', a, b, operator: '−', answer: a - b };
+      }
       const a = randInt(Math.floor(maxVal / 2), maxVal);
       const b = randInt(minVal, a - minVal > 0 ? a - minVal : a);
       return { type: 'uppstallning-sub', a, b, operator: '−', answer: a - b };

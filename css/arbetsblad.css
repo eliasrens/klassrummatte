@@ -271,6 +271,20 @@ body {
   margin-bottom: 0.35rem;
 }
 
+.st-period-vaxling {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.1rem 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.st-period-vax-label {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.65);
+}
+
 .st-period-check {
   font-size: 0.75rem;
   color: rgba(255,255,255,0.65);
