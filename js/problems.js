@@ -83,26 +83,37 @@ const Problems = (() => {
       );
     }
 
-    return selectedAreas.map(area => {
+    const results = [];
+    for (const area of selectedAreas) {
       if (area === 'egna' && customList.length > 0) {
         const p = PluginUtils.pickRandom(customList);
-        return { type: 'egna', isTextProblem: true, textTemplate: p.question, answer: p.answer };
+        results.push({ type: 'egna', isTextProblem: true, textTemplate: p.question, answer: p.answer });
+        continue;
       }
       const pluginType = area === 'oppna-utsagor' ? 'oppna-utsaga' : area;
       const plugin = PluginManager.get(pluginType);
-      if (!plugin) return null;
+      if (!plugin) continue;
       let problem;
-      try {
-        problem = plugin.generate(settings);
-      } catch (err) {
-        console.error(`[Klassrummatte] Plugin "${pluginType}" kastade ett fel:`, err);
-        return null;
-      }
+      let attempts = 0;
+      do {
+        try {
+          problem = plugin.generate(settings);
+        } catch (err) {
+          console.error(`[Klassrummatte] Plugin "${pluginType}" kastade ett fel:`, err);
+          problem = null;
+          break;
+        }
+        attempts++;
+      } while (problem && attempts < 8 && results.some(r =>
+        r && r.type === problem.type && String(r.answer) === String(problem.answer)
+      ));
+      if (!problem) continue;
       if (settings.problemlosning && Templates.canWrap(pluginType)) {
         problem = Templates.wrapInTemplate(problem, settings.grade);
       }
-      return problem;
-    }).filter(Boolean);
+      results.push(problem);
+    }
+    return results;
   }
 
   function generateExtraProblem(settings) {
