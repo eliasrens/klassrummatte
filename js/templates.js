@@ -655,10 +655,7 @@ const Templates = (() => {
           text = pickRandom(BRAK_SIMPLIFY_TEMPLATES)(name1, problem.numerator, problem.denominator);
           return { ...problem, isTextProblem: true, textTemplate: text, answer: problem.answer };
         }
-        if (bqt === 'name') {
-          text = pickRandom(BRAK_NAME_TEMPLATES)(name1, problem.numerator, problem.denominator, problem.wordName);
-          return { ...problem, isTextProblem: true, textTemplate: text, answer: problem.answer };
-        }
+        // 'name' wrappas inte – svaret visas redan i renderingen
         return problem;
       }
       default:
