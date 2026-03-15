@@ -645,6 +645,7 @@ body:has(#st-sidebar:not(.hidden)) #empty-state {
   vertical-align: top;
   text-align: center;
   position: relative;
+  overflow: hidden;
 }
 
 .ab-table td:last-child { border-right: none; }
@@ -665,12 +666,34 @@ body:has(#st-sidebar:not(.hidden)) #empty-state {
   font-weight: 600;
   color: #1a1a2e;
   margin-bottom: 0.05cm;
-  white-space: nowrap;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.2;
 }
 
 .ab-cell-text .problem-display,
 .ab-cell-text > div {
   font-size: inherit;
+}
+
+/* Begränsa all visuell plugin-output (SVG, canvas etc.) till cellstorleken */
+.ab-cell-text svg,
+.ab-table td svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Frågetext under visuellt innehåll i celler */
+.ab-cell-text p,
+.ab-cell-text .question-text,
+.ab-cell-text > span {
+  white-space: normal;
+  word-wrap: break-word;
+  font-size: 0.7rem;
+  line-height: 1.2;
 }
 
 /* === Problemlösningscell ================================= */
@@ -794,6 +817,92 @@ body:has(#st-sidebar:not(.hidden)) #empty-state {
 }
 
 .ab-regen-btn:hover { opacity: 0.85; }
+
+/* =========================================================
+   Visuella plugins i arbetsblad – anpassning för cellstorlek
+   ========================================================= */
+
+/* Gemensamt: alla SVG:er i celler */
+.ab-table td svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Klocka */
+.ab-table .clock-container { gap: 0.1cm; }
+.ab-table .clock-svg { width: 3cm !important; height: 3cm !important; }
+.ab-table .clock-question { font-size: 0.55rem; font-weight: 600; white-space: normal; }
+
+/* Geometri */
+.ab-table .geometry-display { gap: 0.1cm; }
+.ab-table .geometry-svg,
+.ab-table .geometry-display svg { width: 100%; max-height: 3cm; overflow: visible; }
+.ab-table .geometry-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .geometry-dims { font-size: 0.55rem; }
+
+/* Koordinatsystem */
+.ab-table .koord-wrap { gap: 0.1cm; }
+.ab-table .koord-svg,
+.ab-table .koord-wrap svg { width: 100%; max-height: 3.5cm; }
+.ab-table .koord-question { font-size: 0.55rem; white-space: normal; }
+
+/* Statistik */
+.ab-table .stat-wrap { gap: 0.1cm; }
+.ab-table .stat-chart-svg { width: 100%; max-height: 3cm; }
+.ab-table .stat-question { font-size: 0.55rem; white-space: normal; }
+
+/* Sannolikhet */
+.ab-table .sann-question { font-size: 0.55rem; white-space: normal; margin: 0 0 0.1cm; }
+.ab-table .sann-hint { font-size: 0.5rem; margin: 0.05cm 0 0; }
+.ab-table .sann-kulor-svg { width: 100%; max-height: 1.2cm; margin: 0 auto 0.05cm; }
+.ab-table .sann-compare-wrap { gap: 0.05cm; }
+.ab-table .sann-compare-row { gap: 0.3cm; }
+.ab-table .sann-compare-col { gap: 0.05cm; }
+.ab-table .sann-col-label { font-size: 0.5rem; max-width: none; }
+
+/* Symmetri */
+.ab-table .sym-wrap { gap: 0.1cm; }
+.ab-table .sym-svg,
+.ab-table .sym-wrap svg { width: 100%; max-height: 3.5cm; }
+.ab-table .sym-question { font-size: 0.55rem; white-space: normal; }
+
+/* Romerska siffror */
+.ab-table .rom-wrap { gap: 0.1cm; }
+.ab-table .rom-value { font-size: 1.2rem; }
+.ab-table .rom-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .rom-ref { font-size: 0.4rem; white-space: normal; word-wrap: break-word; }
+
+/* Talföljd */
+.ab-table .tallinje-display { gap: 0.1cm; }
+.ab-table .tallinje-sequence { font-size: 0.7rem; gap: 0.05cm; flex-wrap: wrap; justify-content: center; }
+.ab-table .tallinje-box { padding: 0.02cm 0.05cm; min-width: 0; }
+.ab-table .tallinje-blank { border-bottom-width: 2px; }
+.ab-table .tallinje-sep { font-size: 0.5rem; }
+.ab-table .tallinje-question { font-size: 0.55rem; white-space: normal; }
+
+/* Talsorter */
+.ab-table .talsorter-wrapper { gap: 0.1cm; }
+.ab-table .talsorter-display { font-size: 1rem; letter-spacing: 0.1em; }
+.ab-table .talsorter-question { font-size: 0.55rem; white-space: normal; }
+
+/* Negativa tal */
+.ab-table .negtal-question { font-size: 0.55rem; white-space: normal; margin: 0 0 0.1cm; }
+.ab-table .negtal-text { font-size: 0.55rem; white-space: normal; line-height: 1.2; max-width: none; }
+.ab-table .negtal-expr { font-size: 0.9rem; }
+.ab-table .negtal-line { width: 100%; }
+.ab-table .negtal-line svg { max-width: 100%; max-height: 1.5cm; }
+
+/* Bråk */
+.ab-table .brak-fraction { font-size: 0.9rem; }
+.ab-table .brak-question { font-size: 0.55rem; white-space: normal; }
+
+/* Procent */
+.ab-table .procent-question { font-size: 0.55rem; white-space: normal; }
+
+/* Generellt: alla frågetext-klasser i celler */
+.ab-table td p { font-size: 0.55rem; white-space: normal; margin: 0.05cm 0; }
 
 /* === Flera sidor ========================================== */
 /* JS skapar en .ab-sheet per sida – gap i wrappern ger visuell separation */
