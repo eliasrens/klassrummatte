@@ -124,6 +124,9 @@ const App = (() => {
         extraAnswerBtn.textContent = '✓';
       }
     });
+
+    // Genomgång
+    if (typeof Genomgang !== 'undefined') Genomgang.init();
   }
 
   // =========================================================
@@ -196,6 +199,49 @@ const App = (() => {
   function showNewProblem() {
     clearExtraTask();
     clearBildstod();
+
+    // ── Genomgång-playback ──────────────────────────────
+    if (typeof Genomgang !== 'undefined' && Genomgang.isPlaybackActive()) {
+      Genomgang.advance();
+      if (Genomgang.isPlaybackDone()) {
+        Genomgang.stopPlayback();
+        problemDisplay.innerHTML = '<p style="font-size:1.6rem;font-weight:700;color:var(--text-muted);text-align:center;margin-top:2rem">Genomgången är klar!</p>';
+        problemDisplay.classList.remove('hidden');
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          problemDisplay.classList.add('visible');
+        }));
+        problemVisible = true;
+        clickHint.classList.add('hidden-hint');
+        return;
+      }
+      const problem = Genomgang.getPlaybackProblem();
+      const ggSettings = Genomgang.getPlaybackSettings();
+      problemDisplay.classList.remove('multi-mode');
+      currentProblem  = problem;
+      currentProblems = [];
+      Renderer.renderProblem(problem, problemDisplay);
+
+      showAnswerBtn.disabled    = false;
+      showAnswerBtn.textContent = 'Visa svar';
+      problemDisplay.classList.remove('hidden');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        problemDisplay.classList.add('visible');
+        showAnswerBtn.classList.add('problem-visible');
+        prevBtn.classList.toggle('problem-visible', Genomgang.canGoBackPlayback());
+      }));
+      clickHint.classList.add('hidden-hint');
+      problemVisible = true;
+
+      // Bildstöd under genomgång-playback
+      if (ggSettings && ggSettings.bildstod && problem &&
+          Bildstod.hasBildstodSupport(problem, ggSettings)) {
+        const delay = (ggSettings.bildstodDelay ?? 0) * 1000;
+        bildstodTimer = setTimeout(() => {
+          Bildstod.appendBildstod(problem, ggSettings, problemDisplay, problemVisible);
+        }, delay || 80);
+      }
+      return;
+    }
 
     // Töm tidigare elevsvar på lärarvyn när en ny uppgift startas
     const submissionsMain = document.getElementById('session-submissions-main');
@@ -288,6 +334,40 @@ const App = (() => {
   //  Historiknavigering (bakåt)
   // =========================================================
   function goBack() {
+    // Genomgång-playback: backa i kön
+    if (typeof Genomgang !== 'undefined' && Genomgang.isPlaybackActive()) {
+      if (!Genomgang.canGoBackPlayback()) return;
+      Genomgang.goBackPlayback();
+      const problem = Genomgang.getPlaybackProblem();
+      if (!problem) return;
+      clearExtraTask();
+      clearBildstod();
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+      problemDisplay.classList.remove('multi-mode');
+      currentProblem  = problem;
+      currentProblems = [];
+      Renderer.renderProblem(problem, problemDisplay);
+      showAnswerBtn.disabled    = false;
+      showAnswerBtn.textContent = 'Visa svar';
+      problemDisplay.classList.remove('hidden');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        problemDisplay.classList.add('visible');
+        showAnswerBtn.classList.add('problem-visible');
+        prevBtn.classList.toggle('problem-visible', Genomgang.canGoBackPlayback());
+      }));
+      problemVisible = true;
+
+      // Bildstöd vid bakåtnavigering i genomgång
+      const ggSettings = Genomgang.getPlaybackSettings();
+      if (ggSettings && ggSettings.bildstod && problem &&
+          Bildstod.hasBildstodSupport(problem, ggSettings)) {
+        bildstodTimer = setTimeout(() => {
+          Bildstod.appendBildstod(problem, ggSettings, problemDisplay, problemVisible);
+        }, 80);
+      }
+      return;
+    }
+
     if (problemHistory.length < 2) return;
 
     // Bestäm index att visa

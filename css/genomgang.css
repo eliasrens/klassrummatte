@@ -1,0 +1,520 @@
+/* =========================================================
+   Genomgång – skapande-overlay, kö-hantering, playback
+   ========================================================= */
+
+/* === Overlay (fullskärm) ================================= */
+.gg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.gg-overlay.hidden { display: none; }
+
+/* --- Header --- */
+.gg-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1.2rem;
+  background: var(--menu-bg);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.gg-close-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  line-height: 1;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+.gg-close-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+.gg-header h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+}
+
+.gg-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.gg-name-input {
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  color: #fff;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  width: 14rem;
+}
+.gg-name-input::placeholder { color: rgba(255,255,255,0.4); }
+.gg-name-input:focus { outline: none; border-color: var(--accent-2); }
+
+.gg-save-btn {
+  background: var(--accent-2);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.gg-save-btn:disabled { opacity: 0.4; cursor: default; }
+.gg-save-btn:not(:disabled):hover { opacity: 0.85; }
+
+/* --- Body (tre kolumner) --- */
+.gg-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* --- Config (vänster) --- */
+.gg-config {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 0.8rem;
+  overflow-y: auto;
+  border-right: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.gg-config-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.2rem;
+}
+
+.gg-config select {
+  width: 100%;
+  padding: 0.3rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: #fff;
+}
+
+.gg-config-areas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.gg-config-areas label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.05rem 0;
+}
+
+.gg-config-areas input { accent-color: var(--accent-2); }
+
+/* --- Config sub-sections --- */
+.gg-config-divider {
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+  margin: 0.3rem 0;
+}
+
+.gg-config-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.gg-config-sub.hidden { display: none; }
+
+.gg-config-check {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.05rem 0;
+}
+.gg-config-check input { accent-color: var(--accent-2); }
+.gg-config-check--sm { display: inline-flex; min-width: 2rem; }
+
+.gg-sub-options {
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.gg-sub-options.hidden { display: none; }
+
+.gg-tables-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.3rem;
+}
+
+.gg-generate-btn {
+  background: var(--accent-3);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 0.4rem;
+  transition: opacity 0.15s;
+}
+.gg-generate-btn:hover { opacity: 0.85; }
+
+/* --- Previews (mitten) --- */
+.gg-previews {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0.8rem;
+  align-content: start;
+}
+
+.gg-preview-card {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.gg-preview-card:hover {
+  border-color: var(--accent-2);
+  box-shadow: 0 2px 12px rgba(69,123,157,0.15);
+}
+
+.gg-preview-card.gg-card-selected {
+  border-color: var(--accent-3);
+  background: #f0faf8;
+}
+
+.gg-preview-card.gg-card-selected::after {
+  content: '\2713';
+  position: absolute;
+  top: 0.3rem;
+  right: 0.4rem;
+  background: var(--accent-3);
+  color: #fff;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Renderad förhandsgranskning (nedskalad) */
+.gg-preview-render {
+  width: 600px;
+  transform: scale(var(--gg-scale, 0.45));
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+/* Imitera #problem-display styling inuti förhandsgranskningen */
+.gg-preview-render > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1.2rem;
+  font-size: clamp(2.4rem, 8vw, 5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text);
+  position: relative;
+}
+
+/* Textuppgifter (problemlösning) – mindre font i preview */
+.gg-preview-render .text-problem {
+  font-size: clamp(1.2rem, 3vw, 2rem) !important;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Bildstöd i förhandsgranskning – inline, inte absolut */
+.gg-preview-render .bildstod-container {
+  position: static !important;
+  right: auto !important;
+  top: auto !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  animation: none !important;
+  margin-bottom: 0.3rem;
+  justify-content: center;
+  max-width: 100%;
+}
+
+/* Typindikator */
+.gg-preview-type {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(26,26,46,0.75);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  text-align: center;
+}
+
+/* --- Kö (höger) --- */
+.gg-queue {
+  width: 260px;
+  flex-shrink: 0;
+  border-left: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.gg-queue-header {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.gg-queue-header h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+}
+
+.gg-queue-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.gg-queue-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.4rem 0;
+}
+
+.gg-queue-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  font-size: 0.78rem;
+  transition: background 0.1s;
+}
+.gg-queue-item:hover { background: rgba(0,0,0,0.02); }
+.gg-queue-item[draggable] { cursor: grab; }
+.gg-queue-item.gg-queue-dragging { opacity: 0.4; }
+.gg-queue-item.gg-queue-drop-above { box-shadow: 0 -2px 0 0 var(--accent-2); }
+.gg-queue-item.gg-queue-drop-below { box-shadow: 0 2px 0 0 var(--accent-2); }
+
+.gg-queue-num {
+  font-weight: 700;
+  color: var(--accent-2);
+  min-width: 1.4em;
+  text-align: center;
+}
+
+.gg-queue-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gg-queue-arrows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.gg-queue-arrow {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.6rem;
+  padding: 0;
+  line-height: 1;
+  color: var(--text-muted);
+  opacity: 0.5;
+  transition: opacity 0.1s;
+}
+.gg-queue-arrow:hover { opacity: 1; }
+
+.gg-queue-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 0.8rem;
+  padding: 0.1rem 0.25rem;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.1s;
+}
+.gg-queue-remove:hover { opacity: 1; }
+
+.gg-queue-empty {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* === Menysektion (sparade genomgångar) =================== */
+.gg-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.3rem 0;
+}
+
+.gg-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.gg-menu-item:hover { background: rgba(255,255,255,0.06); }
+
+.gg-menu-play {
+  background: var(--accent-3);
+  border: none;
+  color: #fff;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.gg-menu-play:hover { opacity: 0.8; }
+
+.gg-menu-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.gg-menu-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gg-menu-meta {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.45);
+}
+
+.gg-menu-delete {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.2rem;
+  transition: color 0.15s;
+}
+.gg-menu-delete:hover { color: var(--accent); }
+
+.gg-menu-empty {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+  padding: 0.3rem 0;
+}
+
+/* === Playback-bar (visas under aktiv genomgång) ========== */
+.gg-playback-bar {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  background: var(--menu-bg);
+  color: #fff;
+  padding: 0.35rem 1rem;
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.8rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+
+.gg-playback-bar.hidden { display: none; }
+
+.gg-playback-name {
+  font-weight: 600;
+  max-width: 14rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gg-playback-counter {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.75rem;
+}
+
+.gg-playback-stop {
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.gg-playback-stop:hover { background: rgba(255,255,255,0.22); }

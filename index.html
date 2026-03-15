@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Klassrummatte</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/genomgang.css">
   <!-- Firebase (compat SDK, utan bundler/ES-moduler) -->
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics-compat.js"></script>
@@ -399,6 +400,12 @@
       </a>
     </section>
 
+    <section class="menu-section">
+      <button type="button" id="gg-create-btn" class="clear-areas-btn">Skapa genomgång</button>
+      <div id="gg-menu-list" class="gg-menu-list"></div>
+      <p id="gg-menu-empty" class="implicit-hint">Inga sparade genomgångar</p>
+    </section>
+
   </nav>
 
   <!-- Overlay bakom menyn -->
@@ -445,6 +452,159 @@
     <button id="extra-answer-btn" class="extra-answer-btn">Visa svar</button>
   </aside>
 
+  <!-- Genomgång – skapande-overlay -->
+  <div id="gg-overlay" class="gg-overlay hidden">
+    <div class="gg-header">
+      <button type="button" id="gg-close-btn" class="gg-close-btn" title="Stäng">&#10005;</button>
+      <h2>Skapa genomgång</h2>
+      <div class="gg-header-actions">
+        <input type="text" id="gg-name-input" class="gg-name-input" placeholder="Namn på genomgången...">
+        <button type="button" id="gg-save-btn" class="gg-save-btn" disabled>Spara</button>
+      </div>
+    </div>
+    <div class="gg-body">
+      <div class="gg-config">
+        <label class="gg-config-label">Årskurs</label>
+        <select id="gg-grade">
+          <option value="1">Åk 1</option>
+          <option value="2">Åk 2</option>
+          <option value="3" selected>Åk 3</option>
+          <option value="4">Åk 4</option>
+          <option value="5">Åk 5</option>
+          <option value="6">Åk 6</option>
+        </select>
+
+        <label class="gg-config-label">Områden</label>
+        <div id="gg-areas" class="gg-config-areas"></div>
+
+        <div class="gg-config-divider"></div>
+
+        <!-- Add/Sub nivå -->
+        <div id="gg-addsub-wrap" class="gg-config-sub hidden">
+          <label class="gg-config-label">Addition &amp; subtraktion</label>
+          <div id="gg-addsub-mode">
+            <label class="gg-config-check"><input type="checkbox" value="standard" checked><span>Standard</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="uppstallning"><span>Uppställning</span></label>
+            <div id="gg-addsub-vaxling-wrap" class="gg-sub-options hidden">
+              <label class="gg-config-check"><input type="checkbox" value="med" checked><span>Med växling</span></label>
+              <label class="gg-config-check"><input type="checkbox" value="utan"><span>Utan växling</span></label>
+            </div>
+            <label class="gg-config-check"><input type="checkbox" value="decimaler"><span>Decimaler</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="flersteg"><span>Flerstegsaddition</span></label>
+          </div>
+        </div>
+
+        <!-- Mult/Div nivå -->
+        <div id="gg-multdiv-wrap" class="gg-config-sub hidden">
+          <label class="gg-config-label">Multiplikation &amp; division</label>
+          <div id="gg-multdiv-mode">
+            <label class="gg-config-check"><input type="checkbox" value="tables-basic" checked><span>Tabeller 1–9</span></label>
+            <div id="gg-specific-tables-wrap" class="gg-sub-options">
+              <div class="gg-tables-grid">
+                <label class="gg-config-check gg-config-check--sm"><input type="checkbox" value="1" name="gg-specific-table"><span>1</span></label>
+                <label class="gg-config-check gg-config-check--sm"><input type="checkbox" value="2" name="gg-specific-table" checked><span>2</span></label>
+                <label class="gg-config-check gg-config-check--sm"><input type="checkbox" value="3" name="gg-specific-table" checked><span>3</span></label>
+                <label class="gg-config-check gg-config-check--sm"><input type="checkbox" value="4" name="gg-specific-table" checked><span>4</span></label>
+                <label class="gg-config-check gg-config-check--sm"><input type="checkbox" value="5" name="gg-specific-table" checked><span>5</span></label>
+                <label class="gg-config-check gg-config-check--sm"><input type="checkbox" value="6" name="gg-specific-table" checked><span>6</span></label>
+                <label class="gg-config-check gg-config-check--sm"><input type="checkbox" value="7" name="gg-specific-table" checked><span>7</span></label>
+                <label class="gg-config-check gg-config-check--sm"><input type="checkbox" value="8" name="gg-specific-table" checked><span>8</span></label>
+                <label class="gg-config-check gg-config-check--sm"><input type="checkbox" value="9" name="gg-specific-table" checked><span>9</span></label>
+              </div>
+            </div>
+            <label class="gg-config-check"><input type="checkbox" value="tables-ten"><span>Mult/div med 10, 100</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="tables-large"><span>Stora tal</span></label>
+          </div>
+          <label class="gg-config-check" style="margin-top:0.2rem"><input type="checkbox" id="gg-division-rest"><span>Division med rest</span></label>
+        </div>
+
+        <!-- Geometri frågetyp -->
+        <div id="gg-geometri-wrap" class="gg-config-sub hidden">
+          <label class="gg-config-label">Geometri – frågetyp</label>
+          <div id="gg-geometri-types">
+            <label class="gg-config-check"><input type="checkbox" value="area"><span>Area</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="perimeter"><span>Omkrets</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="kropp"><span>Namnge kroppar</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="klassificering"><span>Klassificera figurer</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="vinklar"><span>Vinklar</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="volym"><span>Volym</span></label>
+          </div>
+        </div>
+
+        <!-- Klocka visningsläge -->
+        <div id="gg-klocka-wrap" class="gg-config-sub hidden">
+          <label class="gg-config-label">Klocka – visningsläge</label>
+          <div id="gg-klocka-types">
+            <label class="gg-config-check"><input type="checkbox" value="analog" checked><span>Analogt</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="digital" checked><span>Digitalt</span></label>
+          </div>
+        </div>
+
+        <!-- Bråk delmoment -->
+        <div id="gg-brak-wrap" class="gg-config-sub hidden">
+          <label class="gg-config-label">Bråk – delmoment</label>
+          <div id="gg-brak-types">
+            <label class="gg-config-check"><input type="checkbox" value="name" checked><span>Namnge bråk</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="order-same-den" checked><span>Ordna – lika nämn.</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="order-diff-den" checked><span>Ordna – olika nämn.</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="add-same-den" checked><span>Add – lika nämn.</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="sub-same-den" checked><span>Sub – lika nämn.</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="compare" checked><span>Jämföra bråk</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="fraction-of-whole" checked><span>Bråk av heltal</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="simplify" checked><span>Förenkla</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="add-diff-den" checked><span>Add – olika nämn.</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="sub-diff-den" checked><span>Sub – olika nämn.</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="to-mixed" checked><span>Blandat tal</span></label>
+          </div>
+        </div>
+
+        <!-- Prioritetsregler -->
+        <div id="gg-prioritet-wrap" class="gg-config-sub hidden">
+          <label class="gg-config-label">Prioritetsregler – räknesätt</label>
+          <div id="gg-prioritet-ops">
+            <label class="gg-config-check"><input type="checkbox" value="mult" checked><span>Multiplikation</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="div" checked><span>Division</span></label>
+          </div>
+        </div>
+
+        <div class="gg-config-divider"></div>
+
+        <!-- Pedagogiska verktyg -->
+        <label class="gg-config-label">Pedagogiska verktyg</label>
+        <label class="gg-config-check"><input type="checkbox" id="gg-bildstod-check"><span>Bildstöd</span></label>
+        <label class="gg-config-check"><input type="checkbox" id="gg-problemlosning-check"><span>Problemlösning</span></label>
+        <div id="gg-problemlosning-opts" class="gg-sub-options hidden">
+          <label class="gg-config-check"><input type="radio" name="gg-problemlosning-src" value="auto" checked><span>Autogenererade</span></label>
+          <label class="gg-config-check"><input type="radio" name="gg-problemlosning-src" value="egna"><span>Egenimporterade</span></label>
+          <div id="gg-egna-import-wrap" class="gg-sub-options hidden">
+            <input type="file" id="gg-custom-file-input" accept=".csv,.txt,text/csv" style="font-size:0.72rem;max-width:100%;margin-top:0.2rem">
+            <textarea id="gg-custom-paste" rows="3" placeholder="Fråga,Svar&#10;Emma har 12..." style="width:100%;font-size:0.72rem;resize:vertical;box-sizing:border-box;margin-top:0.2rem"></textarea>
+            <button type="button" id="gg-custom-import-btn" class="gg-generate-btn" style="font-size:0.72rem;padding:0.3rem;margin-top:0.15rem">Importera</button>
+            <p id="gg-custom-status" style="font-size:0.68rem;color:var(--text-muted);margin:0.15rem 0 0"></p>
+          </div>
+        </div>
+        <label class="gg-config-check"><input type="checkbox" id="gg-discussion-check"><span>Diskussionsstöd</span></label>
+
+        <button type="button" id="gg-generate-btn" class="gg-generate-btn">Generera fler</button>
+      </div>
+      <div id="gg-previews" class="gg-previews"></div>
+      <div class="gg-queue">
+        <div class="gg-queue-header">
+          <h3>Valda uppgifter</h3>
+          <span id="gg-queue-count" class="gg-queue-count">(0)</span>
+        </div>
+        <div id="gg-queue-list" class="gg-queue-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Genomgång – playback-bar -->
+  <div id="gg-playback-bar" class="gg-playback-bar hidden">
+    <span id="gg-playback-name" class="gg-playback-name"></span>
+    <span id="gg-playback-counter" class="gg-playback-counter"></span>
+    <button type="button" id="gg-playback-stop" class="gg-playback-stop">Avsluta</button>
+  </div>
+
   <!-- Plugin-system (laddas före fasaderna) -->
   <script src="js/plugins/_math-utils.js"></script>
   <script src="js/plugins/_render-utils.js"></script>
@@ -485,6 +645,7 @@
   <script src="js/bildstod.js"></script>
   <script src="js/answer.js"></script>
   <script src="js/menu.js"></script>
+  <script src="js/genomgang.js"></script>
   <script src="js/app.js"></script>
   <script src="js/session-teacher.js"></script>
 </body>
