@@ -108,12 +108,13 @@ const CustomProblems = (() => {
   }
 
   /**
-   * Importerar CSV-text: parsar och sparar i Settings. Returnerar samma som parseCsvToProblems.
+   * Importerar CSV-text som ett namngivet set. Returnerar samma som parseCsvToProblems.
    */
-  function importFromCsvText(csvText) {
+  function importFromCsvText(csvText, setName) {
     const result = parseCsvToProblems(csvText);
     if (result.success) {
-      Settings.setCustomProblems(result.problems);
+      const name = (setName && setName.trim()) || ('Import ' + new Date().toLocaleDateString('sv-SE'));
+      Settings.addCustomProblemSet(name, result.problems);
     }
     return result;
   }

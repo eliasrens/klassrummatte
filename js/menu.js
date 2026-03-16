@@ -100,8 +100,48 @@ const Menu = (() => {
     if (list.length === 0) {
       el.textContent = '';
     } else {
-      el.textContent = `${list.length} uppgift${list.length === 1 ? '' : 'er'} importerade.`;
+      el.textContent = `${list.length} aktiv${list.length === 1 ? '' : 'a'} uppgift${list.length === 1 ? '' : 'er'} totalt.`;
     }
+  }
+
+  function renderCustomProblemSets() {
+    const container = document.getElementById('custom-sets-list');
+    if (!container) return;
+    const sets = Settings.getCustomProblemSets();
+    if (sets.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+    container.innerHTML = '<label class="section-label" style="margin-bottom:0.3rem">Importerade set</label>';
+    sets.forEach(s => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex; align-items:center; gap:0.4rem; margin-bottom:0.25rem; font-size:0.82rem';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!s.enabled;
+      cb.addEventListener('change', () => {
+        Settings.toggleCustomProblemSet(s.id, cb.checked);
+        updateCustomProblemsStatus();
+      });
+      const label = document.createElement('span');
+      label.style.cssText = 'flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap';
+      label.textContent = s.name + ' (' + s.problems.length + ')';
+      label.title = s.name + ' – ' + s.problems.length + ' uppgifter';
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.textContent = '\u00D7';
+      del.title = 'Ta bort set';
+      del.style.cssText = 'background:none; border:none; color:#c00; font-size:1rem; cursor:pointer; padding:0 0.2rem; line-height:1';
+      del.addEventListener('click', () => {
+        Settings.deleteCustomProblemSet(s.id);
+        renderCustomProblemSets();
+        updateCustomProblemsStatus();
+      });
+      row.appendChild(cb);
+      row.appendChild(label);
+      row.appendChild(del);
+      container.appendChild(row);
+    });
   }
 
   function getBrakPoolForGrade(grade) {
@@ -326,6 +366,7 @@ const Menu = (() => {
     document.getElementById('discussion-check').checked     = s.discussionEnabled || false;
     document.getElementById('session-limit-select').value   = s.sessionLimit || 'unlimited';
     updateCustomProblemsStatus();
+    renderCustomProblemSets();
     updateConditionalSections();
     updateAreaCheckboxAvailability();
     updateBildstodCheckbox();
@@ -517,14 +558,18 @@ const Menu = (() => {
       const reader = new FileReader();
       reader.onload = ev => {
         const text = (ev.target && ev.target.result) || '';
-        const result = CustomProblems.importFromCsvText(text);
-        updateCustomProblemsStatus();
+        const nameInput = document.getElementById('custom-set-name');
+        const setName = (nameInput && nameInput.value.trim()) || file.name.replace(/\.[^.]+$/, '');
+        const result = CustomProblems.importFromCsvText(text, setName);
         const statusEl = document.getElementById('custom-problems-status');
         if (result.success) {
-          statusEl.textContent = `${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade.`;
+          statusEl.textContent = `"${setName}" – ${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade.`;
+          if (nameInput) nameInput.value = '';
         } else {
           statusEl.textContent = result.error || 'Import misslyckades.';
         }
+        renderCustomProblemSets();
+        updateCustomProblemsStatus();
       };
       reader.readAsText(file, 'UTF-8');
       e.target.value = '';
@@ -533,15 +578,20 @@ const Menu = (() => {
     document.getElementById('custom-import-paste-btn').addEventListener('click', () => {
       const textarea = document.getElementById('custom-problems-paste');
       const text = (textarea && textarea.value) || '';
-      const result = CustomProblems.importFromCsvText(text);
-      updateCustomProblemsStatus();
+      const nameInput = document.getElementById('custom-set-name');
+      const setName = (nameInput && nameInput.value.trim()) || '';
+      const result = CustomProblems.importFromCsvText(text, setName);
       const statusEl = document.getElementById('custom-problems-status');
       if (result.success) {
-        statusEl.textContent = `${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade.`;
+        const usedName = setName || ('Import ' + new Date().toLocaleDateString('sv-SE'));
+        statusEl.textContent = `"${usedName}" – ${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade.`;
         if (textarea) textarea.value = '';
+        if (nameInput) nameInput.value = '';
       } else {
         statusEl.textContent = result.error || 'Import misslyckades.';
       }
+      renderCustomProblemSets();
+      updateCustomProblemsStatus();
     });
 
     document.getElementById('clear-areas-btn').addEventListener('click', e => {

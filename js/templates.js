@@ -131,7 +131,7 @@ const Templates = (() => {
 
   const DIVISION_PENGAR_TEMPLATES = [
     (n1, _n2, _o, dividend, divisor) =>
-      `${n1} ska dela ${dividend}\u00a0kr lika med ${divisor} kompisar. Hur mycket får varje kompis?`,
+      `${n1} har ${dividend}\u00a0kr och ska dela ut dem lika till ${divisor} kompisar. Hur mycket får varje kompis?`,
 
     (_n1, _n2, _o, dividend, divisor) =>
       `${dividend}\u00a0kr ska delas lika mellan ${divisor} syskon. Hur mycket får var och en?`,

@@ -5,6 +5,7 @@
 const Settings = (() => {
   const STORAGE_KEY = 'klassrummatte-settings';
   const CUSTOM_PROBLEMS_KEY = 'klassrummatte-custom-problems';
+  const CUSTOM_SETS_KEY = 'klassrummatte-custom-problem-sets';
 
   const DEFAULTS = {
     grade: 3,
@@ -105,19 +106,67 @@ const Settings = (() => {
   function setAreas(arr)           { state.areas = [...arr]; save(); }
   function isCustomProblemsEnabled() { return !!state.customProblemsEnabled; }
   function setCustomProblemsEnabled(b) { state.customProblemsEnabled = !!b; save(); }
-  function getCustomProblems() {
+
+  // ── Set-baserad hantering av egna uppgifter ──
+  function migrateOldCustomProblems() {
     try {
       const raw = localStorage.getItem(CUSTOM_PROBLEMS_KEY);
+      if (!raw) return;
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr) || arr.length === 0) return;
+      // Kolla om sets redan finns (undvik dubbelmigrering)
+      const existing = localStorage.getItem(CUSTOM_SETS_KEY);
+      if (existing) return;
+      const set = { id: 'migrated_' + Date.now(), name: 'Importerade uppgifter', problems: arr, enabled: true };
+      localStorage.setItem(CUSTOM_SETS_KEY, JSON.stringify([set]));
+      localStorage.removeItem(CUSTOM_PROBLEMS_KEY);
+    } catch (_) {}
+  }
+  migrateOldCustomProblems();
+
+  function getCustomProblemSets() {
+    try {
+      const raw = localStorage.getItem(CUSTOM_SETS_KEY);
       const arr = raw ? JSON.parse(raw) : [];
       return Array.isArray(arr) ? arr : [];
     } catch (_) {
       return [];
     }
   }
-  function setCustomProblems(arr) {
+  function setCustomProblemSets(sets) {
     try {
-      localStorage.setItem(CUSTOM_PROBLEMS_KEY, JSON.stringify(Array.isArray(arr) ? arr : []));
+      localStorage.setItem(CUSTOM_SETS_KEY, JSON.stringify(Array.isArray(sets) ? sets : []));
     } catch (_) {}
+  }
+  function addCustomProblemSet(name, problems) {
+    const sets = getCustomProblemSets();
+    sets.push({ id: 'set_' + Date.now(), name: name, problems: problems, enabled: true });
+    setCustomProblemSets(sets);
+  }
+  function toggleCustomProblemSet(id, enabled) {
+    const sets = getCustomProblemSets();
+    const s = sets.find(x => x.id === id);
+    if (s) { s.enabled = enabled; setCustomProblemSets(sets); }
+  }
+  function deleteCustomProblemSet(id) {
+    const sets = getCustomProblemSets().filter(x => x.id !== id);
+    setCustomProblemSets(sets);
+  }
+
+  // Returnerar alla uppgifter från aktiverade sets
+  function getCustomProblems() {
+    const sets = getCustomProblemSets();
+    const result = [];
+    for (const s of sets) {
+      if (s.enabled && Array.isArray(s.problems)) {
+        for (const p of s.problems) result.push(p);
+      }
+    }
+    return result;
+  }
+  // Bakåtkompatibelt alias (används ej längre för sparning)
+  function setCustomProblems(arr) {
+    // Migrerad – gör inget; import sker via addCustomProblemSet
   }
   function setExtraEnabled(b)      { state.extraEnabled = !!b; save(); }
   function setExtraType(t)         { state.extraType = t; save(); }
@@ -151,6 +200,7 @@ const Settings = (() => {
     get,
     getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning,
     isCustomProblemsEnabled, setCustomProblemsEnabled, getCustomProblems, setCustomProblems,
+    getCustomProblemSets, setCustomProblemSets, addCustomProblemSet, toggleCustomProblemSet, deleteCustomProblemSet,
     isBildstod, getBildstodDelay, getGeometriTypes, getAddSubMode, getAddSubVaxling,
     setGrade, setAreas, setExtraEnabled, setExtraType, setExtraDelay, setProblemlosning,
     setBildstod, setBildstodDelay, setDivisionRest, setGeometriTypes,

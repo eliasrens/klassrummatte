@@ -84,7 +84,7 @@
         <div class="area-category">
           <div class="area-category-label">Algebra</div>
           <div class="area-grid-2col">
-            <label class="check-label"><input type="checkbox" value="prioritet"><span>Prioritetsregler</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="prioritet"><span>Prioritetsregler</span></label>
             <label class="check-label"><input type="checkbox" value="oppna-utsagor"><span>Öppna utsagor</span></label>
           </div>
         </div>
@@ -92,7 +92,7 @@
         <div class="area-category">
           <div class="area-category-label">Tal &amp; samband</div>
           <div class="area-grid-2col">
-            <label class="check-label"><input type="checkbox" value="brak"><span>Bråk</span></label>
+            <label class="check-label check-label--has-sub"><input type="checkbox" value="brak"><span>Bråk</span></label>
             <label class="check-label"><input type="checkbox" value="procent"><span>Procent <small>(Åk 4+)</small></span></label>
           </div>
         </div>
@@ -279,12 +279,15 @@
     <section class="menu-section hidden" id="egna-uppgifter-section">
       <p class="implicit-hint" style="margin-bottom:0.5rem">Importera från CSV/Excel (kolumnerna <strong>Fråga</strong> och <strong>Svar</strong>). Valfri kolumn: <strong>Område</strong>.</p>
       <button type="button" id="custom-download-template-btn" class="clear-areas-btn" style="margin-bottom:0.35rem">Ladda ner mall (CSV)</button>
+      <label class="section-label" style="display:block; margin-top:0.5rem">Namn på set</label>
+      <input type="text" id="custom-set-name" placeholder="T.ex. Vecka 12" style="width:100%; font-size:0.85rem; padding:0.3rem 0.4rem; box-sizing:border-box; border:1px solid #ccc; border-radius:4px">
       <label class="section-label" style="display:block; margin-top:0.5rem">Importera fil</label>
       <input type="file" id="custom-problems-file-input" accept=".csv,.txt,text/csv" style="font-size:0.85rem; max-width:100%">
       <label class="section-label" style="display:block; margin-top:0.75rem">eller klistra in CSV</label>
       <textarea id="custom-problems-paste" rows="4" placeholder="Fråga,Svar,Område&#10;Emma har 12 pennor...&#10;" style="width:100%; font-size:0.85rem; resize:vertical; box-sizing:border-box"></textarea>
       <button type="button" id="custom-import-paste-btn" class="clear-areas-btn" style="margin-top:0.35rem">Importera från text</button>
       <p id="custom-problems-status" class="implicit-hint" style="margin-top:0.5rem"></p>
+      <div id="custom-sets-list" style="margin-top:0.75rem"></div>
     </section>
 
     <!-- ── PEDAGOGISKA VERKTYG ────────────────────────── -->
@@ -335,23 +338,6 @@
       </div>
     </section>
 
-    <!-- ── LIVESESSION (LÄRARE) ─────────────────────────── -->
-    <div class="menu-group-label">Livesession (elevsvar)</div>
-
-    <section class="menu-section">
-      <label class="section-label">Styr elevsession</label>
-      <button id="session-start-btn" class="clear-areas-btn" type="button">Starta livesession</button>
-      <p id="session-code-text" class="implicit-hint hidden"></p>
-      <button id="session-send-problem-btn" class="clear-areas-btn" type="button" disabled style="margin-top:0.5rem">
-        Skicka aktuell uppgift till elever
-      </button>
-    </section>
-
-    <section class="menu-section" id="session-submissions-section" style="display:none">
-      <label class="section-label">Elevsvar (senaste uppgift)</label>
-      <ul id="session-submissions-list" style="list-style:none; padding-left:0; max-height:160px; overflow-y:auto; font-size:0.8rem;"></ul>
-    </section>
-
     <section class="menu-section">
       <label class="check-label check-label--featured">
         <input type="checkbox" id="discussion-check">
@@ -359,13 +345,10 @@
       </label>
     </section>
 
-    <!-- ── EXTRAUPPGIFT ───────────────────────────────── -->
-    <div class="menu-group-label">Sidopanel – fördjupning</div>
-
     <section class="menu-section">
       <label class="check-label check-label--featured">
         <input type="checkbox" id="extra-enabled-check">
-        <span>Aktivera extrauppgift<br><small>En sidopanel med fördjupningsuppgift visas efter vald fördröjning</small></span>
+        <span>Extrauppgift (sidopanel)<br><small>En fördjupningsuppgift visas efter vald fördröjning</small></span>
       </label>
       <div id="extra-task-options" class="hidden">
         <label class="section-label" for="extra-type-select">Typ</label>
@@ -404,6 +387,20 @@
       <button type="button" id="gg-create-btn" class="clear-areas-btn">Skapa genomgång</button>
       <div id="gg-menu-list" class="gg-menu-list"></div>
       <p id="gg-menu-empty" class="implicit-hint">Inga sparade genomgångar</p>
+    </section>
+
+    <section class="menu-section">
+      <label class="section-label">Livesession (elevsvar)</label>
+      <button id="session-start-btn" class="clear-areas-btn" type="button">Starta livesession</button>
+      <p id="session-code-text" class="implicit-hint hidden"></p>
+      <button id="session-send-problem-btn" class="clear-areas-btn" type="button" disabled style="margin-top:0.5rem">
+        Skicka aktuell uppgift till elever
+      </button>
+    </section>
+
+    <section class="menu-section" id="session-submissions-section" style="display:none">
+      <label class="section-label">Elevsvar (senaste uppgift)</label>
+      <ul id="session-submissions-list" style="list-style:none; padding-left:0; max-height:160px; overflow-y:auto; font-size:0.8rem;"></ul>
     </section>
 
   </nav>
