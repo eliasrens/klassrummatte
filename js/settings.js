@@ -32,6 +32,7 @@ const Settings = (() => {
     klockaTypes: ['analog', 'digital'],
     sessionLimit: 'unlimited',
     discussionEnabled: false,
+    statistikTypes: ['bar', 'freq-table', 'pie-chart'],
   };
 
   let state = { ...DEFAULTS };
@@ -88,6 +89,7 @@ const Settings = (() => {
       addSubVaxling: [...(state.addSubVaxling  || ['med'])],
       prioritetOps:  [...(state.prioritetOps   || ['mult', 'div'])],
       brakTypes:     [...(state.brakTypes      || [])],
+      statistikTypes:[...(state.statistikTypes || ['bar', 'freq-table', 'pie-chart'])],
     };
   }
   function getGrade()          { return state.grade; }
@@ -192,6 +194,8 @@ const Settings = (() => {
   function setSessionLimit(v)          { state.sessionLimit = v; save(); }
   function isDiscussionEnabled()       { return !!state.discussionEnabled; }
   function setDiscussionEnabled(b)     { state.discussionEnabled = !!b; save(); }
+  function getStatistikTypes()         { return [...(state.statistikTypes || ['bar', 'freq-table', 'pie-chart'])]; }
+  function setStatistikTypes(arr)      { state.statistikTypes = [...arr]; save(); }
 
   // Initiering
   load();
@@ -209,5 +213,6 @@ const Settings = (() => {
     getKlockaTypes, setKlockaTypes,
     getSessionLimit, setSessionLimit,
     isDiscussionEnabled, setDiscussionEnabled,
+    getStatistikTypes, setStatistikTypes,
   };
 })();

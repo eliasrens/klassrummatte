@@ -13,6 +13,24 @@ class MultiplikationPlugin extends BasePlugin {
     const specificTables = settings.specificTables || [1,2,3,4,5,6,7,8,9];
     const mode = PluginUtils.pickRandom(multDivMode);
 
+    if (mode === 'bild-mult') {
+      // Visa rutnät, eleven identifierar multiplikationen
+      const rows = PluginUtils.randInt(2, grade <= 2 ? 5 : 7);
+      const cols = PluginUtils.randInt(2, grade <= 2 ? 5 : 7);
+      return {
+        type: 'multiplikation', a: rows, b: cols, operator: '·', answer: rows * cols,
+        questionType: 'bild-mult', rows, cols,
+      };
+    }
+
+    if (mode === 'double-half') {
+      const a = PluginUtils.randInt(grade <= 2 ? 1 : 2, grade <= 2 ? 10 : grade <= 4 ? 50 : 500);
+      return {
+        type: 'multiplikation', a, b: 2, operator: '·', answer: a * 2,
+        questionType: 'double', questionText: 'Hur mycket är dubbelt så mycket som ' + a + '?',
+      };
+    }
+
     if (mode === 'tables-ten') {
       const tenPow = grade >= 5 ? PluginUtils.pickRandom([10, 100]) : 10;
       const factor = PluginUtils.randInt(2, grade <= 3 ? 9 : grade <= 5 ? 99 : 999);
@@ -44,6 +62,35 @@ class MultiplikationPlugin extends BasePlugin {
   }
 
   render(problem, container) {
+    if (problem.questionType === 'double') {
+      const wrap = document.createElement('div');
+      wrap.className = 'double-half-wrap';
+      const q = document.createElement('p');
+      q.className = 'double-half-question';
+      q.textContent = problem.questionText;
+      wrap.appendChild(q);
+      const ans = document.createElement('span');
+      ans.className = 'answer-value answer-hidden double-half-answer';
+      ans.textContent = problem.answer;
+      wrap.appendChild(ans);
+      container.appendChild(wrap);
+      return;
+    }
+    if (problem.questionType === 'bild-mult') {
+      const wrap = document.createElement('div');
+      wrap.className = 'bild-mult-wrap';
+      const q = document.createElement('p');
+      q.className = 'bild-mult-question';
+      q.textContent = 'Vilken multiplikation visar bilden?';
+      wrap.appendChild(q);
+      wrap.appendChild(PluginUtils.buildDivisionGrid(problem.rows, problem.cols));
+      const ans = document.createElement('div');
+      ans.className = 'answer-value answer-hidden bild-mult-answer';
+      ans.textContent = problem.a + ' · ' + problem.b + ' = ' + problem.answer;
+      wrap.appendChild(ans);
+      container.appendChild(wrap);
+      return;
+    }
     PluginUtils.renderArithmetic(problem, container);
   }
 

@@ -46,7 +46,7 @@ const Genomgang = (() => {
   let gradeSelect, areasWrap, playbackBar, playbackName, playbackCounter;
 
   // Sub-section wraps
-  let ggAddsubWrap, ggMultdivWrap, ggGeometriWrap, ggKlockaWrap, ggBrakWrap, ggPrioritetWrap;
+  let ggAddsubWrap, ggMultdivWrap, ggGeometriWrap, ggKlockaWrap, ggBrakWrap, ggPrioritetWrap, ggStatistikWrap;
 
   // =========================================================
   //  localStorage
@@ -155,6 +155,10 @@ const Genomgang = (() => {
     const prioritetOps = [];
     document.querySelectorAll('#gg-prioritet-ops input:checked').forEach(cb => prioritetOps.push(cb.value));
 
+    // Statistik types
+    const statistikTypes = [];
+    document.querySelectorAll('#gg-statistik-types input:checked').forEach(cb => statistikTypes.push(cb.value));
+
     // Toggles
     const bildstod = document.getElementById('gg-bildstod-check').checked;
     const problemlosning = document.getElementById('gg-problemlosning-check').checked;
@@ -176,6 +180,7 @@ const Genomgang = (() => {
       klockaTypes: klockaTypes.length ? klockaTypes : ['analog', 'digital'],
       brakTypes,
       prioritetOps: prioritetOps.length ? prioritetOps : ['mult', 'div'],
+      statistikTypes: statistikTypes.length ? statistikTypes : ['bar', 'freq-table', 'pie-chart'],
       bildstod,
       bildstodDelay: 0,
       problemlosning: problemlosning && !customEnabled,
@@ -201,6 +206,7 @@ const Genomgang = (() => {
     const hasKlocka = checked.has('klocka');
     const hasBrak = checked.has('brak');
     const hasPrioritet = checked.has('prioritet');
+    const hasStatistik = checked.has('statistik');
 
     if (ggAddsubWrap)   ggAddsubWrap.classList.toggle('hidden', !hasAddSub);
     if (ggMultdivWrap)  ggMultdivWrap.classList.toggle('hidden', !hasMultDiv);
@@ -208,6 +214,7 @@ const Genomgang = (() => {
     if (ggKlockaWrap)   ggKlockaWrap.classList.toggle('hidden', !hasKlocka);
     if (ggBrakWrap)     ggBrakWrap.classList.toggle('hidden', !hasBrak);
     if (ggPrioritetWrap) ggPrioritetWrap.classList.toggle('hidden', !hasPrioritet);
+    if (ggStatistikWrap) ggStatistikWrap.classList.toggle('hidden', !hasStatistik);
   }
 
   // Visa/dölj uppställnings-växling
@@ -666,11 +673,21 @@ const Genomgang = (() => {
     ggKlockaWrap   = document.getElementById('gg-klocka-wrap');
     ggBrakWrap     = document.getElementById('gg-brak-wrap');
     ggPrioritetWrap = document.getElementById('gg-prioritet-wrap');
+    ggStatistikWrap = document.getElementById('gg-statistik-wrap');
 
     if (!overlay) return;
 
     // Stäng-knapp
     document.getElementById('gg-close-btn').addEventListener('click', closeCreator);
+
+    // Avmarkera allt
+    const deselectBtn = document.getElementById('gg-deselect-all');
+    if (deselectBtn) {
+      deselectBtn.addEventListener('click', () => {
+        areasWrap.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+        updateConfigVisibility();
+      });
+    }
 
     // Generera
     document.getElementById('gg-generate-btn').addEventListener('click', generateBatch);

@@ -11,24 +11,45 @@ class SymmetriPlugin extends BasePlugin {
     const grade = settings.grade;
 
     // Pool: { shape, lines, label }
-    // lines = antal symmetrilinjer
+    // lines = antal symmetrilinjer; 0 = oändligt; -1 = inga
     const pool4 = [
       { shape: 'kvadrat',         lines: 4, label: 'kvadrat'           },
       { shape: 'rektangel',       lines: 2, label: 'rektangel'         },
       { shape: 'liksidig',        lines: 3, label: 'liksidig triangel'  },
       { shape: 'likbent',         lines: 1, label: 'likbent triangel'   },
-      { shape: 'cirkel',          lines: 0, label: 'cirkel'             }, // 0 = oändligt
+      { shape: 'cirkel',          lines: 0, label: 'cirkel'             },
       { shape: 'romb',            lines: 2, label: 'romb'               },
       { shape: 'trapets-sym',     lines: 1, label: 'symmetrisk trapets' },
+      { shape: 'trapets-asym',    lines: -1, label: 'trapets'           },
     ];
     const pool5 = [
       ...pool4,
-      { shape: 'parallellogram',  lines: -1, label: 'parallellogram'   }, // -1 = inga
+      { shape: 'parallellogram',  lines: -1, label: 'parallellogram'   },
       { shape: 'oliksidig',       lines: -1, label: 'oliksidig triangel'},
       { shape: 'pentagon',        lines: 5,  label: 'femhörning'        },
     ];
 
-    const item = PluginUtils.pickRandom(grade >= 5 ? pool5 : pool4);
+    const pool = grade >= 5 ? pool5 : pool4;
+
+    // Symmetrilinjer att rita (30% chans, bara figurer med >0 linjer)
+    const drawPool = pool.filter(f => f.lines > 0);
+    if (drawPool.length > 0 && Math.random() < 0.3) {
+      const item = PluginUtils.pickRandom(drawPool);
+      return {
+        type: 'symmetri', questionType: 'draw-lines',
+        shape: item.shape, label: item.label, lines: item.lines,
+        answer: String(item.lines),
+      };
+    }
+
+    // ~30% chans för "identify-non-sym" (kräver icke-symmetriska figurer)
+    const nonSymPool = pool.filter(f => f.lines === -1);
+    const symPool = pool.filter(f => f.lines !== -1);
+    if (nonSymPool.length > 0 && symPool.length >= 2 && Math.random() < 0.3) {
+      return this._generateIdentifyNonSym(symPool, nonSymPool);
+    }
+
+    const item = PluginUtils.pickRandom(pool);
 
     let answer;
     if (item.lines === 0)       answer = 'Oändligt många';
@@ -38,7 +59,63 @@ class SymmetriPlugin extends BasePlugin {
     return { type: 'symmetri', shape: item.shape, label: item.label, lines: item.lines, answer };
   }
 
+  _generateIdentifyNonSym(symPool, nonSymPool) {
+    // Välj 2 symmetriska + 1 icke-symmetrisk
+    const shuffledSym = symPool.slice().sort(() => Math.random() - 0.5);
+    const sym1 = shuffledSym[0];
+    const sym2 = shuffledSym[1];
+    const nonSym = PluginUtils.pickRandom(nonSymPool);
+
+    // Blanda ordningen, placera icke-symmetrisk slumpmässigt
+    const trio = [sym1, sym2, nonSym].sort(() => Math.random() - 0.5);
+    const correctIndex = trio.indexOf(nonSym);
+
+    return {
+      type: 'symmetri',
+      questionType: 'identify-non-sym',
+      shapes: trio.map(f => f.shape),
+      labels: trio.map(f => f.label),
+      correctIndex,
+      answer: nonSym.label,
+      shape: nonSym.shape,  // för isSameProblem
+    };
+  }
+
   render(problem, container) {
+    if (problem.questionType === 'draw-lines') {
+      const wrap = document.createElement('div');
+      wrap.className = 'sym-wrap';
+      const q = document.createElement('p');
+      q.className = 'sym-question';
+      q.textContent = 'Rita symmetrilinjerna i figuren.';
+      wrap.appendChild(q);
+      wrap.appendChild(_buildSymmetriSVG(problem.shape));
+      container.appendChild(wrap);
+      return;
+    }
+    if (problem.questionType === 'identify-non-sym') {
+      const wrap = document.createElement('div');
+      wrap.className = 'sym-wrap';
+      const q = document.createElement('p');
+      q.className = 'sym-question';
+      q.textContent = 'Vilken figur är inte symmetrisk?';
+      wrap.appendChild(q);
+      const row = document.createElement('div');
+      row.className = 'sym-trio';
+      problem.shapes.forEach((shape, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'sym-trio-cell';
+        cell.appendChild(_buildSymmetriSVG(shape));
+        const lbl = document.createElement('span');
+        lbl.className = 'sym-trio-label';
+        lbl.textContent = (i + 1) + '. ' + problem.labels[i];
+        cell.appendChild(lbl);
+        row.appendChild(cell);
+      });
+      wrap.appendChild(row);
+      container.appendChild(wrap);
+      return;
+    }
     const wrap = document.createElement('div');
     wrap.className = 'sym-wrap';
     wrap.appendChild(_buildSymmetriSVG(problem.shape));
@@ -51,11 +128,22 @@ class SymmetriPlugin extends BasePlugin {
 
   showAnswer(problem, container, btn) {
     if (btn) { btn.disabled = true; btn.textContent = '✓'; }
+    if (problem.questionType === 'identify-non-sym') {
+      // Markera rätt figur
+      const cells = container.querySelectorAll('.sym-trio-cell');
+      if (cells[problem.correctIndex]) {
+        cells[problem.correctIndex].classList.add('sym-trio-cell--correct');
+      }
+      PluginUtils.appendAnswerBox(problem.answer, container);
+      return;
+    }
     PluginUtils.appendAnswerBox(problem.answer, container);
   }
 
   isSameProblem(a, b) {
-    return a.shape === b.shape;
+    if (a.questionType !== b.questionType) return false;
+    if (a.questionType === 'identify-non-sym') return a.answer === b.answer;
+    return a.shape === b.shape && a.questionType === b.questionType;
   }
 }
 
@@ -98,6 +186,10 @@ function _buildSymmetriSVG(shape) {
   } else if (shape === 'trapets-sym') {
     // Symmetrisk trapets (övre sida kortare, centrerad)
     inner = `<polygon points="40,172 240,172 200,48 80,48" fill="#fef3c7" stroke="#e9c46a" stroke-width="3"/>`;
+
+  } else if (shape === 'trapets-asym') {
+    // Asymmetrisk trapets (övre sida förskjuten)
+    inner = `<polygon points="30,172 250,172 210,48 100,48" fill="#fef3c7" stroke="#e9c46a" stroke-width="3"/>`;
 
   } else if (shape === 'cirkel') {
     inner = `<circle cx="140" cy="100" r="88" fill="#fef9c3" stroke="#ca8a04" stroke-width="3"/>`;

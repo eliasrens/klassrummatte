@@ -214,6 +214,7 @@ const Menu = (() => {
     const showKlocka    = areas.some(a => a === 'klocka');
     const showBrak      = areas.includes('brak');
     const showPrioritet = areas.includes('prioritet');
+    const showStatistik = areas.includes('statistik');
     const showEgna     = Settings.isCustomProblemsEnabled();
 
     function setSection(labelId, sectionId, show) {
@@ -234,6 +235,7 @@ const Menu = (() => {
     setSection('klocka-group-label',    'klocka-section',    showKlocka);
     setSection('brak-group-label',      'brak-section',      showBrak);
     setSection('prioritet-group-label', 'prioritet-section', showPrioritet);
+    setSection('statistik-group-label', 'statistik-section', showStatistik);
     setSection('egna-uppgifter-group-label', 'egna-uppgifter-section', showEgna);
     document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
     updateBrakTypeAvailability();
@@ -318,6 +320,10 @@ const Menu = (() => {
 
     document.querySelectorAll('#prioritet-ops-checkboxes input[type=checkbox]').forEach(cb => {
       cb.checked = (s.prioritetOps || ['mult', 'div']).includes(cb.value);
+    });
+
+    document.querySelectorAll('#statistik-types-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = (s.statistikTypes || ['bar', 'freq-table', 'pie-chart']).includes(cb.value);
     });
 
     const brakAll = ['name','order-same-den','order-diff-den','add-same-den','sub-same-den','compare','fraction-of-whole','simplify','add-diff-den','sub-diff-den','to-mixed'];
@@ -437,6 +443,14 @@ const Menu = (() => {
         const checked = [...document.querySelectorAll('#prioritet-ops-checkboxes input:checked')].map(c => c.value);
         if (checked.length > 0) Settings.setPrioritetOps(checked);
         else cb.checked = true; // minst ett måste vara valt
+      });
+    });
+
+    document.querySelectorAll('#statistik-types-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#statistik-types-checkboxes input:checked')].map(c => c.value);
+        if (checked.length > 0) Settings.setStatistikTypes(checked);
+        else cb.checked = true;
       });
     });
 
@@ -624,6 +638,9 @@ const Menu = (() => {
 
       document.querySelectorAll('#klocka-type-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setKlockaTypes([]);
+
+      document.querySelectorAll('#statistik-types-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = true; });
+      Settings.setStatistikTypes(['bar', 'freq-table', 'pie-chart']);
 
       document.getElementById('problemlosning-check').checked = false;
       Settings.setProblemlosning(false);

@@ -851,6 +851,10 @@ body:has(#st-sidebar:not(.hidden)) #empty-state {
 /* Statistik */
 .ab-table .stat-wrap { gap: 0.1cm; }
 .ab-table .stat-chart-svg { width: 100%; max-height: 3cm; }
+.ab-table .stat-pie-svg { width: 100%; max-height: 3cm; }
+.ab-table .stat-freq-table { font-size: 0.5rem; min-width: auto; width: 100%; }
+.ab-table .stat-freq-table th,
+.ab-table .stat-freq-table td { padding: 0.1em 0.3em; border-width: 1px; }
 .ab-table .stat-question { font-size: 0.55rem; white-space: normal; }
 
 /* Sannolikhet */
@@ -867,6 +871,14 @@ body:has(#st-sidebar:not(.hidden)) #empty-state {
 .ab-table .sym-svg,
 .ab-table .sym-wrap svg { width: 100%; max-height: 3.5cm; }
 .ab-table .sym-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .sym-trio { gap: 0.2cm; }
+.ab-table .sym-trio-cell .sym-svg { width: 1.5cm; }
+.ab-table .sym-trio-label { font-size: 0.4rem; }
+
+/* Bild-multiplikation */
+.ab-table .bild-mult-wrap { gap: 0.1cm; }
+.ab-table .bild-mult-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .bild-mult-answer { font-size: 0.7rem; }
 
 /* Romerska siffror */
 .ab-table .rom-wrap { gap: 0.1cm; }

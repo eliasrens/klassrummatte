@@ -20,22 +20,48 @@ class StatistikPlugin extends BasePlugin {
     const n     = PluginUtils.randInt(4, 5);
     const items = tema.items.slice(0, n).map(lbl => ({ label: lbl, value: PluginUtils.randInt(2, 18) }));
 
+    // Vilka diagramtyper är aktiverade?
+    const statTypes = settings.statistikTypes && settings.statistikTypes.length
+      ? settings.statistikTypes : ['bar', 'freq-table', 'pie-chart'];
+    const chartType = PluginUtils.pickRandom(statTypes);
+
     // Välj frågetyp baserat på åk
     const qtPool = ['read-val', 'read-val', 'most', 'least', 'diff'];
     if (settings.grade >= 5) qtPool.push('mean', 'mode');
     if (settings.grade >= 6) qtPool.push('median');
-    const qt = PluginUtils.pickRandom(qtPool);
 
-    return this._buildProblem(tema.kategori, items, qt);
+    // Cirkeldiagram: begränsa frågetyper till det som är rimligt
+    if (chartType === 'pie-chart') {
+      const pieQtPool = ['most', 'least'];
+      if (settings.grade >= 5) pieQtPool.push('read-pct');
+      const qt = PluginUtils.pickRandom(pieQtPool);
+      return this._buildProblem(tema.kategori, items, qt, chartType);
+    }
+
+    const qt = PluginUtils.pickRandom(qtPool);
+    return this._buildProblem(tema.kategori, items, qt, chartType);
   }
 
-  _buildProblem(kategori, items, qt) {
+  _buildProblem(kategori, items, qt, chartType) {
+    chartType = chartType || 'bar';
     const vals = items.map(d => d.value);
+
+    if (qt === 'read-pct') {
+      const total = vals.reduce((a, b) => a + b, 0);
+      const target = PluginUtils.pickRandom(items);
+      const pct = Math.round((target.value / total) * 100);
+      return {
+        type: 'statistik', questionType: 'read-pct', chartType,
+        kategori, items,
+        question: `Ungefär hur många procent utgör "${target.label}"?`,
+        answer: pct + '%',
+      };
+    }
 
     if (qt === 'read-val') {
       const target = PluginUtils.pickRandom(items);
       return {
-        type: 'statistik', questionType: 'read-val',
+        type: 'statistik', questionType: 'read-val', chartType,
         kategori, items,
         question: `Hur många röstar på "${target.label}"?`,
         answer: String(target.value),
@@ -45,7 +71,7 @@ class StatistikPlugin extends BasePlugin {
       const max  = Math.max(...vals);
       const best = items.find(d => d.value === max);
       return {
-        type: 'statistik', questionType: 'most',
+        type: 'statistik', questionType: 'most', chartType,
         kategori, items,
         question: 'Vilket alternativ har flest?',
         answer: best.label,
@@ -55,7 +81,7 @@ class StatistikPlugin extends BasePlugin {
       const min   = Math.min(...vals);
       const least = items.find(d => d.value === min);
       return {
-        type: 'statistik', questionType: 'least',
+        type: 'statistik', questionType: 'least', chartType,
         kategori, items,
         question: 'Vilket alternativ har minst?',
         answer: least.label,
@@ -65,7 +91,7 @@ class StatistikPlugin extends BasePlugin {
       const sorted = [...items].sort((a, b) => b.value - a.value);
       const diff   = sorted[0].value - sorted[1].value;
       return {
-        type: 'statistik', questionType: 'diff',
+        type: 'statistik', questionType: 'diff', chartType,
         kategori, items,
         question: `Hur många fler har "${sorted[0].label}" än "${sorted[1].label}"?`,
         answer: String(diff),
@@ -75,7 +101,7 @@ class StatistikPlugin extends BasePlugin {
       const sum  = vals.reduce((a, b) => a + b, 0);
       const mean = parseFloat((sum / vals.length).toFixed(1));
       return {
-        type: 'statistik', questionType: 'mean',
+        type: 'statistik', questionType: 'mean', chartType,
         kategori, items,
         question: 'Vad är medelvärdet?',
         answer: String(mean),
@@ -87,9 +113,9 @@ class StatistikPlugin extends BasePlugin {
       const maxF = Math.max(...Object.values(freq));
       const mode = vals.find(v => freq[v] === maxF);
       // Ensure a clear mode – regenerate if all unique
-      if (maxF === 1) return this._buildProblem(kategori, items, 'mean');
+      if (maxF === 1) return this._buildProblem(kategori, items, 'mean', chartType);
       return {
-        type: 'statistik', questionType: 'mode',
+        type: 'statistik', questionType: 'mode', chartType,
         kategori, items,
         question: 'Vad är typvärdet?',
         answer: String(mode),
@@ -102,7 +128,7 @@ class StatistikPlugin extends BasePlugin {
       ? (sorted[mid - 1] + sorted[mid]) / 2
       : sorted[mid];
     return {
-      type: 'statistik', questionType: 'median',
+      type: 'statistik', questionType: 'median', chartType,
       kategori, items,
       question: 'Vad är medianen?',
       answer: String(median),
@@ -112,7 +138,14 @@ class StatistikPlugin extends BasePlugin {
   render(problem, container) {
     const wrap = document.createElement('div');
     wrap.className = 'stat-wrap';
-    wrap.appendChild(_buildBarChart(problem.items, problem.kategori));
+    const ct = problem.chartType || 'bar';
+    if (ct === 'freq-table') {
+      wrap.appendChild(_buildFreqTable(problem.items, problem.kategori));
+    } else if (ct === 'pie-chart') {
+      wrap.appendChild(_buildPieChart(problem.items, problem.kategori));
+    } else {
+      wrap.appendChild(_buildBarChart(problem.items, problem.kategori));
+    }
     const q = document.createElement('p');
     q.className = 'stat-question';
     q.textContent = problem.question;
@@ -200,6 +233,129 @@ function _buildBarChart(items, title) {
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.classList.add('stat-chart-svg');
   svg.innerHTML = c;
+  return svg;
+}
+
+// =========================================================
+//  Frekvenstabell (privat)
+// =========================================================
+function _buildFreqTable(items, title) {
+  const table = document.createElement('table');
+  table.className = 'stat-freq-table';
+
+  // Rubrikrad
+  const thead = document.createElement('thead');
+  const hrow = document.createElement('tr');
+  const thKat = document.createElement('th');
+  thKat.textContent = title;
+  hrow.appendChild(thKat);
+  const thAntal = document.createElement('th');
+  thAntal.textContent = 'Antal';
+  hrow.appendChild(thAntal);
+  thead.appendChild(hrow);
+  table.appendChild(thead);
+
+  // Datarader
+  const tbody = document.createElement('tbody');
+  items.forEach(item => {
+    const row = document.createElement('tr');
+    const tdLabel = document.createElement('td');
+    tdLabel.textContent = item.label;
+    row.appendChild(tdLabel);
+    const tdVal = document.createElement('td');
+    tdVal.textContent = item.value;
+    row.appendChild(tdVal);
+    tbody.appendChild(row);
+  });
+
+  // Totalrad
+  const total = items.reduce((s, i) => s + i.value, 0);
+  const trow = document.createElement('tr');
+  trow.className = 'stat-freq-total';
+  const tdTot = document.createElement('td');
+  tdTot.textContent = 'Totalt';
+  trow.appendChild(tdTot);
+  const tdTotVal = document.createElement('td');
+  tdTotVal.textContent = total;
+  trow.appendChild(tdTotVal);
+  tbody.appendChild(trow);
+
+  table.appendChild(tbody);
+  return table;
+}
+
+// =========================================================
+//  SVG-cirkeldiagram (privat)
+// =========================================================
+function _buildPieChart(items, title) {
+  const W = 300, H = 240;
+  const cx = 120, cy = 120, r = 95;
+  const total = items.reduce((s, i) => s + i.value, 0);
+  const colors = ['#e63946', '#457b9d', '#2a9d8f', '#e9c46a', '#f4a261'];
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.classList.add('stat-pie-svg');
+
+  let angle = -Math.PI / 2; // starta kl 12
+
+  items.forEach((item, i) => {
+    const slice = (item.value / total) * Math.PI * 2;
+    const x1 = cx + r * Math.cos(angle);
+    const y1 = cy + r * Math.sin(angle);
+    const x2 = cx + r * Math.cos(angle + slice);
+    const y2 = cy + r * Math.sin(angle + slice);
+    const large = slice > Math.PI ? 1 : 0;
+
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', `M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large},1 ${x2.toFixed(2)},${y2.toFixed(2)} Z`);
+    path.setAttribute('fill', colors[i % colors.length]);
+    path.setAttribute('stroke', '#fff');
+    path.setAttribute('stroke-width', '2');
+    svg.appendChild(path);
+
+    // Etikett i mitten av skivan
+    const midAngle = angle + slice / 2;
+    const labelR = r * 0.6;
+    const lx = cx + labelR * Math.cos(midAngle);
+    const ly = cy + labelR * Math.sin(midAngle);
+    if (slice > 0.25) { // Visa bara text om skivan är stor nog
+      const text = document.createElementNS(svgNS, 'text');
+      text.setAttribute('x', lx.toFixed(1));
+      text.setAttribute('y', ly.toFixed(1));
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'central');
+      text.setAttribute('font-size', '10');
+      text.setAttribute('font-weight', '600');
+      text.setAttribute('fill', '#fff');
+      text.textContent = item.label;
+      svg.appendChild(text);
+    }
+
+    angle += slice;
+  });
+
+  // Legend till höger
+  items.forEach((item, i) => {
+    const ly = 20 + i * 22;
+    const rect = document.createElementNS(svgNS, 'rect');
+    rect.setAttribute('x', '250');
+    rect.setAttribute('y', String(ly - 6));
+    rect.setAttribute('width', '12');
+    rect.setAttribute('height', '12');
+    rect.setAttribute('rx', '2');
+    rect.setAttribute('fill', colors[i % colors.length]);
+    svg.appendChild(rect);
+
+    const text = document.createElementNS(svgNS, 'text');
+    text.setAttribute('x', '266');
+    text.setAttribute('y', String(ly + 4));
+    text.setAttribute('font-size', '10');
+    text.setAttribute('fill', '#1a1a2e');
+    text.textContent = item.label;
+    svg.appendChild(text);
+  });
+
   return svg;
 }
 

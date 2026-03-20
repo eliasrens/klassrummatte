@@ -211,6 +211,14 @@
           <input type="checkbox" value="tables-large">
           <span>Stora tal (flersiffrigt)</span>
         </label>
+        <label class="check-label">
+          <input type="checkbox" value="double-half">
+          <span>Dubbelt &amp; hälften</span>
+        </label>
+        <label class="check-label">
+          <input type="checkbox" value="bild-mult">
+          <span>Vilken multiplikation visar bilden?</span>
+        </label>
       </div>
       <p id="multdiv-implicit-hint" class="implicit-hint hidden">Inget valt — Alla tabeller används</p>
       <label class="check-label check-label--sep" id="division-rest-label">
@@ -271,6 +279,17 @@
       <div id="prioritet-ops-checkboxes">
         <label class="check-label"><input type="checkbox" value="mult" checked><span>Multiplikation</span></label>
         <label class="check-label"><input type="checkbox" value="div" checked><span>Division <small>(Åk 3+)</small></span></label>
+      </div>
+    </section>
+
+    <!-- ── STATISTIK – diagramtyp ──────────────── -->
+    <div class="menu-group-label" id="statistik-group-label">Statistik – diagramtyp</div>
+
+    <section class="menu-section" id="statistik-section">
+      <div id="statistik-types-checkboxes">
+        <label class="check-label"><input type="checkbox" value="bar" checked><span>Stapeldiagram</span></label>
+        <label class="check-label"><input type="checkbox" value="freq-table" checked><span>Frekvenstabell</span></label>
+        <label class="check-label"><input type="checkbox" value="pie-chart" checked><span>Cirkeldiagram</span></label>
       </div>
     </section>
 
@@ -471,7 +490,10 @@
           <option value="6">Åk 6</option>
         </select>
 
-        <label class="gg-config-label">Områden</label>
+        <div class="gg-config-label-row">
+          <label class="gg-config-label">Områden</label>
+          <button type="button" id="gg-deselect-all" class="gg-deselect-btn">Avmarkera allt</button>
+        </div>
         <div id="gg-areas" class="gg-config-areas"></div>
 
         <div class="gg-config-divider"></div>
@@ -511,6 +533,8 @@
             </div>
             <label class="gg-config-check"><input type="checkbox" value="tables-ten"><span>Mult/div med 10, 100</span></label>
             <label class="gg-config-check"><input type="checkbox" value="tables-large"><span>Stora tal</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="double-half"><span>Dubbelt &amp; hälften</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="bild-mult"><span>Vilken mult. visar bilden?</span></label>
           </div>
           <label class="gg-config-check" style="margin-top:0.2rem"><input type="checkbox" id="gg-division-rest"><span>Division med rest</span></label>
         </div>
@@ -552,6 +576,16 @@
             <label class="gg-config-check"><input type="checkbox" value="add-diff-den" checked><span>Add – olika nämn.</span></label>
             <label class="gg-config-check"><input type="checkbox" value="sub-diff-den" checked><span>Sub – olika nämn.</span></label>
             <label class="gg-config-check"><input type="checkbox" value="to-mixed" checked><span>Blandat tal</span></label>
+          </div>
+        </div>
+
+        <!-- Statistik diagramtyp -->
+        <div id="gg-statistik-wrap" class="gg-config-sub hidden">
+          <label class="gg-config-label">Statistik – diagramtyp</label>
+          <div id="gg-statistik-types">
+            <label class="gg-config-check"><input type="checkbox" value="bar" checked><span>Stapeldiagram</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="freq-table" checked><span>Frekvenstabell</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="pie-chart" checked><span>Cirkeldiagram</span></label>
           </div>
         </div>
 

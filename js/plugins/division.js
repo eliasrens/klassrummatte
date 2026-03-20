@@ -24,6 +24,16 @@ class DivisionPlugin extends BasePlugin {
     const withRest       = settings.divisionRest   || false;
     const mode = PluginUtils.pickRandom(multDivMode);
 
+    if (mode === 'double-half') {
+      const half = PluginUtils.randInt(grade <= 2 ? 1 : 2, grade <= 2 ? 10 : grade <= 4 ? 50 : 500);
+      const a = half * 2;
+      return {
+        type: 'division', a, b: 2, operator: 'division', answer: half,
+        bildstodEligible: a <= 20, rows: 2, cols: half,
+        questionType: 'half', questionText: 'Hur mycket är hälften av ' + a + '?',
+      };
+    }
+
     if (mode === 'tables-ten') {
       const tenPow   = grade >= 5 ? PluginUtils.pickRandom([10, 100]) : 10;
       const quotient = PluginUtils.randInt(2, grade <= 3 ? 9 : grade <= 5 ? 99 : 999);
@@ -67,6 +77,20 @@ class DivisionPlugin extends BasePlugin {
   }
 
   render(problem, container) {
+    if (problem.questionType === 'half') {
+      const wrap = document.createElement('div');
+      wrap.className = 'double-half-wrap';
+      const q = document.createElement('p');
+      q.className = 'double-half-question';
+      q.textContent = problem.questionText;
+      wrap.appendChild(q);
+      const ans = document.createElement('span');
+      ans.className = 'answer-value answer-hidden double-half-answer';
+      ans.textContent = problem.answer;
+      wrap.appendChild(ans);
+      container.appendChild(wrap);
+      return;
+    }
     container.appendChild(PluginUtils.buildFractionEl(problem.a, problem.b));
     const eq = document.createElement('span');
     eq.textContent = ' = ';

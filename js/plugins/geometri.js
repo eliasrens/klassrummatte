@@ -106,11 +106,15 @@ class GeometriPlugin extends BasePlugin {
       area       = side * side;
       perimeter  = 4 * side;
     } else if (shape === 'rectangle') {
-      const w = PluginUtils.randInt(2, maxSide);
-      const h = PluginUtils.randInt(2, Math.floor(maxSide * 0.8));
-      dimensions = { width: w, height: h };
-      area       = w * h;
-      perimeter  = 2 * (w + h);
+      // Lång sida alltid > kort sida, med rimlig proportion (1.3x–3x)
+      const minSide = Math.max(2, Math.floor(maxSide * 0.15));
+      const short = PluginUtils.randInt(minSide, Math.floor(maxSide * 0.6));
+      const minLong = short + Math.max(1, Math.ceil(short * 0.3));
+      const maxLong = Math.min(maxSide, short * 3);
+      const long = PluginUtils.randInt(Math.min(minLong, maxLong), maxLong);
+      dimensions = { width: long, height: short };
+      area       = long * short;
+      perimeter  = 2 * (long + short);
     } else if (shape === 'triangle') {
       const evenBase = PluginUtils.randInt(2, 15) * 2;
       const h        = PluginUtils.randInt(3, 20);
@@ -191,7 +195,19 @@ function buildShapeSVG(problem) {
       <text x="${x+s+18}" y="${H/2}" dominant-baseline="central" font-size="17" fill="#1a1a2e" font-weight="600">${d.side} cm</text>`;
 
   } else if (shape === 'rectangle') {
-    const rw = Math.min(220, W - 80), rh = Math.min(120, H - 60);
+    // Skala SVG-proportioner efter faktiska mått
+    const ratio = d.width / d.height; // alltid >= 1.3
+    const maxW = W - 80, maxH = H - 60;
+    let rw, rh;
+    if (ratio * maxH <= maxW) {
+      rh = maxH;
+      rw = Math.round(rh * ratio);
+    } else {
+      rw = maxW;
+      rh = Math.round(rw / ratio);
+    }
+    rw = Math.max(80, Math.min(rw, maxW));
+    rh = Math.max(50, Math.min(rh, maxH));
     const x = (W - rw) / 2, y = (H - rh) / 2;
     inner = `
       <rect x="${x}" y="${y}" width="${rw}" height="${rh}" fill="#dbeafe" stroke="#457b9d" stroke-width="3" rx="3"/>

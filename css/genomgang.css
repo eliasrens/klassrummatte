@@ -108,6 +108,26 @@
   margin-top: 0.2rem;
 }
 
+.gg-config-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem;
+}
+
+.gg-deselect-btn {
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.15rem 0.4rem;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+.gg-deselect-btn:hover { background: rgba(0,0,0,0.04); color: var(--text); }
+
 .gg-config select {
   width: 100%;
   padding: 0.3rem;

@@ -731,6 +731,42 @@ body.extra-visible #stage {
   opacity: 0.6;
 }
 
+/* === Dubbelt & hälften === */
+.double-half-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+.double-half-question {
+  font-size: clamp(1.4rem, 4vw, 3rem);
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+.double-half-answer {
+  font-size: clamp(2rem, 7vw, 5rem);
+}
+
+/* === "Vilken multiplikation visar bilden?" === */
+.bild-mult-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6em;
+}
+.bild-mult-question {
+  font-size: clamp(1rem, 2.3vw, 1.7rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+.bild-mult-answer {
+  font-size: clamp(1.6rem, 5vw, 3.5rem);
+  font-weight: 700;
+  margin-top: 0.3em;
+}
+
 /* === Bildstöd – prickar (addition, subtraktion, multiplikation) === */
 .bildstod-dots {
   display: flex;
@@ -1681,6 +1717,39 @@ body.extra-visible .session-counter {
   margin: 0;
 }
 
+/* --- Frekvenstabell --- */
+.stat-freq-table {
+  border-collapse: collapse;
+  font-size: clamp(0.9rem, 2vw, 1.3rem);
+  min-width: 240px;
+}
+.stat-freq-table th,
+.stat-freq-table td {
+  border: 2px solid #d1d5db;
+  padding: 0.4em 1em;
+  text-align: left;
+}
+.stat-freq-table th {
+  background: var(--accent-2);
+  color: #fff;
+  font-weight: 700;
+}
+.stat-freq-table td:last-child {
+  text-align: center;
+  font-weight: 600;
+}
+.stat-freq-total td {
+  font-weight: 700;
+  border-top: 3px solid var(--text);
+}
+
+/* --- Cirkeldiagram --- */
+.stat-pie-svg {
+  width: clamp(220px, 42vw, 380px);
+  height: auto;
+  display: block;
+}
+
 /* === Koordinatsystem === */
 .koord-wrap {
   display: flex;
@@ -1743,6 +1812,35 @@ body.extra-visible .session-counter {
   font-weight: 600;
   text-align: center;
   margin: 0;
+}
+.sym-trio {
+  display: flex;
+  gap: clamp(1rem, 3vw, 3rem);
+  justify-content: center;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.sym-trio-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.5em;
+  border-radius: 8px;
+  border: 3px solid transparent;
+  transition: border-color 0.3s;
+}
+.sym-trio-cell .sym-svg {
+  width: clamp(100px, 18vw, 180px);
+}
+.sym-trio-label {
+  font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+  font-weight: 600;
+  text-align: center;
+}
+.sym-trio-cell--correct {
+  border-color: var(--accent);
+  background: rgba(230, 57, 70, 0.08);
 }
 
 /* === Romerska siffror === */
