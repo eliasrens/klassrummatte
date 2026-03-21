@@ -236,7 +236,7 @@ body.menu-open #settings-menu {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.85);
   padding: 3.5rem 0.5rem 0.75rem;
   flex: 1;
 }
@@ -325,20 +325,20 @@ select option {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.7);
   padding: 0.6rem 0.5rem 0.35rem;
   cursor: pointer;
   transition: color 0.15s;
   user-select: none;
 }
 .area-category-label:hover {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.9);
 }
 .area-category-label::before {
   content: '\25B8';
   font-size: 0.55rem;
   transition: transform 0.2s ease;
-  color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.35);
 }
 .area-category.area-category--open .area-category-label::before {
   transform: rotate(90deg);
@@ -349,7 +349,7 @@ select option {
   font-size: 0.58rem;
   letter-spacing: 0.02em;
   text-transform: none;
-  color: rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.35);
 }
 
 .area-grid-2col {
