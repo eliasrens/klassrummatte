@@ -7,7 +7,7 @@
   position: fixed;
   inset: 0;
   z-index: 500;
-  background: var(--bg);
+  background: #111827;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -21,7 +21,7 @@
   align-items: center;
   gap: 1rem;
   padding: 0.8rem 1.2rem;
-  background: var(--menu-bg);
+  background: linear-gradient(175deg, #1e2a4a 0%, #172035 60%, #111827 100%);
   color: #fff;
   flex-shrink: 0;
 }
@@ -93,16 +93,47 @@
   flex-shrink: 0;
   padding: 0.8rem;
   overflow-y: auto;
-  border-right: 1px solid rgba(0,0,0,0.08);
+  border-right: 1px solid rgba(255,255,255,0.06);
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  background: linear-gradient(175deg, #1e2a4a 0%, #172035 35%, #111827 65%, #0d1117 100%);
+  color: #f0eeea;
+}
+
+/* Finare scrollbar (config, previews, queue) */
+.gg-config::-webkit-scrollbar,
+.gg-previews::-webkit-scrollbar,
+.gg-queue-list::-webkit-scrollbar {
+  width: 4px;
+}
+.gg-config::-webkit-scrollbar-track,
+.gg-previews::-webkit-scrollbar-track,
+.gg-queue-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.gg-config::-webkit-scrollbar-thumb,
+.gg-previews::-webkit-scrollbar-thumb,
+.gg-queue-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+.gg-config::-webkit-scrollbar-thumb:hover,
+.gg-previews::-webkit-scrollbar-thumb:hover,
+.gg-queue-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+.gg-config,
+.gg-previews,
+.gg-queue-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
 }
 
 .gg-config-label {
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.45);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-top: 0.2rem;
@@ -117,26 +148,28 @@
 
 .gg-deselect-btn {
   background: none;
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 4px;
   font-size: 0.62rem;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.45);
   cursor: pointer;
   padding: 0.15rem 0.4rem;
   font-family: inherit;
   transition: background 0.15s, color 0.15s;
 }
-.gg-deselect-btn:hover { background: rgba(0,0,0,0.04); color: var(--text); }
+.gg-deselect-btn:hover { background: rgba(255,255,255,0.08); color: #f0eeea; }
 
 .gg-config select {
   width: 100%;
   padding: 0.3rem;
-  border: 1.5px solid #d1d5db;
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 6px;
   font-family: inherit;
   font-size: 0.8rem;
-  background: #fff;
+  background: rgba(255,255,255,0.08);
+  color: #f0eeea;
 }
+.gg-config select option { background: #172035; }
 
 .gg-config-areas {
   display: flex;
@@ -149,6 +182,7 @@
   align-items: center;
   gap: 0.3rem;
   font-size: 0.75rem;
+  color: rgba(255,255,255,0.8);
   cursor: pointer;
   padding: 0.05rem 0;
 }
@@ -158,7 +192,7 @@
 /* --- Config sub-sections --- */
 .gg-config-divider {
   height: 1px;
-  background: rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.08);
   margin: 0.3rem 0;
 }
 
@@ -174,6 +208,7 @@
   align-items: center;
   gap: 0.3rem;
   font-size: 0.75rem;
+  color: rgba(255,255,255,0.8);
   cursor: pointer;
   padding: 0.05rem 0;
 }
@@ -214,6 +249,7 @@
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
+  background: #1a1f2e;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 0.8rem;
@@ -221,7 +257,7 @@
 }
 
 .gg-preview-card {
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   background: #fff;
   cursor: pointer;
@@ -321,15 +357,16 @@
 .gg-queue {
   width: 260px;
   flex-shrink: 0;
-  border-left: 1px solid rgba(0,0,0,0.08);
+  border-left: 1px solid rgba(255,255,255,0.06);
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: linear-gradient(175deg, #172035 0%, #111827 50%, #0d1117 100%);
+  color: #f0eeea;
 }
 
 .gg-queue-header {
   padding: 0.8rem 1rem;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -344,7 +381,7 @@
 
 .gg-queue-count {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.45);
   font-weight: 400;
 }
 
@@ -359,11 +396,11 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.6rem;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
   font-size: 0.78rem;
   transition: background 0.1s;
 }
-.gg-queue-item:hover { background: rgba(0,0,0,0.02); }
+.gg-queue-item:hover { background: rgba(255,255,255,0.04); }
 .gg-queue-item[draggable] { cursor: grab; }
 .gg-queue-item.gg-queue-dragging { opacity: 0.4; }
 .gg-queue-item.gg-queue-drop-above { box-shadow: 0 -2px 0 0 var(--accent-2); }
@@ -396,7 +433,7 @@
   font-size: 0.6rem;
   padding: 0;
   line-height: 1;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.45);
   opacity: 0.5;
   transition: opacity 0.1s;
 }
@@ -406,19 +443,19 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--accent);
+  color: rgba(255,255,255,0.3);
   font-size: 0.8rem;
   padding: 0.1rem 0.25rem;
   line-height: 1;
   opacity: 0.5;
   transition: opacity 0.1s;
 }
-.gg-queue-remove:hover { opacity: 1; }
+.gg-queue-remove:hover { opacity: 1; color: var(--accent); }
 
 .gg-queue-empty {
   padding: 1.5rem 1rem;
   text-align: center;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.35);
   font-size: 0.8rem;
 }
 

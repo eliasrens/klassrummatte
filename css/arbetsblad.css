@@ -16,7 +16,7 @@ body {
 
 /* === Konfigurations-panel ================================== */
 #config-panel {
-  background: #1a1a2e;
+  background: linear-gradient(175deg, #1e2a4a 0%, #172035 35%, #111827 65%, #0d1117 100%);
   color: #f0eeea;
   padding: 1rem 2rem;
   display: flex;
@@ -68,7 +68,7 @@ body {
   border-color: rgba(255,255,255,0.4);
 }
 
-.config-group select option { background: #1a1a2e; }
+.config-group select option { background: #172035; }
 
 /* === Gemensamma sidebar-stilar (standard + problemlösning) ============== */
 #ab-sidebar,
@@ -78,7 +78,7 @@ body {
   left: 0;
   bottom: 0;
   width: 15rem;
-  background: #1e1e34;
+  background: linear-gradient(175deg, #1e2a4a 0%, #172035 35%, #111827 65%, #0d1117 100%);
   color: #f0eeea;
   padding: 1rem 1.2rem 1.5rem;
   overflow-y: auto;
@@ -90,6 +90,35 @@ body {
 #ab-sidebar.hidden,
 #pl-sidebar.hidden,
 #st-sidebar.hidden { display: none; }
+
+/* Finare scrollbar (sidebars) */
+#ab-sidebar::-webkit-scrollbar,
+#pl-sidebar::-webkit-scrollbar,
+#st-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+#ab-sidebar::-webkit-scrollbar-track,
+#pl-sidebar::-webkit-scrollbar-track,
+#st-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+#ab-sidebar::-webkit-scrollbar-thumb,
+#pl-sidebar::-webkit-scrollbar-thumb,
+#st-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+#ab-sidebar::-webkit-scrollbar-thumb:hover,
+#pl-sidebar::-webkit-scrollbar-thumb:hover,
+#st-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+#ab-sidebar,
+#pl-sidebar,
+#st-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
 
 .sidebar-title {
   font-size: 0.7rem;
@@ -180,7 +209,7 @@ body {
 
 #ab-sidebar select option,
 #pl-sidebar select option,
-#st-sidebar select option { background: #1e1e34; }
+#st-sidebar select option { background: #172035; }
 
 /* Underkategorier per område */
 .ab-area-item { margin-bottom: 0.15rem; }

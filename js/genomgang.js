@@ -543,11 +543,14 @@ const Genomgang = (() => {
     const list = loadAll();
     container.innerHTML = '';
 
+    const expandBtn = document.getElementById('gg-expand-btn');
     if (list.length === 0) {
       if (emptyHint) emptyHint.classList.remove('hidden');
+      if (expandBtn) expandBtn.classList.add('hidden');
       return;
     }
     if (emptyHint) emptyHint.classList.add('hidden');
+    if (expandBtn) expandBtn.classList.remove('hidden');
 
     list.forEach(gg => {
       const item = document.createElement('div');
@@ -702,6 +705,15 @@ const Genomgang = (() => {
       createBtn.addEventListener('click', () => {
         if (typeof Menu !== 'undefined') Menu.closeMenu();
         openCreator();
+      });
+    }
+
+    // Expand-knapp för sparade genomgångar
+    const expandBtn = document.getElementById('gg-expand-btn');
+    if (expandBtn) {
+      expandBtn.addEventListener('click', () => {
+        const card = document.getElementById('gg-tool-card');
+        if (card) card.classList.toggle('tool-card--expanded');
       });
     }
 

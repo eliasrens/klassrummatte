@@ -68,9 +68,40 @@ const Menu = (() => {
     document.getElementById('addsub-vaxling-wrap').classList.toggle('hidden', !uppstallningChecked);
   }
 
+  const AREA_DISPLAY_NAMES = {
+    addition: 'Addition', subtraktion: 'Subtraktion',
+    multiplikation: 'Multiplikation', division: 'Division',
+    prioritet: 'Prioritetsregler', 'oppna-utsagor': 'Öppna utsagor',
+    brak: 'Bråk', procent: 'Procent',
+    tallinje: 'Tallinje', talsorter: 'Talsorter', talfoljd: 'Talföljder',
+    'negativa-tal': 'Negativa tal', romerska: 'Romerska',
+    geometri: 'Geometri', koordinatsystem: 'Koordinatsystem', symmetri: 'Symmetri',
+    klocka: 'Klocka', 'matt-langd': 'Längd', 'matt-volym': 'Volym',
+    'matt-vikt': 'Vikt', 'matt-tid': 'Tid', 'matt-area': 'Area',
+    statistik: 'Statistik', sannolikhet: 'Sannolikhet',
+    'egna-uppgifter': 'Egna uppgifter',
+  };
+
+  function updateSelectedAreaTags() {
+    const container = document.getElementById('selected-areas-tags');
+    const checked = [...document.querySelectorAll('#area-checkboxes > .area-category > .area-grid-2col input:checked')];
+    container.innerHTML = '';
+    checked.forEach(cb => {
+      const tag = document.createElement('span');
+      tag.className = 'selected-area-tag';
+      tag.textContent = AREA_DISPLAY_NAMES[cb.value] || cb.value;
+      tag.addEventListener('click', () => {
+        cb.checked = false;
+        cb.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      container.appendChild(tag);
+    });
+  }
+
   function updateAreaImplicitHint() {
-    const anyChecked = document.querySelectorAll('#area-checkboxes input:checked').length > 0;
+    const anyChecked = document.querySelectorAll('#area-checkboxes > .area-category > .area-grid-2col input:checked').length > 0;
     document.getElementById('area-implicit-hint').classList.toggle('hidden', anyChecked);
+    updateSelectedAreaTags();
   }
 
   function updateAddSubImplicitHint() {
@@ -218,14 +249,20 @@ const Menu = (() => {
     const showEgna     = Settings.isCustomProblemsEnabled();
 
     function setSection(labelId, sectionId, show) {
-      const lbl = document.getElementById(labelId);
-      const sec = document.getElementById(sectionId);
-      if (show) {
-        lbl.classList.remove('hidden', 'section-collapsed', 'is-collapsed');
-        sec.classList.remove('hidden', 'section-collapsed');
+      const el = document.getElementById(labelId);
+      if (!el) return;
+      // inline-sub variant: labelId pekar på wrapper-div med class inline-sub
+      if (el.classList.contains('inline-sub')) {
+        el.classList.toggle('hidden', !show);
       } else {
-        lbl.classList.add('hidden');
-        sec.classList.add('hidden');
+        const sec = document.getElementById(sectionId);
+        if (show) {
+          el.classList.remove('hidden', 'section-collapsed', 'is-collapsed');
+          if (sec) sec.classList.remove('hidden', 'section-collapsed');
+        } else {
+          el.classList.add('hidden');
+          if (sec) sec.classList.add('hidden');
+        }
       }
     }
 
@@ -257,7 +294,7 @@ const Menu = (() => {
     const grade = s.grade;
     let changed = false;
 
-    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
+    document.querySelectorAll('#area-checkboxes > .area-category > .area-grid-2col input[type=checkbox]').forEach(cb => {
       const limits = AREA_GRADE_LIMITS[cb.value];
       if (!limits) { cb.disabled = false; return; }
       const unavailable = (limits.min && grade < limits.min) || (limits.max && grade > limits.max);
@@ -269,7 +306,7 @@ const Menu = (() => {
     });
 
     if (changed) {
-      const checked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value).filter(v => v !== 'egna-uppgifter');
+      const checked = [...document.querySelectorAll('#area-checkboxes > .area-category > .area-grid-2col input:checked')].map(c => c.value).filter(v => v !== 'egna-uppgifter');
       Settings.setAreas(checked);
       updateConditionalSections();
       updateBildstodCheckbox();
@@ -298,7 +335,7 @@ const Menu = (() => {
 
     document.getElementById('grade-select').value = s.gradeSelected ? s.grade : '';
 
-    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
+    document.querySelectorAll('#area-checkboxes > .area-category > .area-grid-2col input[type=checkbox]').forEach(cb => {
       if (cb.value === 'egna-uppgifter') {
         cb.checked = Settings.isCustomProblemsEnabled();
       } else {
@@ -400,9 +437,9 @@ const Menu = (() => {
       updateMenuConfiguredIndicator();
     });
 
-    document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => {
+    document.querySelectorAll('#area-checkboxes > .area-category > .area-grid-2col input[type=checkbox]').forEach(cb => {
       cb.addEventListener('change', () => {
-        const allChecked = [...document.querySelectorAll('#area-checkboxes input:checked')].map(c => c.value);
+        const allChecked = [...document.querySelectorAll('#area-checkboxes > .area-category > .area-grid-2col input:checked')].map(c => c.value);
         // 'egna-uppgifter' är inte ett riktigt plugin-område – hanteras separat
         const areas = allChecked.filter(v => v !== 'egna-uppgifter');
         const customEnabled = allChecked.includes('egna-uppgifter');
@@ -610,7 +647,7 @@ const Menu = (() => {
 
     document.getElementById('clear-areas-btn').addEventListener('click', e => {
       e.stopPropagation();
-      document.querySelectorAll('#area-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      document.querySelectorAll('#area-checkboxes > .area-category > .area-grid-2col input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setAreas([]);
       Settings.setCustomProblemsEnabled(false);
 
@@ -676,10 +713,19 @@ const Menu = (() => {
   // =========================================================
   //  Init – anropas från app.js
   // =========================================================
+  function bindCategoryAccordions() {
+    document.querySelectorAll('.area-category-label').forEach(label => {
+      label.addEventListener('click', () => {
+        label.closest('.area-category').classList.toggle('area-category--open');
+      });
+    });
+  }
+
   function init(menuToggleEl, menuOverlayEl) {
     loadSettingsIntoUI();
     bindSettingsUI();
     bindMenuCollapse();
+    bindCategoryAccordions();
     menuToggleEl.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
     menuOverlayEl.addEventListener('click', closeMenu);
   }

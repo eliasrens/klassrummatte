@@ -69,244 +69,228 @@
     <div class="menu-group-label" id="matematikarea-group-label">Matematikområden</div>
 
     <section class="menu-section">
+      <div id="selected-areas-tags" class="selected-areas-tags"></div>
       <div id="area-checkboxes">
 
+        <!-- ── ARITMETIK ── -->
         <div class="area-category">
-          <div class="area-category-label">Aritmetik</div>
+          <div class="area-category-label">Aritmetik <span class="area-category-desc">(de fyra räknesätten)</span></div>
           <div class="area-grid-2col">
-            <label class="check-label check-label--has-sub"><input type="checkbox" value="addition"><span>Addition</span></label>
-            <label class="check-label check-label--has-sub"><input type="checkbox" value="subtraktion"><span>Subtraktion</span></label>
-            <label class="check-label check-label--has-sub"><input type="checkbox" value="multiplikation"><span>Multiplikation</span></label>
-            <label class="check-label check-label--has-sub"><input type="checkbox" value="division"><span>Division</span></label>
+            <label class="check-label"><input type="checkbox" value="addition"><span>Addition</span></label>
+            <label class="check-label"><input type="checkbox" value="subtraktion"><span>Subtraktion</span></label>
+            <label class="check-label"><input type="checkbox" value="multiplikation"><span>Multiplikation</span></label>
+            <label class="check-label"><input type="checkbox" value="division"><span>Division</span></label>
+          </div>
+          <!-- Add/Sub nivå (inline) -->
+          <div class="inline-sub hidden" id="addsub-group-label">
+            <div class="inline-sub-title">Nivå: Addition &amp; subtraktion</div>
+            <div id="addsub-section">
+              <div id="addsub-mode-checkboxes">
+                <label class="check-label"><input type="checkbox" value="standard" checked><span>Standard</span></label>
+                <label class="check-label"><input type="checkbox" value="uppstallning"><span>Uppställning</span></label>
+                <div id="addsub-vaxling-wrap" class="specific-tables-wrap hidden">
+                  <div class="specific-tables-label">Växling:</div>
+                  <div id="addsub-vaxling-checkboxes">
+                    <label class="check-label"><input type="checkbox" value="med" checked><span>Med växling</span></label>
+                    <label class="check-label"><input type="checkbox" value="utan"><span>Utan växling</span></label>
+                  </div>
+                </div>
+                <label class="check-label"><input type="checkbox" value="decimaler"><span>Decimaler <small>(Åk 4+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="flersteg"><span>Flerstegsaddition <small>(Åk 3+)</small></span></label>
+              </div>
+              <p id="addsub-implicit-hint" class="implicit-hint hidden">Inget valt — Standard används</p>
+            </div>
+          </div>
+          <!-- Mult/Div nivå (inline) -->
+          <div class="inline-sub hidden" id="multdiv-group-label">
+            <div class="inline-sub-title">Nivå: Multiplikation &amp; division</div>
+            <div id="multdiv-section">
+              <div id="multdiv-mode-checkboxes">
+                <label class="check-label"><input type="checkbox" value="tables-basic" checked><span>Tabeller 1–9</span></label>
+                <div id="specific-tables-wrap" class="specific-tables-wrap hidden">
+                  <div class="specific-tables-label">Välj tabeller:</div>
+                  <div id="specific-tables-checkboxes" class="specific-tables-grid">
+                    <label class="check-label check-label--sm"><input type="checkbox" value="1" name="specific-table"><span>1</span></label>
+                    <label class="check-label check-label--sm"><input type="checkbox" value="2" name="specific-table" checked><span>2</span></label>
+                    <label class="check-label check-label--sm"><input type="checkbox" value="3" name="specific-table" checked><span>3</span></label>
+                    <label class="check-label check-label--sm"><input type="checkbox" value="4" name="specific-table" checked><span>4</span></label>
+                    <label class="check-label check-label--sm"><input type="checkbox" value="5" name="specific-table" checked><span>5</span></label>
+                    <label class="check-label check-label--sm"><input type="checkbox" value="6" name="specific-table" checked><span>6</span></label>
+                    <label class="check-label check-label--sm"><input type="checkbox" value="7" name="specific-table" checked><span>7</span></label>
+                    <label class="check-label check-label--sm"><input type="checkbox" value="8" name="specific-table" checked><span>8</span></label>
+                    <label class="check-label check-label--sm"><input type="checkbox" value="9" name="specific-table" checked><span>9</span></label>
+                  </div>
+                </div>
+                <label class="check-label"><input type="checkbox" value="tables-ten"><span>Mult/div med 10 och 100</span></label>
+                <label class="check-label"><input type="checkbox" value="tables-large"><span>Stora tal (flersiffrigt)</span></label>
+                <label class="check-label"><input type="checkbox" value="double-half"><span>Dubbelt &amp; hälften</span></label>
+                <label class="check-label"><input type="checkbox" value="bild-mult"><span>Vilken mult. visar bilden?</span></label>
+              </div>
+              <p id="multdiv-implicit-hint" class="implicit-hint hidden">Inget valt — Alla tabeller används</p>
+              <label class="check-label check-label--sep" id="division-rest-label">
+                <input type="checkbox" id="division-rest-check">
+                <span>Division med rest</span>
+              </label>
+            </div>
           </div>
         </div>
 
+        <!-- ── ALGEBRA ── -->
         <div class="area-category">
-          <div class="area-category-label">Algebra</div>
+          <div class="area-category-label">Algebra <span class="area-category-desc">(mönster och okända tal)</span></div>
           <div class="area-grid-2col">
-            <label class="check-label check-label--has-sub"><input type="checkbox" value="prioritet"><span>Prioritetsregler</span></label>
+            <label class="check-label"><input type="checkbox" value="prioritet"><span>Prioritetsregler</span></label>
             <label class="check-label"><input type="checkbox" value="oppna-utsagor"><span>Öppna utsagor</span></label>
           </div>
-        </div>
-
-        <div class="area-category">
-          <div class="area-category-label">Tal &amp; samband</div>
-          <div class="area-grid-2col">
-            <label class="check-label check-label--has-sub"><input type="checkbox" value="brak"><span>Bråk</span></label>
-            <label class="check-label"><input type="checkbox" value="procent"><span>Procent <small>(Åk 4+)</small></span></label>
+          <!-- Prioritet räknesätt (inline) -->
+          <div class="inline-sub hidden" id="prioritet-group-label">
+            <div class="inline-sub-title">Prioritet – räknesätt</div>
+            <div id="prioritet-section">
+              <div id="prioritet-ops-checkboxes">
+                <label class="check-label"><input type="checkbox" value="mult" checked><span>Multiplikation</span></label>
+                <label class="check-label"><input type="checkbox" value="div" checked><span>Division <small>(Åk 3+)</small></span></label>
+              </div>
+            </div>
           </div>
         </div>
 
+        <!-- ── TAL & SAMBAND ── -->
         <div class="area-category">
-          <div class="area-category-label">Taluppfattning</div>
+          <div class="area-category-label">Tal &amp; samband <span class="area-category-desc">(bråk och procent)</span></div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="brak"><span>Bråk</span></label>
+            <label class="check-label"><input type="checkbox" value="procent"><span>Procent <small>(Åk 4+)</small></span></label>
+          </div>
+          <!-- Bråk delmoment (inline) -->
+          <div class="inline-sub hidden" id="brak-group-label">
+            <div class="inline-sub-title">Bråk – delmoment</div>
+            <div id="brak-section">
+              <div id="brak-type-checkboxes">
+                <label class="check-label"><input type="checkbox" value="name" checked><span>Namnge bråk</span></label>
+                <label class="check-label"><input type="checkbox" value="order-same-den" checked><span>Ordna – lika nämn. <small>(Åk 3+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="order-diff-den" checked><span>Ordna – olika nämn. <small>(Åk 3+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="add-same-den" checked><span>Add – lika nämn. <small>(Åk 4+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="sub-same-den" checked><span>Sub – lika nämn. <small>(Åk 4+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="compare" checked><span>Jämföra bråk <small>(Åk 4+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="fraction-of-whole" checked><span>Bråk av heltal <small>(Åk 4+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="simplify" checked><span>Förenkla bråk <small>(Åk 4+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="add-diff-den" checked><span>Add – olika nämn. <small>(Åk 5+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="sub-diff-den" checked><span>Sub – olika nämn. <small>(Åk 5+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="to-mixed" checked><span>Blandat tal <small>(Åk 6)</small></span></label>
+              </div>
+              <p id="brak-implicit-hint" class="implicit-hint hidden">Inget valt — Alla delmoment för vald åk används</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── TALUPPFATTNING ── -->
+        <div class="area-category">
+          <div class="area-category-label">Taluppfattning <span class="area-category-desc">(tallinje, talsorter, talföljder)</span></div>
           <div class="area-grid-2col">
             <label class="check-label"><input type="checkbox" value="tallinje"><span>Tallinje <small>(Åk 1–3)</small></span></label>
             <label class="check-label"><input type="checkbox" value="talsorter"><span>Talsorter <small>(Åk 1–3)</small></span></label>
             <label class="check-label"><input type="checkbox" value="talfoljd"><span>Talföljder</span></label>
-            <label class="check-label"><input type="checkbox" value="negativa-tal"><span>Negativa tal <small>(Åk 5–6)</small></span></label>
-            <label class="check-label"><input type="checkbox" value="romerska"><span>Romerska siffror <small>(Åk 4–5)</small></span></label>
+            <label class="check-label"><input type="checkbox" value="negativa-tal"><span>Neg. tal <small>(Åk 5–6)</small></span></label>
+            <label class="check-label"><input type="checkbox" value="romerska"><span>Romerska <small>(Åk 4–5)</small></span></label>
           </div>
         </div>
 
+        <!-- ── GEOMETRI ── -->
         <div class="area-category">
-          <div class="area-category-label">Geometri</div>
+          <div class="area-category-label">Geometri <span class="area-category-desc">(former, area, omkrets)</span></div>
           <div class="area-grid-2col">
-            <label class="check-label check-label--has-sub"><input type="checkbox" value="geometri"><span>Geometri</span></label>
+            <label class="check-label"><input type="checkbox" value="geometri"><span>Geometri</span></label>
             <label class="check-label"><input type="checkbox" value="koordinatsystem"><span>Koordinatsystem <small>(Åk 4+)</small></span></label>
             <label class="check-label"><input type="checkbox" value="symmetri"><span>Symmetri <small>(Åk 1–5)</small></span></label>
           </div>
-        </div>
-
-        <div class="area-category">
-          <div class="area-category-label">Mått &amp; tid</div>
-          <div class="area-grid-2col">
-            <label class="check-label check-label--has-sub"><input type="checkbox" value="klocka"><span>Klocka</span></label>
-            <label class="check-label"><input type="checkbox" value="matt-langd"><span>Mått – längd</span></label>
-            <label class="check-label"><input type="checkbox" value="matt-volym"><span>Mått – volym</span></label>
-            <label class="check-label"><input type="checkbox" value="matt-vikt"><span>Mått – vikt</span></label>
-            <label class="check-label"><input type="checkbox" value="matt-tid"><span>Mått – tid</span></label>
-            <label class="check-label"><input type="checkbox" value="matt-area"><span>Mått – area <small>(Åk 4+)</small></span></label>
+          <!-- Geometri frågetyp (inline) -->
+          <div class="inline-sub hidden" id="geometri-group-label">
+            <div class="inline-sub-title">Geometri – frågetyp</div>
+            <div id="geometri-section">
+              <div id="geometri-type-checkboxes">
+                <label class="check-label"><input type="checkbox" value="area"><span>Area</span></label>
+                <label class="check-label"><input type="checkbox" value="perimeter"><span>Omkrets</span></label>
+                <label class="check-label"><input type="checkbox" value="kropp"><span>Namnge kroppar <small>(Åk 3+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="klassificering"><span>Klassificera figurer <small>(Åk 4+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="vinklar"><span>Vinklar <small>(Åk 4+)</small></span></label>
+                <label class="check-label"><input type="checkbox" value="volym"><span>Volym <small>(Åk 5+)</small></span></label>
+              </div>
+              <p id="geometri-implicit-hint" class="implicit-hint hidden">Inget valt — Area och omkrets används</p>
+            </div>
           </div>
         </div>
 
+        <!-- ── MÅTT & TID ── -->
         <div class="area-category">
-          <div class="area-category-label">Statistik &amp; sannolikhet</div>
+          <div class="area-category-label">Mått &amp; tid <span class="area-category-desc">(enheter och omvandling)</span></div>
+          <div class="area-grid-2col">
+            <label class="check-label"><input type="checkbox" value="klocka"><span>Klocka</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-langd"><span>Längd</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-volym"><span>Volym</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-vikt"><span>Vikt</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-tid"><span>Tid</span></label>
+            <label class="check-label"><input type="checkbox" value="matt-area"><span>Area <small>(Åk 4+)</small></span></label>
+          </div>
+          <!-- Klocka visningsläge (inline) -->
+          <div class="inline-sub hidden" id="klocka-group-label">
+            <div class="inline-sub-title">Klocka – visningsläge</div>
+            <div id="klocka-section">
+              <div id="klocka-type-checkboxes">
+                <label class="check-label"><input type="checkbox" value="analog"><span>Analogt</span></label>
+                <label class="check-label"><input type="checkbox" value="digital"><span>Digitalt</span></label>
+              </div>
+              <p id="klocka-implicit-hint" class="implicit-hint hidden">Inget valt — Blandat används</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STATISTIK & SANNOLIKHET ── -->
+        <div class="area-category">
+          <div class="area-category-label">Statistik &amp; sannolikhet <span class="area-category-desc">(diagram och chanser)</span></div>
           <div class="area-grid-2col">
             <label class="check-label"><input type="checkbox" value="statistik"><span>Statistik <small>(Åk 4+)</small></span></label>
             <label class="check-label"><input type="checkbox" value="sannolikhet"><span>Sannolikhet <small>(Åk 5–6)</small></span></label>
           </div>
+          <!-- Statistik diagramtyp (inline) -->
+          <div class="inline-sub hidden" id="statistik-group-label">
+            <div class="inline-sub-title">Statistik – diagramtyp</div>
+            <div id="statistik-section">
+              <div id="statistik-types-checkboxes">
+                <label class="check-label"><input type="checkbox" value="bar" checked><span>Stapeldiagram</span></label>
+                <label class="check-label"><input type="checkbox" value="freq-table" checked><span>Frekvenstabell</span></label>
+                <label class="check-label"><input type="checkbox" value="pie-chart" checked><span>Cirkeldiagram</span></label>
+              </div>
+            </div>
+          </div>
         </div>
 
+        <!-- ── ÖVRIGT ── -->
         <div class="area-category">
-          <div class="area-category-label">Övrigt</div>
+          <div class="area-category-label">Övrigt <span class="area-category-desc">(importerade uppgifter)</span></div>
           <div class="area-grid-2col">
-            <label class="check-label check-label--has-sub"><input type="checkbox" id="custom-problems-check" value="egna-uppgifter"><span>Egna uppgifter</span></label>
+            <label class="check-label"><input type="checkbox" id="custom-problems-check" value="egna-uppgifter"><span>Egna uppgifter</span></label>
+          </div>
+          <!-- Egna uppgifter import (inline) -->
+          <div class="inline-sub hidden" id="egna-uppgifter-group-label">
+            <div class="inline-sub-title">Import</div>
+            <div id="egna-uppgifter-section">
+              <p class="implicit-hint" style="margin-bottom:0.5rem">Importera från CSV/Excel (kolumnerna <strong>Fråga</strong> och <strong>Svar</strong>). Valfri kolumn: <strong>Område</strong>.</p>
+              <button type="button" id="custom-download-template-btn" class="clear-areas-btn" style="margin-bottom:0.35rem">Ladda ner mall (CSV)</button>
+              <label class="section-label" style="display:block; margin-top:0.5rem">Namn på set</label>
+              <input type="text" id="custom-set-name" placeholder="T.ex. Vecka 12" style="width:100%; font-size:0.85rem; padding:0.3rem 0.4rem; box-sizing:border-box; border:1px solid rgba(255,255,255,0.15); border-radius:4px; background:rgba(255,255,255,0.06); color:var(--menu-text)">
+              <label class="section-label" style="display:block; margin-top:0.5rem">Importera fil</label>
+              <input type="file" id="custom-problems-file-input" accept=".csv,.txt,text/csv" style="font-size:0.85rem; max-width:100%">
+              <label class="section-label" style="display:block; margin-top:0.75rem">eller klistra in CSV</label>
+              <textarea id="custom-problems-paste" rows="4" placeholder="Fråga,Svar,Område&#10;Emma har 12 pennor...&#10;" style="width:100%; font-size:0.85rem; resize:vertical; box-sizing:border-box; background:rgba(255,255,255,0.06); color:var(--menu-text); border:1px solid rgba(255,255,255,0.15); border-radius:4px"></textarea>
+              <button type="button" id="custom-import-paste-btn" class="clear-areas-btn" style="margin-top:0.35rem">Importera från text</button>
+              <p id="custom-problems-status" class="implicit-hint" style="margin-top:0.5rem"></p>
+              <div id="custom-sets-list" style="margin-top:0.75rem"></div>
+            </div>
           </div>
         </div>
 
       </div>
       <p id="area-implicit-hint" class="implicit-hint hidden">Inget markerat — blandar automatiskt mellan alla områden</p>
-    </section>
-
-    <!-- ── SUBINSTÄLLNINGAR: ADD / SUB ──────────────── -->
-    <div class="menu-group-label" id="addsub-group-label">Addition &amp; subtraktion – nivå</div>
-
-    <section class="menu-section" id="addsub-section">
-      <div id="addsub-mode-checkboxes">
-        <label class="check-label">
-          <input type="checkbox" value="standard" checked>
-          <span>Standard</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="uppstallning">
-          <span>Uppställning</span>
-        </label>
-        <div id="addsub-vaxling-wrap" class="specific-tables-wrap hidden">
-          <div class="specific-tables-label">Växling:</div>
-          <div id="addsub-vaxling-checkboxes">
-            <label class="check-label"><input type="checkbox" value="med" checked><span>Med växling</span></label>
-            <label class="check-label"><input type="checkbox" value="utan"><span>Utan växling</span></label>
-          </div>
-        </div>
-        <label class="check-label">
-          <input type="checkbox" value="decimaler">
-          <span>Decimaler (Åk 4+)</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="flersteg">
-          <span>Flerstegsaddition (Åk 3+)</span>
-        </label>
-      </div>
-      <p id="addsub-implicit-hint" class="implicit-hint hidden">Inget valt — Standard används</p>
-    </section>
-
-    <!-- ── SUBINSTÄLLNINGAR: MULT / DIV ──────────────── -->
-    <div class="menu-group-label" id="multdiv-group-label">Multiplikation &amp; division – nivå</div>
-
-    <section class="menu-section" id="multdiv-section">
-      <div id="multdiv-mode-checkboxes">
-        <label class="check-label">
-          <input type="checkbox" value="tables-basic" checked>
-          <span>Tabeller 1–9</span>
-        </label>
-        <div id="specific-tables-wrap" class="specific-tables-wrap hidden">
-          <div class="specific-tables-label">Välj tabeller:</div>
-          <div id="specific-tables-checkboxes" class="specific-tables-grid">
-            <label class="check-label check-label--sm"><input type="checkbox" value="1" name="specific-table"><span>1</span></label>
-            <label class="check-label check-label--sm"><input type="checkbox" value="2" name="specific-table" checked><span>2</span></label>
-            <label class="check-label check-label--sm"><input type="checkbox" value="3" name="specific-table" checked><span>3</span></label>
-            <label class="check-label check-label--sm"><input type="checkbox" value="4" name="specific-table" checked><span>4</span></label>
-            <label class="check-label check-label--sm"><input type="checkbox" value="5" name="specific-table" checked><span>5</span></label>
-            <label class="check-label check-label--sm"><input type="checkbox" value="6" name="specific-table" checked><span>6</span></label>
-            <label class="check-label check-label--sm"><input type="checkbox" value="7" name="specific-table" checked><span>7</span></label>
-            <label class="check-label check-label--sm"><input type="checkbox" value="8" name="specific-table" checked><span>8</span></label>
-            <label class="check-label check-label--sm"><input type="checkbox" value="9" name="specific-table" checked><span>9</span></label>
-          </div>
-        </div>
-        <label class="check-label">
-          <input type="checkbox" value="tables-ten">
-          <span>Mult/div med 10 och 100</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="tables-large">
-          <span>Stora tal (flersiffrigt)</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="double-half">
-          <span>Dubbelt &amp; hälften</span>
-        </label>
-        <label class="check-label">
-          <input type="checkbox" value="bild-mult">
-          <span>Vilken multiplikation visar bilden?</span>
-        </label>
-      </div>
-      <p id="multdiv-implicit-hint" class="implicit-hint hidden">Inget valt — Alla tabeller används</p>
-      <label class="check-label check-label--sep" id="division-rest-label">
-        <input type="checkbox" id="division-rest-check">
-        <span>Division med rest</span>
-      </label>
-    </section>
-
-    <!-- ── SUBINSTÄLLNINGAR: GEOMETRI ────────────────── -->
-    <div class="menu-group-label" id="geometri-group-label">Geometri – frågetyp</div>
-
-    <section class="menu-section" id="geometri-section">
-      <div id="geometri-type-checkboxes">
-        <label class="check-label"><input type="checkbox" value="area"><span>Area</span></label>
-        <label class="check-label"><input type="checkbox" value="perimeter"><span>Omkrets</span></label>
-        <label class="check-label"><input type="checkbox" value="kropp"><span>Namnge kroppar <small>(Åk 3+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="klassificering"><span>Klassificera figurer <small>(Åk 4+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="vinklar"><span>Vinklar <small>(Åk 4+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="volym"><span>Volym <small>(Åk 5+)</small></span></label>
-      </div>
-      <p id="geometri-implicit-hint" class="implicit-hint hidden">Inget valt — Area och omkrets används</p>
-    </section>
-
-    <div class="menu-group-label" id="klocka-group-label">Klocka – visningsläge</div>
-
-    <section class="menu-section" id="klocka-section">
-      <div id="klocka-type-checkboxes">
-        <label class="check-label"><input type="checkbox" value="analog"><span>Analogt</span></label>
-        <label class="check-label"><input type="checkbox" value="digital"><span>Digitalt</span></label>
-      </div>
-      <p id="klocka-implicit-hint" class="implicit-hint hidden">Inget valt — Blandat används</p>
-    </section>
-
-    <!-- ── SUBINSTÄLLNINGAR: BRÅK ───────────────────── -->
-    <div class="menu-group-label" id="brak-group-label">Bråk – delmoment</div>
-
-    <section class="menu-section" id="brak-section">
-      <div id="brak-type-checkboxes">
-        <label class="check-label"><input type="checkbox" value="name" checked><span>Namnge bråk</span></label>
-        <label class="check-label"><input type="checkbox" value="order-same-den" checked><span>Storleksordna – lika nämnare <small>(Åk 3+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="order-diff-den" checked><span>Storleksordna – olika nämnare <small>(Åk 3+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="add-same-den" checked><span>Addition – lika nämnare <small>(Åk 4+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="sub-same-den" checked><span>Subtraktion – lika nämnare <small>(Åk 4+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="compare" checked><span>Jämföra bråk <small>(Åk 4+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="fraction-of-whole" checked><span>Bråk av heltal <small>(Åk 4+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="simplify" checked><span>Förenkla bråk <small>(Åk 4+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="add-diff-den" checked><span>Addition – olika nämnare <small>(Åk 5+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="sub-diff-den" checked><span>Subtraktion – olika nämnare <small>(Åk 5+)</small></span></label>
-        <label class="check-label"><input type="checkbox" value="to-mixed" checked><span>Blandat tal <small>(Åk 6)</small></span></label>
-      </div>
-      <p id="brak-implicit-hint" class="implicit-hint hidden">Inget valt — Alla delmoment för vald åk används</p>
-    </section>
-
-    <!-- ── SUBINSTÄLLNINGAR: PRIORITET ──────────────── -->
-    <div class="menu-group-label" id="prioritet-group-label">Prioritetsregler – räknesätt</div>
-
-    <section class="menu-section" id="prioritet-section">
-      <div id="prioritet-ops-checkboxes">
-        <label class="check-label"><input type="checkbox" value="mult" checked><span>Multiplikation</span></label>
-        <label class="check-label"><input type="checkbox" value="div" checked><span>Division <small>(Åk 3+)</small></span></label>
-      </div>
-    </section>
-
-    <!-- ── STATISTIK – diagramtyp ──────────────── -->
-    <div class="menu-group-label" id="statistik-group-label">Statistik – diagramtyp</div>
-
-    <section class="menu-section" id="statistik-section">
-      <div id="statistik-types-checkboxes">
-        <label class="check-label"><input type="checkbox" value="bar" checked><span>Stapeldiagram</span></label>
-        <label class="check-label"><input type="checkbox" value="freq-table" checked><span>Frekvenstabell</span></label>
-        <label class="check-label"><input type="checkbox" value="pie-chart" checked><span>Cirkeldiagram</span></label>
-      </div>
-    </section>
-
-    <!-- ── EGNA UPPGIFTER (sub-section, visas när checkboxen i area-listan är ibockad) ── -->
-    <div class="menu-group-label hidden" id="egna-uppgifter-group-label">Egna uppgifter – import</div>
-    <section class="menu-section hidden" id="egna-uppgifter-section">
-      <p class="implicit-hint" style="margin-bottom:0.5rem">Importera från CSV/Excel (kolumnerna <strong>Fråga</strong> och <strong>Svar</strong>). Valfri kolumn: <strong>Område</strong>.</p>
-      <button type="button" id="custom-download-template-btn" class="clear-areas-btn" style="margin-bottom:0.35rem">Ladda ner mall (CSV)</button>
-      <label class="section-label" style="display:block; margin-top:0.5rem">Namn på set</label>
-      <input type="text" id="custom-set-name" placeholder="T.ex. Vecka 12" style="width:100%; font-size:0.85rem; padding:0.3rem 0.4rem; box-sizing:border-box; border:1px solid #ccc; border-radius:4px">
-      <label class="section-label" style="display:block; margin-top:0.5rem">Importera fil</label>
-      <input type="file" id="custom-problems-file-input" accept=".csv,.txt,text/csv" style="font-size:0.85rem; max-width:100%">
-      <label class="section-label" style="display:block; margin-top:0.75rem">eller klistra in CSV</label>
-      <textarea id="custom-problems-paste" rows="4" placeholder="Fråga,Svar,Område&#10;Emma har 12 pennor...&#10;" style="width:100%; font-size:0.85rem; resize:vertical; box-sizing:border-box"></textarea>
-      <button type="button" id="custom-import-paste-btn" class="clear-areas-btn" style="margin-top:0.35rem">Importera från text</button>
-      <p id="custom-problems-status" class="implicit-hint" style="margin-top:0.5rem"></p>
-      <div id="custom-sets-list" style="margin-top:0.75rem"></div>
     </section>
 
     <!-- ── PEDAGOGISKA VERKTYG ────────────────────────── -->
@@ -395,26 +379,50 @@
 
     <!-- ── VERKTYG ─────────────────────────────────── -->
     <div class="menu-group-label">Verktyg</div>
-    <section class="menu-section">
-      <a href="arbetsblad.html" target="_blank" class="check-label check-label--featured" style="text-decoration:none;display:flex;gap:0.6rem;align-items:center">
-        <span style="font-size:1.1rem">📄</span>
-        <span>Skapa arbetsblad<br><small>Generera en utskriftsvänlig stencil med slumpmässiga uppgifter</small></span>
-      </a>
-    </section>
+    <section class="menu-section tool-cards">
 
-    <section class="menu-section">
-      <button type="button" id="gg-create-btn" class="clear-areas-btn">Skapa genomgång</button>
-      <div id="gg-menu-list" class="gg-menu-list"></div>
-      <p id="gg-menu-empty" class="implicit-hint">Inga sparade genomgångar</p>
-    </section>
+      <div class="tool-card">
+        <div class="tool-card-text">
+          <span class="tool-card-title">Arbetsblad</span>
+          <span class="tool-card-desc">Skapa en utskriftsvänlig stencil med slumpmässiga uppgifter utifrån dina valda inställningar.</span>
+        </div>
+        <a href="arbetsblad.html" target="_blank" class="tool-card-action">Skapa</a>
+      </div>
 
-    <section class="menu-section">
-      <label class="section-label">Livesession (elevsvar)</label>
-      <button id="session-start-btn" class="clear-areas-btn" type="button">Starta livesession</button>
-      <p id="session-code-text" class="implicit-hint hidden"></p>
-      <button id="session-send-problem-btn" class="clear-areas-btn" type="button" disabled style="margin-top:0.5rem">
-        Skicka aktuell uppgift till elever
-      </button>
+      <div class="tool-card tool-card--expandable" id="gg-tool-card">
+        <div class="tool-card-main">
+          <div class="tool-card-text">
+            <span class="tool-card-title">Genomgång</span>
+            <span class="tool-card-desc">Förbered en serie uppgifter i förväg och stega igenom dem under lektionen.</span>
+            <span id="gg-menu-empty" class="tool-card-meta">Inga sparade</span>
+          </div>
+          <button type="button" id="gg-create-btn" class="tool-card-action">Skapa</button>
+        </div>
+        <button type="button" id="gg-expand-btn" class="tool-card-expand hidden" title="Visa sparade genomgångar">
+          <span class="tool-card-expand-chevron">&#9662;</span>
+        </button>
+        <div id="gg-menu-list" class="gg-menu-list tool-card-drawer"></div>
+      </div>
+
+      <div class="tool-card tool-card--expandable" id="session-tool-card">
+        <div class="tool-card-main">
+          <div class="tool-card-text">
+            <span class="tool-card-title">Livesession</span>
+            <span class="tool-card-desc">Eleverna svarar på sina enheter i realtid — du ser svaren direkt på skärmen.</span>
+            <span id="session-code-text" class="tool-card-meta hidden"></span>
+          </div>
+          <button id="session-start-btn" class="tool-card-action" type="button">Starta</button>
+        </div>
+        <button type="button" id="session-expand-btn" class="tool-card-expand hidden" title="Visa sessionsverktyg">
+          <span class="tool-card-expand-chevron">&#9662;</span>
+        </button>
+        <div class="tool-card-drawer" id="session-drawer">
+          <button id="session-send-problem-btn" class="tool-card-action tool-card-action--full" type="button">
+            Skicka uppgift till elever
+          </button>
+        </div>
+      </div>
+
     </section>
 
     <section class="menu-section" id="session-submissions-section" style="display:none">

@@ -140,9 +140,14 @@
         const { docRef, code } = result;
         sessionId = docRef.id;
         problemIndex = 0;
-        codeText.textContent = `Sessionskod för elever: ${code}`;
+        codeText.textContent = `Kod: ${code}`;
         codeText.classList.remove('hidden');
         setSendEnabled(true);
+        // Visa expand-knapp och expandera kortet
+        const expandBtn = $('session-expand-btn');
+        const card = $('session-tool-card');
+        if (expandBtn) expandBtn.classList.remove('hidden');
+        if (card) card.classList.add('tool-card--expanded');
         submissionsSection.style.display = 'block';
         attachSubmissionsListener();
         // Visa "Nästa uppgift"-knappen om en uppgift redan visas
@@ -154,6 +159,15 @@
     });
 
     sendBtn.addEventListener('click', sendCurrentProblem);
+
+    // Expand-knapp för livesession
+    const sessionExpandBtn = $('session-expand-btn');
+    if (sessionExpandBtn) {
+      sessionExpandBtn.addEventListener('click', () => {
+        const card = $('session-tool-card');
+        if (card) card.classList.toggle('tool-card--expanded');
+      });
+    }
 
     window.KlassrumsSessionTeacher = {
       hasActiveSession: () => !!sessionId,

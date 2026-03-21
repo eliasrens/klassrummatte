@@ -189,7 +189,7 @@ body.menu-open #menu-overlay {
   left: 0;
   height: 100vh;
   width: var(--menu-width);
-  background: var(--menu-bg);
+  background: linear-gradient(175deg, #1e2a4a 0%, #172035 35%, #111827 65%, #0d1117 100%);
   color: var(--menu-text);
   transform: translateX(calc(-1 * var(--menu-width)));
   transition: transform var(--transition);
@@ -200,6 +200,25 @@ body.menu-open #menu-overlay {
   display: flex;
   flex-direction: column;
   gap: 0;
+}
+
+/* Finare scrollbar */
+#settings-menu::-webkit-scrollbar {
+  width: 4px;
+}
+#settings-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+#settings-menu::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+#settings-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+#settings-menu {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
 }
 
 body.menu-open #settings-menu {
@@ -293,21 +312,79 @@ select option {
 
 /* Kategorier i matematikområden */
 .area-category {
-  margin-bottom: 0.05rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 .area-category-label {
-  font-size: 0.58rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.28);
-  padding: 0.55rem 0.5rem 0.1rem;
+  color: rgba(255,255,255,0.4);
+  padding: 0.6rem 0.5rem 0.35rem;
+  cursor: pointer;
+  transition: color 0.15s;
+  user-select: none;
+}
+.area-category-label:hover {
+  color: rgba(255,255,255,0.7);
+}
+.area-category-label::before {
+  content: '\25B8';
+  font-size: 0.55rem;
+  transition: transform 0.2s ease;
+  color: rgba(255,255,255,0.25);
+}
+.area-category.area-category--open .area-category-label::before {
+  transform: rotate(90deg);
+}
+
+.area-category-desc {
+  font-weight: 400;
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: rgba(255,255,255,0.18);
 }
 
 .area-grid-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 0.25rem;
+}
+.area-category--open .area-grid-2col {
+  max-height: 600px;
+  padding-bottom: 0.3rem;
+}
+
+/* Sub-inställningar inline under kategori */
+.area-category .inline-sub {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0 0.5rem;
+}
+.area-category--open .inline-sub:not(.hidden) {
+  max-height: 1200px;
+}
+
+.inline-sub-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  padding: 0.5rem 0 0.2rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 0.2rem;
 }
 
 .check-label {
@@ -1003,6 +1080,173 @@ body.extra-visible #stage {
 .clear-areas-btn:hover {
   opacity: 1;
   color: var(--clr-accent, #e63946);
+}
+
+/* === Valda områden – taggar === */
+.selected-areas-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding-bottom: 0.5rem;
+}
+.selected-areas-tags:empty {
+  display: none;
+}
+.selected-area-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(42, 157, 143, 0.25);
+  border: 1px solid rgba(42, 157, 143, 0.35);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.selected-area-tag:hover {
+  background: rgba(230, 57, 70, 0.3);
+  border-color: rgba(230, 57, 70, 0.5);
+}
+.selected-area-tag::after {
+  content: '\00d7';
+  font-size: 0.85rem;
+  line-height: 1;
+  opacity: 0.5;
+}
+.selected-area-tag:hover::after {
+  opacity: 1;
+}
+
+/* === Verktygskort === */
+.tool-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tool-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tool-card:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.tool-card-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.tool-card-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.tool-card-desc {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.35;
+}
+
+.tool-card-action {
+  flex-shrink: 0;
+  min-width: 4rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--accent-2);
+  background: rgba(69, 123, 157, 0.12);
+  border: 1px solid rgba(69, 123, 157, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+.tool-card-action:hover {
+  background: rgba(69, 123, 157, 0.25);
+  color: #fff;
+}
+.tool-card-action:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.tool-card-meta {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.25);
+  font-style: italic;
+}
+
+/* Expanderbart verktygskort (genomgång) */
+.tool-card--expandable {
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+}
+.tool-card--expandable .tool-card-main {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  width: 100%;
+}
+
+.tool-card-expand {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0.15rem 0;
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  cursor: pointer;
+  color: rgba(255,255,255,0.3);
+  transition: color 0.15s, background 0.15s;
+}
+.tool-card-expand:hover {
+  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.03);
+}
+.tool-card-expand-chevron {
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+}
+.tool-card--expanded .tool-card-expand-chevron {
+  transform: rotate(180deg);
+}
+
+.tool-card-drawer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0 0.7rem;
+}
+.tool-card--expanded .tool-card-drawer {
+  max-height: 500px;
+  padding: 0.3rem 0.7rem 0.5rem;
+}
+
+.tool-card-action--full {
+  width: 100%;
+  text-align: center;
+  margin-top: -0.2rem;
 }
 
 /* === Implicit standardhint === */
