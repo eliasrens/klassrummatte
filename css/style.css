@@ -193,43 +193,109 @@ body.menu-open #menu-overlay {
   color: var(--menu-text);
   transform: translateX(calc(-1 * var(--menu-width)));
   transition: transform var(--transition);
+  visibility: hidden;
   z-index: 200;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 1rem;
+  overflow: hidden;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
-/* Finare scrollbar */
-#settings-menu::-webkit-scrollbar {
-  width: 4px;
+/* Wider menu when detail panel is visible – no transition to avoid glitch */
+#settings-menu.has-detail {
+  width: calc(var(--menu-width) + 260px);
+  transform: translateX(calc(-1 * (var(--menu-width) + 260px)));
 }
-#settings-menu::-webkit-scrollbar-track {
-  background: transparent;
+body.menu-open #settings-menu.has-detail {
+  transform: translateX(0);
 }
-#settings-menu::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
-  border-radius: 4px;
+
+/* Menu body: two-column flex */
+#menu-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
-#settings-menu::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.2);
+#menu-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem;
 }
-#settings-menu {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
+/* Scrollbar for menu-main */
+#menu-main::-webkit-scrollbar { width: 4px; }
+#menu-main::-webkit-scrollbar-track { background: transparent; }
+#menu-main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+#menu-main::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+#menu-main { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+
+/* Detail panel (right side of menu) */
+#menu-detail-panel {
+  width: 260px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-left: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(175deg, #172035 0%, #111827 50%, #0d1117 100%);
+  display: none;
+  flex-direction: column;
 }
+#menu-detail-panel.visible {
+  display: flex;
+}
+#menu-detail-panel::-webkit-scrollbar { width: 4px; }
+#menu-detail-panel::-webkit-scrollbar-track { background: transparent; }
+#menu-detail-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+#menu-detail-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+#menu-detail-panel { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+
+.detail-panel-header {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.detail-panel-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.45);
+}
+#detail-panel-content {
+  flex: 1;
+  padding: 0.5rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+/* Detail panel sub-setting blocks */
+#detail-panel-content .detail-block {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+#detail-panel-content .detail-block:last-child { border-bottom: none; }
+#detail-panel-content .detail-block-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  margin-bottom: 0.3rem;
+}
+
+/* (scrollbar styling is on #menu-main and #menu-detail-panel) */
 
 body.menu-open #settings-menu {
   transform: translateX(0);
+  visibility: visible;
 }
 
 .menu-header {
   display: flex;
   align-items: baseline;
   border-bottom: 1px solid var(--menu-border);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
+  padding: 3.5rem 1rem 0.75rem;
+  flex-shrink: 0;
 }
 #settings-menu h2 {
   font-size: 1rem;
@@ -237,7 +303,7 @@ body.menu-open #settings-menu {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.85);
-  padding: 3.5rem 0.5rem 0.75rem;
+  padding: 0;
   flex: 1;
 }
 
@@ -365,15 +431,21 @@ select option {
   padding-bottom: 0.3rem;
 }
 
-/* Sub-inställningar inline under kategori */
-.area-category .inline-sub {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  padding: 0 0.5rem;
+/* Sub-inställningar i detaljpanelen */
+.inline-sub {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.area-category--open .inline-sub:not(.hidden) {
-  max-height: 1200px;
+.inline-sub:last-child { border-bottom: none; }
+.inline-sub.hidden { display: none; }
+.inline-sub .check-label.hidden { display: none; }
+
+.grade-hint {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.3);
+  font-style: italic;
+  padding: 0.3rem 0 0;
+  margin: 0;
 }
 
 .inline-sub-title {
@@ -382,9 +454,8 @@ select option {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent-2);
-  padding: 0.5rem 0 0.2rem;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  margin-top: 0.2rem;
+  padding: 0 0 0.3rem;
+  margin: 0;
 }
 
 .check-label {
@@ -1861,6 +1932,9 @@ body.extra-visible .session-counter {
     --menu-width: min(520px, 96vw);
     --extra-width: 240px;
   }
+  /* Detail panel + wider menu on narrow screens */
+  #menu-detail-panel { width: min(220px, 40vw); }
+  #settings-menu.has-detail { width: calc(var(--menu-width) + min(220px, 40vw)); }
 }
 
 /* === Negativa tal === */

@@ -192,6 +192,41 @@ const Menu = (() => {
     });
   }
 
+  /** Döljer sub-setting labels med data-min-grade som inte matchar vald årskurs.
+   *  Visar en hint-text per .inline-sub som sammanfattar vilka åk som saknas. */
+  function updateGradeVisibility() {
+    const s = Settings.get();
+    const grade = s.gradeSelected ? s.grade : null;
+
+    document.querySelectorAll('.inline-sub').forEach(sub => {
+      const labels = sub.querySelectorAll('.check-label[data-min-grade]');
+      if (!labels.length) return;
+
+      let minHiddenGrade = Infinity;
+      labels.forEach(label => {
+        const minG = parseInt(label.dataset.minGrade, 10);
+        const hidden = grade !== null && minG > grade;
+        label.classList.toggle('hidden', hidden);
+        const cb = label.querySelector('input');
+        if (hidden && cb) { cb.disabled = true; }
+        if (hidden && minG < minHiddenGrade) minHiddenGrade = minG;
+      });
+
+      // Hantera hint-texten
+      let hint = sub.querySelector('.grade-hint');
+      if (minHiddenGrade < Infinity) {
+        if (!hint) {
+          hint = document.createElement('p');
+          hint.className = 'grade-hint';
+          sub.appendChild(hint);
+        }
+        hint.textContent = 'Fler val finns från åk ' + minHiddenGrade + '+';
+      } else if (hint) {
+        hint.remove();
+      }
+    });
+  }
+
   function updateAddSubModeAvailability() {
     const s = Settings.get();
     const grade = s.grade;
@@ -248,12 +283,27 @@ const Menu = (() => {
     const showStatistik = areas.includes('statistik');
     const showEgna     = Settings.isCustomProblemsEnabled();
 
+    const detailPanel = document.getElementById('menu-detail-panel');
+    const detailContent = document.getElementById('detail-panel-content');
+
     function setSection(labelId, sectionId, show) {
       const el = document.getElementById(labelId);
       if (!el) return;
-      // inline-sub variant: labelId pekar på wrapper-div med class inline-sub
       if (el.classList.contains('inline-sub')) {
-        el.classList.toggle('hidden', !show);
+        if (show) {
+          // Flytta till detaljpanelen
+          if (!el.parentNode || el.parentNode.id !== 'detail-panel-content') {
+            if (!el._originalParent) el._originalParent = el.parentNode;
+            detailContent.appendChild(el);
+          }
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+          // Flytta tillbaka till ursprunglig plats
+          if (el._originalParent && el.parentNode && el.parentNode.id === 'detail-panel-content') {
+            el._originalParent.appendChild(el);
+          }
+        }
       } else {
         const sec = document.getElementById(sectionId);
         if (show) {
@@ -275,7 +325,14 @@ const Menu = (() => {
     setSection('statistik-group-label', 'statistik-section', showStatistik);
     setSection('egna-uppgifter-group-label', 'egna-uppgifter-section', showEgna);
     document.getElementById('division-rest-label').classList.toggle('hidden', !showDivRest);
+
+    // Visa/dölj detaljpanelen beroende på om det finns synliga sub-settings
+    const hasVisibleSubs = detailContent && detailContent.querySelector('.inline-sub:not(.hidden)');
+    if (detailPanel) detailPanel.classList.toggle('visible', !!hasVisibleSubs);
+    const settingsMenu = document.getElementById('settings-menu');
+    if (settingsMenu) settingsMenu.classList.toggle('has-detail', !!hasVisibleSubs);
     updateBrakTypeAvailability();
+    updateGradeVisibility();
     updateProblemlosningCheckbox();
   }
 
@@ -434,6 +491,7 @@ const Menu = (() => {
       updateBildstodCheckbox();
       updateAddSubModeAvailability();
       updateBrakTypeAvailability();
+      updateGradeVisibility();
       updateMenuConfiguredIndicator();
     });
 

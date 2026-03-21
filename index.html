@@ -41,6 +41,9 @@
       <button id="clear-areas-btn" class="clear-areas-btn" title="Återställer alla inställningar utom vald klass">Återställ allt</button>
     </div>
 
+    <div id="menu-body">
+    <div id="menu-main">
+
     <!-- ── LEKTIONSINSTÄLLNINGAR ──────────────────────── -->
     <div class="menu-group-label" id="grundinstallningar-group-label">Lektionsinställningar</div>
 
@@ -95,8 +98,8 @@
                     <label class="check-label"><input type="checkbox" value="utan"><span>Utan växling</span></label>
                   </div>
                 </div>
-                <label class="check-label"><input type="checkbox" value="decimaler"><span>Decimaler <small>(Åk 4+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="flersteg"><span>Flerstegsaddition <small>(Åk 3+)</small></span></label>
+                <label class="check-label" data-min-grade="4"><input type="checkbox" value="decimaler"><span>Decimaler <small>(Åk 4+)</small></span></label>
+                <label class="check-label" data-min-grade="3"><input type="checkbox" value="flersteg"><span>Flerstegsaddition <small>(Åk 3+)</small></span></label>
               </div>
               <p id="addsub-implicit-hint" class="implicit-hint hidden">Inget valt — Standard används</p>
             </div>
@@ -148,7 +151,7 @@
             <div id="prioritet-section">
               <div id="prioritet-ops-checkboxes">
                 <label class="check-label"><input type="checkbox" value="mult" checked><span>Multiplikation</span></label>
-                <label class="check-label"><input type="checkbox" value="div" checked><span>Division <small>(Åk 3+)</small></span></label>
+                <label class="check-label" data-min-grade="3"><input type="checkbox" value="div" checked><span>Division <small>(Åk 3+)</small></span></label>
               </div>
             </div>
           </div>
@@ -167,16 +170,16 @@
             <div id="brak-section">
               <div id="brak-type-checkboxes">
                 <label class="check-label"><input type="checkbox" value="name" checked><span>Namnge bråk</span></label>
-                <label class="check-label"><input type="checkbox" value="order-same-den" checked><span>Ordna – lika nämn. <small>(Åk 3+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="order-diff-den" checked><span>Ordna – olika nämn. <small>(Åk 3+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="add-same-den" checked><span>Add – lika nämn. <small>(Åk 4+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="sub-same-den" checked><span>Sub – lika nämn. <small>(Åk 4+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="compare" checked><span>Jämföra bråk <small>(Åk 4+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="fraction-of-whole" checked><span>Bråk av heltal <small>(Åk 4+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="simplify" checked><span>Förenkla bråk <small>(Åk 4+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="add-diff-den" checked><span>Add – olika nämn. <small>(Åk 5+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="sub-diff-den" checked><span>Sub – olika nämn. <small>(Åk 5+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="to-mixed" checked><span>Blandat tal <small>(Åk 6)</small></span></label>
+                <label class="check-label" data-min-grade="3"><input type="checkbox" value="order-same-den" checked><span>Ordna – lika nämn. <small>(Åk 3+)</small></span></label>
+                <label class="check-label" data-min-grade="3"><input type="checkbox" value="order-diff-den" checked><span>Ordna – olika nämn. <small>(Åk 3+)</small></span></label>
+                <label class="check-label" data-min-grade="4"><input type="checkbox" value="add-same-den" checked><span>Add – lika nämn. <small>(Åk 4+)</small></span></label>
+                <label class="check-label" data-min-grade="4"><input type="checkbox" value="sub-same-den" checked><span>Sub – lika nämn. <small>(Åk 4+)</small></span></label>
+                <label class="check-label" data-min-grade="4"><input type="checkbox" value="compare" checked><span>Jämföra bråk <small>(Åk 4+)</small></span></label>
+                <label class="check-label" data-min-grade="4"><input type="checkbox" value="fraction-of-whole" checked><span>Bråk av heltal <small>(Åk 4+)</small></span></label>
+                <label class="check-label" data-min-grade="4"><input type="checkbox" value="simplify" checked><span>Förenkla bråk <small>(Åk 4+)</small></span></label>
+                <label class="check-label" data-min-grade="5"><input type="checkbox" value="add-diff-den" checked><span>Add – olika nämn. <small>(Åk 5+)</small></span></label>
+                <label class="check-label" data-min-grade="5"><input type="checkbox" value="sub-diff-den" checked><span>Sub – olika nämn. <small>(Åk 5+)</small></span></label>
+                <label class="check-label" data-min-grade="6"><input type="checkbox" value="to-mixed" checked><span>Blandat tal <small>(Åk 6)</small></span></label>
               </div>
               <p id="brak-implicit-hint" class="implicit-hint hidden">Inget valt — Alla delmoment för vald åk används</p>
             </div>
@@ -210,10 +213,10 @@
               <div id="geometri-type-checkboxes">
                 <label class="check-label"><input type="checkbox" value="area"><span>Area</span></label>
                 <label class="check-label"><input type="checkbox" value="perimeter"><span>Omkrets</span></label>
-                <label class="check-label"><input type="checkbox" value="kropp"><span>Namnge kroppar <small>(Åk 3+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="klassificering"><span>Klassificera figurer <small>(Åk 4+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="vinklar"><span>Vinklar <small>(Åk 4+)</small></span></label>
-                <label class="check-label"><input type="checkbox" value="volym"><span>Volym <small>(Åk 5+)</small></span></label>
+                <label class="check-label" data-min-grade="3"><input type="checkbox" value="kropp"><span>Namnge kroppar <small>(Åk 3+)</small></span></label>
+                <label class="check-label" data-min-grade="4"><input type="checkbox" value="klassificering"><span>Klassificera figurer <small>(Åk 4+)</small></span></label>
+                <label class="check-label" data-min-grade="4"><input type="checkbox" value="vinklar"><span>Vinklar <small>(Åk 4+)</small></span></label>
+                <label class="check-label" data-min-grade="5"><input type="checkbox" value="volym"><span>Volym <small>(Åk 5+)</small></span></label>
               </div>
               <p id="geometri-implicit-hint" class="implicit-hint hidden">Inget valt — Area och omkrets används</p>
             </div>
@@ -429,6 +432,15 @@
       <label class="section-label">Elevsvar (senaste uppgift)</label>
       <ul id="session-submissions-list" style="list-style:none; padding-left:0; max-height:160px; overflow-y:auto; font-size:0.8rem;"></ul>
     </section>
+
+    </div><!-- #menu-main -->
+    <div id="menu-detail-panel">
+      <div class="detail-panel-header">
+        <span class="detail-panel-title">Inställningar</span>
+      </div>
+      <div id="detail-panel-content"></div>
+    </div>
+    </div><!-- #menu-body -->
 
   </nav>
 
