@@ -208,7 +208,7 @@ const Menu = (() => {
         const hidden = grade !== null && minG > grade;
         label.classList.toggle('hidden', hidden);
         const cb = label.querySelector('input');
-        if (hidden && cb) { cb.disabled = true; }
+        if (cb) cb.disabled = hidden;
         if (hidden && minG < minHiddenGrade) minHiddenGrade = minG;
       });
 
