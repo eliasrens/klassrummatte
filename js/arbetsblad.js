@@ -32,11 +32,12 @@ const Arbetsblad = (() => {
       { id: 'oppna-utsagor', label: 'Öppna utsagor' },
       { id: 'talfoljd',      label: 'Talföljd' },
     ]},
-    { cat: 'Tal & samband', desc: 'bråk och procent', areas: [
+    { cat: 'Tal & samband', desc: 'bråk, procent, taluppfattning', areas: [
       { id: 'brak',         label: 'Bråk', hasSub: true },
       { id: 'procent',      label: 'Procent' },
       { id: 'tallinje',     label: 'Tallinje' },
       { id: 'talsorter',    label: 'Talsorter' },
+      { id: 'avrundning',   label: 'Avrundning' },
       { id: 'negativa-tal', label: 'Negativa tal' },
       { id: 'romerska',     label: 'Romerska siffror' },
     ]},
@@ -560,7 +561,8 @@ const Arbetsblad = (() => {
       } else if (problem) {
         // Visuella uppgifter (bild-mult, geometri, klocka, symmetri, etc.) behöver ej rutnät
         const VISUAL_TYPES = ['geometri', 'klocka', 'symmetri', 'koordinatsystem',
-          'statistik', 'sannolikhet', 'tallinje', 'talsorter', 'negativa-tal', 'romerska'];
+          'statistik', 'sannolikhet', 'tallinje', 'talsorter', 'negativa-tal', 'romerska',
+          'avrundning'];
         const isVisual = VISUAL_TYPES.includes(problem.type)
           || (problem.questionType === 'bild-mult');
         let gridAdded = false;

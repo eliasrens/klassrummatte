@@ -1078,6 +1078,13 @@ body:has(#ab-sidebar.has-detail:not(.hidden)) #empty-state {
 .ab-table .talsorter-display { font-size: 1rem; letter-spacing: 0.1em; }
 .ab-table .talsorter-question { font-size: 0.55rem; white-space: normal; }
 
+/* Avrundning */
+.ab-table .avrund-wrap { gap: 0.1cm; }
+.ab-table .avrund-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .avrund-choices { gap: 0.2cm; }
+.ab-table .avrund-choice { font-size: 0.7rem; padding: 0.1em 0.4em; border-width: 1px; border-radius: 4px; }
+.ab-table .avrund-answer { font-size: 0.7rem; }
+
 /* Negativa tal */
 .ab-table .negtal-question { font-size: 0.55rem; white-space: normal; margin: 0 0 0.1cm; }
 .ab-table .negtal-text { font-size: 0.55rem; white-space: normal; line-height: 1.2; max-width: none; }

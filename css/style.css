@@ -978,6 +978,39 @@ body.extra-visible .session-counter {
   font-weight: 700;
 }
 
+/* === Avrundning / uppskattning === */
+.avrund-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 2vw, 1.2rem);
+}
+.avrund-question {
+  font-size: clamp(1rem, 2.5vw, 1.7rem);
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+  text-align: center;
+}
+.avrund-choices {
+  display: flex;
+  gap: clamp(0.8rem, 2vw, 1.5rem);
+  justify-content: center;
+}
+.avrund-choice {
+  font-size: clamp(1.3rem, 3vw, 2.2rem);
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(255,255,255,0.08);
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 0.3em 0.8em;
+}
+.avrund-answer {
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  font-weight: 700;
+}
+
 /* === Elevsvar under uppgift (lärarvy) === */
 .session-submissions-main {
   position: absolute;
