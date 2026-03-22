@@ -92,42 +92,58 @@
 
   <!-- ── Sidopanel för arbetsblad (standard) ──────────────── -->
   <div id="ab-sidebar" class="no-print hidden">
-    <h3 class="sidebar-title">Inställningar</h3>
+    <div id="ab-sidebar-main">
+      <h3 class="sidebar-title">Inställningar</h3>
 
-    <div class="sidebar-section">
-      <div class="sidebar-section-label">Kolumner</div>
-      <select id="ab-cols">
-        <option value="2">2 per rad</option>
-        <option value="3">3 per rad</option>
-        <option value="4">4 per rad</option>
-      </select>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Kolumner</div>
+        <select id="ab-cols">
+          <option value="2">2 per rad</option>
+          <option value="3">3 per rad</option>
+          <option value="4">4 per rad</option>
+        </select>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Områden</div>
+        <div id="ab-area-checks"></div>
+        <select id="ab-import-gg" class="ab-import-gg hidden">
+          <option value="">Fyll i från sparad genomgång...</option>
+        </select>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Antal sidor</div>
+        <select id="ab-pages">
+          <option value="auto" selected>Auto</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+
+      <label class="sidebar-toggle-row">
+        <input type="checkbox" id="ab-show-grid" checked>
+        Visa uppställningsrutnät
+      </label>
+
+      <label class="sidebar-toggle-row">
+        <input type="checkbox" id="ab-show-svar">
+        Visa svarslinje
+      </label>
+
+      <label class="sidebar-toggle-row">
+        <input type="checkbox" id="ab-show-answers">
+        Inkludera svarsnyckel
+      </label>
+
+      <div class="sidebar-total">
+        Totalt: <strong id="ab-total-count">0</strong> uppgifter
+      </div>
     </div>
-
-    <div class="sidebar-section">
-      <div class="sidebar-section-label">Områden</div>
-      <div id="ab-area-checks"></div>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="sidebar-section-label">Antal sidor</div>
-      <select id="ab-pages">
-        <option value="auto" selected>Auto</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-      </select>
-    </div>
-
-    <label class="sidebar-toggle-row">
-      <input type="checkbox" id="ab-show-answers">
-      Inkludera svarsnyckel
-    </label>
-
-    <div class="sidebar-total">
-      Totalt: <strong id="ab-total-count">0</strong> uppgifter
-    </div>
+    <div id="ab-detail-panel"></div>
   </div>
 
   <!-- ── Sidopanel för starten ──────────────────────────────── -->
@@ -198,6 +214,9 @@
     <div class="sidebar-section pl-auto-only">
       <div class="sidebar-section-label">Områden</div>
       <div id="pl-area-checks"></div>
+      <select id="pl-import-gg" class="ab-import-gg hidden">
+        <option value="">Fyll i från sparad genomgång...</option>
+      </select>
     </div>
 
     <div class="sidebar-section">

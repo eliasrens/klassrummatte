@@ -21,180 +21,288 @@ const Arbetsblad = (() => {
   ];
 
   const AREA_CONFIG = [
-    { cat: 'Aritmetik', areas: [
-      { id: 'addition',       label: 'Addition' },
-      { id: 'subtraktion',    label: 'Subtraktion' },
-      { id: 'multiplikation', label: 'Multiplikation', subcats: [
-        { id: 'tables-basic',   label: 'Tabeller',       default: 0 },
-        { id: 'tables-large',   label: 'Stora tal',      default: 0 },
-      ]},
-      { id: 'division', label: 'Division', subcats: [
-        { id: 'tables-basic',   label: 'Tabeller',       default: 0 },
-        { id: 'tables-large',   label: 'Stora tal',      default: 0 },
-        { id: 'rest',           label: 'Med rest',        default: 0 },
-      ]},
+    { cat: 'Aritmetik', desc: 'de fyra räknesätten', areas: [
+      { id: 'addition',       label: 'Addition', hasSub: true },
+      { id: 'subtraktion',    label: 'Subtraktion', hasSub: true },
+      { id: 'multiplikation', label: 'Multiplikation', hasSub: true },
+      { id: 'division',       label: 'Division', hasSub: true },
     ]},
-    { cat: 'Algebra', areas: [
-      { id: 'prioritet',     label: 'Prioritetsregler' },
+    { cat: 'Algebra', desc: 'mönster och okända tal', areas: [
+      { id: 'prioritet',     label: 'Prioritetsregler', hasSub: true },
       { id: 'oppna-utsagor', label: 'Öppna utsagor' },
       { id: 'talfoljd',      label: 'Talföljd' },
     ]},
-    { cat: 'Tal & samband', areas: [
-      { id: 'brak',         label: 'Bråk' },
+    { cat: 'Tal & samband', desc: 'bråk och procent', areas: [
+      { id: 'brak',         label: 'Bråk', hasSub: true },
       { id: 'procent',      label: 'Procent' },
       { id: 'tallinje',     label: 'Tallinje' },
       { id: 'talsorter',    label: 'Talsorter' },
       { id: 'negativa-tal', label: 'Negativa tal' },
       { id: 'romerska',     label: 'Romerska siffror' },
     ]},
-    { cat: 'Geometri', areas: [
-      { id: 'geometri',         label: 'Geometri' },
+    { cat: 'Geometri', desc: 'former, area, omkrets', areas: [
+      { id: 'geometri',         label: 'Geometri', hasSub: true },
       { id: 'symmetri',         label: 'Symmetri' },
       { id: 'koordinatsystem',  label: 'Koordinatsystem' },
     ]},
-    { cat: 'Mått & tid', areas: [
-      { id: 'klocka',     label: 'Klocka' },
+    { cat: 'Mått & tid', desc: 'enheter och omvandling', areas: [
+      { id: 'klocka',     label: 'Klocka', hasSub: true },
       { id: 'matt-langd', label: 'Längd' },
       { id: 'matt-volym', label: 'Volym' },
       { id: 'matt-vikt',  label: 'Vikt' },
       { id: 'matt-tid',   label: 'Tid' },
       { id: 'matt-area',  label: 'Area-mått' },
     ]},
-    { cat: 'Statistik', areas: [
-      { id: 'statistik',   label: 'Statistik' },
+    { cat: 'Statistik', desc: 'diagram och chanser', areas: [
+      { id: 'statistik',   label: 'Statistik', hasSub: true },
       { id: 'sannolikhet', label: 'Sannolikhet' },
     ]},
   ];
 
+  // Sub-settings per område (visas i detaljpanelen)
+  const SUB_SETTINGS = {
+    addition: {
+      title: 'Addition & subtraktion',
+      settingsKey: 'addSubMode',
+      options: [
+        { value: 'standard', label: 'Standard', checked: true },
+        { value: 'uppstallning', label: 'Uppställning' },
+        { value: 'decimaler', label: 'Decimaler', minGrade: 4 },
+        { value: 'flersteg', label: 'Flerstegsaddition', minGrade: 3 },
+      ],
+    },
+    subtraktion: {
+      title: 'Addition & subtraktion',
+      settingsKey: 'addSubMode',
+      shared: 'addition',  // delar inställningar med addition
+    },
+    multiplikation: {
+      title: 'Multiplikation & division',
+      settingsKey: 'multDivMode',
+      options: [
+        { value: 'tables-basic', label: 'Tabeller 1–9', checked: true },
+        { value: 'tables-ten', label: 'Mult/div med 10 och 100' },
+        { value: 'tables-large', label: 'Stora tal (flersiffrigt)' },
+        { value: 'double-half', label: 'Dubbelt & hälften' },
+        { value: 'bild-mult', label: 'Vilken mult. visar bilden?' },
+      ],
+    },
+    division: {
+      title: 'Multiplikation & division',
+      settingsKey: 'multDivMode',
+      shared: 'multiplikation',
+    },
+    prioritet: {
+      title: 'Prioritet – räknesätt',
+      settingsKey: 'prioritetOps',
+      options: [
+        { value: 'mult', label: 'Med × och ÷', checked: true },
+        { value: 'div', label: 'Med ÷', checked: true },
+        { value: 'parens', label: 'Med parenteser' },
+      ],
+    },
+    brak: {
+      title: 'Bråk – delmoment',
+      settingsKey: 'brakTypes',
+      options: [
+        { value: 'name', label: 'Namnge bråk', checked: true },
+        { value: 'add-same-den', label: 'Add – lika nämn.', checked: true, minGrade: 4 },
+        { value: 'sub-same-den', label: 'Sub – lika nämn.', checked: true, minGrade: 4 },
+        { value: 'compare', label: 'Jämföra bråk', checked: true, minGrade: 4 },
+        { value: 'fraction-of-whole', label: 'Bråk av heltal', checked: true, minGrade: 4 },
+        { value: 'simplify', label: 'Förenkla bråk', checked: true, minGrade: 4 },
+        { value: 'add-diff-den', label: 'Add – olika nämn.', checked: true, minGrade: 5 },
+        { value: 'to-mixed', label: 'Blandat tal', checked: true, minGrade: 6 },
+      ],
+    },
+    geometri: {
+      title: 'Geometri – frågetyp',
+      settingsKey: 'geometriTypes',
+      options: [
+        { value: 'area', label: 'Area', checked: true },
+        { value: 'perimeter', label: 'Omkrets', checked: true },
+        { value: 'volume', label: 'Namnge kroppar', minGrade: 3 },
+      ],
+    },
+    klocka: {
+      title: 'Klocka – visningsläge',
+      settingsKey: 'klockaTypes',
+      options: [
+        { value: 'analog', label: 'Analogt', checked: true },
+        { value: 'digital', label: 'Digitalt', checked: true },
+      ],
+    },
+    statistik: {
+      title: 'Statistik – diagramtyp',
+      settingsKey: 'statistikTypes',
+      options: [
+        { value: 'bar', label: 'Stapeldiagram', checked: true },
+        { value: 'freq-table', label: 'Frekvenstabell', checked: true },
+        { value: 'pie-chart', label: 'Cirkeldiagram', checked: true },
+      ],
+    },
+  };
+
   // =========================================================
-  //  Bygg områdes-popup dynamiskt
+  //  Bygg områdes-sidebar med accordion + detaljpanel
   // =========================================================
   function buildAbSidebar() {
     const container = document.getElementById('ab-area-checks');
     if (!container) return;
     container.innerHTML = '';
 
-    AREA_CONFIG.forEach(category => {
+    AREA_CONFIG.forEach((category, catIdx) => {
+      const cat = document.createElement('div');
+      cat.className = 'ab-category' + (catIdx === 0 ? ' ab-category--open' : '');
+
+      // Kategori-label (klickbar accordion)
       const catLabel = document.createElement('div');
-      catLabel.className = 'sidebar-cat-label';
-      catLabel.textContent = category.cat;
-      container.appendChild(catLabel);
+      catLabel.className = 'ab-category-label';
+      catLabel.innerHTML = category.cat + (category.desc
+        ? ' <span class="ab-category-desc">(' + category.desc + ')</span>' : '');
+      cat.appendChild(catLabel);
+
+      // Rutnät med checkboxar
+      const grid = document.createElement('div');
+      grid.className = 'ab-area-grid';
 
       category.areas.forEach(area => {
-        const item = document.createElement('div');
-        item.className = 'ab-area-item';
-
-        // Huvudcheckbox
         const label = document.createElement('label');
         label.className = 'sidebar-check-row';
+        if (area.hasSub) label.classList.add('sidebar-check-row--has-sub');
         const cb = document.createElement('input');
         cb.type = 'checkbox';
         cb.value = area.id;
-        if (area.checked) cb.checked = true;
         label.appendChild(cb);
-        label.appendChild(document.createTextNode(' ' + area.label));
-        item.appendChild(label);
+        const span = document.createElement('span');
+        span.textContent = area.label;
+        label.appendChild(span);
+        grid.appendChild(label);
 
-        // Underkategorier (antal-inputs) – bara om explicit definierade
-        if (area.subcats && area.subcats.length > 0) {
-          const subcats = area.subcats;
-          const subcatDiv = document.createElement('div');
-          subcatDiv.className = 'ab-subcats';
-          subcatDiv.dataset.area = area.id;
-          subcatDiv.classList.add('hidden');
-
-          subcats.forEach(sc => {
-            const row = document.createElement('div');
-            row.className = 'ab-subcat-row';
-
-            const span = document.createElement('span');
-            span.textContent = sc.label;
-            row.appendChild(span);
-
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.min = '0';
-            input.max = '99';
-            input.value = sc.default || 0;
-            input.dataset.area = area.id;
-            input.dataset.subcat = sc.id;
-            row.appendChild(input);
-
-            subcatDiv.appendChild(row);
-          });
-
-          cb.addEventListener('change', () => {
-            subcatDiv.classList.toggle('hidden', !cb.checked);
-            updateTotalCount();
-          });
-
-          item.appendChild(subcatDiv);
-        } else {
-          cb.addEventListener('change', () => updateTotalCount());
-        }
-
-        container.appendChild(item);
+        cb.addEventListener('change', () => {
+          updateDetailPanel();
+          updateTotalCount();
+        });
       });
-    });
 
-    // Lyssna på ändringar i alla antal-inputs
-    container.querySelectorAll('input[type="number"]').forEach(inp => {
-      inp.addEventListener('input', updateTotalCount);
+      cat.appendChild(grid);
+      container.appendChild(cat);
+
+      // Accordion-toggle
+      catLabel.addEventListener('click', () => {
+        cat.classList.toggle('ab-category--open');
+      });
     });
 
     updateTotalCount();
   }
 
+  // =========================================================
+  //  Detaljpanel – visar sub-settings för ikryssade områden
+  // =========================================================
+  function updateDetailPanel() {
+    const panel = document.getElementById('ab-detail-panel');
+    if (!panel) return;
+
+    const checkedAreas = getCheckedAreas();
+    panel.innerHTML = '';
+    const grade = parseInt(document.getElementById('ab-grade')?.value) || 3;
+
+    // Samla unika sub-settings (hantera shared)
+    const shown = new Set();
+    checkedAreas.forEach(areaId => {
+      const sub = SUB_SETTINGS[areaId];
+      if (!sub) return;
+      const key = sub.shared || areaId;
+      if (shown.has(key)) return;
+      shown.add(key);
+
+      const resolved = SUB_SETTINGS[key];
+      if (!resolved || !resolved.options) return;
+
+      const block = document.createElement('div');
+      block.className = 'ab-detail-block';
+      block.dataset.settingsKey = resolved.settingsKey;
+
+      const title = document.createElement('div');
+      title.className = 'ab-detail-title';
+      title.textContent = resolved.title;
+      block.appendChild(title);
+
+      resolved.options.forEach(opt => {
+        const hidden = opt.minGrade && opt.minGrade > grade;
+        const label = document.createElement('label');
+        label.className = 'sidebar-check-row sidebar-check-row--sm';
+        if (hidden) label.classList.add('hidden');
+
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = opt.value;
+        input.checked = !!opt.checked;
+        if (hidden) input.disabled = true;
+        label.appendChild(input);
+
+        const span = document.createElement('span');
+        span.textContent = opt.label;
+        if (opt.minGrade) {
+          const small = document.createElement('small');
+          small.textContent = ' (Åk ' + opt.minGrade + '+)';
+          span.appendChild(small);
+        }
+        label.appendChild(span);
+        block.appendChild(label);
+      });
+
+      panel.appendChild(block);
+    });
+
+    // Visa/dölj panelen
+    const hasContent = panel.children.length > 0;
+    panel.classList.toggle('visible', hasContent);
+    document.getElementById('ab-sidebar')?.classList.toggle('has-detail', hasContent);
+  }
+
   function updateTotalCount() {
-    const manualTotal = getSubcatSpecs().reduce((sum, s) => sum + s.count, 0);
     const el = document.getElementById('ab-total-count');
     if (!el) return;
-    if (manualTotal > 0) {
-      el.textContent = manualTotal;
+    const checkedAreas = getCheckedAreas();
+    if (checkedAreas.length > 0) {
+      const cols = parseInt(document.getElementById('ab-cols')?.value) || 2;
+      const pagesVal = document.getElementById('ab-pages')?.value || 'auto';
+      const pages = pagesVal === 'auto' ? 1 : (parseInt(pagesVal) || 1);
+      el.textContent = `~${cols * 5 * pages} (auto)`;
     } else {
-      // Auto-fördeling: beräkna från layout
-      const checkedAreas = getCheckedAreas();
-      if (checkedAreas.length > 0) {
-        const cols = parseInt(document.getElementById('ab-cols')?.value) || 2;
-        const pagesVal = document.getElementById('ab-pages')?.value || 'auto';
-        const pages = pagesVal === 'auto' ? 1 : (parseInt(pagesVal) || 1);
-        el.textContent = `~${cols * 5 * pages} (auto)`;
-      } else {
-        el.textContent = '0';
-      }
+      el.textContent = '0';
     }
   }
 
-  // =========================================================
-  //  Läs underkategori-specifikationer
-  // =========================================================
-  function getSubcatSpecs() {
-    const specs = [];
-    const container = document.getElementById('ab-area-checks');
-    if (!container) return specs;
-
-    container.querySelectorAll('.ab-subcats:not(.hidden)').forEach(subcatDiv => {
-      const area = subcatDiv.dataset.area;
-      subcatDiv.querySelectorAll('input[type="number"]').forEach(inp => {
-        const count = parseInt(inp.value) || 0;
-        if (count > 0) {
-          specs.push({ area, subcat: inp.dataset.subcat, count });
-        }
-      });
-    });
-    return specs;
-  }
-
-  // Hämta ikryssade områden (utan att titta på antal)
+  // Hämta ikryssade områden (bara area-checkboxar, inte detail-panel)
   function getCheckedAreas() {
     const container = document.getElementById('ab-area-checks');
     if (!container) return [];
     const areas = [];
-    container.querySelectorAll('.sidebar-check-row input[type="checkbox"]:checked').forEach(cb => {
+    container.querySelectorAll('.ab-area-grid input[type="checkbox"]:checked').forEach(cb => {
       areas.push(cb.value);
     });
     return areas;
   }
+
+  // Läs detaljpanel-inställningar → settings-objekt
+  function getDetailSettings() {
+    const panel = document.getElementById('ab-detail-panel');
+    if (!panel) return {};
+    const result = {};
+    panel.querySelectorAll('.ab-detail-block').forEach(block => {
+      const key = block.dataset.settingsKey;
+      const checked = [...block.querySelectorAll('input[type="checkbox"]:checked:not(:disabled)')].map(cb => cb.value);
+      result[key] = checked;
+    });
+    return result;
+  }
+
+  // Bakåtkompatibilitet: getSubcatSpecs returnerar nu tom lista
+  // (subcats med antal-inputs finns ej längre)
+  function getSubcatSpecs() { return []; }
 
   // =========================================================
   //  Inställningar från konfigurations-panelen
@@ -205,15 +313,13 @@ const Arbetsblad = (() => {
     const themeEl = document.getElementById('ab-theme');
     const theme   = themeEl ? themeEl.value : '';
     const title   = document.getElementById('ab-title').value.trim()     || 'Matematik';
-    const showAns = document.getElementById('ab-show-answers').checked;
+    const showAns  = document.getElementById('ab-show-answers').checked;
+    const showGrid = document.getElementById('ab-show-grid')?.checked ?? true;
+    const showSvar = document.getElementById('ab-show-svar')?.checked ?? false;
     const pagesVal = document.getElementById('ab-pages').value;
-    const specs   = getSubcatSpecs();
-    const total   = specs.reduce((sum, s) => sum + s.count, 0);
     const perPage = cols * 5;
-    const pages   = pagesVal === 'auto'
-      ? Math.max(1, Math.ceil(total / perPage))
-      : parseInt(pagesVal) || 1;
-    return { grade, count: total, cols, pages, perPage, theme, title, showAns, specs, pagesVal };
+    const pages   = pagesVal === 'auto' ? 1 : (parseInt(pagesVal) || 1);
+    return { grade, cols, pages, perPage, theme, title, showAns, showGrid, showSvar, pagesVal };
   }
 
   // Läs config för problemlösning-läget (från sidopanelen)
@@ -239,17 +345,20 @@ const Arbetsblad = (() => {
   //  Problem-generering per underkategori
   // =========================================================
   function makeBaseSettings(grade) {
+    const detail = getDetailSettings();
     return {
       grade,
       areas:          [],
       problemlosning: false,
-      flersteg:       false,
-      addSubMode:     [],
-      multDivMode:    [],
+      flersteg:       !!(detail.addSubMode && detail.addSubMode.includes('flersteg')),
+      addSubMode:     detail.addSubMode || [],
+      multDivMode:    detail.multDivMode || [],
       specificTables: [],
-      brakTypes:      ['name', 'add-same-den', 'compare', 'add-diff-den', 'fraction-of-whole', 'simplify'],
-      geometriTypes:  ['area', 'perimeter'],
-      klockaTypes:    ['analog', 'digital'],
+      brakTypes:      detail.brakTypes || ['name', 'add-same-den', 'compare', 'add-diff-den', 'fraction-of-whole', 'simplify'],
+      geometriTypes:  detail.geometriTypes || ['area', 'perimeter'],
+      klockaTypes:    detail.klockaTypes || ['analog', 'digital'],
+      prioritetOps:   detail.prioritetOps || ['mult', 'div'],
+      statistikTypes: detail.statistikTypes || ['bar', 'freq-table', 'pie-chart'],
       isArbetsblad:   true,
     };
   }
@@ -301,7 +410,6 @@ const Arbetsblad = (() => {
 
   function generateForSubcat(spec, grade, allProblems) {
     const area   = spec.area;
-    const subcat = spec.subcat;
     const count  = spec.count;
 
     // Problemlösning – egen kategori
@@ -319,12 +427,12 @@ const Arbetsblad = (() => {
     const problems = [];
     const settings = makeBaseSettings(grade);
 
-    // Konfigurera settings för denna specifika underkategori
-    // addition/subtraktion: alltid standard (ingen uppställning på arbetsblad)
-    if (area === 'multiplikation' || area === 'division') {
-      if (subcat === 'tables-basic')  settings.multDivMode = ['tables-basic'];
-      else if (subcat === 'tables-large') settings.multDivMode = ['tables-large'];
-      else if (subcat === 'rest') { settings.multDivMode = ['tables-basic']; settings.divisionRest = true; }
+    // Standardvärden om detail-panel saknar val
+    if ((area === 'addition' || area === 'subtraktion') && settings.addSubMode.length === 0) {
+      settings.addSubMode = ['standard'];
+    }
+    if ((area === 'multiplikation' || area === 'division') && settings.multDivMode.length === 0) {
+      settings.multDivMode = ['tables-basic'];
     }
 
     for (let i = 0; i < count; i++) {
@@ -384,7 +492,7 @@ const Arbetsblad = (() => {
   // =========================================================
   //  Rendering av en cell i tabellen
   // =========================================================
-  function renderCell(problem, index, showAns) {
+  function renderCell(problem, index, showAns, showGrid, showSvar) {
     const td = document.createElement('td');
     const isText = problem && problem.isTextProblem;
     td.className = isText ? 'ab-cell ab-cell--text' : 'ab-cell';
@@ -450,13 +558,30 @@ const Arbetsblad = (() => {
         key.textContent = `Svar: ${problem.answer}`;
         td.appendChild(key);
       } else if (problem) {
-        const grid = buildCalcGrid(problem);
-        if (grid) {
-          td.appendChild(grid);
-        } else if (problem.type === 'division' || problem.type === 'multiplikation') {
-          const space = document.createElement('div');
-          space.className = 'ab-cell-space';
-          td.appendChild(space);
+        // Visuella uppgifter (bild-mult, geometri, klocka, symmetri, etc.) behöver ej rutnät
+        const VISUAL_TYPES = ['geometri', 'klocka', 'symmetri', 'koordinatsystem',
+          'statistik', 'sannolikhet', 'tallinje', 'talsorter', 'negativa-tal', 'romerska'];
+        const isVisual = VISUAL_TYPES.includes(problem.type)
+          || (problem.questionType === 'bild-mult');
+        let gridAdded = false;
+        if (showGrid && !isVisual) {
+          const grid = buildCalcGrid(problem);
+          if (grid) {
+            td.appendChild(grid);
+            gridAdded = true;
+          } else if (problem.type === 'division' || problem.type === 'multiplikation') {
+            const space = document.createElement('div');
+            space.className = 'ab-cell-space';
+            td.appendChild(space);
+            gridAdded = true;
+          }
+        }
+        // Svarslinje om vald och inget rutnät visades
+        if (showSvar && !gridAdded) {
+          const svar = document.createElement('div');
+          svar.className = 'ab-cell-svar';
+          svar.innerHTML = 'Svar: <span class="ab-cell-svar-line"></span>';
+          td.appendChild(svar);
         }
       }
     }
@@ -542,7 +667,7 @@ const Arbetsblad = (() => {
         for (let c = 0; c < numCols; c++) {
           const idx = i + c;
           if (idx < pageProblems.length) {
-            tr.appendChild(renderCell(pageProblems[idx], pageStart + idx, cfg.showAns));
+            tr.appendChild(renderCell(pageProblems[idx], pageStart + idx, cfg.showAns, cfg.showGrid, cfg.showSvar));
           } else {
             tr.appendChild(document.createElement('td'));
           }
@@ -1126,25 +1251,20 @@ const Arbetsblad = (() => {
     }
 
     const cfg   = readConfig();
-    let specs = cfg.specs;
     sheetProblems = [];
 
-    // Om inga antal angivits men områden är ikryssade → fördela jämnt
-    if (specs.length === 0) {
-      const checkedAreas = getCheckedAreas();
-      if (checkedAreas.length === 0) {
-        alert('Välj minst ett område.');
-        return;
-      }
-      const total = cfg.perPage * cfg.pages;
-      const perArea = Math.floor(total / checkedAreas.length);
-      const remainder = total % checkedAreas.length;
-      specs = checkedAreas.map((area, i) => ({
-        area,
-        subcat: 'standard',
-        count: perArea + (i < remainder ? 1 : 0),
-      }));
+    const checkedAreas = getCheckedAreas();
+    if (checkedAreas.length === 0) {
+      alert('Välj minst ett område.');
+      return;
     }
+    const total = cfg.perPage * cfg.pages;
+    const perArea = Math.floor(total / checkedAreas.length);
+    const remainder = total % checkedAreas.length;
+    const specs = checkedAreas.map((area, i) => ({
+      area,
+      count: perArea + (i < remainder ? 1 : 0),
+    }));
 
     // Om användaren valt specifikt antal sidor, skala upp antal problem
     const wantedTotal = cfg.pagesVal !== 'auto'
@@ -1244,7 +1364,7 @@ const Arbetsblad = (() => {
         for (let c = 0; c < numCols; c++) {
           const idx = i + c;
           if (idx < pageProblems.length) {
-            tr.appendChild(renderCell(pageProblems[idx], pageStart + idx, pl.showAns));
+            tr.appendChild(renderCell(pageProblems[idx], pageStart + idx, pl.showAns, false, false));
           } else {
             tr.appendChild(document.createElement('td'));
           }
@@ -1383,11 +1503,11 @@ const Arbetsblad = (() => {
     }
 
     const cfg   = readConfig();
-    const specs = cfg.specs;
-    if (specs.length === 0) return;
+    const checkedAreas = getCheckedAreas();
+    if (checkedAreas.length === 0) return;
 
-    const spec = specs[Math.floor(Math.random() * specs.length)];
-    const results = generateForSubcat({ ...spec, count: 1 }, cfg.grade, sheetProblems);
+    const area = checkedAreas[Math.floor(Math.random() * checkedAreas.length)];
+    const results = generateForSubcat({ area, count: 1 }, cfg.grade, sheetProblems);
     sheetProblems[index] = results[0] || null;
     renderSheet();
   }
@@ -1503,9 +1623,56 @@ const Arbetsblad = (() => {
     if (container) container.appendChild(buildPeriodEl(4));
   }
 
+  // =========================================================
+  //  Importera områden från sparad genomgång
+  // =========================================================
+  function loadGenomgangar() {
+    try {
+      return JSON.parse(localStorage.getItem('klassrummatte-genomgangar')) || [];
+    } catch (_) { return []; }
+  }
+
+  function populateGGSelect(selectId, checkContainerId) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    const ggs = loadGenomgangar();
+    // Rensa gamla options (behåll placeholder)
+    while (sel.options.length > 1) sel.remove(1);
+    ggs.forEach(gg => {
+      const opt = document.createElement('option');
+      opt.value = gg.id;
+      opt.textContent = gg.name || 'Namnlös';
+      sel.appendChild(opt);
+    });
+    sel.classList.toggle('hidden', ggs.length === 0);
+
+    sel.addEventListener('change', () => {
+      if (!sel.value) return;
+      const gg = ggs.find(g => g.id === sel.value);
+      if (!gg || !gg.problems) return;
+      // Extrahera unika areas
+      const areas = new Set();
+      gg.problems.forEach(p => {
+        const key = p.type === 'oppna-utsaga' ? 'oppna-utsagor' : p.type;
+        areas.add(key);
+      });
+      // Kryssa i matchande checkboxar
+      const container = document.getElementById(checkContainerId);
+      if (container) {
+        container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.checked = areas.has(cb.value);
+          cb.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      }
+      sel.value = '';  // Återställ dropdown
+    });
+  }
+
   function init() {
     buildAbSidebar();
     buildPLSidebar();
+    populateGGSelect('ab-import-gg', 'ab-area-checks');
+    populateGGSelect('pl-import-gg', 'pl-area-checks');
     initPLImport();
     initBatchMode();
 
@@ -1527,6 +1694,12 @@ const Arbetsblad = (() => {
     };
     document.getElementById('ab-starten-colors')?.addEventListener('click', colorHandler);
     document.getElementById('ab-starten-colors-2')?.addEventListener('click', colorHandler);
+
+    // Uppdatera detaljpanel vid årskursändring
+    document.getElementById('ab-grade')?.addEventListener('change', () => {
+      updateDetailPanel();
+      updateTotalCount();
+    });
 
     // Uppdatera total vid kolumn/sid-ändring
     document.getElementById('ab-cols')?.addEventListener('change', updateTotalCount);
