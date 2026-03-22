@@ -250,6 +250,7 @@ const Arbetsblad = (() => {
       brakTypes:      ['name', 'add-same-den', 'compare', 'add-diff-den', 'fraction-of-whole', 'simplify'],
       geometriTypes:  ['area', 'perimeter'],
       klockaTypes:    ['analog', 'digital'],
+      isArbetsblad:   true,
     };
   }
 
