@@ -114,16 +114,20 @@ class AvrundningPlugin extends BasePlugin {
 
   // Uppskatta differens
   _estimateDiff(grade) {
-    let a, b;
-    if (grade <= 4) {
-      a = PluginUtils.randInt(50, 998);
-      b = PluginUtils.randInt(12, a - 10);
-    } else {
-      a = PluginUtils.randInt(200, 9999);
-      b = PluginUtils.randInt(100, a - 50);
-    }
+    let a, b, est;
     const roundTo = grade <= 4 ? 10 : 100;
-    const est = Math.round(a / roundTo) * roundTo - Math.round(b / roundTo) * roundTo;
+    // Säkerställ att uppskattningen blir > 0
+    for (let tries = 0; tries < 20; tries++) {
+      if (grade <= 4) {
+        a = PluginUtils.randInt(50, 998);
+        b = PluginUtils.randInt(12, a - 10);
+      } else {
+        a = PluginUtils.randInt(200, 9999);
+        b = PluginUtils.randInt(100, a - 50);
+      }
+      est = Math.round(a / roundTo) * roundTo - Math.round(b / roundTo) * roundTo;
+      if (est > 0) break;
+    }
     return {
       type: 'avrundning', questionType: 'estimate',
       expression: `${a} − ${b}`,

@@ -1085,6 +1085,23 @@ body:has(#ab-sidebar.has-detail:not(.hidden)) #empty-state {
 .ab-table .avrund-choice { font-size: 0.7rem; padding: 0.1em 0.4em; border-width: 1px; border-radius: 4px; }
 .ab-table .avrund-answer { font-size: 0.7rem; }
 
+/* Mönster */
+.ab-table .monster-wrap { gap: 0.1cm; }
+.ab-table .monster-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .monster-row { gap: 0.08cm; }
+.ab-table .monster-svg { width: 0.55cm; height: 0.55cm; }
+.ab-table .monster-missing {
+  width: 0.55cm; height: 0.55cm;
+  border-width: 1.5px; border-radius: 3px;
+  font-size: 0.5rem;
+}
+.ab-table .monster-groups { gap: 0.15cm; }
+.ab-table .monster-group { gap: 0.05cm; padding: 0.1em; border-width: 1px; border-radius: 3px; max-width: 2cm; }
+.ab-table .monster-group .monster-svg { width: 0.4cm; height: 0.4cm; }
+.ab-table .monster-group--missing { min-width: 0.7cm; min-height: 0.55cm; font-size: 0.5rem; }
+.ab-table .monster-sep { height: 0.5cm; }
+.ab-table .monster-answer { font-size: 0.7rem; }
+
 /* Negativa tal */
 .ab-table .negtal-question { font-size: 0.55rem; white-space: normal; margin: 0 0 0.1cm; }
 .ab-table .negtal-text { font-size: 0.55rem; white-space: normal; line-height: 1.2; max-width: none; }
