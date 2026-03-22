@@ -13,11 +13,14 @@ const Menu = (() => {
   // =========================================================
   //  Hopfällbara menygrupper
   // =========================================================
+  // Element som aldrig ska döljas av collapse-logiken
+  const COLLAPSE_SKIP = new Set(['selected-areas-tags', 'selected-tools-tags']);
+
   function collapseMenuLabel(label) {
     label.classList.add('is-collapsed');
     let el = label.nextElementSibling;
     while (el && !el.classList.contains('menu-group-label')) {
-      el.classList.add('section-collapsed');
+      if (!COLLAPSE_SKIP.has(el.id)) el.classList.add('section-collapsed');
       el = el.nextElementSibling;
     }
   }
@@ -29,7 +32,7 @@ const Menu = (() => {
         const collapsed = label.classList.toggle('is-collapsed');
         let el = label.nextElementSibling;
         while (el && !el.classList.contains('menu-group-label')) {
-          el.classList.toggle('section-collapsed', collapsed);
+          if (!COLLAPSE_SKIP.has(el.id)) el.classList.toggle('section-collapsed', collapsed);
           el = el.nextElementSibling;
         }
       });
@@ -90,6 +93,32 @@ const Menu = (() => {
       const tag = document.createElement('span');
       tag.className = 'selected-area-tag';
       tag.textContent = AREA_DISPLAY_NAMES[cb.value] || cb.value;
+      tag.addEventListener('click', () => {
+        cb.checked = false;
+        cb.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      container.appendChild(tag);
+    });
+  }
+
+  const TOOL_CHECKS = [
+    { id: 'bildstod-check', name: 'Bildstöd' },
+    { id: 'problemlosning-check', name: 'Problemlösning' },
+    { id: 'multiple-check', name: 'Flera uppgifter' },
+    { id: 'discussion-check', name: 'Diskussionsstöd' },
+    { id: 'extra-enabled-check', name: 'Extrauppgift' },
+  ];
+
+  function updateSelectedToolTags() {
+    const container = document.getElementById('selected-tools-tags');
+    if (!container) return;
+    container.innerHTML = '';
+    TOOL_CHECKS.forEach(({ id, name }) => {
+      const cb = document.getElementById(id);
+      if (!cb || !cb.checked) return;
+      const tag = document.createElement('span');
+      tag.className = 'selected-area-tag';
+      tag.textContent = name;
       tag.addEventListener('click', () => {
         cb.checked = false;
         cb.dispatchEvent(new Event('change', { bubbles: true }));
@@ -471,6 +500,7 @@ const Menu = (() => {
     updateAreaCheckboxAvailability();
     updateBildstodCheckbox();
     updateMenuConfiguredIndicator();
+    updateSelectedToolTags();
   }
 
   // =========================================================
@@ -595,6 +625,7 @@ const Menu = (() => {
     document.getElementById('bildstod-check').addEventListener('change', e => {
       Settings.setBildstod(e.target.checked);
       document.getElementById('bildstod-options').classList.toggle('hidden', !e.target.checked);
+      updateSelectedToolTags();
     });
 
     document.getElementById('bildstod-delay-select').addEventListener('change', e => {
@@ -616,6 +647,7 @@ const Menu = (() => {
         document.getElementById('flersteg-check').checked = false;
         Settings.setFlersteg(false);
       }
+      updateSelectedToolTags();
     });
 
     document.getElementById('flersteg-check').addEventListener('change', e => {
@@ -625,6 +657,7 @@ const Menu = (() => {
     document.getElementById('extra-enabled-check').addEventListener('change', e => {
       Settings.setExtraEnabled(e.target.checked);
       document.getElementById('extra-task-options').classList.toggle('hidden', !e.target.checked);
+      updateSelectedToolTags();
     });
 
     document.getElementById('extra-type-select').addEventListener('change', e => {
@@ -642,6 +675,7 @@ const Menu = (() => {
     document.getElementById('multiple-check').addEventListener('change', e => {
       Settings.setMultipleProblems(e.target.checked);
       document.getElementById('multiple-count-wrap').classList.toggle('hidden', !e.target.checked);
+      updateSelectedToolTags();
     });
 
     document.getElementById('multiple-count-select').addEventListener('change', e => {
@@ -650,6 +684,7 @@ const Menu = (() => {
 
     document.getElementById('discussion-check').addEventListener('change', e => {
       Settings.setDiscussionEnabled(e.target.checked);
+      updateSelectedToolTags();
     });
 
     document.getElementById('session-limit-select').addEventListener('change', e => {
@@ -765,6 +800,7 @@ const Menu = (() => {
       updateMultDivImplicitHint();
       updateBildstodCheckbox();
       updateMenuConfiguredIndicator();
+      updateSelectedToolTags();
     });
   }
 

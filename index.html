@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Klassrummatte</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/menu.css">
   <link rel="stylesheet" href="css/genomgang.css">
   <!-- Firebase (compat SDK, utan bundler/ES-moduler) -->
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -70,9 +71,9 @@
 
     <!-- ── MATEMATIKOMRÅDEN ───────────────────────────── -->
     <div class="menu-group-label" id="matematikarea-group-label">Matematikområden</div>
+    <div id="selected-areas-tags" class="selected-areas-tags"></div>
 
     <section class="menu-section">
-      <div id="selected-areas-tags" class="selected-areas-tags"></div>
       <div id="area-checkboxes">
 
         <!-- ── ARITMETIK ── -->
@@ -297,7 +298,8 @@
     </section>
 
     <!-- ── PEDAGOGISKA VERKTYG ────────────────────────── -->
-    <div class="menu-group-label">Pedagogiska verktyg</div>
+    <div class="menu-group-label" id="pedagogiska-group-label">Pedagogiska verktyg</div>
+    <div id="selected-tools-tags" class="selected-areas-tags"></div>
 
     <section class="menu-section">
       <label class="check-label check-label--featured">

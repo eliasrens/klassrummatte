@@ -31,15 +31,17 @@ class SymmetriPlugin extends BasePlugin {
 
     const pool = grade >= 5 ? pool5 : pool4;
 
-    // Symmetrilinjer att rita (30% chans, bara figurer med >0 linjer)
-    const drawPool = pool.filter(f => f.lines > 0);
-    if (drawPool.length > 0 && Math.random() < 0.3) {
-      const item = PluginUtils.pickRandom(drawPool);
-      return {
-        type: 'symmetri', questionType: 'draw-lines',
-        shape: item.shape, label: item.label, lines: item.lines,
-        answer: String(item.lines),
-      };
+    // Symmetrilinjer att rita (30% chans, bara arbetsblad – passar ej projektor)
+    if (settings.isArbetsblad) {
+      const drawPool = pool.filter(f => f.lines > 0);
+      if (drawPool.length > 0 && Math.random() < 0.3) {
+        const item = PluginUtils.pickRandom(drawPool);
+        return {
+          type: 'symmetri', questionType: 'draw-lines',
+          shape: item.shape, label: item.label, lines: item.lines,
+          answer: String(item.lines),
+        };
+      }
     }
 
     // ~30% chans för "identify-non-sym" (kräver icke-symmetriska figurer)
@@ -59,6 +61,16 @@ class SymmetriPlugin extends BasePlugin {
     return { type: 'symmetri', shape: item.shape, label: item.label, lines: item.lines, answer };
   }
 
+  // Neutrala namn som inte avslöjar symmetri/asymmetri
+  static NEUTRAL_LABELS = {
+    'kvadrat': 'kvadrat', 'rektangel': 'rektangel',
+    'liksidig': 'triangel', 'likbent': 'triangel',
+    'cirkel': 'cirkel', 'romb': 'romb',
+    'trapets-sym': 'trapets', 'trapets-asym': 'trapets',
+    'parallellogram': 'parallellogram', 'oliksidig': 'triangel',
+    'pentagon': 'femhörning',
+  };
+
   _generateIdentifyNonSym(symPool, nonSymPool) {
     // Välj 2 symmetriska + 1 icke-symmetrisk
     const shuffledSym = symPool.slice().sort(() => Math.random() - 0.5);
@@ -69,15 +81,16 @@ class SymmetriPlugin extends BasePlugin {
     // Blanda ordningen, placera icke-symmetrisk slumpmässigt
     const trio = [sym1, sym2, nonSym].sort(() => Math.random() - 0.5);
     const correctIndex = trio.indexOf(nonSym);
+    const neutral = s => SymmetriPlugin.NEUTRAL_LABELS[s.shape] || s.label;
 
     return {
       type: 'symmetri',
       questionType: 'identify-non-sym',
       shapes: trio.map(f => f.shape),
-      labels: trio.map(f => f.label),
+      labels: trio.map(f => neutral(f)),
       correctIndex,
-      answer: nonSym.label,
-      shape: nonSym.shape,  // för isSameProblem
+      answer: neutral(nonSym),
+      shape: nonSym.shape,
     };
   }
 

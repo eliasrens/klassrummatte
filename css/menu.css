@@ -1,0 +1,785 @@
+/* ============================================================
+   Klassrummatte – Meny (sidomeny, hamburger, overlay, alla menykomponenter)
+   ============================================================ */
+
+/* === Hamburgarmeny-knapp === */
+#menu-toggle {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 300;
+  background: var(--menu-bg);
+  color: var(--menu-text);
+  border: none;
+  border-radius: var(--radius);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: background var(--transition), transform var(--transition);
+}
+
+#menu-toggle:hover {
+  background: #2d3563;
+  transform: scale(1.05);
+}
+
+.burger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--menu-text);
+  border-radius: 2px;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+/* Burger → X vid öppen meny */
+body.menu-open #menu-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+#menu-toggle.menu-configured::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-3);
+  box-shadow: 0 0 0 2px var(--menu-bg);
+}
+body.menu-open #menu-toggle.menu-configured::after {
+  display: none;
+}
+body.menu-open #menu-toggle .burger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+body.menu-open #menu-toggle .burger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+body.menu-open #menu-toggle .burger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* === Helskärmsknapp === */
+#fullscreen-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 300;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: var(--radius);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--transition), background var(--transition), right var(--transition);
+}
+
+body.extra-visible #fullscreen-btn {
+  right: calc(var(--extra-width) + 1rem);
+}
+
+#fullscreen-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#fullscreen-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.fs-icon-compress { display: none; }
+#fullscreen-btn.is-fullscreen .fs-icon-expand  { display: none; }
+#fullscreen-btn.is-fullscreen .fs-icon-compress { display: block; }
+
+/* === Overlay (bakom meny) === */
+#menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+body.menu-open #menu-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* === Sidomeny === */
+#settings-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--menu-width);
+  background: linear-gradient(175deg, #1e2a4a 0%, #172035 35%, #111827 65%, #0d1117 100%);
+  color: var(--menu-text);
+  transform: translateX(calc(-1 * var(--menu-width)));
+  transition: transform var(--transition);
+  visibility: hidden;
+  z-index: 200;
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Wider menu when detail panel is visible – no transition to avoid glitch */
+#settings-menu.has-detail {
+  width: calc(var(--menu-width) + 260px);
+  transform: translateX(calc(-1 * (var(--menu-width) + 260px)));
+}
+body.menu-open #settings-menu.has-detail {
+  transform: translateX(0);
+}
+
+/* Menu body: two-column flex */
+#menu-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+#menu-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem;
+}
+/* Scrollbar for menu-main */
+#menu-main::-webkit-scrollbar { width: 4px; }
+#menu-main::-webkit-scrollbar-track { background: transparent; }
+#menu-main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+#menu-main::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+#menu-main { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+
+/* Detail panel (right side of menu) */
+#menu-detail-panel {
+  width: 260px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-left: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(175deg, #172035 0%, #111827 50%, #0d1117 100%);
+  display: none;
+  flex-direction: column;
+}
+#menu-detail-panel.visible {
+  display: flex;
+}
+#menu-detail-panel::-webkit-scrollbar { width: 4px; }
+#menu-detail-panel::-webkit-scrollbar-track { background: transparent; }
+#menu-detail-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+#menu-detail-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+#menu-detail-panel { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+
+.detail-panel-header {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.detail-panel-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.45);
+}
+#detail-panel-content {
+  flex: 1;
+  padding: 0.5rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+/* Detail panel sub-setting blocks */
+#detail-panel-content .detail-block {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+#detail-panel-content .detail-block:last-child { border-bottom: none; }
+#detail-panel-content .detail-block-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  margin-bottom: 0.3rem;
+}
+
+body.menu-open #settings-menu {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.menu-header {
+  display: flex;
+  align-items: baseline;
+  border-bottom: 1px solid var(--menu-border);
+  margin-bottom: 0;
+  padding: 3.5rem 1rem 0.75rem;
+  flex-shrink: 0;
+}
+#settings-menu h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  padding: 0;
+  flex: 1;
+}
+
+/* Grupprubrik i menyn */
+.menu-group-label {
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  padding: 1.1rem 0.5rem 0.3rem;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  margin-bottom: 0.1rem;
+}
+
+.menu-section {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--menu-border);
+}
+
+.section-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 0.6rem;
+}
+
+/* Select */
+select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255,255,255,0.08);
+  color: var(--menu-text);
+  border: 1px solid var(--menu-border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+select:focus {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 1px;
+}
+
+select option {
+  background: #1a1a2e;
+  color: var(--menu-text);
+}
+
+/* Checkboxar */
+#area-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+#multdiv-mode-checkboxes,
+#addsub-mode-checkboxes,
+#geometri-type-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+/* Kategorier i matematikområden */
+.area-category {
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.area-category-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  padding: 0.6rem 0.5rem 0.35rem;
+  cursor: pointer;
+  transition: color 0.15s;
+  user-select: none;
+}
+.area-category-label:hover {
+  color: rgba(255,255,255,0.9);
+}
+.area-category-label::before {
+  content: '\25B8';
+  font-size: 0.55rem;
+  transition: transform 0.2s ease;
+  color: rgba(255,255,255,0.35);
+}
+.area-category.area-category--open .area-category-label::before {
+  transform: rotate(90deg);
+}
+
+.area-category-desc {
+  font-weight: 400;
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: rgba(255,255,255,0.35);
+}
+
+.area-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 0.25rem;
+}
+.area-category--open .area-grid-2col {
+  max-height: 600px;
+  padding-bottom: 0.3rem;
+}
+
+/* Sub-inställningar i detaljpanelen */
+.inline-sub {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.inline-sub:last-child { border-bottom: none; }
+.inline-sub.hidden { display: none; }
+.inline-sub .check-label.hidden { display: none; }
+
+.grade-hint {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.3);
+  font-style: italic;
+  padding: 0.3rem 0 0;
+  margin: 0;
+}
+
+.inline-sub-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  padding: 0 0 0.3rem;
+  margin: 0;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background var(--transition);
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.check-label:hover {
+  background: var(--menu-hover);
+}
+
+.check-label input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.check-label input[type="checkbox"]:checked {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
+.check-label input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 6px;
+  height: 10px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.check-label--has-sub span::after {
+  content: '⚙';
+  font-size: 0.6em;
+  margin-left: 0.3em;
+  opacity: 0.2;
+  vertical-align: middle;
+}
+.check-label--has-sub input:checked ~ span::after {
+  opacity: 0.55;
+}
+
+.check-label--mixed {
+  margin-top: 0.3rem;
+  border-top: 1px solid var(--menu-border);
+  padding-top: 0.6rem;
+  color: rgba(255,255,255,0.7);
+  font-style: italic;
+}
+
+.check-label--featured {
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.check-label small {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  font-style: normal;
+}
+
+#extra-task-options {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--menu-border);
+}
+
+/* === Hopfällbara menygrupper === */
+.menu-group-label.is-collapsible {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-group-label.is-collapsible::after {
+  content: '▾';
+  font-size: 1em;
+  flex-shrink: 0;
+  transition: transform var(--transition);
+}
+
+.menu-group-label.is-collapsible.is-collapsed::after {
+  transform: rotate(-90deg);
+}
+
+.section-collapsed {
+  display: none !important;
+}
+
+.clear-areas-btn {
+  margin-right: 0.75rem;
+  padding: 0.15em 0.55em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--menu-text);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  cursor: pointer;
+  line-height: 1.4;
+  opacity: 0.7;
+  transition: opacity var(--transition), color var(--transition);
+  flex-shrink: 0;
+}
+.clear-areas-btn:hover {
+  opacity: 1;
+  color: var(--clr-accent, #e63946);
+}
+
+/* === Valda områden – taggar === */
+.selected-areas-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding-bottom: 0.5rem;
+}
+.selected-areas-tags:empty {
+  display: none;
+}
+.selected-area-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(42, 157, 143, 0.25);
+  border: 1px solid rgba(42, 157, 143, 0.35);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.selected-area-tag:hover {
+  background: rgba(230, 57, 70, 0.3);
+  border-color: rgba(230, 57, 70, 0.5);
+}
+.selected-area-tag::after {
+  content: '\00d7';
+  font-size: 0.85rem;
+  line-height: 1;
+  opacity: 0.5;
+}
+.selected-area-tag:hover::after {
+  opacity: 1;
+}
+
+/* === Verktygskort === */
+.tool-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tool-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tool-card:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.tool-card-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.tool-card-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.tool-card-desc {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.35;
+}
+
+.tool-card-action {
+  flex-shrink: 0;
+  min-width: 4rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--accent-2);
+  background: rgba(69, 123, 157, 0.12);
+  border: 1px solid rgba(69, 123, 157, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+.tool-card-action:hover {
+  background: rgba(69, 123, 157, 0.25);
+  color: #fff;
+}
+.tool-card-action:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.tool-card-meta {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.25);
+  font-style: italic;
+}
+
+/* Expanderbart verktygskort (genomgång) */
+.tool-card--expandable {
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+}
+.tool-card--expandable .tool-card-main {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  width: 100%;
+}
+
+.tool-card-expand {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0.15rem 0;
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  cursor: pointer;
+  color: rgba(255,255,255,0.3);
+  transition: color 0.15s, background 0.15s;
+}
+.tool-card-expand:hover {
+  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.03);
+}
+.tool-card-expand-chevron {
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+}
+.tool-card--expanded .tool-card-expand-chevron {
+  transform: rotate(180deg);
+}
+
+.tool-card-drawer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0 0.7rem;
+}
+.tool-card--expanded .tool-card-drawer {
+  max-height: 500px;
+  padding: 0.3rem 0.7rem 0.5rem;
+}
+
+.tool-card-action--full {
+  width: 100%;
+  text-align: center;
+  margin-top: -0.2rem;
+}
+
+/* === Implicit standardhint === */
+.implicit-hint {
+  margin: 0.35rem 0 0 0;
+  font-size: 0.71rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+/* === Radioknappar (bildstöd-timing) === */
+.check-label input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.check-label input[type="radio"]:checked {
+  border-color: var(--accent-2);
+}
+
+.check-label input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-2);
+}
+
+#bildstod-options {
+  margin-top: 0.4rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+/* Separator under en grupp-div i menyn */
+.check-label--sep {
+  margin-top: 0.4rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--menu-border);
+}
+
+/* Bildstöd-checkbox när inget område stöder det */
+.check-label--featured.bildstod-unavailable {
+  opacity: 0.38;
+  pointer-events: none;
+}
+.check-label:has(input:disabled) {
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+/* === Specifika tabellval === */
+.specific-tables-wrap {
+  margin: 0.15rem 0 0.25rem 1.5rem;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-left: 2px solid rgba(255,255,255,0.1);
+}
+
+.specific-tables-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 0.25rem;
+}
+
+.specific-tables-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem;
+}
+
+.check-label--sm {
+  padding: 0.2rem 0.35rem;
+  font-size: 0.88rem;
+  min-width: 2.6rem;
+  justify-content: center;
+}
