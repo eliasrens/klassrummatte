@@ -18,6 +18,8 @@ const Genomgang = (() => {
     { value: 'tallinje',       label: 'Tallinje' },
     { value: 'talsorter',      label: 'Talsorter' },
     { value: 'talfoljd',       label: 'Talföljder' },
+    { value: 'avrundning',    label: 'Avrundning' },
+    { value: 'monster',       label: 'Mönster' },
     { value: 'negativa-tal',   label: 'Negativa tal' },
     { value: 'romerska',       label: 'Romerska siffror' },
     { value: 'geometri',       label: 'Geometri' },
@@ -390,6 +392,44 @@ const Genomgang = (() => {
   // Drag-state
   let dragFromIdx = -1;
 
+  function buildQueuePreview(problem) {
+    const preview = document.createElement('div');
+    preview.className = 'gg-queue-preview';
+
+    const renderHost = document.createElement('div');
+    renderHost.className = 'gg-queue-preview-render';
+    const inner = document.createElement('div');
+    Renderer.renderProblem(problem, inner);
+    inner.className = '';  // ta bort 'hidden'
+
+    // Bildstöd
+    const settings = readOverlaySettings();
+    if (settings.bildstod && typeof Bildstod !== 'undefined' && Bildstod.hasBildstodSupport(problem, settings)) {
+      const plugin = PluginManager.get(problem.type);
+      if (plugin) {
+        const bEl = plugin.buildBildstod(problem, settings);
+        if (bEl && bEl instanceof Node) {
+          const bWrap = document.createElement('div');
+          bWrap.className = 'bildstod-container';
+          bWrap.appendChild(bEl);
+          inner.prepend(bWrap);
+        }
+      }
+    }
+
+    renderHost.appendChild(inner);
+    preview.appendChild(renderHost);
+
+    // Beräkna skalad höjd efter rendering
+    requestAnimationFrame(() => {
+      const scale = 0.35;
+      const contentH = renderHost.scrollHeight;
+      preview.style.maxHeight = (contentH * scale + 8) + 'px';
+    });
+
+    return preview;
+  }
+
   function updateQueueUI() {
     queueList.innerHTML = '';
     queueCount.textContent = '(' + selectedQueue.length + ')';
@@ -461,6 +501,27 @@ const Genomgang = (() => {
       num.className = 'gg-queue-num';
       num.textContent = i + 1;
 
+      // Expandera-knapp (visa miniatyr)
+      const expandBtn = document.createElement('button');
+      expandBtn.className = 'gg-queue-expand';
+      expandBtn.textContent = '▸';
+      expandBtn.title = 'Visa uppgift';
+      expandBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const wrap = item.closest('.gg-queue-entry');
+        if (!wrap) return;
+        const isOpen = wrap.classList.toggle('gg-queue-entry--open');
+        expandBtn.textContent = isOpen ? '▾' : '▸';
+        // Lazy-rendera preview vid första öppning
+        if (isOpen) {
+          let preview = wrap.querySelector('.gg-queue-preview');
+          if (!preview) {
+            preview = buildQueuePreview(problem);
+            wrap.appendChild(preview);
+          }
+        }
+      });
+
       const label = document.createElement('span');
       label.className = 'gg-queue-label';
       label.textContent = getQueueLabel(problem);
@@ -485,8 +546,13 @@ const Genomgang = (() => {
       remove.title = 'Ta bort';
       remove.addEventListener('click', e => { e.stopPropagation(); removeFromQueue(i); });
 
-      item.append(num, label, arrows, remove);
-      queueList.appendChild(item);
+      item.append(num, expandBtn, label, arrows, remove);
+
+      // Wrap: item-rad + expanderbar preview
+      const entry = document.createElement('div');
+      entry.className = 'gg-queue-entry';
+      entry.appendChild(item);
+      queueList.appendChild(entry);
     });
   }
 

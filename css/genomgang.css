@@ -459,6 +459,81 @@
   font-size: 0.8rem;
 }
 
+/* Expandera-knapp i kö */
+.gg-queue-expand {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.4);
+  padding: 0.1rem 0.15rem;
+  line-height: 1;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.gg-queue-expand:hover { color: var(--accent-2); }
+
+/* Entry-wrapper: rad + preview */
+.gg-queue-entry {
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.gg-queue-entry .gg-queue-item {
+  border-bottom: none;
+}
+
+/* Inline-preview av uppgift */
+.gg-queue-preview {
+  display: none;
+  padding: 0.3rem 0.5rem 0.5rem 1.8rem;
+  background: rgba(0,0,0,0.15);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  overflow: hidden;
+}
+.gg-queue-entry--open .gg-queue-preview {
+  display: block;
+}
+
+.gg-queue-preview-render {
+  width: 400px;
+  transform: scale(var(--gg-q-scale, 0.35));
+  transform-origin: top left;
+  pointer-events: none;
+}
+/* Imitera problem-display inuti köminiatyr */
+.gg-queue-preview-render > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.6rem;
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text);
+  position: relative;
+}
+.gg-queue-preview-render .text-problem {
+  font-size: clamp(1rem, 3vw, 1.6rem) !important;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.gg-queue-preview-render .bildstod-container {
+  position: static !important;
+  right: auto !important; top: auto !important;
+  left: auto !important; bottom: auto !important;
+  transform: none !important;
+  animation: none !important;
+  margin-bottom: 0.2rem;
+  justify-content: center;
+  max-width: 100%;
+}
+/* Dölj svar i preview */
+.gg-queue-preview-render .answer-hidden {
+  display: none !important;
+}
+
 /* === Menysektion (sparade genomgångar) =================== */
 .gg-menu-list {
   display: flex;
