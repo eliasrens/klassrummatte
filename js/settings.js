@@ -33,6 +33,10 @@ const Settings = (() => {
     sessionLimit: 'unlimited',
     discussionEnabled: false,
     statistikTypes: ['bar', 'freq-table', 'pie-chart'],
+    timerEnabled: false,
+    timerDuration: 20,
+    volymUnits: [],
+    volymModes: [],
   };
 
   let state = { ...DEFAULTS };
@@ -196,6 +200,14 @@ const Settings = (() => {
   function setDiscussionEnabled(b)     { state.discussionEnabled = !!b; save(); }
   function getStatistikTypes()         { return [...(state.statistikTypes || ['bar', 'freq-table', 'pie-chart'])]; }
   function setStatistikTypes(arr)      { state.statistikTypes = [...arr]; save(); }
+  function getVolymUnits()             { return [...(state.volymUnits || [])]; }
+  function setVolymUnits(arr)          { state.volymUnits = [...arr]; save(); }
+  function getVolymModes()             { return [...(state.volymModes || [])]; }
+  function setVolymModes(arr)          { state.volymModes = [...arr]; save(); }
+  function isTimerEnabled()            { return !!state.timerEnabled; }
+  function setTimerEnabled(b)          { state.timerEnabled = !!b; save(); }
+  function getTimerDuration()          { return state.timerDuration || 20; }
+  function setTimerDuration(n)         { state.timerDuration = parseInt(n, 10); save(); }
 
   // Initiering
   load();
@@ -214,5 +226,7 @@ const Settings = (() => {
     getSessionLimit, setSessionLimit,
     isDiscussionEnabled, setDiscussionEnabled,
     getStatistikTypes, setStatistikTypes,
+    getVolymUnits, setVolymUnits, getVolymModes, setVolymModes,
+    isTimerEnabled, setTimerEnabled, getTimerDuration, setTimerDuration,
   };
 })();

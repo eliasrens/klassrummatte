@@ -48,7 +48,7 @@ const Genomgang = (() => {
   let gradeSelect, areasWrap, playbackBar, playbackName, playbackCounter;
 
   // Sub-section wraps
-  let ggAddsubWrap, ggMultdivWrap, ggGeometriWrap, ggKlockaWrap, ggBrakWrap, ggPrioritetWrap, ggStatistikWrap;
+  let ggAddsubWrap, ggMultdivWrap, ggGeometriWrap, ggKlockaWrap, ggBrakWrap, ggPrioritetWrap, ggStatistikWrap, ggVolymWrap;
 
   // =========================================================
   //  localStorage
@@ -161,6 +161,12 @@ const Genomgang = (() => {
     const statistikTypes = [];
     document.querySelectorAll('#gg-statistik-types input:checked').forEach(cb => statistikTypes.push(cb.value));
 
+    // Volym units & modes
+    const volymUnits = [];
+    document.querySelectorAll('#gg-volym-units input:checked').forEach(cb => volymUnits.push(cb.value));
+    const volymModes = [];
+    document.querySelectorAll('#gg-volym-modes input:checked').forEach(cb => volymModes.push(cb.value));
+
     // Toggles
     const bildstod = document.getElementById('gg-bildstod-check').checked;
     const problemlosning = document.getElementById('gg-problemlosning-check').checked;
@@ -183,6 +189,8 @@ const Genomgang = (() => {
       brakTypes,
       prioritetOps: prioritetOps.length ? prioritetOps : ['mult', 'div'],
       statistikTypes: statistikTypes.length ? statistikTypes : ['bar', 'freq-table', 'pie-chart'],
+      volymUnits: volymUnits.length ? volymUnits : ['dl', 'l'],
+      volymModes: volymModes.length ? volymModes : ['convert'],
       bildstod,
       bildstodDelay: 0,
       problemlosning: problemlosning && !customEnabled,
@@ -209,6 +217,7 @@ const Genomgang = (() => {
     const hasBrak = checked.has('brak');
     const hasPrioritet = checked.has('prioritet');
     const hasStatistik = checked.has('statistik');
+    const hasVolym = checked.has('matt-volym');
 
     if (ggAddsubWrap)   ggAddsubWrap.classList.toggle('hidden', !hasAddSub);
     if (ggMultdivWrap)  ggMultdivWrap.classList.toggle('hidden', !hasMultDiv);
@@ -217,6 +226,7 @@ const Genomgang = (() => {
     if (ggBrakWrap)     ggBrakWrap.classList.toggle('hidden', !hasBrak);
     if (ggPrioritetWrap) ggPrioritetWrap.classList.toggle('hidden', !hasPrioritet);
     if (ggStatistikWrap) ggStatistikWrap.classList.toggle('hidden', !hasStatistik);
+    if (ggVolymWrap)    ggVolymWrap.classList.toggle('hidden', !hasVolym);
   }
 
   // Visa/dölj uppställnings-växling
@@ -743,6 +753,7 @@ const Genomgang = (() => {
     ggBrakWrap     = document.getElementById('gg-brak-wrap');
     ggPrioritetWrap = document.getElementById('gg-prioritet-wrap');
     ggStatistikWrap = document.getElementById('gg-statistik-wrap');
+    ggVolymWrap     = document.getElementById('gg-volym-wrap');
 
     if (!overlay) return;
 

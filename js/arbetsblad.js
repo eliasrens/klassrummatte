@@ -143,6 +143,28 @@ const Arbetsblad = (() => {
         { value: 'pie-chart', label: 'Cirkeldiagram', checked: true },
       ],
     },
+    'matt-volym': {
+      title: 'Volym – enheter',
+      settingsKey: 'volymUnits',
+      options: [
+        { value: 'ml', label: 'ml' },
+        { value: 'cl', label: 'cl' },
+        { value: 'dl', label: 'dl', checked: true },
+        { value: 'l', label: 'l', checked: true },
+      ],
+      extraGroups: [
+        {
+          title: 'Volym – läge',
+          settingsKey: 'volymModes',
+          options: [
+            { value: 'convert', label: 'Omvandling', checked: true },
+            { value: 'addition', label: 'Addition' },
+            { value: 'subtraction', label: 'Subtraktion' },
+            { value: 'open', label: 'Öppna utsagor' },
+          ],
+        },
+      ],
+    },
   };
 
   // =========================================================
@@ -231,31 +253,53 @@ const Arbetsblad = (() => {
       title.textContent = resolved.title;
       block.appendChild(title);
 
-      resolved.options.forEach(opt => {
-        const hidden = opt.minGrade && opt.minGrade > grade;
-        const label = document.createElement('label');
-        label.className = 'sidebar-check-row sidebar-check-row--sm';
-        if (hidden) label.classList.add('hidden');
+      // Rendera en grupp av checkboxar
+      function renderOptionGroup(parent, opts, settingsKey) {
+        opts.forEach(opt => {
+          const hidden = opt.minGrade && opt.minGrade > grade;
+          const label = document.createElement('label');
+          label.className = 'sidebar-check-row sidebar-check-row--sm';
+          if (hidden) label.classList.add('hidden');
 
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.value = opt.value;
-        input.checked = !!opt.checked;
-        if (hidden) input.disabled = true;
-        label.appendChild(input);
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.value = opt.value;
+          input.checked = !!opt.checked;
+          if (hidden) input.disabled = true;
+          label.appendChild(input);
 
-        const span = document.createElement('span');
-        span.textContent = opt.label;
-        if (opt.minGrade) {
-          const small = document.createElement('small');
-          small.textContent = ' (Åk ' + opt.minGrade + '+)';
-          span.appendChild(small);
-        }
-        label.appendChild(span);
-        block.appendChild(label);
-      });
+          const span = document.createElement('span');
+          span.textContent = opt.label;
+          if (opt.minGrade) {
+            const small = document.createElement('small');
+            small.textContent = ' (Åk ' + opt.minGrade + '+)';
+            span.appendChild(small);
+          }
+          label.appendChild(span);
+          parent.appendChild(label);
+        });
+      }
+
+      renderOptionGroup(block, resolved.options, resolved.settingsKey);
 
       panel.appendChild(block);
+
+      // Extra grupper (t.ex. volym har enheter + läge)
+      if (resolved.extraGroups) {
+        resolved.extraGroups.forEach(group => {
+          const subBlock = document.createElement('div');
+          subBlock.className = 'ab-detail-block';
+          subBlock.dataset.settingsKey = group.settingsKey;
+
+          const subTitle = document.createElement('div');
+          subTitle.className = 'ab-detail-title';
+          subTitle.textContent = group.title;
+          subBlock.appendChild(subTitle);
+
+          renderOptionGroup(subBlock, group.options, group.settingsKey);
+          panel.appendChild(subBlock);
+        });
+      }
     });
 
     // Visa/dölj panelen
@@ -361,6 +405,8 @@ const Arbetsblad = (() => {
       klockaTypes:    detail.klockaTypes || ['analog', 'digital'],
       prioritetOps:   detail.prioritetOps || ['mult', 'div'],
       statistikTypes: detail.statistikTypes || ['bar', 'freq-table', 'pie-chart'],
+      volymUnits:     detail.volymUnits || ['dl', 'l'],
+      volymModes:     detail.volymModes || ['convert'],
       isArbetsblad:   true,
     };
   }

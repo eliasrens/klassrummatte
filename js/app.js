@@ -34,6 +34,12 @@ const App = (() => {
   let problemHistory       = [];   // historik för bakåtnavigering
   let historyIndex         = -1;   // -1 = ingen historik visas
 
+  // Timer-state
+  let timerInterval        = null;
+  let timerRemaining       = 0;
+  let timerDuration        = 0;
+  let timerPaused          = false;
+
   // Global hook för livesession (lärarvy + Firebase)
   window.KlassrumsSession = window.KlassrumsSession || {
     currentProblem: null,
@@ -182,6 +188,7 @@ const App = (() => {
       if (nextBtn) nextBtn.classList.remove('problem-visible');
       clearExtraTask();
       clearBildstod();
+      stopTimer();
       problemVisible = false;
 
       if (hideTimer) clearTimeout(hideTimer);
@@ -240,6 +247,7 @@ const App = (() => {
           Bildstod.appendBildstod(problem, ggSettings, problemDisplay, problemVisible);
         }, delay || 80);
       }
+      startTimer();
       return;
     }
 
@@ -328,6 +336,8 @@ const App = (() => {
         Bildstod.appendBildstod(currentProblem, settings, problemDisplay, problemVisible);
       }, delay);
     }
+
+    startTimer();
   }
 
   // =========================================================
@@ -447,6 +457,62 @@ const App = (() => {
     if (bildstodTimer) { clearTimeout(bildstodTimer); bildstodTimer = null; }
     const existing = problemDisplay.querySelector('.bildstod-container');
     if (existing) existing.remove();
+  }
+
+  // =========================================================
+  //  Timer
+  // =========================================================
+  const TIMER_CIRCUMFERENCE = 2 * Math.PI * 26; // 163.36
+
+  function startTimer() {
+    stopTimer();
+    if (!Settings.isTimerEnabled()) return;
+    timerDuration  = Settings.getTimerDuration();
+    timerRemaining = timerDuration;
+    timerPaused    = false;
+
+    const el   = document.getElementById('stage-timer');
+    const ring = el?.querySelector('.stage-timer-ring');
+    const text = el?.querySelector('.stage-timer-text');
+    if (!el) return;
+
+    el.classList.remove('hidden', 'stage-timer--done', 'stage-timer--paused');
+    updateTimerDisplay(ring, text);
+
+    timerInterval = setInterval(() => {
+      if (timerPaused) return;
+      timerRemaining--;
+      updateTimerDisplay(ring, text);
+      if (timerRemaining <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        el.classList.add('stage-timer--done');
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay(ring, text) {
+    const fraction = timerDuration > 0 ? timerRemaining / timerDuration : 0;
+    const offset = TIMER_CIRCUMFERENCE * (1 - fraction);
+    if (ring) ring.style.strokeDashoffset = offset;
+    if (text) text.textContent = timerRemaining;
+  }
+
+  function stopTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    timerPaused = false;
+    const el = document.getElementById('stage-timer');
+    if (el) {
+      el.classList.add('hidden');
+      el.classList.remove('stage-timer--done', 'stage-timer--paused');
+    }
+  }
+
+  function toggleTimerPause() {
+    if (!timerInterval && timerRemaining <= 0) return;
+    timerPaused = !timerPaused;
+    const el = document.getElementById('stage-timer');
+    if (el) el.classList.toggle('stage-timer--paused', timerPaused);
   }
 
   function showExtraTask(settings) {

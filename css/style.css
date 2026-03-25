@@ -738,6 +738,76 @@ body.extra-visible .session-counter {
   right: calc(var(--extra-width) + 44px + 2rem);
 }
 
+/* === Timer === */
+.stage-timer {
+  position: fixed;
+  top: 1rem;
+  right: calc(1rem + 44px + 0.75rem); /* till vänster om helskärmsknappen */
+  width: clamp(2.8rem, 5.5vw, 4rem);
+  height: clamp(2.8rem, 5.5vw, 4rem);
+  z-index: 250;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: right var(--transition);
+}
+body.extra-visible .stage-timer {
+  right: calc(var(--extra-width) + 1rem + 44px + 0.75rem);
+}
+.stage-timer.hidden { display: none; }
+
+.stage-timer-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.stage-timer-bg {
+  fill: none;
+  stroke: rgba(255,255,255,0.08);
+  stroke-width: 4;
+}
+.stage-timer-ring {
+  fill: none;
+  stroke: var(--accent-2);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 163.36;  /* 2π × 26 */
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.3s linear, stroke 0.3s;
+}
+.stage-timer-text {
+  position: relative;
+  font-size: clamp(0.8rem, 1.6vw, 1.15rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+/* Timer klar – mjuk pulsering i blått */
+.stage-timer--done .stage-timer-ring {
+  stroke: var(--accent-2);
+  opacity: 0.4;
+}
+.stage-timer--done .stage-timer-text {
+  animation: timer-pulse 1s ease-in-out 3;
+}
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* Pausa-indikator */
+.stage-timer--paused .stage-timer-ring {
+  stroke: rgba(255,255,255,0.15);
+}
+.stage-timer--paused .stage-timer-text {
+  opacity: 0.5;
+}
+
 /* === Diskussionsstöd === */
 .discussion-prompt {
   position: absolute;

@@ -237,6 +237,27 @@
             <label class="check-label"><input type="checkbox" value="matt-tid"><span>Tid</span></label>
             <label class="check-label"><input type="checkbox" value="matt-area"><span>Area <small>(Åk 4+)</small></span></label>
           </div>
+          <!-- Volym inställningar (inline) -->
+          <div class="inline-sub hidden" id="volym-group-label">
+            <div class="inline-sub-title">Volym – enheter &amp; läge</div>
+            <div id="volym-section">
+              <div class="inline-sub-subtitle">Enheter</div>
+              <div id="volym-unit-checkboxes">
+                <label class="check-label"><input type="checkbox" value="ml"><span>ml</span></label>
+                <label class="check-label"><input type="checkbox" value="cl"><span>cl</span></label>
+                <label class="check-label"><input type="checkbox" value="dl" checked><span>dl</span></label>
+                <label class="check-label"><input type="checkbox" value="l" checked><span>l</span></label>
+              </div>
+              <div class="inline-sub-subtitle">Uppgiftstyp</div>
+              <div id="volym-mode-checkboxes">
+                <label class="check-label"><input type="checkbox" value="convert" checked><span>Omvandling</span></label>
+                <label class="check-label"><input type="checkbox" value="addition"><span>Addition (3 dl + 2 dl)</span></label>
+                <label class="check-label"><input type="checkbox" value="subtraction"><span>Subtraktion (5 dl − 2 dl)</span></label>
+                <label class="check-label"><input type="checkbox" value="open"><span>Öppen utsaga (3 dl + _ = 1 l)</span></label>
+              </div>
+              <p id="volym-implicit-hint" class="implicit-hint hidden">Inget valt — Omvandling dl↔l används</p>
+            </div>
+          </div>
           <!-- Klocka visningsläge (inline) -->
           <div class="inline-sub hidden" id="klocka-group-label">
             <div class="inline-sub-title">Klocka – visningsläge</div>
@@ -357,6 +378,25 @@
 
     <section class="menu-section">
       <label class="check-label check-label--featured">
+        <input type="checkbox" id="timer-check">
+        <span>Timer<br><small>Visuell nedräkning per uppgift</small></span>
+      </label>
+      <div id="timer-options" class="hidden">
+        <label class="section-label" for="timer-duration-select">Tid per uppgift</label>
+        <select id="timer-duration-select">
+          <option value="10">10 sekunder</option>
+          <option value="15">15 sekunder</option>
+          <option value="20" selected>20 sekunder</option>
+          <option value="30">30 sekunder</option>
+          <option value="60">60 sekunder</option>
+          <option value="90">90 sekunder</option>
+          <option value="120">120 sekunder</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="menu-section">
+      <label class="check-label check-label--featured">
         <input type="checkbox" id="extra-enabled-check">
         <span>Extrauppgift (sidopanel)<br><small>En fördjupningsuppgift visas efter vald fördröjning</small></span>
       </label>
@@ -453,6 +493,13 @@
 
   <!-- Huvudscen -->
   <main id="stage" role="button" tabindex="0" aria-label="Tryck för ny uppgift">
+    <div id="stage-timer" class="stage-timer hidden">
+      <svg class="stage-timer-svg" viewBox="0 0 60 60">
+        <circle class="stage-timer-bg" cx="30" cy="30" r="26" />
+        <circle class="stage-timer-ring" cx="30" cy="30" r="26" />
+      </svg>
+      <span class="stage-timer-text">0</span>
+    </div>
     <div id="session-counter" class="session-counter" aria-live="polite"></div>
     <div id="problem-display" class="hidden" aria-live="polite"></div>
     <div id="session-submissions-main" class="session-submissions-main hidden" aria-live="polite"></div>
@@ -610,6 +657,24 @@
             <label class="gg-config-check"><input type="checkbox" value="bar" checked><span>Stapeldiagram</span></label>
             <label class="gg-config-check"><input type="checkbox" value="freq-table" checked><span>Frekvenstabell</span></label>
             <label class="gg-config-check"><input type="checkbox" value="pie-chart" checked><span>Cirkeldiagram</span></label>
+          </div>
+        </div>
+
+        <!-- Volym enheter & läge -->
+        <div id="gg-volym-wrap" class="gg-config-sub hidden">
+          <label class="gg-config-label">Volym – enheter</label>
+          <div id="gg-volym-units">
+            <label class="gg-config-check"><input type="checkbox" value="ml"><span>ml</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="cl"><span>cl</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="dl" checked><span>dl</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="l" checked><span>l</span></label>
+          </div>
+          <label class="gg-config-label" style="margin-top:0.4rem">Volym – läge</label>
+          <div id="gg-volym-modes">
+            <label class="gg-config-check"><input type="checkbox" value="convert" checked><span>Omvandling</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="addition"><span>Addition</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="subtraction"><span>Subtraktion</span></label>
+            <label class="gg-config-check"><input type="checkbox" value="open"><span>Öppna utsagor</span></label>
           </div>
         </div>
 

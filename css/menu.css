@@ -394,6 +394,14 @@ select option {
   padding: 0 0 0.3rem;
   margin: 0;
 }
+.inline-sub-subtitle {
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.35);
+  margin: 0.5rem 0 0.15rem 0.5rem;
+}
 
 .check-label {
   display: flex;

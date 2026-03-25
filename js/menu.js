@@ -106,6 +106,7 @@ const Menu = (() => {
     { id: 'problemlosning-check', name: 'Problemlösning' },
     { id: 'multiple-check', name: 'Flera uppgifter' },
     { id: 'discussion-check', name: 'Diskussionsstöd' },
+    { id: 'timer-check', name: 'Timer' },
     { id: 'extra-enabled-check', name: 'Extrauppgift' },
   ];
 
@@ -151,6 +152,13 @@ const Menu = (() => {
   function updateKlockaImplicitHint() {
     const anyChecked = document.querySelectorAll('#klocka-type-checkboxes input:checked').length > 0;
     document.getElementById('klocka-implicit-hint').classList.toggle('hidden', anyChecked);
+  }
+
+  function updateVolymImplicitHint() {
+    const unitsChecked = document.querySelectorAll('#volym-unit-checkboxes input:checked').length > 0;
+    const modesChecked = document.querySelectorAll('#volym-mode-checkboxes input:checked').length > 0;
+    const hint = document.getElementById('volym-implicit-hint');
+    if (hint) hint.classList.toggle('hidden', unitsChecked && modesChecked);
   }
 
   function updateCustomProblemsStatus() {
@@ -307,6 +315,7 @@ const Menu = (() => {
     const showGeometri = areas.includes('geometri');
     const showDivRest  = areas.includes('division');
     const showKlocka    = areas.some(a => a === 'klocka');
+    const showVolym     = areas.includes('matt-volym');
     const showBrak      = areas.includes('brak');
     const showPrioritet = areas.includes('prioritet');
     const showStatistik = areas.includes('statistik');
@@ -349,6 +358,7 @@ const Menu = (() => {
     setSection('multdiv-group-label',   'multdiv-section',   showMultDiv);
     setSection('geometri-group-label',  'geometri-section',  showGeometri);
     setSection('klocka-group-label',    'klocka-section',    showKlocka);
+    setSection('volym-group-label',     'volym-section',     showVolym);
     setSection('brak-group-label',      'brak-section',      showBrak);
     setSection('prioritet-group-label', 'prioritet-section', showPrioritet);
     setSection('statistik-group-label', 'statistik-section', showStatistik);
@@ -481,6 +491,16 @@ const Menu = (() => {
     });
     updateKlockaImplicitHint();
 
+    const vUnits = Settings.getVolymUnits();
+    document.querySelectorAll('#volym-unit-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = vUnits.length > 0 ? vUnits.includes(cb.value) : (cb.value === 'dl' || cb.value === 'l');
+    });
+    const vModes = Settings.getVolymModes();
+    document.querySelectorAll('#volym-mode-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = vModes.length > 0 ? vModes.includes(cb.value) : cb.value === 'convert';
+    });
+    updateVolymImplicitHint();
+
     document.getElementById('problemlosning-check').checked = s.problemlosning;
     document.getElementById('flersteg-check').checked = s.flersteg || false;
     document.getElementById('flersteg-wrap').classList.toggle('hidden', !s.problemlosning);
@@ -493,6 +513,9 @@ const Menu = (() => {
     document.getElementById('multiple-count-select').value  = s.multipleCount || 2;
     document.getElementById('multiple-count-wrap').classList.toggle('hidden', !s.multipleProblems);
     document.getElementById('discussion-check').checked     = s.discussionEnabled || false;
+    document.getElementById('timer-check').checked          = s.timerEnabled || false;
+    document.getElementById('timer-duration-select').value  = s.timerDuration || 20;
+    document.getElementById('timer-options').classList.toggle('hidden', !s.timerEnabled);
     document.getElementById('session-limit-select').value   = s.sessionLimit || 'unlimited';
     updateCustomProblemsStatus();
     renderCustomProblemSets();
@@ -640,6 +663,21 @@ const Menu = (() => {
       });
     });
 
+    document.querySelectorAll('#volym-unit-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#volym-unit-checkboxes input:checked')].map(c => c.value);
+        Settings.setVolymUnits(checked);
+        updateVolymImplicitHint();
+      });
+    });
+    document.querySelectorAll('#volym-mode-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#volym-mode-checkboxes input:checked')].map(c => c.value);
+        Settings.setVolymModes(checked);
+        updateVolymImplicitHint();
+      });
+    });
+
     document.getElementById('problemlosning-check').addEventListener('change', e => {
       Settings.setProblemlosning(e.target.checked);
       document.getElementById('flersteg-wrap').classList.toggle('hidden', !e.target.checked);
@@ -685,6 +723,15 @@ const Menu = (() => {
     document.getElementById('discussion-check').addEventListener('change', e => {
       Settings.setDiscussionEnabled(e.target.checked);
       updateSelectedToolTags();
+    });
+
+    document.getElementById('timer-check').addEventListener('change', e => {
+      Settings.setTimerEnabled(e.target.checked);
+      document.getElementById('timer-options').classList.toggle('hidden', !e.target.checked);
+      updateSelectedToolTags();
+    });
+    document.getElementById('timer-duration-select').addEventListener('change', e => {
+      Settings.setTimerDuration(e.target.value);
     });
 
     document.getElementById('session-limit-select').addEventListener('change', e => {
@@ -769,6 +816,11 @@ const Menu = (() => {
       document.querySelectorAll('#klocka-type-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setKlockaTypes([]);
 
+      document.querySelectorAll('#volym-unit-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setVolymUnits([]);
+      document.querySelectorAll('#volym-mode-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setVolymModes([]);
+
       document.querySelectorAll('#statistik-types-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = true; });
       Settings.setStatistikTypes(['bar', 'freq-table', 'pie-chart']);
 
@@ -784,6 +836,10 @@ const Menu = (() => {
 
       document.getElementById('discussion-check').checked = false;
       Settings.setDiscussionEnabled(false);
+
+      document.getElementById('timer-check').checked = false;
+      Settings.setTimerEnabled(false);
+      document.getElementById('timer-options').classList.add('hidden');
 
       document.getElementById('session-limit-select').value = 'unlimited';
       Settings.setSessionLimit('unlimited');
