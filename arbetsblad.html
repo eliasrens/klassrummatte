@@ -83,12 +83,42 @@
       </div>
     </div>
 
+    <button id="ab-design-toggle" class="btn-design-toggle no-print">Design</button>
+
     <div class="config-actions">
       <button class="btn-generate" id="ab-generate-btn">Generera arbetsblad</button>
       <button class="btn-print"    id="ab-print-btn">Skriv ut / PDF</button>
       <span class="print-hint">Tips: Avmarkera "Sidhuvuden och sidfötter" i utskriftsdialogen för att dölja webbläsarens URL.</span>
     </div>
   </div><!-- /config-panel -->
+
+  <!-- ── Designpanel (höger) ─────────────────────────────── -->
+  <div id="ab-design-panel" class="no-print hidden">
+    <h3 class="sidebar-title">Designstil</h3>
+
+    <div class="design-style-grid">
+      <label class="design-style-card">
+        <input type="radio" name="ab-design" value="" checked>
+        <div class="design-preview design-preview--standard"></div>
+        <span>Standard</span>
+      </label>
+      <label class="design-style-card">
+        <input type="radio" name="ab-design" value="kort">
+        <div class="design-preview design-preview--kort"></div>
+        <span>Kort</span>
+      </label>
+      <label class="design-style-card">
+        <input type="radio" name="ab-design" value="ramad">
+        <div class="design-preview design-preview--ramad"></div>
+        <span>Ramad</span>
+      </label>
+      <label class="design-style-card">
+        <input type="radio" name="ab-design" value="minimal">
+        <div class="design-preview design-preview--minimal"></div>
+        <span>Minimal</span>
+      </label>
+    </div>
+  </div>
 
   <!-- ── Sidopanel för arbetsblad (standard) ──────────────── -->
   <div id="ab-sidebar" class="no-print hidden">
@@ -161,6 +191,7 @@
         <label class="sidebar-check-row"><input type="checkbox" id="st-op-add" checked> Addition</label>
         <label class="sidebar-check-row"><input type="checkbox" id="st-op-sub" checked> Subtraktion</label>
         <label class="sidebar-check-row"><input type="checkbox" id="st-op-mult" checked> Multiplikation</label>
+        <label class="sidebar-check-row"><input type="checkbox" id="st-op-div-cell"> Division</label>
       </div>
 
       <div class="sidebar-section">

@@ -9,6 +9,7 @@ const Arbetsblad = (() => {
   let batchSheets   = [];   // [{ grade, rows, color, vaxling }] för batch-regen
   let plConfig      = null; // Senaste PL-config för omrendering vid färgbyte
   let startenColor  = '';   // tema-klass för färgval
+  let designStyle   = '';   // designstil: '', 'kort', 'ramad', 'minimal'
 
   // =========================================================
   //  Områdeskonfiguration med underkategorier
@@ -699,7 +700,7 @@ const Arbetsblad = (() => {
       const pageProblems = sheetProblems.slice(pageStart, pageStart + PAGE_SIZE);
 
       const sheet = document.createElement('div');
-      sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '');
+      sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '') + (designStyle ? ` ab-design--${designStyle}` : '');
       if (pageIdx > 0) sheet.classList.add('ab-sheet--next-page');
 
       const inner = document.createElement('div');
@@ -779,6 +780,7 @@ const Arbetsblad = (() => {
     if (document.getElementById('st-op-add')?.checked) ops.push('add');
     if (document.getElementById('st-op-sub')?.checked) ops.push('sub');
     if (document.getElementById('st-op-mult')?.checked) ops.push('mult');
+    if (document.getElementById('st-op-div-cell')?.checked) ops.push('div');
     const showDiv = document.getElementById('st-op-div')?.checked ?? true;
     const vaxlingEl = document.querySelector('input[name="st-vaxling"]:checked');
     const vaxling = vaxlingEl && vaxlingEl.value ? vaxlingEl.value : null;
@@ -843,7 +845,8 @@ const Arbetsblad = (() => {
       '<label class="st-period-check"><input type="checkbox" data-op="add" checked> Add</label>' +
       '<label class="st-period-check"><input type="checkbox" data-op="sub" checked> Sub</label>' +
       '<label class="st-period-check"><input type="checkbox" data-op="mult" checked> Mult</label>' +
-      '<label class="st-period-check"><input type="checkbox" data-op="div" checked> Div</label>';
+      '<label class="st-period-check"><input type="checkbox" data-op="div-cell"> Div</label>' +
+      '<label class="st-period-check"><input type="checkbox" data-op="div" checked> Div-kol</label>';
     div.appendChild(opsDiv);
 
     // Växling
@@ -893,7 +896,8 @@ const Arbetsblad = (() => {
       const ops = [];
       el.querySelectorAll('.st-period-ops input[type="checkbox"]:checked').forEach(cb => {
         const op = cb.dataset.op;
-        if (op !== 'div') ops.push(op);
+        if (op === 'div-cell') ops.push('div');
+        else if (op !== 'div') ops.push(op);
       });
       const showDiv = !!el.querySelector('.st-period-ops input[data-op="div"]:checked');
       const colorBtn = el.querySelector('.st-pcolor-btn--active');
@@ -963,9 +967,59 @@ const Arbetsblad = (() => {
     return rows;
   }
 
+  // Bygg en starten-problemcell (uppstallning eller division)
+  function buildStartenProblemTd(problem, regenFn) {
+    const td = document.createElement('td');
+
+    if (problem.type === 'uppstallning-div') {
+      td.className = 'starten-problem starten-problem--div';
+      const line = document.createElement('div');
+      line.className = 'starten-brak-line starten-div-brak-line';
+      line.innerHTML =
+        `<span class="starten-frac">` +
+          `<span class="starten-frac-num">${problem.a}</span>` +
+          `<span class="starten-frac-den">${problem.b}</span>` +
+        `</span>` +
+        `<span class="starten-eq">=</span>`;
+      td.appendChild(line);
+    } else {
+      td.className = 'starten-problem';
+      const text = document.createElement('div');
+      text.className = 'starten-problem-text';
+      text.textContent = `${problem.a} ${problem.operator} ${problem.b}`;
+      td.appendChild(text);
+
+      const grid = document.createElement('table');
+      grid.className = 'starten-grid';
+      const digits = Math.max(String(problem.a).length, String(problem.b).length, String(problem.answer).length) + 1;
+      const cols = Math.max(digits, 4);
+      for (let r = 0; r < 3; r++) {
+        const gtr = document.createElement('tr');
+        for (let c = 0; c < cols; c++) gtr.appendChild(document.createElement('td'));
+        grid.appendChild(gtr);
+      }
+      const lastRow = document.createElement('tr');
+      lastRow.className = 'starten-grid-answer';
+      for (let c = 0; c < cols; c++) lastRow.appendChild(document.createElement('td'));
+      grid.appendChild(lastRow);
+      td.appendChild(grid);
+    }
+
+    if (regenFn) {
+      const regen = document.createElement('button');
+      regen.className = 'starten-regen no-print';
+      regen.title = 'Byt uppgift';
+      regen.textContent = '\u{1F504}';
+      regen.addEventListener('click', regenFn);
+      td.appendChild(regen);
+    }
+
+    return td;
+  }
+
   function renderSingleStartenSheet(wrap, grade, startenRows, title, color, pageBreak, sheetIdx) {
     const sheet = document.createElement('div');
-    sheet.className = 'ab-sheet' + (color ? ` starten-${color}` : '');
+    sheet.className = 'ab-sheet' + (color ? ` starten-${color}` : '') + (designStyle ? ` ab-design--${designStyle}` : '');
     if (pageBreak) sheet.classList.add('ab-sheet--next-page');
 
     const inner = document.createElement('div');
@@ -1001,38 +1055,8 @@ const Arbetsblad = (() => {
       tr.appendChild(tdDay);
 
       row.uppstallningar.forEach((problem, pi) => {
-        const td = document.createElement('td');
-        td.className = 'starten-problem';
-        const text = document.createElement('div');
-        text.className = 'starten-problem-text';
-        text.textContent = `${problem.a} ${problem.operator} ${problem.b}`;
-        td.appendChild(text);
-
-        const grid = document.createElement('table');
-        grid.className = 'starten-grid';
-        const digits = Math.max(String(problem.a).length, String(problem.b).length, String(problem.answer).length) + 1;
-        const cols = Math.max(digits, 4);
-        for (let r = 0; r < 3; r++) {
-          const gtr = document.createElement('tr');
-          for (let c = 0; c < cols; c++) gtr.appendChild(document.createElement('td'));
-          grid.appendChild(gtr);
-        }
-        const lastRow = document.createElement('tr');
-        lastRow.className = 'starten-grid-answer';
-        for (let c = 0; c < cols; c++) lastRow.appendChild(document.createElement('td'));
-        grid.appendChild(lastRow);
-        td.appendChild(grid);
-
-        if (sheetIdx !== undefined) {
-          const regen = document.createElement('button');
-          regen.className = 'starten-regen no-print';
-          regen.title = 'Byt uppgift';
-          regen.textContent = '\u{1F504}';
-          regen.addEventListener('click', () => regenBatchCell(sheetIdx, di, pi));
-          td.appendChild(regen);
-        }
-
-        tr.appendChild(td);
+        const regenFn = sheetIdx !== undefined ? () => regenBatchCell(sheetIdx, di, pi) : null;
+        tr.appendChild(buildStartenProblemTd(problem, regenFn));
       });
 
       if (row.brak) {
@@ -1159,7 +1183,7 @@ const Arbetsblad = (() => {
     const title = document.getElementById('ab-title').value.trim() || 'Starten';
 
     const sheet = document.createElement('div');
-    sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '');
+    sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '') + (designStyle ? ` ab-design--${designStyle}` : '');
 
     const inner = document.createElement('div');
     inner.className = 'ab-sheet-inner';
@@ -1195,42 +1219,9 @@ const Arbetsblad = (() => {
       tdDay.textContent = DAYS[di];
       tr.appendChild(tdDay);
 
-      // 3 uppställningar
+      // 3–4 uppställningar (inkl. ev. division)
       row.uppstallningar.forEach((problem, pi) => {
-        const td = document.createElement('td');
-        td.className = 'starten-problem';
-
-        // Uppgiftstext
-        const text = document.createElement('div');
-        text.className = 'starten-problem-text';
-        text.textContent = `${problem.a} ${problem.operator} ${problem.b}`;
-        td.appendChild(text);
-
-        // Rutnät för räkning
-        const grid = document.createElement('table');
-        grid.className = 'starten-grid';
-        const digits = Math.max(String(problem.a).length, String(problem.b).length, String(problem.answer).length) + 1;
-        const cols = Math.max(digits, 4);
-        for (let r = 0; r < 3; r++) {
-          const gtr = document.createElement('tr');
-          for (let c = 0; c < cols; c++) gtr.appendChild(document.createElement('td'));
-          grid.appendChild(gtr);
-        }
-        const lastRow = document.createElement('tr');
-        lastRow.className = 'starten-grid-answer';
-        for (let c = 0; c < cols; c++) lastRow.appendChild(document.createElement('td'));
-        grid.appendChild(lastRow);
-        td.appendChild(grid);
-
-        // Regenera-knapp
-        const regen = document.createElement('button');
-        regen.className = 'starten-regen no-print';
-        regen.title = 'Byt uppgift';
-        regen.textContent = '\u{1F504}';
-        regen.addEventListener('click', () => regenStartenCell(di, pi));
-        td.appendChild(regen);
-
-        tr.appendChild(td);
+        tr.appendChild(buildStartenProblemTd(problem, () => regenStartenCell(di, pi)));
       });
 
       // Bråk/division-cell (villkorlig)
@@ -1395,7 +1386,7 @@ const Arbetsblad = (() => {
       const pageProblems = sheetProblems.slice(pageStart, pageStart + perPage);
 
       const sheet = document.createElement('div');
-      sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '');
+      sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '') + (designStyle ? ` ab-design--${designStyle}` : '');
       if (pageIdx > 0) sheet.classList.add('ab-sheet--next-page');
 
       const inner = document.createElement('div');
@@ -1759,6 +1750,26 @@ const Arbetsblad = (() => {
 
     document.getElementById('ab-print-btn')
       ?.addEventListener('click', printViaIframe);
+
+    // Design panel toggle
+    const designToggle = document.getElementById('ab-design-toggle');
+    const designPanel  = document.getElementById('ab-design-panel');
+    designToggle?.addEventListener('click', () => {
+      const hidden = designPanel.classList.toggle('hidden');
+      designToggle.classList.toggle('active', !hidden);
+    });
+
+    // Design style selection
+    document.getElementById('ab-design-panel')?.addEventListener('change', e => {
+      const radio = e.target.closest('input[name="ab-design"]');
+      if (!radio) return;
+      designStyle = radio.value;
+      // Re-apply class to all existing sheets
+      document.querySelectorAll('.ab-sheet').forEach(s => {
+        s.classList.forEach(c => { if (c.startsWith('ab-design--')) s.classList.remove(c); });
+        if (designStyle) s.classList.add(`ab-design--${designStyle}`);
+      });
+    });
 
     window.addEventListener('resize', syncSidebarTop);
   }
