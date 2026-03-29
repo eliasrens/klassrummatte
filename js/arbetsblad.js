@@ -12,6 +12,26 @@ const Arbetsblad = (() => {
   let designStyle   = '';   // designstil: '', 'kort', 'ramad', 'minimal'
 
   // =========================================================
+  //  SVG-ram som DOM-element (inte background-image)
+  // =========================================================
+  const FRAME_SVG = {
+    blomma:   'css/blomma-border.svg',
+    pask:     'css/pask-border.svg',
+    bjorkris: 'css/bjorkris-border.svg',
+  };
+
+  /** Injicerar SVG-rambild i arket om designStyle har en ram. */
+  function injectFrameSVG(sheet) {
+    const src = FRAME_SVG[designStyle];
+    if (!src) return;
+    const img = document.createElement('img');
+    img.src = src;
+    img.className = 'ab-frame-img';
+    img.setAttribute('aria-hidden', 'true');
+    sheet.appendChild(img);
+  }
+
+  // =========================================================
   //  Områdeskonfiguration med underkategorier
   // =========================================================
   // Områden som stöder autogenererad problemlösning (Templates.canWrap)
@@ -364,7 +384,9 @@ const Arbetsblad = (() => {
     const showGrid = document.getElementById('ab-show-grid')?.checked ?? true;
     const showSvar = document.getElementById('ab-show-svar')?.checked ?? false;
     const pagesVal = document.getElementById('ab-pages').value;
-    const perPage = cols * 5;
+    const frameDesigns = ['blomma', 'pask', 'bjorkris'];
+    const rows = frameDesigns.includes(designStyle) ? 4 : 5;
+    const perPage = cols * rows;
     const pages   = pagesVal === 'auto' ? 1 : (parseInt(pagesVal) || 1);
     return { grade, cols, pages, perPage, theme, title, showAns, showGrid, showSvar, pagesVal };
   }
@@ -688,6 +710,11 @@ const Arbetsblad = (() => {
     wrap.innerHTML = '';
 
     const PAGE_SIZE  = cfg.perPage || 24;
+    // Trunkera problem som inte ryms på valt antal sidor (t.ex. vid designbyte)
+    const maxProblems = PAGE_SIZE * cfg.pages;
+    if (sheetProblems.length > maxProblems) {
+      sheetProblems.length = maxProblems;
+    }
     const totalPages = Math.max(1, Math.ceil(sheetProblems.length / PAGE_SIZE));
     const numCols    = cfg.cols;
 
@@ -723,6 +750,7 @@ const Arbetsblad = (() => {
 
       inner.appendChild(table);
       sheet.appendChild(inner);
+      injectFrameSVG(sheet);
       wrap.appendChild(sheet);
     }
 
@@ -1095,6 +1123,7 @@ const Arbetsblad = (() => {
 
     inner.appendChild(table);
     sheet.appendChild(inner);
+    injectFrameSVG(sheet);
     wrap.appendChild(sheet);
   }
 
@@ -1261,6 +1290,7 @@ const Arbetsblad = (() => {
     inner.appendChild(table);
 
     sheet.appendChild(inner);
+    injectFrameSVG(sheet);
     wrap.appendChild(sheet);
     wrap.classList.remove('hidden');
     if (empty) empty.classList.add('hidden');
@@ -1410,6 +1440,7 @@ const Arbetsblad = (() => {
 
       inner.appendChild(table);
       sheet.appendChild(inner);
+      injectFrameSVG(sheet);
       wrap.appendChild(sheet);
     }
 
@@ -1755,16 +1786,13 @@ const Arbetsblad = (() => {
       designToggle.classList.toggle('active', !hidden);
     });
 
-    // Design style selection
+    // Design style selection — ändrar klass + re-renderar arket
     document.getElementById('ab-design-panel')?.addEventListener('change', e => {
       const radio = e.target.closest('input[name="ab-design"]');
       if (!radio) return;
       designStyle = radio.value;
-      // Re-apply class to all existing sheets
-      document.querySelectorAll('.ab-sheet').forEach(s => {
-        s.classList.forEach(c => { if (c.startsWith('ab-design--')) s.classList.remove(c); });
-        if (designStyle) s.classList.add(`ab-design--${designStyle}`);
-      });
+      // Re-rendera arket så perPage (4 vs 5 rader) uppdateras
+      if (sheetProblems.length) renderSheet();
     });
 
     window.addEventListener('resize', syncSidebarTop);

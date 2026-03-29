@@ -710,6 +710,7 @@ body:has(#ab-sidebar.has-detail:not(.hidden)) #empty-state {
 }
 
 .ab-sheet {
+  position: relative;
   width: 210mm;
   height: 297mm;
   background: #fff;
@@ -902,7 +903,7 @@ body:has(#ab-sidebar.has-detail:not(.hidden)) #empty-state {
   grid-auto-rows: 7mm;
   border: 1px solid #8a919b;
   border-radius: 2px;
-  margin: 0 0 7mm 0;
+  margin: 0 0 0.15cm 0;
   background-image:
     linear-gradient(to right, #8a919b 1px, transparent 1px),
     linear-gradient(to bottom, #8a919b 1px, transparent 1px);
@@ -1394,7 +1395,7 @@ body:has(#ab-sidebar.has-detail:not(.hidden)) #empty-state {
   .ab-sheet {
     width: 100%; box-shadow: none;
     display: flex; flex-direction: column;
-    height: 100vh; overflow: visible;
+    height: 277mm; overflow: hidden;
   }
   .ab-sheet-inner {
     padding: 0;
@@ -1413,6 +1414,15 @@ body:has(#ab-sidebar.has-detail:not(.hidden)) #empty-state {
 
   /* Ram-temat i utskrift */
   .ab-sheet.theme-ram .ab-sheet-inner { border: 3px solid #457b9d; padding: 0.4cm 0.5cm; }
+
+  /* SVG-ramdesigner: padding MÅSTE vara kvar i print så content
+     hamnar innanför den synliga ramen (SVG border-rect vid 10mm) */
+  .ab-sheet.ab-design--blomma .ab-sheet-inner,
+  .ab-sheet.ab-design--pask .ab-sheet-inner,
+  .ab-sheet.ab-design--bjorkris .ab-sheet-inner {
+    padding: 2cm 1.6cm 1.6cm !important;
+  }
+
 }
 
 @page { size: A4 portrait; margin: 1cm 1.5cm; }
@@ -1813,104 +1823,66 @@ body:has(#ab-design-panel:not(.hidden)) #ab-content-wrap {
   font-weight: 800;
 }
 
-/* ── Påsk ─────────────────────────────────────────────────── */
-.ab-sheet.ab-design--pask {
-  background-color: #fffdf0;
-  background-image: url('pask-border.svg');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  print-color-adjust: exact;
-  -webkit-print-color-adjust: exact;
+/* ── SVG-ramdesigner (gemensamt) ──────────────────────────── */
+/* Ramen injiceras som <img> i DOM via JS — ingen background-image.
+   .ab-sheet behöver position: relative (redan satt) som ankare. */
+.ab-frame-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
 }
-.ab-sheet.ab-design--pask .ab-sheet-inner { padding: 1.2cm; }
-.ab-sheet.ab-design--pask .ab-header { background: transparent; }
-.ab-sheet.ab-design--pask .ab-header::after { display: none; }
-.ab-sheet.ab-design--pask::before { display: none; }
-.ab-sheet.ab-design--pask .ab-table { border: none; }
-.ab-sheet.ab-design--pask .ab-table tr { border-bottom: 1px solid #d8d0b0; }
-.ab-sheet.ab-design--pask .ab-table tr:last-child { border-bottom: none; }
-.ab-sheet.ab-design--pask .ab-table td { border-right: 1px solid #d8d0b0; }
-.ab-sheet.ab-design--pask .ab-table td:last-child { border-right: none; }
+
+/* Inner och header ovanpå ramen */
+.ab-sheet.ab-design--pask .ab-sheet-inner,
+.ab-sheet.ab-design--bjorkris .ab-sheet-inner,
+.ab-sheet.ab-design--blomma .ab-sheet-inner {
+  padding: 2cm 1.6cm 1.6cm;
+  position: relative;
+  z-index: 1;
+}
+
+.ab-sheet.ab-design--pask .ab-header,
+.ab-sheet.ab-design--bjorkris .ab-header,
+.ab-sheet.ab-design--blomma .ab-header { background: transparent; }
+
+.ab-sheet.ab-design--pask .ab-header::after,
+.ab-sheet.ab-design--bjorkris .ab-header::after,
+.ab-sheet.ab-design--blomma .ab-header::after { display: none; }
+
+.ab-sheet.ab-design--pask::before,
+.ab-sheet.ab-design--bjorkris::before,
+.ab-sheet.ab-design--blomma::before { display: none; }
+
+.ab-sheet.ab-design--pask .ab-table,
+.ab-sheet.ab-design--bjorkris .ab-table,
+.ab-sheet.ab-design--blomma .ab-table { border: none; }
+
+/* Svarslinje högre upp i ramdesigner så den inte hamnar under ramen */
+.ab-sheet.ab-design--pask .ab-cell-svar,
+.ab-sheet.ab-design--bjorkris .ab-cell-svar,
+.ab-sheet.ab-design--blomma .ab-cell-svar { bottom: 0.575cm; }
+
+/* ── Påsk ─────────────────────────────────────────────────── */
+.ab-sheet.ab-design--pask { background-color: #fffdf0; }
+.ab-sheet.ab-design--pask .ab-table tr { border-bottom: none; }
+.ab-sheet.ab-design--pask .ab-table td { border-right: none; }
 .ab-sheet.ab-design--pask .ab-cell-num { color: #e07818; }
 
 /* ── Björkris ─────────────────────────────────────────────── */
-.ab-sheet.ab-design--bjorkris {
-  background-color: #fdfcf8;
-  background-image: url('bjorkris-border.svg');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  print-color-adjust: exact;
-  -webkit-print-color-adjust: exact;
-}
-.ab-sheet.ab-design--bjorkris .ab-sheet-inner { padding: 1.2cm; }
-.ab-sheet.ab-design--bjorkris .ab-header { background: transparent; }
-.ab-sheet.ab-design--bjorkris .ab-header::after { display: none; }
-.ab-sheet.ab-design--bjorkris::before { display: none; }
-.ab-sheet.ab-design--bjorkris .ab-table { border: none; }
-.ab-sheet.ab-design--bjorkris .ab-table tr { border-bottom: 1px solid #c8b890; }
-.ab-sheet.ab-design--bjorkris .ab-table tr:last-child { border-bottom: none; }
-.ab-sheet.ab-design--bjorkris .ab-table td { border-right: 1px solid #c8b890; }
-.ab-sheet.ab-design--bjorkris .ab-table td:last-child { border-right: none; }
+.ab-sheet.ab-design--bjorkris { background-color: #fdfcf8; }
+.ab-sheet.ab-design--bjorkris .ab-table tr { border-bottom: none; }
+.ab-sheet.ab-design--bjorkris .ab-table td { border-right: none; }
 .ab-sheet.ab-design--bjorkris .ab-cell-num { color: #5a4228; }
 
 /* ── Blomma ───────────────────────────────────────────────── */
-.ab-sheet.ab-design--blomma {
-  background-color: #faf8f2;
-  background-image: url('blomma-border.svg');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  print-color-adjust: exact;
-  -webkit-print-color-adjust: exact;
-}
-
-/* 12mm padding — precis utanför 10mm-dekorzonen i SVG.
-   Konvention: alla framtida ramar håller sig inom 10mm från sidkanten. */
-.ab-sheet.ab-design--blomma .ab-sheet-inner {
-  padding: 1.2cm;
-}
-
-/* Header: transparent so the floral border shows through */
-.ab-sheet.ab-design--blomma .ab-header {
-  background: transparent;
-}
-
-.ab-sheet.ab-design--blomma .ab-header::after {
-  display: none;
-}
-
-.ab-sheet.ab-design--blomma .ab-title {
-  color: #3a3530;
-}
-
-/* Table: remove outer borders, let the flower frame be the border */
-.ab-sheet.ab-design--blomma .ab-table {
-  border: none;
-}
-
-.ab-sheet.ab-design--blomma .ab-table tr {
-  border-bottom: 1px solid #d5ccbb;
-}
-
-.ab-sheet.ab-design--blomma .ab-table tr:last-child {
-  border-bottom: none;
-}
-
-.ab-sheet.ab-design--blomma .ab-table td {
-  border-right: 1px solid #d5ccbb;
-}
-
-.ab-sheet.ab-design--blomma .ab-table td:last-child {
-  border-right: none;
-}
-
-.ab-sheet.ab-design--blomma .ab-cell-num {
-  color: #7baa5a;
-}
-
-/* No ::before stripe for this style */
-.ab-sheet.ab-design--blomma::before {
-  display: none;
-}
+.ab-sheet.ab-design--blomma { background-color: #faf8f2; }
+.ab-sheet.ab-design--blomma .ab-title { color: #3a3530; }
+.ab-sheet.ab-design--blomma .ab-table tr { border-bottom: none; }
+.ab-sheet.ab-design--blomma .ab-table td { border-right: none; }
+.ab-sheet.ab-design--blomma .ab-cell-num { color: #7baa5a; }
 
 /* ── Rutnät ska aldrig påverkas av designstilar ────────────
    Återställ ab-calc-grid och starten-grid till exakt samma
