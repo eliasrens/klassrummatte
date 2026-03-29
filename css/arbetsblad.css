@@ -1867,20 +1867,23 @@ body:has(#ab-design-panel:not(.hidden)) #ab-content-wrap {
 
 /* ── Påsk ─────────────────────────────────────────────────── */
 .ab-sheet.ab-design--pask { background-color: #fffdf0; }
-.ab-sheet.ab-design--pask .ab-table tr { border-bottom: none; }
+.ab-sheet.ab-design--pask .ab-table tr { border-bottom: 1px solid #d8d0b0; }
+.ab-sheet.ab-design--pask .ab-table tr:last-child { border-bottom: none; }
 .ab-sheet.ab-design--pask .ab-table td { border-right: none; }
 .ab-sheet.ab-design--pask .ab-cell-num { color: #e07818; }
 
 /* ── Björkris ─────────────────────────────────────────────── */
 .ab-sheet.ab-design--bjorkris { background-color: #fdfcf8; }
-.ab-sheet.ab-design--bjorkris .ab-table tr { border-bottom: none; }
+.ab-sheet.ab-design--bjorkris .ab-table tr { border-bottom: 1px solid #c8b890; }
+.ab-sheet.ab-design--bjorkris .ab-table tr:last-child { border-bottom: none; }
 .ab-sheet.ab-design--bjorkris .ab-table td { border-right: none; }
 .ab-sheet.ab-design--bjorkris .ab-cell-num { color: #5a4228; }
 
 /* ── Blomma ───────────────────────────────────────────────── */
 .ab-sheet.ab-design--blomma { background-color: #faf8f2; }
 .ab-sheet.ab-design--blomma .ab-title { color: #3a3530; }
-.ab-sheet.ab-design--blomma .ab-table tr { border-bottom: none; }
+.ab-sheet.ab-design--blomma .ab-table tr { border-bottom: 1px solid #d5ccbb; }
+.ab-sheet.ab-design--blomma .ab-table tr:last-child { border-bottom: none; }
 .ab-sheet.ab-design--blomma .ab-table td { border-right: none; }
 .ab-sheet.ab-design--blomma .ab-cell-num { color: #7baa5a; }
 
