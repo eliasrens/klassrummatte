@@ -1622,6 +1622,30 @@ body:has(#ab-design-panel:not(.hidden)) #ab-content-wrap {
   );
 }
 
+/* Blomma preview */
+.design-preview--blomma {
+  background: #faf8f2;
+  background-image: url('blomma-border.svg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* Påsk preview */
+.design-preview--pask {
+  background: #fffdf0;
+  background-image: url('pask-border.svg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* Björkris preview */
+.design-preview--bjorkris {
+  background: #fdfcf8;
+  background-image: url('bjorkris-border.svg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
 /* ============================================================
    Design-stilar för .ab-sheet
    ============================================================ */
@@ -1787,6 +1811,105 @@ body:has(#ab-design-panel:not(.hidden)) #ab-content-wrap {
   color: hsl(var(--sh1), 38%, 44%);
   font-size: 0.65rem;
   font-weight: 800;
+}
+
+/* ── Påsk ─────────────────────────────────────────────────── */
+.ab-sheet.ab-design--pask {
+  background-color: #fffdf0;
+  background-image: url('pask-border.svg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+.ab-sheet.ab-design--pask .ab-sheet-inner { padding: 1.2cm; }
+.ab-sheet.ab-design--pask .ab-header { background: transparent; }
+.ab-sheet.ab-design--pask .ab-header::after { display: none; }
+.ab-sheet.ab-design--pask::before { display: none; }
+.ab-sheet.ab-design--pask .ab-table { border: none; }
+.ab-sheet.ab-design--pask .ab-table tr { border-bottom: 1px solid #d8d0b0; }
+.ab-sheet.ab-design--pask .ab-table tr:last-child { border-bottom: none; }
+.ab-sheet.ab-design--pask .ab-table td { border-right: 1px solid #d8d0b0; }
+.ab-sheet.ab-design--pask .ab-table td:last-child { border-right: none; }
+.ab-sheet.ab-design--pask .ab-cell-num { color: #e07818; }
+
+/* ── Björkris ─────────────────────────────────────────────── */
+.ab-sheet.ab-design--bjorkris {
+  background-color: #fdfcf8;
+  background-image: url('bjorkris-border.svg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+.ab-sheet.ab-design--bjorkris .ab-sheet-inner { padding: 1.2cm; }
+.ab-sheet.ab-design--bjorkris .ab-header { background: transparent; }
+.ab-sheet.ab-design--bjorkris .ab-header::after { display: none; }
+.ab-sheet.ab-design--bjorkris::before { display: none; }
+.ab-sheet.ab-design--bjorkris .ab-table { border: none; }
+.ab-sheet.ab-design--bjorkris .ab-table tr { border-bottom: 1px solid #c8b890; }
+.ab-sheet.ab-design--bjorkris .ab-table tr:last-child { border-bottom: none; }
+.ab-sheet.ab-design--bjorkris .ab-table td { border-right: 1px solid #c8b890; }
+.ab-sheet.ab-design--bjorkris .ab-table td:last-child { border-right: none; }
+.ab-sheet.ab-design--bjorkris .ab-cell-num { color: #5a4228; }
+
+/* ── Blomma ───────────────────────────────────────────────── */
+.ab-sheet.ab-design--blomma {
+  background-color: #faf8f2;
+  background-image: url('blomma-border.svg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* 12mm padding — precis utanför 10mm-dekorzonen i SVG.
+   Konvention: alla framtida ramar håller sig inom 10mm från sidkanten. */
+.ab-sheet.ab-design--blomma .ab-sheet-inner {
+  padding: 1.2cm;
+}
+
+/* Header: transparent so the floral border shows through */
+.ab-sheet.ab-design--blomma .ab-header {
+  background: transparent;
+}
+
+.ab-sheet.ab-design--blomma .ab-header::after {
+  display: none;
+}
+
+.ab-sheet.ab-design--blomma .ab-title {
+  color: #3a3530;
+}
+
+/* Table: remove outer borders, let the flower frame be the border */
+.ab-sheet.ab-design--blomma .ab-table {
+  border: none;
+}
+
+.ab-sheet.ab-design--blomma .ab-table tr {
+  border-bottom: 1px solid #d5ccbb;
+}
+
+.ab-sheet.ab-design--blomma .ab-table tr:last-child {
+  border-bottom: none;
+}
+
+.ab-sheet.ab-design--blomma .ab-table td {
+  border-right: 1px solid #d5ccbb;
+}
+
+.ab-sheet.ab-design--blomma .ab-table td:last-child {
+  border-right: none;
+}
+
+.ab-sheet.ab-design--blomma .ab-cell-num {
+  color: #7baa5a;
+}
+
+/* No ::before stripe for this style */
+.ab-sheet.ab-design--blomma::before {
+  display: none;
 }
 
 /* ── Rutnät ska aldrig påverkas av designstilar ────────────

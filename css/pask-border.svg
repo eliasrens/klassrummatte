@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 297">
+<!--
+  PÅSK-MALL: Påskägg + kycklingar
+  Konvention: alla dekorationer inom 10mm från sidkanten.
+  CSS-padding: 1.2cm
+-->
+<defs>
+  <g id="egg-y">
+    <ellipse rx="4" ry="5.5" fill="#f8e840" stroke="#c8a820" stroke-width="0.5"/>
+    <line x1="-4" y1="0.5" x2="4" y2="0.5" stroke="#c8a820" stroke-width="0.4"/>
+    <circle cx="1" cy="-1.5" r="0.7" fill="#c8a820"/>
+    <circle cx="-1" cy="2.2" r="0.7" fill="#c8a820"/>
+  </g>
+  <g id="egg-p">
+    <ellipse rx="3.5" ry="5" fill="#f8b0c0" stroke="#d07890" stroke-width="0.5"/>
+    <path d="M-3.5,0 Q0,-1.5 3.5,0" fill="none" stroke="#d07890" stroke-width="0.4"/>
+    <circle cx="0" cy="-2" r="0.6" fill="#d07890"/>
+    <circle cx="0" cy="2" r="0.6" fill="#d07890"/>
+  </g>
+  <g id="egg-b">
+    <ellipse rx="3.5" ry="5" fill="#a8d0f0" stroke="#5080c0" stroke-width="0.5"/>
+    <line x1="-3.5" y1="-0.5" x2="3.5" y2="-0.5" stroke="#5080c0" stroke-width="0.4"/>
+    <line x1="-3.5" y1="1.2" x2="3.5" y2="1.2" stroke="#5080c0" stroke-width="0.4"/>
+  </g>
+  <g id="egg-g">
+    <ellipse rx="3.5" ry="5" fill="#b0e0a0" stroke="#60a840" stroke-width="0.5"/>
+    <path d="M-3.5,0.5 Q-1.5,-1 0,0.5 Q1.5,2 3.5,0.5" fill="none" stroke="#60a840" stroke-width="0.5"/>
+  </g>
+  <g id="egg-v">
+    <ellipse rx="3.5" ry="5" fill="#d0b0e8" stroke="#9060b8" stroke-width="0.5"/>
+    <circle cx="0" cy="-1" r="1" fill="#9060b8"/>
+    <circle cx="-1.5" cy="1.5" r="0.6" fill="#9060b8"/>
+    <circle cx="1.5" cy="1.5" r="0.6" fill="#9060b8"/>
+  </g>
+  <g id="chick">
+    <ellipse cx="0" cy="2" rx="4" ry="3.2" fill="#f8d030"/>
+    <circle cx="0" cy="-2" r="2.8" fill="#f8d030"/>
+    <circle cx="1" cy="-2.5" r="0.5" fill="#2a1818"/>
+    <path d="M2.2,-1.5 L4.2,-0.8 L2.2,-0.2 Z" fill="#e07818"/>
+    <path d="M-2.5,1.5 Q-5.5,0 -4,3.5" fill="#e8c020"/>
+    <path d="M-1,5 Q-2,6 0,5.5" stroke="#d4a820" stroke-width="0.5" fill="none"/>
+    <path d="M1,5 Q2,6 0,5.5" stroke="#d4a820" stroke-width="0.5" fill="none"/>
+  </g>
+  <g id="grass">
+    <path d="M0,0 Q-1,-3.5 0,-5.5" stroke="#5d9a40" stroke-width="0.8" fill="none"/>
+    <path d="M0,0 Q1.5,-2.5 2,-4.5" stroke="#5d9a40" stroke-width="0.8" fill="none"/>
+    <path d="M0,0 Q-2,-2 -2.5,-4" stroke="#5d9a40" stroke-width="0.8" fill="none"/>
+  </g>
+</defs>
+
+<!-- BORDER -->
+<rect x="10" y="10" width="190" height="277" fill="none" stroke="#3a3530" stroke-width="0.7"/>
+<line x1="38" y1="10" x2="88" y2="10" stroke="#3a3530" stroke-width="0.4"/>
+<line x1="122" y1="10" x2="172" y2="10" stroke="#3a3530" stroke-width="0.4"/>
+<line x1="38" y1="287" x2="88" y2="287" stroke="#3a3530" stroke-width="0.4"/>
+<line x1="122" y1="287" x2="172" y2="287" stroke="#3a3530" stroke-width="0.4"/>
+
+<!-- TOP LEFT -->
+<use href="#egg-y" transform="translate(10,10)"/>
+<use href="#egg-p" transform="translate(22,7)"/>
+<use href="#egg-b" transform="translate(31,9) rotate(15)"/>
+<use href="#egg-g" transform="translate(8,22)"/>
+<use href="#grass" transform="translate(17,15)"/>
+
+<!-- TOP RIGHT -->
+<g transform="translate(210,0) scale(-1,1)">
+  <use href="#egg-y" transform="translate(10,10)"/>
+  <use href="#egg-p" transform="translate(22,7)"/>
+  <use href="#egg-b" transform="translate(31,9) rotate(-15)"/>
+  <use href="#egg-g" transform="translate(8,22)"/>
+  <use href="#grass" transform="translate(17,15)"/>
+</g>
+
+<!-- BOTTOM LEFT: chick + eggs -->
+<g transform="translate(0,297) scale(1,-1)">
+  <use href="#chick" transform="translate(10,11)"/>
+  <use href="#egg-y" transform="translate(22,7) rotate(10)"/>
+  <use href="#egg-v" transform="translate(8,23) rotate(-10)"/>
+  <use href="#grass" transform="translate(20,15)"/>
+</g>
+
+<!-- BOTTOM RIGHT -->
+<g transform="translate(210,297) scale(-1,-1)">
+  <use href="#chick" transform="translate(10,11)"/>
+  <use href="#egg-y" transform="translate(22,7) rotate(-10)"/>
+  <use href="#egg-v" transform="translate(8,23) rotate(10)"/>
+  <use href="#grass" transform="translate(20,15)"/>
+</g>
+
+<!-- TOP CENTER -->
+<g transform="translate(105,10)">
+  <use href="#egg-b" transform="translate(-8,0)"/>
+  <use href="#egg-g" transform="translate(8,0)"/>
+  <use href="#grass" transform="translate(0,6)"/>
+</g>
+
+<!-- BOTTOM CENTER -->
+<g transform="translate(105,287)">
+  <use href="#egg-p" transform="translate(-8,0)"/>
+  <use href="#egg-y" transform="translate(8,0)"/>
+  <use href="#grass" transform="translate(0,-6) scale(1,-1)"/>
+</g>
+
+<!-- LEFT SIDE: ägg i olika färger, lätt roterade -->
+<use href="#egg-y" transform="translate(5,46) rotate(-12)"/>
+<use href="#egg-p" transform="translate(5,60) rotate(10)"/>
+<use href="#egg-g" transform="translate(5,74) rotate(-8)"/>
+<use href="#egg-b" transform="translate(5,88) rotate(14)"/>
+<use href="#egg-v" transform="translate(5,102) rotate(-10)"/>
+<use href="#egg-y" transform="translate(5,116) rotate(8)"/>
+<use href="#egg-p" transform="translate(5,130) rotate(-14)"/>
+<use href="#egg-g" transform="translate(5,144) rotate(10)"/>
+<use href="#egg-b" transform="translate(5,158) rotate(-8)"/>
+<use href="#egg-v" transform="translate(5,172) rotate(12)"/>
+<use href="#egg-y" transform="translate(5,186) rotate(-10)"/>
+<use href="#egg-p" transform="translate(5,200) rotate(8)"/>
+<use href="#egg-g" transform="translate(5,214) rotate(-12)"/>
+<use href="#egg-b" transform="translate(5,228) rotate(10)"/>
+<use href="#egg-v" transform="translate(5,242) rotate(-8)"/>
+<use href="#egg-y" transform="translate(5,256) rotate(14)"/>
+<use href="#egg-p" transform="translate(5,270) rotate(-10)"/>
+
+<!-- RIGHT SIDE -->
+<use href="#egg-g" transform="translate(205,46) rotate(12)"/>
+<use href="#egg-b" transform="translate(205,60) rotate(-10)"/>
+<use href="#egg-v" transform="translate(205,74) rotate(8)"/>
+<use href="#egg-y" transform="translate(205,88) rotate(-14)"/>
+<use href="#egg-p" transform="translate(205,102) rotate(10)"/>
+<use href="#egg-g" transform="translate(205,116) rotate(-8)"/>
+<use href="#egg-b" transform="translate(205,130) rotate(14)"/>
+<use href="#egg-v" transform="translate(205,144) rotate(-10)"/>
+<use href="#egg-y" transform="translate(205,158) rotate(8)"/>
+<use href="#egg-p" transform="translate(205,172) rotate(-12)"/>
+<use href="#egg-g" transform="translate(205,186) rotate(10)"/>
+<use href="#egg-b" transform="translate(205,200) rotate(-8)"/>
+<use href="#egg-v" transform="translate(205,214) rotate(12)"/>
+<use href="#egg-y" transform="translate(205,228) rotate(-10)"/>
+<use href="#egg-p" transform="translate(205,242) rotate(8)"/>
+<use href="#egg-g" transform="translate(205,256) rotate(-14)"/>
+<use href="#egg-b" transform="translate(205,270) rotate(10)"/>
+
+</svg>

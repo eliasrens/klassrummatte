@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 297">
+<!--
+  BJÖRKRIS — ljusa björkrisgrenar med löv
+  Konvention: alla dekorationer inom 10mm från sidkanten.
+  CSS-padding: 1.2cm
+-->
+<defs>
+  <!-- Björklöv: tydlig form, ljusgrönt med ådra -->
+  <g id="lv">
+    <path d="M0,0 Q-2.5,-1.5 -2,-5 Q0,-7.5 2,-5 Q2.5,-1.5 0,0" fill="#8aba48"/>
+    <line x1="0" y1="-0.5" x2="0" y2="-7" stroke="#5a8828" stroke-width="0.3"/>
+  </g>
+  <!-- Litet löv -->
+  <g id="lv-s">
+    <path d="M0,0 Q-1.8,-1 -1.5,-3.5 Q0,-5.5 1.5,-3.5 Q1.8,-1 0,0" fill="#9ac850"/>
+    <line x1="0" y1="-0.5" x2="0" y2="-5" stroke="#5a8828" stroke-width="0.25"/>
+  </g>
+  <!-- Björklenticel (kort mörkt streck = björkbark) -->
+  <g id="lent">
+    <rect x="-2" y="-0.3" width="4" height="0.6" rx="0.3" fill="#3a2810" opacity="0.5"/>
+  </g>
+</defs>
+
+<!-- TUNN BORTERRAM -->
+<rect x="10" y="10" width="190" height="277"
+  fill="none" stroke="#7a6848" stroke-width="0.6"/>
+
+<!-- ═══════════════════════════════════════════
+     TOP KANT — horisontell björkgren + löv
+═══════════════════════════════════════════ -->
+<path d="M10,9 Q60,7 105,8.5 Q150,7 200,9"
+  fill="none" stroke="#cdbf9a" stroke-width="1.8" stroke-linecap="round"/>
+<!-- Lenticeler på topgrenen -->
+<use href="#lent" transform="translate(35,8)"/>
+<use href="#lent" transform="translate(65,7.5)"/>
+<use href="#lent" transform="translate(105,8.5)"/>
+<use href="#lent" transform="translate(145,7.5)"/>
+<use href="#lent" transform="translate(175,8)"/>
+<!-- Korta sidogrenar uppåt -->
+<line x1="35" y1="8" x2="33" y2="3" stroke="#cdbf9a" stroke-width="1"/>
+<line x1="65" y1="7.5" x2="63" y2="2.5" stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="145" y1="7.5" x2="147" y2="2.5" stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="175" y1="8" x2="177" y2="3" stroke="#cdbf9a" stroke-width="1"/>
+<!-- Extra förgreningar -->
+<line x1="33" y1="3" x2="30" y2="0" stroke="#cdbf9a" stroke-width="0.6"/>
+<line x1="33" y1="3" x2="36" y2="0.5" stroke="#cdbf9a" stroke-width="0.6"/>
+<line x1="63" y1="2.5" x2="61" y2="0" stroke="#cdbf9a" stroke-width="0.6"/>
+<line x1="147" y1="2.5" x2="149" y2="0" stroke="#cdbf9a" stroke-width="0.6"/>
+<line x1="177" y1="3" x2="174" y2="0.5" stroke="#cdbf9a" stroke-width="0.6"/>
+<line x1="177" y1="3" x2="180" y2="0" stroke="#cdbf9a" stroke-width="0.6"/>
+<!-- Löv på topgrenar -->
+<use href="#lv"   transform="translate(30,0.5) rotate(10)"/>
+<use href="#lv-s" transform="translate(36,1) rotate(-15)"/>
+<use href="#lv-s" transform="translate(61,0.5) rotate(15)"/>
+<use href="#lv"   transform="translate(149,0.5) rotate(-10)"/>
+<use href="#lv-s" transform="translate(174,1) rotate(15)"/>
+<use href="#lv"   transform="translate(180,0.5) rotate(-12)"/>
+
+<!-- ═══════════════════════════════════════════
+     BOTTOM KANT
+═══════════════════════════════════════════ -->
+<path d="M10,288 Q60,290 105,288.5 Q150,290 200,288"
+  fill="none" stroke="#cdbf9a" stroke-width="1.8" stroke-linecap="round"/>
+<use href="#lent" transform="translate(35,289)"/>
+<use href="#lent" transform="translate(65,289.5)"/>
+<use href="#lent" transform="translate(105,288.5)"/>
+<use href="#lent" transform="translate(145,289.5)"/>
+<use href="#lent" transform="translate(175,289)"/>
+<line x1="35" y1="289" x2="33" y2="294" stroke="#cdbf9a" stroke-width="1"/>
+<line x1="65" y1="289.5" x2="63" y2="294.5" stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="145" y1="289.5" x2="147" y2="294.5" stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="175" y1="289" x2="177" y2="294" stroke="#cdbf9a" stroke-width="1"/>
+<line x1="33" y1="294" x2="30" y2="297" stroke="#cdbf9a" stroke-width="0.6"/>
+<line x1="33" y1="294" x2="36" y2="296.5" stroke="#cdbf9a" stroke-width="0.6"/>
+<line x1="63" y1="294.5" x2="61" y2="297" stroke="#cdbf9a" stroke-width="0.6"/>
+<line x1="147" y1="294.5" x2="149" y2="297" stroke="#cdbf9a" stroke-width="0.6"/>
+<line x1="177" y1="294" x2="174" y2="296.5" stroke="#cdbf9a" stroke-width="0.6"/>
+<line x1="177" y1="294" x2="180" y2="297" stroke="#cdbf9a" stroke-width="0.6"/>
+<!-- Löv på bottengrenar (vända nedåt) -->
+<g transform="scale(1,-1) translate(0,-297)">
+  <use href="#lv"   transform="translate(30,0.5) rotate(10)"/>
+  <use href="#lv-s" transform="translate(36,1) rotate(-15)"/>
+  <use href="#lv-s" transform="translate(61,0.5) rotate(15)"/>
+  <use href="#lv"   transform="translate(149,0.5) rotate(-10)"/>
+  <use href="#lv-s" transform="translate(174,1) rotate(15)"/>
+  <use href="#lv"   transform="translate(180,0.5) rotate(-12)"/>
+</g>
+
+<!-- ═══════════════════════════════════════════
+     VÄNSTER KANT
+═══════════════════════════════════════════ -->
+<path d="M8.5,10 Q6.5,80 8,148 Q6.5,216 8.5,287"
+  fill="none" stroke="#cdbf9a" stroke-width="1.8" stroke-linecap="round"/>
+<use href="#lent" transform="translate(7.5,55)"/>
+<use href="#lent" transform="translate(7.5,100)"/>
+<use href="#lent" transform="translate(7.5,148)"/>
+<use href="#lent" transform="translate(7.5,196)"/>
+<use href="#lent" transform="translate(7.5,242)"/>
+<!-- Sidogrenar åt vänster -->
+<line x1="7.5" y1="55"  x2="2" y2="52"  stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="7.5" y1="100" x2="2" y2="97"  stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="7.5" y1="148" x2="2" y2="145" stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="7.5" y1="196" x2="2" y2="193" stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="7.5" y1="242" x2="2" y2="239" stroke="#cdbf9a" stroke-width="0.9"/>
+<!-- Extra förgreningar -->
+<line x1="2" y1="52"  x2="0" y2="48"  stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="2" y1="52"  x2="0" y2="55"  stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="2" y1="97"  x2="0" y2="93"  stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="2" y1="97"  x2="0" y2="100" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="2" y1="145" x2="0" y2="141" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="2" y1="145" x2="0" y2="148" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="2" y1="193" x2="0" y2="189" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="2" y1="193" x2="0" y2="196" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="2" y1="239" x2="0" y2="235" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="2" y1="239" x2="0" y2="242" stroke="#cdbf9a" stroke-width="0.55"/>
+<!-- Löv på vänstergrenar -->
+<use href="#lv"   transform="translate(0,48)  rotate(90)"/>
+<use href="#lv-s" transform="translate(0,55.5) rotate(80)"/>
+<use href="#lv"   transform="translate(0,93)  rotate(95)"/>
+<use href="#lv-s" transform="translate(0,100.5) rotate(82)"/>
+<use href="#lv"   transform="translate(0,141) rotate(90)"/>
+<use href="#lv-s" transform="translate(0,148.5) rotate(83)"/>
+<use href="#lv"   transform="translate(0,189) rotate(92)"/>
+<use href="#lv-s" transform="translate(0,196.5) rotate(80)"/>
+<use href="#lv"   transform="translate(0,235) rotate(90)"/>
+<use href="#lv-s" transform="translate(0,242.5) rotate(85)"/>
+
+<!-- ═══════════════════════════════════════════
+     HÖGER KANT
+═══════════════════════════════════════════ -->
+<path d="M201.5,10 Q203.5,80 202,148 Q203.5,216 201.5,287"
+  fill="none" stroke="#cdbf9a" stroke-width="1.8" stroke-linecap="round"/>
+<use href="#lent" transform="translate(202.5,55)"/>
+<use href="#lent" transform="translate(202.5,100)"/>
+<use href="#lent" transform="translate(202.5,148)"/>
+<use href="#lent" transform="translate(202.5,196)"/>
+<use href="#lent" transform="translate(202.5,242)"/>
+<line x1="202.5" y1="55"  x2="208" y2="52"  stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="202.5" y1="100" x2="208" y2="97"  stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="202.5" y1="148" x2="208" y2="145" stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="202.5" y1="196" x2="208" y2="193" stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="202.5" y1="242" x2="208" y2="239" stroke="#cdbf9a" stroke-width="0.9"/>
+<line x1="208" y1="52"  x2="210" y2="48"  stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="208" y1="52"  x2="210" y2="55"  stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="208" y1="97"  x2="210" y2="93"  stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="208" y1="97"  x2="210" y2="100" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="208" y1="145" x2="210" y2="141" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="208" y1="145" x2="210" y2="148" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="208" y1="193" x2="210" y2="189" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="208" y1="193" x2="210" y2="196" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="208" y1="239" x2="210" y2="235" stroke="#cdbf9a" stroke-width="0.55"/>
+<line x1="208" y1="239" x2="210" y2="242" stroke="#cdbf9a" stroke-width="0.55"/>
+<use href="#lv"   transform="translate(210,48)  rotate(-90)"/>
+<use href="#lv-s" transform="translate(210,55.5) rotate(-80)"/>
+<use href="#lv"   transform="translate(210,93)  rotate(-95)"/>
+<use href="#lv-s" transform="translate(210,100.5) rotate(-82)"/>
+<use href="#lv"   transform="translate(210,141) rotate(-90)"/>
+<use href="#lv-s" transform="translate(210,148.5) rotate(-83)"/>
+<use href="#lv"   transform="translate(210,189) rotate(-92)"/>
+<use href="#lv-s" transform="translate(210,196.5) rotate(-80)"/>
+<use href="#lv"   transform="translate(210,235) rotate(-90)"/>
+<use href="#lv-s" transform="translate(210,242.5) rotate(-85)"/>
+
+</svg>

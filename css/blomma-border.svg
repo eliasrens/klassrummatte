@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 297">
+<!--
+  KONVENTION FÖR MALLAR:
+  Alla dekorativa element håller sig inom 10mm från sidkanten (0–10mm).
+  CSS-padding för mallen: 1.2cm (12mm) på alla sidor.
+  Borterlinjen placeras vid 10mm — dekorationer sticker ut mot sidkanten.
+-->
+<defs>
+  <!-- Yellow daisy (radius ~5mm, centered at origin) -->
+  <g id="yd">
+    <ellipse cy="-5" rx="1.5" ry="3.5" fill="#f5d055"/>
+    <ellipse cy="-5" rx="1.5" ry="3.5" fill="#f5d055" transform="rotate(45)"/>
+    <ellipse cy="-5" rx="1.5" ry="3.5" fill="#f5d055" transform="rotate(90)"/>
+    <ellipse cy="-5" rx="1.5" ry="3.5" fill="#f5d055" transform="rotate(135)"/>
+    <ellipse cy="-5" rx="1.5" ry="3.5" fill="#f5d055" transform="rotate(180)"/>
+    <ellipse cy="-5" rx="1.5" ry="3.5" fill="#f5d055" transform="rotate(225)"/>
+    <ellipse cy="-5" rx="1.5" ry="3.5" fill="#f5d055" transform="rotate(270)"/>
+    <ellipse cy="-5" rx="1.5" ry="3.5" fill="#f5d055" transform="rotate(315)"/>
+    <circle r="2.3" fill="#c88020"/>
+  </g>
+  <!-- Pink daisy -->
+  <g id="pd">
+    <ellipse cy="-4" rx="1.2" ry="3" fill="#f0a0a8"/>
+    <ellipse cy="-4" rx="1.2" ry="3" fill="#f0a0a8" transform="rotate(60)"/>
+    <ellipse cy="-4" rx="1.2" ry="3" fill="#f0a0a8" transform="rotate(120)"/>
+    <ellipse cy="-4" rx="1.2" ry="3" fill="#f0a0a8" transform="rotate(180)"/>
+    <ellipse cy="-4" rx="1.2" ry="3" fill="#f0a0a8" transform="rotate(240)"/>
+    <ellipse cy="-4" rx="1.2" ry="3" fill="#f0a0a8" transform="rotate(300)"/>
+    <circle r="1.8" fill="#e05060"/>
+  </g>
+  <!-- White daisy -->
+  <g id="wd">
+    <ellipse cy="-3.8" rx="1.1" ry="2.8" fill="#f5f2ea"/>
+    <ellipse cy="-3.8" rx="1.1" ry="2.8" fill="#f5f2ea" transform="rotate(45)"/>
+    <ellipse cy="-3.8" rx="1.1" ry="2.8" fill="#f5f2ea" transform="rotate(90)"/>
+    <ellipse cy="-3.8" rx="1.1" ry="2.8" fill="#f5f2ea" transform="rotate(135)"/>
+    <ellipse cy="-3.8" rx="1.1" ry="2.8" fill="#f5f2ea" transform="rotate(180)"/>
+    <ellipse cy="-3.8" rx="1.1" ry="2.8" fill="#f5f2ea" transform="rotate(225)"/>
+    <ellipse cy="-3.8" rx="1.1" ry="2.8" fill="#f5f2ea" transform="rotate(270)"/>
+    <ellipse cy="-3.8" rx="1.1" ry="2.8" fill="#f5f2ea" transform="rotate(315)"/>
+    <circle r="1.8" fill="#f5d055"/>
+  </g>
+  <!-- Sunflower (radius ~5.5mm) -->
+  <g id="sf">
+    <ellipse cy="-5.5" rx="1.7" ry="4" fill="#f5c840"/>
+    <ellipse cy="-5.5" rx="1.7" ry="4" fill="#f5c840" transform="rotate(45)"/>
+    <ellipse cy="-5.5" rx="1.7" ry="4" fill="#f5c840" transform="rotate(90)"/>
+    <ellipse cy="-5.5" rx="1.7" ry="4" fill="#f5c840" transform="rotate(135)"/>
+    <ellipse cy="-5.5" rx="1.7" ry="4" fill="#f5c840" transform="rotate(180)"/>
+    <ellipse cy="-5.5" rx="1.7" ry="4" fill="#f5c840" transform="rotate(225)"/>
+    <ellipse cy="-5.5" rx="1.7" ry="4" fill="#f5c840" transform="rotate(270)"/>
+    <ellipse cy="-5.5" rx="1.7" ry="4" fill="#f5c840" transform="rotate(315)"/>
+    <circle r="2.8" fill="#a06010"/>
+  </g>
+  <!-- Tulip (fits within ~5mm upward from base) -->
+  <g id="tlp">
+    <path d="M0,0 C-3,0 -4,-5 0,-8 C4,-5 3,0 0,0" fill="#d07070"/>
+    <path d="M0,-2 C-1.5,-2 -1.5,-6 0,-8 C1.5,-6 1.5,-2 0,-2" fill="#e09898"/>
+    <line x1="0" y1="0" x2="0" y2="4" stroke="#5d8a4a" stroke-width="0.7"/>
+    <path d="M0,2 Q-3,0 -3,3" fill="none" stroke="#7baa5a" stroke-width="0.6"/>
+    <path d="M0,2 Q3,0 3,3" fill="none" stroke="#7baa5a" stroke-width="0.6"/>
+  </g>
+  <!-- Leaf pair: extends max 4mm to each side from stem -->
+  <g id="lf">
+    <path d="M0,0 Q-4,-2 -3,-8" fill="#7baa5a"/>
+    <path d="M0,0 Q4,-2 3,-8" fill="#7baa5a"/>
+  </g>
+</defs>
+
+<!-- ═══ BORDER LINE at 10mm from all edges ═══ -->
+<rect x="10" y="10" width="190" height="277" fill="none" stroke="#3a3530" stroke-width="0.7"/>
+
+<!-- ═══ TOP: line segments flanking center ═══ -->
+<line x1="38" y1="10" x2="88" y2="10" stroke="#3a3530" stroke-width="0.4"/>
+<line x1="122" y1="10" x2="172" y2="10" stroke="#3a3530" stroke-width="0.4"/>
+
+<!-- ═══ BOTTOM: line segments ═══ -->
+<line x1="38" y1="287" x2="88" y2="287" stroke="#3a3530" stroke-width="0.4"/>
+<line x1="122" y1="287" x2="172" y2="287" stroke="#3a3530" stroke-width="0.4"/>
+
+<!-- ═══ TOP LEFT CORNER (flowers straddle the 10mm border line) ═══ -->
+<use href="#yd" transform="translate(10,10)"/>
+<use href="#pd" transform="translate(24,7)"/>
+<use href="#wd" transform="translate(35,8)"/>
+<use href="#pd" transform="translate(8,24)"/>
+<path d="M5,7 Q3,4 7,6" fill="#7baa5a"/>
+<path d="M8,4 Q6,2 9,4" fill="#7baa5a"/>
+<path d="M4,10 Q1,8 4,7" fill="#7baa5a"/>
+
+<!-- ═══ TOP RIGHT CORNER ═══ -->
+<g transform="translate(210,0) scale(-1,1)">
+  <use href="#yd" transform="translate(10,10)"/>
+  <use href="#pd" transform="translate(24,7)"/>
+  <use href="#wd" transform="translate(35,8)"/>
+  <use href="#pd" transform="translate(8,24)"/>
+  <path d="M5,7 Q3,4 7,6" fill="#7baa5a"/>
+  <path d="M8,4 Q6,2 9,4" fill="#7baa5a"/>
+  <path d="M4,10 Q1,8 4,7" fill="#7baa5a"/>
+</g>
+
+<!-- ═══ BOTTOM LEFT CORNER ═══ -->
+<g transform="translate(0,297) scale(1,-1)">
+  <use href="#sf" transform="translate(10,10)"/>
+  <use href="#tlp" transform="translate(6,26)"/>
+  <use href="#yd" transform="translate(24,7)"/>
+  <path d="M5,7 Q3,4 7,6" fill="#7baa5a"/>
+  <path d="M4,10 Q1,8 4,7" fill="#7baa5a"/>
+</g>
+
+<!-- ═══ BOTTOM RIGHT CORNER ═══ -->
+<g transform="translate(210,297) scale(-1,-1)">
+  <use href="#sf" transform="translate(10,10)"/>
+  <use href="#tlp" transform="translate(6,26)"/>
+  <use href="#yd" transform="translate(24,7)"/>
+  <path d="M5,7 Q3,4 7,6" fill="#7baa5a"/>
+  <path d="M4,10 Q1,8 4,7" fill="#7baa5a"/>
+</g>
+
+<!-- ═══ TOP CENTER ═══ -->
+<g transform="translate(105,10)">
+  <use href="#pd" transform="translate(-8,0)"/>
+  <use href="#wd" transform="translate(8,0)"/>
+  <path d="M-3,3 Q-6,1 -4,0" fill="#7baa5a"/>
+  <path d="M3,3 Q6,1 4,0" fill="#7baa5a"/>
+</g>
+
+<!-- ═══ BOTTOM CENTER ═══ -->
+<g transform="translate(105,287)">
+  <use href="#pd" transform="translate(-8,0)"/>
+  <use href="#wd" transform="translate(8,0)"/>
+  <path d="M-3,-3 Q-6,-1 -4,0" fill="#7baa5a"/>
+  <path d="M3,-3 Q6,-1 4,0" fill="#7baa5a"/>
+</g>
+
+<!-- ═══ LEFT SIDE VINE at x=5, leaves reach max x=9 (within 10mm) ═══ -->
+<use href="#lf" transform="translate(5,42)"/>
+<use href="#lf" transform="translate(5,55)"/>
+<use href="#lf" transform="translate(5,68)"/>
+<use href="#lf" transform="translate(5,81)"/>
+<use href="#lf" transform="translate(5,94)"/>
+<use href="#lf" transform="translate(5,107)"/>
+<use href="#lf" transform="translate(5,120)"/>
+<use href="#lf" transform="translate(5,133)"/>
+<use href="#lf" transform="translate(5,146)"/>
+<use href="#lf" transform="translate(5,159)"/>
+<use href="#lf" transform="translate(5,172)"/>
+<use href="#lf" transform="translate(5,185)"/>
+<use href="#lf" transform="translate(5,198)"/>
+<use href="#lf" transform="translate(5,211)"/>
+<use href="#lf" transform="translate(5,224)"/>
+<use href="#lf" transform="translate(5,237)"/>
+<use href="#lf" transform="translate(5,250)"/>
+<use href="#lf" transform="translate(5,263)"/>
+<use href="#lf" transform="translate(5,276)"/>
+
+<!-- ═══ RIGHT SIDE VINE at x=205, leaves reach min x=201 (within 10mm) ═══ -->
+<use href="#lf" transform="translate(205,42)"/>
+<use href="#lf" transform="translate(205,55)"/>
+<use href="#lf" transform="translate(205,68)"/>
+<use href="#lf" transform="translate(205,81)"/>
+<use href="#lf" transform="translate(205,94)"/>
+<use href="#lf" transform="translate(205,107)"/>
+<use href="#lf" transform="translate(205,120)"/>
+<use href="#lf" transform="translate(205,133)"/>
+<use href="#lf" transform="translate(205,146)"/>
+<use href="#lf" transform="translate(205,159)"/>
+<use href="#lf" transform="translate(205,172)"/>
+<use href="#lf" transform="translate(205,185)"/>
+<use href="#lf" transform="translate(205,198)"/>
+<use href="#lf" transform="translate(205,211)"/>
+<use href="#lf" transform="translate(205,224)"/>
+<use href="#lf" transform="translate(205,237)"/>
+<use href="#lf" transform="translate(205,250)"/>
+<use href="#lf" transform="translate(205,263)"/>
+<use href="#lf" transform="translate(205,276)"/>
+
+</svg>

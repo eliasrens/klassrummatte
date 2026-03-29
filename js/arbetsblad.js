@@ -657,10 +657,6 @@ const Arbetsblad = (() => {
     const left = document.createElement('div');
     left.className = 'ab-header-left';
 
-    const brand = document.createElement('div');
-    brand.className = 'ab-brand';
-    brand.textContent = 'Klassrummatte';
-
     const titleEl = document.createElement('div');
     titleEl.className = 'ab-title';
     titleEl.textContent = cfg.title || 'Matematik';
@@ -669,7 +665,7 @@ const Arbetsblad = (() => {
     sub.className = 'ab-subtitle';
     sub.textContent = `\u00c5k ${cfg.grade}`;
 
-    left.append(brand, titleEl, sub);
+    left.append(titleEl, sub);
 
     const fields = document.createElement('div');
     fields.className = 'ab-header-fields';
