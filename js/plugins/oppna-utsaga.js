@@ -60,11 +60,12 @@ class OppnaUtsagaPlugin extends BasePlugin {
     const quotient = PluginUtils.randInt(2, grade <= 3 ? 9 : 12);
     const dividend = divisor * quotient;
     if (Math.random() < 0.5)
-      return { type: 'oppna-utsaga', expression: `${dividend} ÷ _ = ${quotient}`, answer: divisor };
-    return { type: 'oppna-utsaga', expression: `_ ÷ ${divisor} = ${quotient}`, answer: dividend };
+      return { type: 'oppna-utsaga', expression: `${dividend} / _ = ${quotient}`, answer: divisor };
+    return { type: 'oppna-utsaga', expression: `_ / ${divisor} = ${quotient}`, answer: dividend };
   }
 
   render(problem, container) {
+    container.style.cssText += 'display:block;text-align:center;white-space:nowrap;';
     const parts = problem.expression.split('_');
     if (parts.length === 2) {
       PluginUtils.appendText(container, parts[0]);

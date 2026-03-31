@@ -11,14 +11,8 @@ const Arbetsblad = (() => {
   let startenColor  = '';   // tema-klass för färgval
   let designStyle   = '';   // designstil: '', 'kort', 'ramad', 'minimal'
 
-  // =========================================================
-  //  SVG-ram som DOM-element (inte background-image)
-  // =========================================================
-  const FRAME_SVG = {
-    blomma:   'css/blomma-border.svg',
-    pask:     'css/pask-border.svg',
-    bjorkris: 'css/bjorkris-border.svg',
-  };
+  // Hämta konfigdata från ArbetsbladConfig (laddas före denna fil)
+  const { PROBLEMLOSNING_AREAS, AREA_CONFIG, SUB_SETTINGS, FRAME_SVG } = ArbetsbladConfig;
 
   /** Injicerar SVG-rambild i arket om designStyle har en ram. */
   function injectFrameSVG(sheet) {
@@ -30,163 +24,6 @@ const Arbetsblad = (() => {
     img.setAttribute('aria-hidden', 'true');
     sheet.appendChild(img);
   }
-
-  // =========================================================
-  //  Områdeskonfiguration med underkategorier
-  // =========================================================
-  // Områden som stöder autogenererad problemlösning (Templates.canWrap)
-  const PROBLEMLOSNING_AREAS = [
-    'addition', 'subtraktion', 'multiplikation', 'division',
-    'geometri', 'matt-langd', 'matt-volym', 'matt-vikt', 'matt-tid', 'matt-area',
-    'klocka', 'procent', 'brak'
-  ];
-
-  const AREA_CONFIG = [
-    { cat: 'Aritmetik', desc: 'de fyra räknesätten', areas: [
-      { id: 'addition',       label: 'Addition', hasSub: true },
-      { id: 'subtraktion',    label: 'Subtraktion', hasSub: true },
-      { id: 'multiplikation', label: 'Multiplikation', hasSub: true },
-      { id: 'division',       label: 'Division', hasSub: true },
-    ]},
-    { cat: 'Algebra', desc: 'mönster och okända tal', areas: [
-      { id: 'prioritet',     label: 'Prioritetsregler', hasSub: true },
-      { id: 'oppna-utsagor', label: 'Öppna utsagor' },
-      { id: 'talfoljd',      label: 'Talföljd' },
-      { id: 'monster',       label: 'Mönster' },
-    ]},
-    { cat: 'Tal & samband', desc: 'bråk, procent, taluppfattning', areas: [
-      { id: 'brak',         label: 'Bråk', hasSub: true },
-      { id: 'procent',      label: 'Procent' },
-      { id: 'tallinje',     label: 'Tallinje' },
-      { id: 'talsorter',    label: 'Talsorter' },
-      { id: 'avrundning',   label: 'Avrundning' },
-      { id: 'negativa-tal', label: 'Negativa tal' },
-      { id: 'romerska',     label: 'Romerska siffror' },
-    ]},
-    { cat: 'Geometri', desc: 'former, area, omkrets', areas: [
-      { id: 'geometri',         label: 'Geometri', hasSub: true },
-      { id: 'symmetri',         label: 'Symmetri' },
-      { id: 'koordinatsystem',  label: 'Koordinatsystem' },
-    ]},
-    { cat: 'Mått & tid', desc: 'enheter och omvandling', areas: [
-      { id: 'klocka',     label: 'Klocka', hasSub: true },
-      { id: 'matt-langd', label: 'Längd' },
-      { id: 'matt-volym', label: 'Volym' },
-      { id: 'matt-vikt',  label: 'Vikt' },
-      { id: 'matt-tid',   label: 'Tid' },
-      { id: 'matt-area',  label: 'Area-mått' },
-    ]},
-    { cat: 'Statistik', desc: 'diagram och chanser', areas: [
-      { id: 'statistik',   label: 'Statistik', hasSub: true },
-      { id: 'sannolikhet', label: 'Sannolikhet' },
-    ]},
-  ];
-
-  // Sub-settings per område (visas i detaljpanelen)
-  const SUB_SETTINGS = {
-    addition: {
-      title: 'Addition & subtraktion',
-      settingsKey: 'addSubMode',
-      options: [
-        { value: 'standard', label: 'Standard', checked: true },
-        { value: 'uppstallning', label: 'Uppställning' },
-        { value: 'decimaler', label: 'Decimaler', minGrade: 4 },
-        { value: 'flersteg', label: 'Flerstegsaddition', minGrade: 3 },
-      ],
-    },
-    subtraktion: {
-      title: 'Addition & subtraktion',
-      settingsKey: 'addSubMode',
-      shared: 'addition',  // delar inställningar med addition
-    },
-    multiplikation: {
-      title: 'Multiplikation & division',
-      settingsKey: 'multDivMode',
-      options: [
-        { value: 'tables-basic', label: 'Tabeller 1–9', checked: true },
-        { value: 'tables-ten', label: 'Mult/div med 10 och 100' },
-        { value: 'tables-large', label: 'Stora tal (flersiffrigt)' },
-        { value: 'double-half', label: 'Dubbelt & hälften' },
-        { value: 'bild-mult', label: 'Vilken mult. visar bilden?' },
-      ],
-    },
-    division: {
-      title: 'Multiplikation & division',
-      settingsKey: 'multDivMode',
-      shared: 'multiplikation',
-    },
-    prioritet: {
-      title: 'Prioritet – räknesätt',
-      settingsKey: 'prioritetOps',
-      options: [
-        { value: 'mult', label: 'Med × och ÷', checked: true },
-        { value: 'div', label: 'Med ÷', checked: true },
-        { value: 'parens', label: 'Med parenteser' },
-      ],
-    },
-    brak: {
-      title: 'Bråk – delmoment',
-      settingsKey: 'brakTypes',
-      options: [
-        { value: 'name', label: 'Namnge bråk', checked: true },
-        { value: 'add-same-den', label: 'Add – lika nämn.', checked: true, minGrade: 4 },
-        { value: 'sub-same-den', label: 'Sub – lika nämn.', checked: true, minGrade: 4 },
-        { value: 'compare', label: 'Jämföra bråk', checked: true, minGrade: 4 },
-        { value: 'fraction-of-whole', label: 'Bråk av heltal', checked: true, minGrade: 4 },
-        { value: 'simplify', label: 'Förenkla bråk', checked: true, minGrade: 4 },
-        { value: 'add-diff-den', label: 'Add – olika nämn.', checked: true, minGrade: 5 },
-        { value: 'to-mixed', label: 'Blandat tal', checked: true, minGrade: 6 },
-      ],
-    },
-    geometri: {
-      title: 'Geometri – frågetyp',
-      settingsKey: 'geometriTypes',
-      options: [
-        { value: 'area', label: 'Area', checked: true },
-        { value: 'perimeter', label: 'Omkrets', checked: true },
-        { value: 'volume', label: 'Namnge kroppar', minGrade: 3 },
-      ],
-    },
-    klocka: {
-      title: 'Klocka – visningsläge',
-      settingsKey: 'klockaTypes',
-      options: [
-        { value: 'analog', label: 'Analogt', checked: true },
-        { value: 'digital', label: 'Digitalt', checked: true },
-      ],
-    },
-    statistik: {
-      title: 'Statistik – diagramtyp',
-      settingsKey: 'statistikTypes',
-      options: [
-        { value: 'bar', label: 'Stapeldiagram', checked: true },
-        { value: 'freq-table', label: 'Frekvenstabell', checked: true },
-        { value: 'pie-chart', label: 'Cirkeldiagram', checked: true },
-      ],
-    },
-    'matt-volym': {
-      title: 'Volym – enheter',
-      settingsKey: 'volymUnits',
-      options: [
-        { value: 'ml', label: 'ml' },
-        { value: 'cl', label: 'cl' },
-        { value: 'dl', label: 'dl', checked: true },
-        { value: 'l', label: 'l', checked: true },
-      ],
-      extraGroups: [
-        {
-          title: 'Volym – läge',
-          settingsKey: 'volymModes',
-          options: [
-            { value: 'convert', label: 'Omvandling', checked: true },
-            { value: 'addition', label: 'Addition' },
-            { value: 'subtraction', label: 'Subtraktion' },
-            { value: 'open', label: 'Öppna utsagor' },
-          ],
-        },
-      ],
-    },
-  };
 
   // =========================================================
   //  Bygg områdes-sidebar med accordion + detaljpanel
@@ -380,35 +217,21 @@ const Arbetsblad = (() => {
     const themeEl = document.getElementById('ab-theme');
     const theme   = themeEl ? themeEl.value : '';
     const title   = document.getElementById('ab-title').value.trim()     || 'Matematik';
-    const showAns  = document.getElementById('ab-show-answers').checked;
-    const showGrid = document.getElementById('ab-show-grid')?.checked ?? true;
-    const showSvar = document.getElementById('ab-show-svar')?.checked ?? false;
+    const showAns   = document.getElementById('ab-show-answers').checked;
+    const showGrade = document.getElementById('ab-show-grade')?.checked ?? true;
+    const showGrid  = document.getElementById('ab-show-grid')?.checked ?? true;
+    const showSvar  = document.getElementById('ab-show-svar')?.checked ?? false;
     const pagesVal = document.getElementById('ab-pages').value;
-    const frameDesigns = ['blomma', 'pask', 'bjorkris'];
+    const frameDesigns = ['blomma', 'pask', 'bjorkris', 'stjarnor', 'vag', 'linje'];
     const rows = frameDesigns.includes(designStyle) ? 4 : 5;
     const perPage = cols * rows;
     const pages   = pagesVal === 'auto' ? 1 : (parseInt(pagesVal) || 1);
-    return { grade, cols, pages, perPage, theme, title, showAns, showGrid, showSvar, pagesVal };
+    return { grade, cols, pages, perPage, theme, title, showAns, showGrade, showGrid, showSvar, pagesVal };
   }
 
   // Läs config för problemlösning-läget (från sidopanelen)
-  function readPLConfig() {
-    const grade   = parseInt(document.getElementById('ab-grade').value) || 3;
-    const title   = document.getElementById('ab-title').value.trim()   || 'Problemlösning';
-    const source  = document.querySelector('input[name="pl-source"]:checked')?.value || 'auto';
-    const perPage = parseInt(document.querySelector('input[name="pl-layout"]:checked')?.value) || 6;
-    const pages   = parseInt(document.getElementById('pl-pages').value) || 1;
-    const showAns = document.getElementById('pl-show-answers')?.checked || false;
-    const cols    = 2;
-
-    // Hämta valda områden
-    const selectedAreas = [];
-    document.querySelectorAll('#pl-area-checks input[type="checkbox"]:checked').forEach(cb => {
-      selectedAreas.push(cb.value);
-    });
-
-    return { grade, title, source, perPage, pages, showAns, cols, selectedAreas };
-  }
+  // Delegering till ArbetsbladPL
+  const { readPLConfig, buildPLSidebar, initPLImport } = ArbetsbladPL;
 
   // =========================================================
   //  Problem-generering per underkategori
@@ -589,10 +412,15 @@ const Arbetsblad = (() => {
         key.textContent = `Svar: ${problem.answer}`;
         inner.appendChild(key);
       } else {
-        // Rutnät som fyller tillgängligt utrymme med kvadratiska celler
-        const grid = document.createElement('div');
-        grid.className = 'ab-calc-grid ab-calc-grid--text';
-        inner.appendChild(grid);
+        if (showGrid) {
+          const grid = document.createElement('div');
+          grid.className = 'ab-calc-grid ab-calc-grid--text';
+          inner.appendChild(grid);
+        } else {
+          const space = document.createElement('div');
+          space.className = 'ab-cell-space--text';
+          inner.appendChild(space);
+        }
 
         // Svarslinje längst ner
         const svar = document.createElement('div');
@@ -683,11 +511,14 @@ const Arbetsblad = (() => {
     titleEl.className = 'ab-title';
     titleEl.textContent = cfg.title || 'Matematik';
 
-    const sub = document.createElement('div');
-    sub.className = 'ab-subtitle';
-    sub.textContent = `\u00c5k ${cfg.grade}`;
-
-    left.append(titleEl, sub);
+    if (cfg.showGrade !== false) {
+      const sub = document.createElement('div');
+      sub.className = 'ab-subtitle';
+      sub.textContent = `\u00c5k ${cfg.grade}`;
+      left.append(titleEl, sub);
+    } else {
+      left.append(titleEl);
+    }
 
     const fields = document.createElement('div');
     fields.className = 'ab-header-fields';
@@ -723,7 +554,7 @@ const Arbetsblad = (() => {
       const pageProblems = sheetProblems.slice(pageStart, pageStart + PAGE_SIZE);
 
       const sheet = document.createElement('div');
-      sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '') + (designStyle ? ` ab-design--${designStyle}` : '');
+      sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '') + (designStyle ? ` ab-design--${designStyle}` : '') + (FRAME_SVG[designStyle] ? ' ab-design--frame' : '');
       if (pageIdx > 0) sheet.classList.add('ab-sheet--next-page');
 
       const inner = document.createElement('div');
@@ -773,171 +604,8 @@ const Arbetsblad = (() => {
   }
 
   // =========================================================
-  //  Starten – veckouppgifter (mån–fre)
+  //  Starten – delegerar till ArbetsbladStarten
   // =========================================================
-  const DAYS = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag'];
-
-  // Fyll numCols platser med selectedOps och rotera vilken som dubbleras per dag
-  function buildBalancedOps(selectedOps, numCols, dayIndex) {
-    const ops = [];
-    if (selectedOps.length >= numCols) {
-      // Fler (eller lika många) ops än kolumner — välj slumpmässigt
-      for (let i = 0; i < numCols; i++) ops.push(selectedOps[i % selectedOps.length]);
-    } else {
-      // Färre ops än kolumner — varje op minst en gång, rotera extra-platser
-      selectedOps.forEach(op => ops.push(op));
-      const extras = numCols - selectedOps.length;
-      for (let i = 0; i < extras; i++) {
-        ops.push(selectedOps[(dayIndex + i) % selectedOps.length]);
-      }
-    }
-    // Blanda ordningen
-    for (let i = ops.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [ops[i], ops[j]] = [ops[j], ops[i]];
-    }
-    return ops;
-  }
-
-  function readStartenOps() {
-    const ops = [];
-    if (document.getElementById('st-op-add')?.checked) ops.push('add');
-    if (document.getElementById('st-op-sub')?.checked) ops.push('sub');
-    if (document.getElementById('st-op-mult')?.checked) ops.push('mult');
-    if (document.getElementById('st-op-div-cell')?.checked) ops.push('div');
-    const showDiv = document.getElementById('st-op-div')?.checked ?? true;
-    const vaxlingEl = document.querySelector('input[name="st-vaxling"]:checked');
-    const vaxling = vaxlingEl && vaxlingEl.value ? vaxlingEl.value : null;
-    return { ops: ops.length > 0 ? ops : ['add', 'sub', 'mult'], showDiv, vaxling };
-  }
-
-  // =========================================================
-  //  Starten batch-läge – perioder
-  // =========================================================
-  const STARTEN_COLORS = [
-    { theme: '',          label: 'Blågrön',  bg: 'linear-gradient(135deg,hsl(204,38%,44%),hsl(172,58%,39%))' },
-    { theme: 'vinrod',    label: 'Vinröd',   bg: 'linear-gradient(135deg,hsl(350,38%,44%),hsl(318,58%,39%))' },
-    { theme: 'lila',      label: 'Lila',     bg: 'linear-gradient(135deg,hsl(275,38%,44%),hsl(243,58%,39%))' },
-    { theme: 'skog',      label: 'Skog',     bg: 'linear-gradient(135deg,hsl(140,38%,44%),hsl(108,58%,39%))' },
-    { theme: 'korall',    label: 'Korall',   bg: 'linear-gradient(135deg,hsl(15,38%,44%),hsl(343,58%,39%))' },
-    { theme: 'guld',      label: 'Guld',     bg: 'linear-gradient(135deg,hsl(40,38%,44%),hsl(8,58%,39%))' },
-    { theme: 'hav',       label: 'Hav',      bg: 'linear-gradient(135deg,hsl(215,38%,44%),hsl(190,58%,39%))' },
-    { theme: 'rosa',      label: 'Rosa',     bg: 'linear-gradient(135deg,hsl(330,38%,44%),hsl(300,58%,39%))' },
-    { theme: 'lavendel',  label: 'Lavendel', bg: 'linear-gradient(135deg,hsl(258,38%,44%),hsl(226,58%,39%))' },
-    { theme: 'oliv',      label: 'Oliv',     bg: 'linear-gradient(135deg,hsl(75,38%,44%),hsl(45,58%,39%))' },
-    { theme: 'persika',   label: 'Persika',  bg: 'linear-gradient(135deg,hsl(25,38%,44%),hsl(355,58%,39%))' },
-    { theme: 'stal',      label: 'Stål',     bg: 'linear-gradient(135deg,hsl(200,20%,48%),hsl(220,25%,42%))' },
-  ];
-
-  let periodCounter = 0;
-
-  function buildPeriodEl(numWeeks) {
-    const idx = periodCounter++;
-    const div = document.createElement('div');
-    div.className = 'st-period';
-    div.dataset.periodIdx = idx;
-
-    // Header med veckorange
-    const header = document.createElement('div');
-    header.className = 'st-period-header';
-    const title = document.createElement('span');
-    title.className = 'st-period-title';
-    title.textContent = 'Period ' + (document.querySelectorAll('.st-period').length + 1);
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.className = 'st-period-remove';
-    removeBtn.textContent = '✕';
-    removeBtn.title = 'Ta bort period';
-    removeBtn.addEventListener('click', () => {
-      div.remove();
-      reindexPeriods();
-    });
-    header.append(title, removeBtn);
-    div.appendChild(header);
-
-    // Veckorange
-    const rangeRow = document.createElement('div');
-    rangeRow.className = 'st-period-range';
-    rangeRow.innerHTML =
-      `<label>Antal veckor <input type="number" class="st-period-weeks" value="${numWeeks}" min="1" max="40"></label>`;
-    div.appendChild(rangeRow);
-
-    // Räknesätt
-    const opsDiv = document.createElement('div');
-    opsDiv.className = 'st-period-ops';
-    opsDiv.innerHTML =
-      '<label class="st-period-check"><input type="checkbox" data-op="add" checked> Add</label>' +
-      '<label class="st-period-check"><input type="checkbox" data-op="sub" checked> Sub</label>' +
-      '<label class="st-period-check"><input type="checkbox" data-op="mult" checked> Mult</label>' +
-      '<label class="st-period-check"><input type="checkbox" data-op="div-cell"> Div</label>' +
-      '<label class="st-period-check"><input type="checkbox" data-op="div" checked> Div-kol</label>';
-    div.appendChild(opsDiv);
-
-    // Växling
-    const vaxDiv = document.createElement('div');
-    vaxDiv.className = 'st-period-vaxling';
-    const vaxName = 'st-vax-' + idx;
-    vaxDiv.innerHTML =
-      `<span class="st-period-vax-label">Växling:</span>` +
-      `<label class="st-period-check"><input type="radio" name="${vaxName}" value="" checked> Blandad</label>` +
-      `<label class="st-period-check"><input type="radio" name="${vaxName}" value="utan"> Utan</label>` +
-      `<label class="st-period-check"><input type="radio" name="${vaxName}" value="med"> Med</label>`;
-    div.appendChild(vaxDiv);
-
-    // Färg
-    const colorDiv = document.createElement('div');
-    colorDiv.className = 'st-period-colors';
-    STARTEN_COLORS.forEach((c, ci) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'st-pcolor-btn' + (ci === 0 ? ' st-pcolor-btn--active' : '');
-      btn.dataset.theme = c.theme;
-      btn.title = c.label;
-      const span = document.createElement('span');
-      span.style.background = c.bg;
-      btn.appendChild(span);
-      btn.addEventListener('click', () => {
-        colorDiv.querySelectorAll('.st-pcolor-btn').forEach(b => b.classList.remove('st-pcolor-btn--active'));
-        btn.classList.add('st-pcolor-btn--active');
-      });
-      colorDiv.appendChild(btn);
-    });
-    div.appendChild(colorDiv);
-
-    return div;
-  }
-
-  function reindexPeriods() {
-    document.querySelectorAll('.st-period').forEach((el, i) => {
-      el.querySelector('.st-period-title').textContent = 'Period ' + (i + 1);
-    });
-  }
-
-  function readStartenPeriods() {
-    const periods = [];
-    document.querySelectorAll('.st-period').forEach(el => {
-      const weeks = parseInt(el.querySelector('.st-period-weeks')?.value) || 4;
-      const ops = [];
-      el.querySelectorAll('.st-period-ops input[type="checkbox"]:checked').forEach(cb => {
-        const op = cb.dataset.op;
-        if (op === 'div-cell') ops.push('div');
-        else if (op !== 'div') ops.push(op);
-      });
-      const showDiv = !!el.querySelector('.st-period-ops input[data-op="div"]:checked');
-      const colorBtn = el.querySelector('.st-pcolor-btn--active');
-      const color = colorBtn ? (colorBtn.dataset.theme || '') : '';
-      const vaxEl = el.querySelector('.st-period-vaxling input[type="radio"]:checked');
-      const vaxling = vaxEl && vaxEl.value ? vaxEl.value : null;
-      periods.push({
-        weeks,
-        ops: ops.length > 0 ? ops : ['add', 'sub', 'mult'],
-        showDiv,
-        color,
-        vaxling,
-      });
-    });
-    return periods;
-  }
 
   function generateBatchStarten(grade) {
     const periods = readStartenPeriods();
@@ -971,160 +639,16 @@ const Arbetsblad = (() => {
     if (empty) empty.classList.add('hidden');
   }
 
-  function generateStartenProblemsWithOps(grade, ops, showDiv, vaxling) {
-    const c = PluginUtils.cfg(grade);
-    const numCols = showDiv ? 3 : 4;
-    const vaxOpts = vaxling ? { vaxling } : null;
-    const rows = [];
-    for (let d = 0; d < 5; d++) {
-      const colOps = buildBalancedOps(ops, numCols, d);
-      const uppstallningar = colOps.map(op => PluginUtils.genUppstallning(op, c, vaxOpts));
-
-      let brak = null;
-      if (showDiv) {
-        const divisor  = PluginUtils.randInt(2, 9);
-        const quotient = PluginUtils.randInt(2, 9);
-        brak = { dividend: divisor * quotient, divisor, quotient };
-      }
-      rows.push({ uppstallningar, brak });
-    }
-    return rows;
-  }
-
-  // Bygg en starten-problemcell (uppstallning eller division)
-  function buildStartenProblemTd(problem, regenFn) {
-    const td = document.createElement('td');
-
-    if (problem.type === 'uppstallning-div') {
-      td.className = 'starten-problem starten-problem--div';
-      const line = document.createElement('div');
-      line.className = 'starten-brak-line starten-div-brak-line';
-      line.innerHTML =
-        `<span class="starten-frac">` +
-          `<span class="starten-frac-num">${problem.a}</span>` +
-          `<span class="starten-frac-den">${problem.b}</span>` +
-        `</span>` +
-        `<span class="starten-eq">=</span>`;
-      td.appendChild(line);
-    } else {
-      td.className = 'starten-problem';
-      const text = document.createElement('div');
-      text.className = 'starten-problem-text';
-      text.textContent = `${problem.a} ${problem.operator} ${problem.b}`;
-      td.appendChild(text);
-
-      const grid = document.createElement('table');
-      grid.className = 'starten-grid';
-      const digits = Math.max(String(problem.a).length, String(problem.b).length, String(problem.answer).length) + 1;
-      const cols = Math.max(digits, 4);
-      for (let r = 0; r < 3; r++) {
-        const gtr = document.createElement('tr');
-        for (let c = 0; c < cols; c++) gtr.appendChild(document.createElement('td'));
-        grid.appendChild(gtr);
-      }
-      const lastRow = document.createElement('tr');
-      lastRow.className = 'starten-grid-answer';
-      for (let c = 0; c < cols; c++) lastRow.appendChild(document.createElement('td'));
-      grid.appendChild(lastRow);
-      td.appendChild(grid);
-    }
-
-    if (regenFn) {
-      const regen = document.createElement('button');
-      regen.className = 'starten-regen no-print';
-      regen.title = 'Byt uppgift';
-      regen.textContent = '\u{1F504}';
-      regen.addEventListener('click', regenFn);
-      td.appendChild(regen);
-    }
-
-    return td;
-  }
+  // Delegering till ArbetsbladStarten
+  const { DAYS, buildBalancedOps, readStartenOps, readStartenPeriods,
+          buildPeriodEl, generateStartenProblemsWithOps,
+          buildStartenProblemTd } = ArbetsbladStarten;
 
   function renderSingleStartenSheet(wrap, grade, startenRows, title, color, pageBreak, sheetIdx) {
-    const sheet = document.createElement('div');
-    sheet.className = 'ab-sheet' + (color ? ` starten-${color}` : '') + (designStyle ? ` ab-design--${designStyle}` : '');
-    if (pageBreak) sheet.classList.add('ab-sheet--next-page');
-
-    const inner = document.createElement('div');
-    inner.className = 'ab-sheet-inner';
-
-    // Header
-    const header = document.createElement('header');
-    header.className = 'ab-header starten-header';
-    const left = document.createElement('div');
-    left.className = 'ab-header-left';
-    const titleEl = document.createElement('div');
-    titleEl.className = 'ab-title';
-    titleEl.textContent = title;
-    const sub = document.createElement('div');
-    sub.className = 'ab-subtitle';
-    sub.textContent = `\u00c5k ${grade}`;
-    left.append(titleEl, sub);
-    const fields = document.createElement('div');
-    fields.className = 'ab-header-fields';
-    fields.innerHTML = '<div><div class="ab-field-label">Namn</div><div class="ab-field-line">&nbsp;</div></div>';
-    header.append(left, fields);
-    inner.appendChild(header);
-
-    // Tabell
-    const table = document.createElement('table');
-    table.className = 'starten-table' + (color ? ` starten-${color}` : '');
-
-    startenRows.forEach((row, di) => {
-      const tr = document.createElement('tr');
-      const tdDay = document.createElement('td');
-      tdDay.className = 'starten-day';
-      tdDay.textContent = DAYS[di];
-      tr.appendChild(tdDay);
-
-      row.uppstallningar.forEach((problem, pi) => {
-        const regenFn = sheetIdx !== undefined ? () => regenBatchCell(sheetIdx, di, pi) : null;
-        tr.appendChild(buildStartenProblemTd(problem, regenFn));
-      });
-
-      if (row.brak) {
-        const tdBrak = document.createElement('td');
-        tdBrak.className = 'starten-brak';
-        const brakLine = document.createElement('div');
-        brakLine.className = 'starten-brak-line';
-        brakLine.innerHTML =
-          `<span class="starten-frac">` +
-            `<span class="starten-frac-num">${row.brak.dividend}</span>` +
-            `<span class="starten-frac-den">${row.brak.divisor}</span>` +
-          `</span>` +
-          `<span class="starten-eq">=</span>` +
-          `<span class="starten-blank"></span>`;
-        tdBrak.appendChild(brakLine);
-
-        const multLine = document.createElement('div');
-        multLine.className = 'starten-mult-line';
-        multLine.innerHTML =
-          '<span class="starten-blank starten-blank--short"></span>' +
-          '<span class="starten-op">&middot;</span>' +
-          '<span class="starten-blank starten-blank--short"></span>' +
-          '<span class="starten-eq">=</span>' +
-          '<span class="starten-blank starten-blank--short"></span>';
-        tdBrak.appendChild(multLine);
-
-        if (sheetIdx !== undefined) {
-          const regenBrak = document.createElement('button');
-          regenBrak.className = 'starten-regen no-print';
-          regenBrak.title = 'Byt uppgift';
-          regenBrak.textContent = '\u{1F504}';
-          regenBrak.addEventListener('click', () => regenBatchCell(sheetIdx, di, row.uppstallningar.length));
-          tdBrak.appendChild(regenBrak);
-        }
-
-        tr.appendChild(tdBrak);
-      }
-      table.appendChild(tr);
-    });
-
-    inner.appendChild(table);
-    sheet.appendChild(inner);
-    injectFrameSVG(sheet);
-    wrap.appendChild(sheet);
+    ArbetsbladStarten.renderSingleStartenSheet(
+      wrap, grade, startenRows, title, color, pageBreak, sheetIdx,
+      designStyle, injectFrameSVG, regenBatchCell
+    );
   }
 
   function generateStartenProblems(grade) {
@@ -1208,7 +732,7 @@ const Arbetsblad = (() => {
     const title = document.getElementById('ab-title').value.trim() || 'Starten';
 
     const sheet = document.createElement('div');
-    sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '') + (designStyle ? ` ab-design--${designStyle}` : '');
+    sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '') + (designStyle ? ` ab-design--${designStyle}` : '') + (FRAME_SVG[designStyle] ? ' ab-design--frame' : '');
 
     const inner = document.createElement('div');
     inner.className = 'ab-sheet-inner';
@@ -1412,14 +936,15 @@ const Arbetsblad = (() => {
       const pageProblems = sheetProblems.slice(pageStart, pageStart + perPage);
 
       const sheet = document.createElement('div');
-      sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '') + (designStyle ? ` ab-design--${designStyle}` : '');
+      sheet.className = 'ab-sheet' + (startenColor ? ` starten-${startenColor}` : '') + (designStyle ? ` ab-design--${designStyle}` : '') + (FRAME_SVG[designStyle] ? ' ab-design--frame' : '');
       if (pageIdx > 0) sheet.classList.add('ab-sheet--next-page');
 
       const inner = document.createElement('div');
       inner.className = 'ab-sheet-inner';
 
       if (pageIdx === 0) {
-        inner.appendChild(buildHeader({ grade: pl.grade, title: pl.title }));
+        const showGrade = document.getElementById('ab-show-grade')?.checked ?? true;
+        inner.appendChild(buildHeader({ grade: pl.grade, title: pl.title, showGrade }));
       }
 
       const table = document.createElement('table');
@@ -1430,7 +955,7 @@ const Arbetsblad = (() => {
         for (let c = 0; c < numCols; c++) {
           const idx = i + c;
           if (idx < pageProblems.length) {
-            tr.appendChild(renderCell(pageProblems[idx], pageStart + idx, pl.showAns, false, false));
+            tr.appendChild(renderCell(pageProblems[idx], pageStart + idx, pl.showAns, pl.showGrid, false));
           } else {
             tr.appendChild(document.createElement('td'));
           }
@@ -1449,107 +974,6 @@ const Arbetsblad = (() => {
   }
 
   // Bygg sidopanelens områdes-checkboxar
-  function buildPLSidebar() {
-    const container = document.getElementById('pl-area-checks');
-    if (!container) return;
-    container.innerHTML = '';
-
-    PROBLEMLOSNING_AREAS.forEach(area => {
-      // Hitta label från AREA_CONFIG
-      let label = area;
-      for (const cat of AREA_CONFIG) {
-        const found = cat.areas.find(a => a.id === area);
-        if (found) { label = found.label; break; }
-      }
-
-      const row = document.createElement('label');
-      row.className = 'sidebar-check-row';
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.value = area;
-      cb.checked = false;
-      row.appendChild(cb);
-      row.appendChild(document.createTextNode(' ' + label));
-      container.appendChild(row);
-    });
-
-    // Visa info om egna uppgifter
-    const info = document.getElementById('pl-egna-info');
-    if (info) {
-      const stored = typeof Settings !== 'undefined' ? Settings.getCustomProblems() : [];
-      info.textContent = stored.length > 0
-        ? `${stored.length} lagrade uppgifter`
-        : 'Inga importerade uppgifter';
-    }
-
-    // Visa/dölj auto-only sektioner beroende på källa
-    document.querySelectorAll('input[name="pl-source"]').forEach(radio => {
-      radio.addEventListener('change', updatePLSourceVisibility);
-    });
-    updatePLSourceVisibility();
-  }
-
-  function updatePLSourceVisibility() {
-    const source = document.querySelector('input[name="pl-source"]:checked')?.value || 'auto';
-    const showAuto = source === 'auto' || source === 'mix';
-    const showImport = source === 'egna' || source === 'mix';
-    document.querySelectorAll('.pl-auto-only').forEach(el => {
-      el.style.display = showAuto ? '' : 'none';
-    });
-    const importSection = document.getElementById('pl-import-section');
-    if (importSection) importSection.classList.toggle('hidden', !showImport);
-  }
-
-  function initPLImport() {
-    // Ladda ner mall
-    document.getElementById('pl-download-template')?.addEventListener('click', () => {
-      if (typeof CustomProblems !== 'undefined') CustomProblems.downloadTemplate();
-    });
-
-    // Import från fil
-    document.getElementById('pl-file-input')?.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = CustomProblems.importFromCsvText(reader.result);
-        showPLImportStatus(result);
-      };
-      reader.readAsText(file, 'UTF-8');
-    });
-
-    // Import från textfält
-    document.getElementById('pl-import-paste')?.addEventListener('click', () => {
-      const text = document.getElementById('pl-paste')?.value || '';
-      if (!text.trim()) return;
-      const result = CustomProblems.importFromCsvText(text);
-      showPLImportStatus(result);
-    });
-  }
-
-  function showPLImportStatus(result) {
-    const el = document.getElementById('pl-import-status');
-    if (!el) return;
-    if (result.success) {
-      el.className = 'pl-import-status success';
-      el.textContent = `${result.problems.length} uppgifter importerade!`;
-    } else {
-      el.className = 'pl-import-status error';
-      el.textContent = result.error;
-    }
-    // Uppdatera info-texten
-    updatePLEgnaInfo();
-  }
-
-  function updatePLEgnaInfo() {
-    const info = document.getElementById('pl-egna-info');
-    if (!info) return;
-    const stored = typeof Settings !== 'undefined' ? Settings.getCustomProblems() : [];
-    info.textContent = stored.length > 0
-      ? `${stored.length} lagrade uppgifter`
-      : 'Inga importerade uppgifter';
-  }
-
   function regenerateProblem(index) {
     const mode = document.getElementById('ab-mode').value;
 
@@ -1603,7 +1027,11 @@ const Arbetsblad = (() => {
     doc.open();
     doc.write(`<!DOCTYPE html><html lang="sv"><head><meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/arbetsblad.css">
+<link rel="stylesheet" href="css/arbetsblad-base.css">
+<link rel="stylesheet" href="css/arbetsblad-sidebar.css">
+<link rel="stylesheet" href="css/arbetsblad-sheet.css">
+<link rel="stylesheet" href="css/arbetsblad-starten.css">
+<link rel="stylesheet" href="css/arbetsblad-design.css">
 <style>
   html, body { margin: 0; padding: 0; background: white !important;
                height: 100% !important; overflow: visible !important; }
@@ -1663,6 +1091,12 @@ const Arbetsblad = (() => {
       else if (isPL) titleInput.placeholder = 'T.ex. Problemlösning';
       else titleInput.placeholder = 'T.ex. Multiplikation';
     }
+
+    // Göm designknappen i starten-läge (starten har egna färgteman)
+    const designToggleBtn = document.getElementById('ab-design-toggle');
+    const designPanelEl   = document.getElementById('ab-design-panel');
+    if (designToggleBtn) designToggleBtn.style.display = isStarten ? 'none' : '';
+    if (isStarten && designPanelEl) designPanelEl.classList.add('hidden');
 
     syncSidebarTop();
   }
@@ -1735,7 +1169,14 @@ const Arbetsblad = (() => {
     });
   }
 
+  function syncConfigHeight() {
+    const cp = document.getElementById('config-panel');
+    if (cp) document.documentElement.style.setProperty('--config-h', cp.offsetHeight + 'px');
+  }
+
   function init() {
+    syncConfigHeight();
+    window.addEventListener('resize', syncConfigHeight);
     buildAbSidebar();
     buildPLSidebar();
     populateGGSelect('ab-import-gg', 'ab-area-checks');
@@ -1791,8 +1232,10 @@ const Arbetsblad = (() => {
       const radio = e.target.closest('input[name="ab-design"]');
       if (!radio) return;
       designStyle = radio.value;
-      // Re-rendera arket så perPage (4 vs 5 rader) uppdateras
-      if (sheetProblems.length) renderSheet();
+      // Re-rendera arket i rätt läge så perPage (4 vs 5 rader) uppdateras
+      const currentMode = document.getElementById('ab-mode')?.value;
+      if (currentMode === 'problemlosning' && plConfig) renderPLSheet(plConfig);
+      else if (currentMode === 'standard' && sheetProblems.length) renderSheet();
     });
 
     window.addEventListener('resize', syncSidebarTop);

@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Klassrummatte – Skapa arbetsblad</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/arbetsblad.css">
+  <link rel="stylesheet" href="css/arbetsblad-base.css">
+  <link rel="stylesheet" href="css/arbetsblad-sidebar.css">
+  <link rel="stylesheet" href="css/arbetsblad-sheet.css">
+  <link rel="stylesheet" href="css/arbetsblad-starten.css">
+  <link rel="stylesheet" href="css/arbetsblad-design.css">
 </head>
 <body>
 
@@ -132,6 +136,21 @@
         <div class="design-preview design-preview--bjorkris"></div>
         <span>Björkris</span>
       </label>
+      <label class="design-style-card">
+        <input type="radio" name="ab-design" value="stjarnor">
+        <div class="design-preview design-preview--stjarnor"></div>
+        <span>Stjärnor</span>
+      </label>
+      <label class="design-style-card">
+        <input type="radio" name="ab-design" value="vag">
+        <div class="design-preview design-preview--vag"></div>
+        <span>Våg</span>
+      </label>
+      <label class="design-style-card">
+        <input type="radio" name="ab-design" value="linje">
+        <div class="design-preview design-preview--linje"></div>
+        <span>Linje</span>
+      </label>
     </div>
   </div>
 
@@ -168,6 +187,11 @@
           <option value="5">5</option>
         </select>
       </div>
+
+      <label class="sidebar-toggle-row">
+        <input type="checkbox" id="ab-show-grade" checked>
+        Visa årskurs
+      </label>
 
       <label class="sidebar-toggle-row">
         <input type="checkbox" id="ab-show-grid" checked>
@@ -284,6 +308,11 @@
     </div>
 
     <label class="sidebar-toggle-row">
+      <input type="checkbox" id="pl-show-grid" checked>
+      Visa rutnät
+    </label>
+
+    <label class="sidebar-toggle-row">
       <input type="checkbox" id="pl-show-answers">
       Inkludera svarsnyckel
     </label>
@@ -335,6 +364,9 @@
   <script src="js/settings.js"></script>
   <script src="js/custom-problems.js"></script>
   <script src="js/templates.js"></script>
+  <script src="js/arbetsblad-config.js"></script>
+  <script src="js/arbetsblad-starten.js"></script>
+  <script src="js/arbetsblad-problemlosning.js"></script>
   <script src="js/arbetsblad.js"></script>
 </body>
 </html>

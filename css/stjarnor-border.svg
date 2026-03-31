@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 297">
+<!--
+  STJÄRNOR — små geometriska stjärnor längs kanterna
+  Färgschema: muted navy/steel blue (#4a6fa5 main, #7a9cc6 lighter, #2d4a7a darker)
+  Konvention: alla dekorationer inom 10mm från sidkanten.
+-->
+<defs>
+  <!-- Stor 5-uddig stjärna (r=2.5) -->
+  <polygon id="st" points="0,-2.5 0.7,-0.8 2.4,-0.8 1.1,0.3 1.5,2 0,1 -1.5,2 -1.1,0.3 -2.4,-0.8 -0.7,-0.8"
+    fill="#4a6fa5"/>
+  <!-- Liten 5-uddig stjärna (r=1.5) -->
+  <polygon id="st-s" points="0,-1.5 0.4,-0.5 1.4,-0.5 0.7,0.2 0.9,1.2 0,0.6 -0.9,1.2 -0.7,0.2 -1.4,-0.5 -0.4,-0.5"
+    fill="#7a9cc6"/>
+  <!-- Pytteliten stjärna (r=1) -->
+  <polygon id="st-xs" points="0,-1 0.3,-0.3 0.95,-0.3 0.45,0.15 0.6,0.8 0,0.4 -0.6,0.8 -0.45,0.15 -0.95,-0.3 -0.3,-0.3"
+    fill="#2d4a7a"/>
+  <!-- Liten prick -->
+  <circle id="dot" r="0.5" fill="#7a9cc6" opacity="0.5"/>
+</defs>
+
+<!-- TUNN BORDERRAM -->
+<rect x="10" y="10" width="190" height="277"
+  fill="none" stroke="#4a6fa5" stroke-width="0.5"/>
+
+<!-- ═══════════════════════════════════════════
+     TOP KANT — stjärnor längs överkanten
+═══════════════════════════════════════════ -->
+<use href="#st"    transform="translate(25,5)"/>
+<use href="#st-s"  transform="translate(42,7) rotate(15)"/>
+<use href="#dot"   transform="translate(55,5)"/>
+<use href="#st-xs" transform="translate(65,4) rotate(-10)"/>
+<use href="#st"    transform="translate(85,6) rotate(8)"/>
+<use href="#st-s"  transform="translate(105,4) rotate(-12)"/>
+<use href="#dot"   transform="translate(118,6.5)"/>
+<use href="#st-xs" transform="translate(130,5) rotate(20)"/>
+<use href="#st"    transform="translate(150,6) rotate(-5)"/>
+<use href="#st-s"  transform="translate(170,4.5) rotate(10)"/>
+<use href="#st-xs" transform="translate(190,6) rotate(-18)"/>
+<use href="#dot"   transform="translate(78,3.5)"/>
+<use href="#dot"   transform="translate(160,7)"/>
+
+<!-- ═══════════════════════════════════════════
+     BOTTOM KANT — stjärnor längs underkanten
+═══════════════════════════════════════════ -->
+<use href="#st"    transform="translate(25,292)"/>
+<use href="#st-s"  transform="translate(42,290) rotate(-15)"/>
+<use href="#dot"   transform="translate(55,293)"/>
+<use href="#st-xs" transform="translate(65,294) rotate(10)"/>
+<use href="#st"    transform="translate(85,291) rotate(-8)"/>
+<use href="#st-s"  transform="translate(105,293) rotate(12)"/>
+<use href="#dot"   transform="translate(118,290.5)"/>
+<use href="#st-xs" transform="translate(130,292) rotate(-20)"/>
+<use href="#st"    transform="translate(150,291) rotate(5)"/>
+<use href="#st-s"  transform="translate(170,293.5) rotate(-10)"/>
+<use href="#st-xs" transform="translate(190,291) rotate(18)"/>
+<use href="#dot"   transform="translate(78,294.5)"/>
+<use href="#dot"   transform="translate(160,290)"/>
+
+<!-- ═══════════════════════════════════════════
+     VÄNSTER KANT — stjärnor längs vänsterkanten
+═══════════════════════════════════════════ -->
+<use href="#st"    transform="translate(5,35) rotate(5)"/>
+<use href="#st-s"  transform="translate(6.5,60) rotate(-12)"/>
+<use href="#st-xs" transform="translate(4,80) rotate(18)"/>
+<use href="#dot"   transform="translate(5.5,100)"/>
+<use href="#st"    transform="translate(5,120) rotate(-8)"/>
+<use href="#st-s"  transform="translate(7,145) rotate(10)"/>
+<use href="#st-xs" transform="translate(4.5,168) rotate(-15)"/>
+<use href="#dot"   transform="translate(6,188)"/>
+<use href="#st"    transform="translate(5,210) rotate(12)"/>
+<use href="#st-s"  transform="translate(6.5,235) rotate(-5)"/>
+<use href="#st-xs" transform="translate(4,258) rotate(20)"/>
+<use href="#dot"   transform="translate(5.5,275)"/>
+
+<!-- ═══════════════════════════════════════════
+     HÖGER KANT — stjärnor längs högerkanten
+═══════════════════════════════════════════ -->
+<use href="#st"    transform="translate(205,35) rotate(-5)"/>
+<use href="#st-s"  transform="translate(203.5,60) rotate(12)"/>
+<use href="#st-xs" transform="translate(206,80) rotate(-18)"/>
+<use href="#dot"   transform="translate(204.5,100)"/>
+<use href="#st"    transform="translate(205,120) rotate(8)"/>
+<use href="#st-s"  transform="translate(203,145) rotate(-10)"/>
+<use href="#st-xs" transform="translate(205.5,168) rotate(15)"/>
+<use href="#dot"   transform="translate(204,188)"/>
+<use href="#st"    transform="translate(205,210) rotate(-12)"/>
+<use href="#st-s"  transform="translate(203.5,235) rotate(5)"/>
+<use href="#st-xs" transform="translate(206,258) rotate(-20)"/>
+<use href="#dot"   transform="translate(204.5,275)"/>
+
+</svg>

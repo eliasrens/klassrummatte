@@ -1,0 +1,442 @@
+
+/* === A4-ark ================================================ */
+.ab-sheet-wrap {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.ab-sheet {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  background: #fff;
+  box-shadow: 0 4px 40px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Topplinje i accentfärg */
+.ab-sheet::before {
+  content: '';
+  display: block;
+  height: 6px;
+  background: linear-gradient(90deg, #457b9d, #2a9d8f);
+  flex-shrink: 0;
+}
+
+.ab-sheet-inner {
+  padding: 0.8cm 1cm 0.4cm;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* === Header =============================================== */
+.ab-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.3cm;
+  padding-bottom: 0.2cm;
+  border-bottom: 1.5px solid #e0deda;
+}
+
+.ab-header-left {}
+
+.ab-brand {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 0.1rem;
+}
+
+.ab-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.2;
+}
+
+.ab-subtitle {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.15rem;
+}
+
+.ab-header-fields {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.ab-field-line {
+  font-size: 0.8rem;
+  color: #374151;
+  border-bottom: 1px solid #9ca3af;
+  padding-bottom: 1px;
+  min-width: 5cm;
+  text-align: right;
+}
+
+.ab-field-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-bottom: 0.05rem;
+}
+
+/* === Uppgiftstabell (starten-stil) ======================== */
+.ab-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1.5px solid #9ca3af;
+  table-layout: fixed;
+  flex: 1;
+  border-radius: 4px;
+}
+
+.ab-table tr { border-bottom: 1.5px solid #d1d5db; }
+.ab-table tr:last-child { border-bottom: none; }
+
+.ab-table td {
+  border-right: 1.5px solid #d1d5db;
+  padding: 0.35cm 0.2cm 0.15cm;
+  vertical-align: top;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ab-table td:last-child { border-right: none; }
+
+
+/* Uppgiftsnummer */
+.ab-cell-num {
+  position: absolute;
+  top: 0.1cm;
+  left: 0.15cm;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #9ca3af;
+}
+
+/* Uppgiftstext */
+.ab-cell-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin-bottom: 0.05cm;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+.ab-cell-text .problem-display,
+.ab-cell-text > div {
+  font-size: inherit;
+}
+
+/* Begränsa all visuell plugin-output (SVG, canvas etc.) till cellstorleken */
+.ab-cell-text svg,
+.ab-table td svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Frågetext under visuellt innehåll i celler */
+.ab-cell-text p,
+.ab-cell-text .question-text {
+  white-space: normal;
+  word-wrap: break-word;
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+/* === Problemlösningscell ================================= */
+.ab-cell--text {
+  text-align: left;
+  padding: 0.2cm 0.3cm;
+  vertical-align: top;
+  height: 1px;
+}
+
+/* Flex-wrapper inuti textcell så svar hamnar i botten */
+.ab-cell--text .ab-cell-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ab-cell-problem {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #1a1a2e;
+  line-height: 1.3;
+  margin-bottom: 0.2cm;
+}
+
+/* Nummer i problemlösning */
+.ab-cell--text .ab-cell-problem-num {
+  font-weight: 700;
+  color: #374151;
+  margin-right: 0.05rem;
+}
+
+/* Rutnät i problemlösning – fyller tillgänglig yta med kvadratiska celler */
+.ab-cell--text .ab-calc-grid--text {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 7mm);
+  grid-auto-rows: 7mm;
+  border: 1px solid #8a919b;
+  border-radius: 2px;
+  margin: 0 0 0.15cm 0;
+  background-image:
+    linear-gradient(to right, #8a919b 1px, transparent 1px),
+    linear-gradient(to bottom, #8a919b 1px, transparent 1px);
+  background-size: 7mm 7mm;
+  background-position: -1px -1px;
+}
+
+/* Beräkningsrutnät i cell (exakt som starten) */
+.ab-calc-grid {
+  border-spacing: 0;
+  border-collapse: separate;
+  border: 1px solid #b0b8c4;
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+.ab-calc-grid td {
+  border-right: 1px solid #c5cbd3;
+  border-bottom: 1px solid #c5cbd3;
+  border-top: none;
+  border-left: none;
+  width: 7mm;
+  height: 8.5mm;
+  padding: 0;
+}
+
+.ab-calc-grid td:last-child { border-right: none; }
+.ab-calc-grid tr:last-child td { border-bottom: none; }
+
+.ab-calc-grid .ab-calc-grid-answer td {
+  border-top: 3px solid #1a1a2e;
+}
+
+/* Tom kladdyta för division/multiplikation */
+.ab-cell-space {
+  height: 2cm;
+}
+
+.ab-cell-space--text {
+  flex: 1;
+}
+
+/* Svarslinje – fast i botten av cellen */
+.ab-cell-svar {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  position: absolute;
+  bottom: 0.15cm;
+  left: 0.2cm;
+  right: 0.2cm;
+}
+
+.ab-cell-svar-line {
+  flex: 1;
+  border-bottom: 1.5px solid #9ca3af;
+  display: inline-block;
+  min-width: 1.5cm;
+}
+
+/* Ge plats åt svarslinjen i botten */
+.ab-table td:has(.ab-cell-svar) {
+  padding-bottom: 0.7cm;
+}
+
+/* Svarsnyckel */
+.ab-answer-key {
+  font-size: 0.75rem;
+  color: #e63946;
+  font-weight: 600;
+  margin-top: 0.1cm;
+}
+
+/* Regenerera-knapp */
+.ab-regen-btn {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.2rem;
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0.2;
+  transition: opacity 0.15s;
+  line-height: 1;
+  padding: 0.1rem;
+}
+
+.ab-regen-btn:hover { opacity: 0.85; }
+
+/* =========================================================
+   Visuella plugins i arbetsblad – anpassning för cellstorlek
+   ========================================================= */
+
+/* Gemensamt: alla SVG:er i celler */
+.ab-table td svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Klocka */
+.ab-table .clock-container { gap: 0.1cm; }
+.ab-table .clock-svg { width: 3cm !important; height: 3cm !important; }
+.ab-table .clock-question { font-size: 0.55rem; font-weight: 600; white-space: normal; }
+
+/* Geometri */
+.ab-table .geometry-display { gap: 0.1cm; }
+.ab-table .geometry-svg,
+.ab-table .geometry-display svg { width: 100%; max-height: 3cm; overflow: visible; }
+.ab-table .geometry-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .geometry-dims { font-size: 0.55rem; }
+
+/* Koordinatsystem */
+.ab-table .koord-wrap { gap: 0.1cm; }
+.ab-table .koord-svg,
+.ab-table .koord-wrap svg { width: 100%; max-height: 3.5cm; }
+.ab-table .koord-question { font-size: 0.55rem; white-space: normal; }
+
+/* Statistik */
+.ab-table .stat-wrap { gap: 0.1cm; }
+.ab-table .stat-chart-svg { width: 100%; max-height: 3cm; }
+.ab-table .stat-pie-svg { width: 100%; max-height: 3cm; }
+.ab-table .stat-freq-table { font-size: 0.5rem; min-width: auto; width: 100%; }
+.ab-table .stat-freq-table th,
+.ab-table .stat-freq-table td { padding: 0.1em 0.3em; border-width: 1px; }
+.ab-table .stat-question { font-size: 0.55rem; white-space: normal; }
+
+/* Sannolikhet */
+.ab-table .sann-question { font-size: 0.55rem; white-space: normal; margin: 0 0 0.1cm; }
+.ab-table .sann-hint { font-size: 0.5rem; margin: 0.05cm 0 0; }
+.ab-table .sann-kulor-svg { width: 100%; max-height: 1.2cm; margin: 0 auto 0.05cm; }
+.ab-table .sann-compare-wrap { gap: 0.05cm; }
+.ab-table .sann-compare-row { gap: 0.3cm; }
+.ab-table .sann-compare-col { gap: 0.05cm; }
+.ab-table .sann-col-label { font-size: 0.5rem; max-width: none; }
+
+/* Symmetri */
+.ab-table .sym-wrap { gap: 0.1cm; }
+.ab-table .sym-svg,
+.ab-table .sym-wrap svg { width: 100%; max-height: 3.5cm; }
+.ab-table .sym-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .sym-trio { gap: 0.2cm; }
+.ab-table .sym-trio-cell .sym-svg { width: 1.5cm; }
+.ab-table .sym-trio-label { font-size: 0.4rem; }
+
+/* Bild-multiplikation */
+.ab-table .bild-mult-wrap { gap: 0.1cm; }
+.ab-table .bild-mult-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .bild-mult-answer { font-size: 0.7rem; }
+.ab-table .division-grid { gap: 0.1cm; align-items: center; }
+.ab-table .division-grid-row { gap: 0.1cm; }
+.ab-table .dot {
+  width: 0.45cm;
+  height: 0.45cm;
+  box-shadow: inset 0 0 0 1.5px rgba(0,0,0,0.15);
+}
+
+/* Romerska siffror */
+.ab-table .rom-wrap { gap: 0.1cm; }
+.ab-table .rom-value { font-size: 1.2rem; }
+.ab-table .rom-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .rom-ref { font-size: 0.4rem; white-space: normal; word-wrap: break-word; }
+
+/* Talföljd */
+.ab-table .tallinje-display { gap: 0.1cm; }
+.ab-table .tallinje-sequence { font-size: 0.7rem; gap: 0.05cm; flex-wrap: wrap; justify-content: center; }
+.ab-table .tallinje-box { padding: 0.02cm 0.05cm; min-width: 0; }
+.ab-table .tallinje-blank { border-bottom-width: 2px; }
+.ab-table .tallinje-sep { font-size: 0.5rem; }
+.ab-table .tallinje-question { font-size: 0.55rem; white-space: normal; }
+
+/* Talsorter */
+.ab-table .talsorter-wrapper { gap: 0.1cm; }
+.ab-table .talsorter-display { font-size: 1rem; letter-spacing: 0.1em; }
+.ab-table .talsorter-question { font-size: 0.55rem; white-space: normal; }
+
+/* Avrundning */
+.ab-table .avrund-wrap { gap: 0.2cm; }
+.ab-table .avrund-question { font-size: 1rem; white-space: normal; font-weight: 600; }
+.ab-table .avrund-choices { gap: 0.25cm; flex-wrap: wrap; justify-content: center; }
+.ab-table .avrund-choice { font-size: 1rem; padding: 0.15em 0.5em; border-width: 1px; border-radius: 4px; }
+.ab-table .avrund-answer { font-size: 1rem; }
+
+/* Mönster */
+.ab-table .monster-wrap { gap: 0.1cm; }
+.ab-table .monster-question { font-size: 0.55rem; white-space: normal; }
+.ab-table .monster-row { gap: 0.08cm; }
+.ab-table .monster-svg { width: 0.55cm; height: 0.55cm; }
+.ab-table .monster-missing {
+  width: 0.55cm; height: 0.55cm;
+  border-width: 1.5px; border-radius: 3px;
+  font-size: 0.5rem;
+}
+.ab-table .monster-groups { gap: 0.15cm; }
+.ab-table .monster-group { gap: 0.05cm; padding: 0.1em; border-width: 1px; border-radius: 3px; max-width: 2cm; }
+.ab-table .monster-group .monster-svg { width: 0.4cm; height: 0.4cm; }
+.ab-table .monster-group--missing { min-width: 0.7cm; min-height: 0.55cm; font-size: 0.5rem; }
+.ab-table .monster-sep { height: 0.5cm; }
+.ab-table .monster-answer { font-size: 0.7rem; }
+
+/* Negativa tal */
+.ab-table .negtal-question { font-size: 0.7rem; white-space: normal; margin: 0 0 0.1cm; }
+.ab-table .negtal-text { font-size: 0.7rem; white-space: normal; line-height: 1.3; max-width: none; }
+.ab-table .negtal-expr { font-size: 1rem; }
+.ab-table .negtal-line { width: 100%; }
+.ab-table .negtal-line svg { max-width: 100%; max-height: 1.5cm; }
+
+/* Bråk */
+.ab-table .brak-fraction { font-size: 1.1rem; }
+.ab-table .brak-question { font-size: 1rem; white-space: normal; }
+
+/* Procent */
+.ab-table .procent-question { font-size: 1rem; white-space: normal; }
+
+/* Generellt: alla frågetext-klasser i celler */
+.ab-table td p { font-size: 0.55rem; white-space: normal; margin: 0.05cm 0; }
+
+/* === Flera sidor ========================================== */
+/* JS skapar en .ab-sheet per sida – gap i wrappern ger visuell separation */
+
+/* === Ram-tema ============================================= */
+.ab-sheet.theme-ram::before { display: none; }
+.ab-sheet.theme-ram .ab-sheet-inner {
+  border: 3px solid #457b9d;
+  border-radius: 8px;
+  padding: 1cm 1.2cm 0.8cm;
+}
+.ab-sheet.theme-ram .ab-header { border-bottom-color: #457b9d; }
+.ab-sheet.theme-ram .ab-table { border-color: #457b9d; }
+

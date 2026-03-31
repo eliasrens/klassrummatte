@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 297">
+<!--
+  LINJE — minimalistiska diagonala streck och diamanter
+  Färgschema: warm gray/charcoal (#6a6a6a main, #9a9a9a lighter, #3a3a3a accents)
+  Konvention: alla dekorationer inom 10mm från sidkanten.
+  Korta sneda streck (regn/skraffering) vid jämna intervall, diamanter i hörnen.
+-->
+<defs>
+  <!-- Kort diagonalt streck (/) -->
+  <line id="sl" x1="0" y1="2.5" x2="2" y2="-2.5"
+    stroke="#6a6a6a" stroke-width="0.5" stroke-linecap="round"/>
+  <!-- Kort diagonalt streck, tunt (\) -->
+  <line id="sl-r" x1="0" y1="-2.5" x2="2" y2="2.5"
+    stroke="#9a9a9a" stroke-width="0.35" stroke-linecap="round"/>
+  <!-- Diamant (hörndekoration) -->
+  <polygon id="dia" points="0,-2.5 1.5,0 0,2.5 -1.5,0"
+    fill="none" stroke="#3a3a3a" stroke-width="0.5"/>
+  <!-- Liten diamant -->
+  <polygon id="dia-s" points="0,-1.5 0.9,0 0,-1.5 -0.9,0"
+    fill="#9a9a9a" opacity="0.4"/>
+  <!-- Liten prick -->
+  <circle id="ld" r="0.4" fill="#6a6a6a" opacity="0.5"/>
+</defs>
+
+<!-- TUNN BORDERRAM -->
+<rect x="10" y="10" width="190" height="277"
+  fill="none" stroke="#6a6a6a" stroke-width="0.5"/>
+
+<!-- ═══════════════════════════════════════════
+     HÖRNDIAMANTER
+═══════════════════════════════════════════ -->
+<use href="#dia" transform="translate(10,10) rotate(45)"/>
+<use href="#dia" transform="translate(200,10) rotate(45)"/>
+<use href="#dia" transform="translate(10,287) rotate(45)"/>
+<use href="#dia" transform="translate(200,287) rotate(45)"/>
+
+<!-- ═══════════════════════════════════════════
+     TOP KANT — diagonala streck
+═══════════════════════════════════════════ -->
+<use href="#sl"   transform="translate(25,5)"/>
+<use href="#sl-r" transform="translate(35,6)"/>
+<use href="#sl"   transform="translate(45,5)"/>
+<use href="#ld"   transform="translate(55,5.5)"/>
+<use href="#sl"   transform="translate(62,5)"/>
+<use href="#sl-r" transform="translate(72,6)"/>
+<use href="#sl"   transform="translate(82,5)"/>
+<use href="#ld"   transform="translate(92,5.5)"/>
+<use href="#sl"   transform="translate(99,5)"/>
+<use href="#sl-r" transform="translate(109,6)"/>
+<use href="#sl"   transform="translate(119,5)"/>
+<use href="#ld"   transform="translate(129,5.5)"/>
+<use href="#sl"   transform="translate(136,5)"/>
+<use href="#sl-r" transform="translate(146,6)"/>
+<use href="#sl"   transform="translate(156,5)"/>
+<use href="#ld"   transform="translate(166,5.5)"/>
+<use href="#sl"   transform="translate(173,5)"/>
+<use href="#sl-r" transform="translate(183,6)"/>
+<use href="#sl"   transform="translate(193,5)"/>
+
+<!-- ═══════════════════════════════════════════
+     BOTTOM KANT — diagonala streck
+═══════════════════════════════════════════ -->
+<use href="#sl"   transform="translate(25,292)"/>
+<use href="#sl-r" transform="translate(35,293)"/>
+<use href="#sl"   transform="translate(45,292)"/>
+<use href="#ld"   transform="translate(55,292.5)"/>
+<use href="#sl"   transform="translate(62,292)"/>
+<use href="#sl-r" transform="translate(72,293)"/>
+<use href="#sl"   transform="translate(82,292)"/>
+<use href="#ld"   transform="translate(92,292.5)"/>
+<use href="#sl"   transform="translate(99,292)"/>
+<use href="#sl-r" transform="translate(109,293)"/>
+<use href="#sl"   transform="translate(119,292)"/>
+<use href="#ld"   transform="translate(129,292.5)"/>
+<use href="#sl"   transform="translate(136,292)"/>
+<use href="#sl-r" transform="translate(146,293)"/>
+<use href="#sl"   transform="translate(156,292)"/>
+<use href="#ld"   transform="translate(166,292.5)"/>
+<use href="#sl"   transform="translate(173,292)"/>
+<use href="#sl-r" transform="translate(183,293)"/>
+<use href="#sl"   transform="translate(193,292)"/>
+
+<!-- ═══════════════════════════════════════════
+     VÄNSTER KANT — diagonala streck (roterade 90°)
+═══════════════════════════════════════════ -->
+<use href="#sl"   transform="translate(5,30) rotate(90)"/>
+<use href="#sl-r" transform="translate(5,45) rotate(90)"/>
+<use href="#sl"   transform="translate(5,60) rotate(90)"/>
+<use href="#ld"   transform="translate(5.5,75)"/>
+<use href="#sl"   transform="translate(5,88) rotate(90)"/>
+<use href="#sl-r" transform="translate(5,103) rotate(90)"/>
+<use href="#sl"   transform="translate(5,118) rotate(90)"/>
+<use href="#ld"   transform="translate(5.5,133)"/>
+<use href="#sl"   transform="translate(5,146) rotate(90)"/>
+<use href="#sl-r" transform="translate(5,161) rotate(90)"/>
+<use href="#sl"   transform="translate(5,176) rotate(90)"/>
+<use href="#ld"   transform="translate(5.5,191)"/>
+<use href="#sl"   transform="translate(5,204) rotate(90)"/>
+<use href="#sl-r" transform="translate(5,219) rotate(90)"/>
+<use href="#sl"   transform="translate(5,234) rotate(90)"/>
+<use href="#ld"   transform="translate(5.5,249)"/>
+<use href="#sl"   transform="translate(5,262) rotate(90)"/>
+<use href="#sl-r" transform="translate(5,275) rotate(90)"/>
+
+<!-- ═══════════════════════════════════════════
+     HÖGER KANT — diagonala streck (roterade 90°)
+═══════════════════════════════════════════ -->
+<use href="#sl"   transform="translate(205,30) rotate(90)"/>
+<use href="#sl-r" transform="translate(205,45) rotate(90)"/>
+<use href="#sl"   transform="translate(205,60) rotate(90)"/>
+<use href="#ld"   transform="translate(204.5,75)"/>
+<use href="#sl"   transform="translate(205,88) rotate(90)"/>
+<use href="#sl-r" transform="translate(205,103) rotate(90)"/>
+<use href="#sl"   transform="translate(205,118) rotate(90)"/>
+<use href="#ld"   transform="translate(204.5,133)"/>
+<use href="#sl"   transform="translate(205,146) rotate(90)"/>
+<use href="#sl-r" transform="translate(205,161) rotate(90)"/>
+<use href="#sl"   transform="translate(205,176) rotate(90)"/>
+<use href="#ld"   transform="translate(204.5,191)"/>
+<use href="#sl"   transform="translate(205,204) rotate(90)"/>
+<use href="#sl-r" transform="translate(205,219) rotate(90)"/>
+<use href="#sl"   transform="translate(205,234) rotate(90)"/>
+<use href="#ld"   transform="translate(204.5,249)"/>
+<use href="#sl"   transform="translate(205,262) rotate(90)"/>
+<use href="#sl-r" transform="translate(205,275) rotate(90)"/>
+
+</svg>
