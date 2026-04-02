@@ -17,7 +17,10 @@ const Problems = (() => {
     }
 
     const fallback = settings.grade >= 5 ? BASE_GR56 : settings.grade >= 4 ? BASE_GR4 : BASE_GR13;
-    const customList = Settings.getCustomProblems();
+    // Session-import: om sessionActiveSetId finns, använd bara det setet
+    const customList = settings.sessionActiveSetId
+      ? Settings.getCustomProblemsBySetId(settings.sessionActiveSetId)
+      : Settings.getCustomProblems();
     let areas;
     if (settings.customProblemsEnabled && customList.length > 0 && settings.areas.length === 0) {
       // Endast "Egna uppgifter" ikryssat, inga matematikområden – visa bara importerade uppgifter
@@ -62,7 +65,9 @@ const Problems = (() => {
   function generateMultipleProblems(settings) {
     const count = settings.multipleCount || 2;
     const fallback = settings.grade >= 5 ? BASE_GR56 : settings.grade >= 4 ? BASE_GR4 : BASE_GR13;
-    const customList = Settings.getCustomProblems();
+    const customList = settings.sessionActiveSetId
+      ? Settings.getCustomProblemsBySetId(settings.sessionActiveSetId)
+      : Settings.getCustomProblems();
     let rawAreas;
     if (settings.customProblemsEnabled && customList.length > 0 && settings.areas.length === 0) {
       rawAreas = ['egna'];

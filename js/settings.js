@@ -41,6 +41,9 @@ const Settings = (() => {
 
   let state = { ...DEFAULTS };
 
+  // Session-import: ej persistent, nollställs vid omladdning
+  let sessionActiveSetId = null;
+
   function load() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -86,6 +89,7 @@ const Settings = (() => {
   function get() {
     return {
       ...state,
+      sessionActiveSetId,
       areas:         [...state.areas],
       multDivMode:   [...(state.multDivMode    || [])],
       specificTables:[...(state.specificTables || [1,2,3,4,5,6,7,8,9])],
@@ -146,8 +150,10 @@ const Settings = (() => {
   }
   function addCustomProblemSet(name, problems) {
     const sets = getCustomProblemSets();
-    sets.push({ id: 'set_' + Date.now(), name: name, problems: problems, enabled: true });
+    const id = 'set_' + Date.now();
+    sets.push({ id: id, name: name, problems: problems, enabled: true });
     setCustomProblemSets(sets);
+    return id;
   }
   function toggleCustomProblemSet(id, enabled) {
     const sets = getCustomProblemSets();
@@ -169,6 +175,13 @@ const Settings = (() => {
       }
     }
     return result;
+  }
+  // Returnerar uppgifter från ett specifikt set (för session-import)
+  function getCustomProblemsBySetId(setId) {
+    if (!setId) return getCustomProblems();
+    const sets = getCustomProblemSets();
+    const s = sets.find(x => x.id === setId);
+    return (s && Array.isArray(s.problems)) ? s.problems : [];
   }
   // Bakåtkompatibelt alias (används ej längre för sparning)
   function setCustomProblems(arr) {
@@ -204,6 +217,8 @@ const Settings = (() => {
   function setVolymUnits(arr)          { state.volymUnits = [...arr]; save(); }
   function getVolymModes()             { return [...(state.volymModes || [])]; }
   function setVolymModes(arr)          { state.volymModes = [...arr]; save(); }
+  function getSessionActiveSetId()     { return sessionActiveSetId; }
+  function setSessionActiveSetId(id)   { sessionActiveSetId = id || null; }
   function isTimerEnabled()            { return !!state.timerEnabled; }
   function setTimerEnabled(b)          { state.timerEnabled = !!b; save(); }
   function getTimerDuration()          { return state.timerDuration || 20; }
@@ -215,8 +230,9 @@ const Settings = (() => {
   return {
     get,
     getGrade, getAreas, isExtraEnabled, getExtraType, isProblemlosning,
-    isCustomProblemsEnabled, setCustomProblemsEnabled, getCustomProblems, setCustomProblems,
+    isCustomProblemsEnabled, setCustomProblemsEnabled, getCustomProblems, getCustomProblemsBySetId, setCustomProblems,
     getCustomProblemSets, setCustomProblemSets, addCustomProblemSet, toggleCustomProblemSet, deleteCustomProblemSet,
+    getSessionActiveSetId, setSessionActiveSetId,
     isBildstod, getBildstodDelay, getGeometriTypes, getAddSubMode, getAddSubVaxling,
     setGrade, setAreas, setExtraEnabled, setExtraType, setExtraDelay, setProblemlosning,
     setBildstod, setBildstodDelay, setDivisionRest, setGeometriTypes,

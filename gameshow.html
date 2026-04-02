@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klassrummatte – Gameshow</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/gameshow.css">
+</head>
+<body class="gameshow-body">
+
+  <!-- ══════ VÄNSTER: POÄNGTAVLA ══════ -->
+  <div class="gs-scoreboard">
+    <h2>Poängtavla</h2>
+
+    <div class="gs-team-settings">
+      <label for="gs-team-count">Lag:</label>
+      <select id="gs-team-count">
+        <option value="2" selected>2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+    </div>
+    <div id="gs-teams" class="gs-teams"></div>
+  </div>
+
+  <!-- ══════ MITTEN: SPELYTA ══════ -->
+  <div class="gs-stage">
+    <h1 class="gs-title">Mattekampen</h1>
+
+    <!-- Timer (övre vänstra hörnet av scenen) -->
+    <div id="gs-timer-wrap" class="gs-timer-wrap">
+      <svg class="gs-timer-svg" viewBox="0 0 100 100">
+        <circle class="gs-timer-bg" cx="50" cy="50" r="45"></circle>
+        <circle class="gs-timer-path" id="gs-timer-path" cx="50" cy="50" r="45"></circle>
+      </svg>
+      <span id="gs-time" class="gs-time-text">60</span>
+    </div>
+
+    <button id="gs-fullscreen" class="gs-fullscreen-btn">Helskärm</button>
+
+    <div id="gs-problem-display" class="gs-problem-area">
+      <div class="gs-intro">Välj inställningar och tryck Ny fråga</div>
+    </div>
+
+    <div class="gs-controls">
+      <button id="gs-btn-answer" class="gs-btn gs-btn--answer">Visa svar</button>
+      <button id="gs-btn-next" class="gs-btn">Ny fråga</button>
+    </div>
+  </div>
+
+  <!-- ══════ HÖGER: INSTÄLLNINGAR (infällbar) ══════ -->
+  <button id="gs-settings-toggle" class="gs-settings-toggle" title="Inställningar">⚙</button>
+
+  <div id="gs-settings" class="gs-settings">
+    <h2>Inställningar</h2>
+
+    <div class="gs-setting-group">
+      <label for="gs-grade">Årskurs</label>
+      <select id="gs-grade">
+        <option value="1">Åk 1</option>
+        <option value="2">Åk 2</option>
+        <option value="3" selected>Åk 3</option>
+        <option value="4">Åk 4</option>
+        <option value="5">Åk 5</option>
+        <option value="6">Åk 6</option>
+      </select>
+    </div>
+
+    <div class="gs-setting-group">
+      <label for="gs-timer">Timer (sekunder)</label>
+      <select id="gs-timer">
+        <option value="30">30 s</option>
+        <option value="45">45 s</option>
+        <option value="60" selected>60 s</option>
+        <option value="90">90 s</option>
+        <option value="120">2 min</option>
+        <option value="180">3 min</option>
+        <option value="0">Av</option>
+      </select>
+    </div>
+
+    <div class="gs-setting-group">
+      <label class="gs-checkbox-row">
+        <input type="checkbox" id="gs-problemlosning"> Problemlösning (textuppgifter)
+      </label>
+    </div>
+
+    <div class="gs-setting-group">
+      <label>Egna uppgifter</label>
+      <div class="gs-import-row">
+        <button id="gs-import-csv" class="gs-area-action-btn">Importera CSV</button>
+        <button id="gs-download-template" class="gs-area-action-btn">Ladda ner mall</button>
+      </div>
+      <textarea id="gs-paste" class="gs-paste" rows="3" placeholder="Klistra in CSV här..."></textarea>
+      <button id="gs-import-paste" class="gs-area-action-btn" style="margin-top:0.3rem;width:100%">Importera från text</button>
+      <div id="gs-custom-sets" class="gs-custom-sets"></div>
+      <input type="file" id="gs-file-input" accept=".csv,.txt" style="display:none">
+    </div>
+
+    <div class="gs-setting-group gs-sub-section" id="gs-areas-section">
+      <div class="gs-sub-toggle" id="gs-areas-toggle">Områden</div>
+      <div class="gs-sub-body gs-areas-body">
+        <div class="gs-area-actions">
+          <button id="gs-select-all" class="gs-area-action-btn">Markera allt</button>
+          <button id="gs-deselect-all" class="gs-area-action-btn">Avmarkera allt</button>
+        </div>
+        <div id="gs-areas" class="gs-areas-grid">
+          <!-- Fylls av JS: områdescheckboxar + fällbara sub-settings -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ SCRIPTS ══════ -->
+  <!-- Plugin-system -->
+  <script src="js/plugins/_math-utils.js"></script>
+  <script src="js/plugins/_render-utils.js"></script>
+  <script src="js/plugins/_utils.js"></script>
+  <script src="js/plugins/BasePlugin.js"></script>
+  <script src="js/plugins/PluginManager.js"></script>
+  <!-- Alla plugins -->
+  <script src="js/plugins/addition.js"></script>
+  <script src="js/plugins/subtraktion.js"></script>
+  <script src="js/plugins/multiplikation.js"></script>
+  <script src="js/plugins/division.js"></script>
+  <script src="js/plugins/prioritet.js"></script>
+  <script src="js/plugins/oppna-utsaga.js"></script>
+  <script src="js/plugins/brak.js"></script>
+  <script src="js/plugins/geometri.js"></script>
+  <script src="js/plugins/klocka.js"></script>
+  <script src="js/plugins/matt-langd.js"></script>
+  <script src="js/plugins/matt-volym.js"></script>
+  <script src="js/plugins/matt-vikt.js"></script>
+  <script src="js/plugins/matt-tid.js"></script>
+  <script src="js/plugins/procent.js"></script>
+  <script src="js/plugins/tallinje.js"></script>
+  <script src="js/plugins/talsorter.js"></script>
+  <script src="js/plugins/avrundning.js"></script>
+  <script src="js/plugins/monster.js"></script>
+  <script src="js/plugins/talfoljd.js"></script>
+  <script src="js/plugins/matt-area.js"></script>
+  <script src="js/plugins/negativa-tal.js"></script>
+  <script src="js/plugins/sannolikhet.js"></script>
+  <script src="js/plugins/statistik.js"></script>
+  <script src="js/plugins/koordinatsystem.js"></script>
+  <script src="js/plugins/symmetri.js"></script>
+  <script src="js/plugins/romerska.js"></script>
+  <!-- Fasader -->
+  <script src="js/arbetsblad-config.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/custom-problems.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/problems.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/answer.js"></script>
+  <!-- Gameshow -->
+  <script src="js/gameshow.js"></script>
+</body>
+</html>

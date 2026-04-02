@@ -259,7 +259,10 @@ const Arbetsblad = (() => {
 
   // Generera egna (lagrade) uppgifter från Settings/CustomProblems
   function generateEgnaProblems(count, allProblems) {
-    const stored = typeof Settings !== 'undefined' ? Settings.getCustomProblems() : [];
+    const activeId = typeof Settings !== 'undefined' ? Settings.getSessionActiveSetId() : null;
+    const stored = typeof Settings !== 'undefined'
+      ? (activeId ? Settings.getCustomProblemsBySetId(activeId) : Settings.getCustomProblems())
+      : [];
     if (!stored || stored.length === 0) return [];
     const problems = [];
     const shuffled = stored.slice().sort(() => Math.random() - 0.5);

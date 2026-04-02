@@ -181,7 +181,9 @@ const Menu = (() => {
       return;
     }
     container.innerHTML = '<label class="section-label" style="margin-bottom:0.3rem">Importerade set</label>';
+    const activeId = Settings.getSessionActiveSetId();
     sets.forEach(s => {
+      const isSession = activeId === s.id;
       const row = document.createElement('div');
       row.style.cssText = 'display:flex; align-items:center; gap:0.4rem; margin-bottom:0.25rem; font-size:0.82rem';
       const cb = document.createElement('input');
@@ -191,21 +193,32 @@ const Menu = (() => {
         Settings.toggleCustomProblemSet(s.id, cb.checked);
         updateCustomProblemsStatus();
       });
+      const useBtn = document.createElement('button');
+      useBtn.type = 'button';
+      useBtn.textContent = isSession ? '★' : '☆';
+      useBtn.title = isSession ? 'Aktiv session – klicka för att avaktivera' : 'Använd bara detta set under sessionen';
+      useBtn.style.cssText = 'background:none; border:none; color:' + (isSession ? '#e8a900' : '#999') + '; font-size:0.9rem; cursor:pointer; padding:0 0.1rem; line-height:1';
+      useBtn.addEventListener('click', () => {
+        Settings.setSessionActiveSetId(isSession ? null : s.id);
+        renderCustomProblemSets();
+      });
       const label = document.createElement('span');
       label.style.cssText = 'flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap';
-      label.textContent = s.name + ' (' + s.problems.length + ')';
-      label.title = s.name + ' – ' + s.problems.length + ' uppgifter';
+      label.textContent = s.name + ' (' + s.problems.length + ')' + (isSession ? ' ★' : '');
+      label.title = s.name + ' – ' + s.problems.length + ' uppgifter' + (isSession ? ' (aktiv session)' : '');
       const del = document.createElement('button');
       del.type = 'button';
       del.textContent = '\u00D7';
       del.title = 'Ta bort set';
       del.style.cssText = 'background:none; border:none; color:#c00; font-size:1rem; cursor:pointer; padding:0 0.2rem; line-height:1';
       del.addEventListener('click', () => {
+        if (activeId === s.id) Settings.setSessionActiveSetId(null);
         Settings.deleteCustomProblemSet(s.id);
         renderCustomProblemSets();
         updateCustomProblemsStatus();
       });
       row.appendChild(cb);
+      row.appendChild(useBtn);
       row.appendChild(label);
       row.appendChild(del);
       container.appendChild(row);
@@ -754,7 +767,8 @@ const Menu = (() => {
         const result = CustomProblems.importFromCsvText(text, setName);
         const statusEl = document.getElementById('custom-problems-status');
         if (result.success) {
-          statusEl.textContent = `"${setName}" – ${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade.`;
+          Settings.setSessionActiveSetId(result.setId);
+          statusEl.textContent = `"${setName}" – ${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade. ★ Aktiv session`;
           if (nameInput) nameInput.value = '';
         } else {
           statusEl.textContent = result.error || 'Import misslyckades.';
@@ -774,8 +788,9 @@ const Menu = (() => {
       const result = CustomProblems.importFromCsvText(text, setName);
       const statusEl = document.getElementById('custom-problems-status');
       if (result.success) {
+        Settings.setSessionActiveSetId(result.setId);
         const usedName = setName || ('Import ' + new Date().toLocaleDateString('sv-SE'));
-        statusEl.textContent = `"${usedName}" – ${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade.`;
+        statusEl.textContent = `"${usedName}" – ${result.problems.length} uppgift${result.problems.length === 1 ? '' : 'er'} importerade. ★ Aktiv session`;
         if (textarea) textarea.value = '';
         if (nameInput) nameInput.value = '';
       } else {

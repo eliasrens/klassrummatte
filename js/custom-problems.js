@@ -114,7 +114,7 @@ const CustomProblems = (() => {
     const result = parseCsvToProblems(csvText);
     if (result.success) {
       const name = (setName && setName.trim()) || ('Import ' + new Date().toLocaleDateString('sv-SE'));
-      Settings.addCustomProblemSet(name, result.problems);
+      result.setId = Settings.addCustomProblemSet(name, result.problems);
     }
     return result;
   }

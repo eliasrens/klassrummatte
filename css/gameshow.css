@@ -1,0 +1,650 @@
+/* === Gameshow ============================================= */
+
+/* Override style.css variabler */
+body.gameshow-body {
+  --bg: transparent;
+  --text: white;
+  --text-muted: rgba(255,255,255,0.6);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0b192c, #1a365d, #0d4d4d) !important;
+  color: white;
+  display: flex;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* === VÄNSTER: POÄNGTAVLA ================================== */
+.gs-scoreboard {
+  width: 260px;
+  background: rgba(11, 25, 44, 0.85);
+  border-right: 2px solid #48cae4;
+  display: flex;
+  flex-direction: column;
+  padding: 1.2rem;
+  box-shadow: 2px 0 15px rgba(0,0,0,0.5);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.gs-scoreboard h2 {
+  color: #00ffcc;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0 0 0.8rem;
+  font-size: 1rem;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.4);
+}
+
+/* ── Timer (övre vänstra hörnet av scenen) ─────────────── */
+.gs-timer-wrap {
+  position: absolute;
+  top: 0.8rem;
+  left: 1rem;
+  width: 3.6rem;
+  height: 3.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.gs-timer-wrap.gs-timer--off { display: none; }
+
+.gs-timer-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.gs-timer-svg circle {
+  fill: none;
+  stroke-width: 3;
+}
+
+.gs-timer-bg { stroke: rgba(255, 255, 255, 0.1); }
+
+.gs-timer-path {
+  stroke: #00ffcc;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+}
+
+.gs-time-text {
+  position: relative;
+  z-index: 1;
+  font-size: 1rem;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
+/* ── Lag-inställningar ───────────────────────────────────── */
+.gs-team-settings {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.gs-team-settings label {
+  font-size: 0.8rem;
+  color: #48cae4;
+  font-weight: bold;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.gs-team-settings select {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #48cae4;
+  background: #1a365d;
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.gs-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.gs-team-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  border-left: 4px solid #00ffcc;
+  transition: background 0.2s;
+}
+
+.gs-team-row:hover { background: rgba(255, 255, 255, 0.12); }
+
+.gs-team-name {
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-bottom: 1px dashed rgba(255,255,255,0.2);
+}
+
+.gs-team-name:hover { border-bottom-color: #48cae4; }
+
+.gs-team-name-input {
+  font-size: 1rem;
+  font-weight: 700;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid #48cae4;
+  border-radius: 4px;
+  color: white;
+  padding: 0.1rem 0.3rem;
+  width: 7rem;
+  outline: none;
+}
+
+.gs-score-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gs-team-score {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffde21;
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.gs-score-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #48cae4;
+  color: #0b192c;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.gs-score-btn:hover { background: #90e0ef; transform: scale(1.1); }
+.gs-score-btn:active { transform: scale(0.9); }
+
+/* === MITTEN: SPELYTA ====================================== */
+.gs-stage {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.gs-title {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  letter-spacing: 3px;
+  color: #48cae4;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(72, 202, 228, 0.5);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.gs-fullscreen-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  border: 2px solid #48cae4;
+  background: transparent;
+  color: #48cae4;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.gs-fullscreen-btn:hover { background: #48cae4; color: #0b192c; }
+
+/* Uppgiftsyta — använder originalets .problems-grid via Renderer */
+.gs-problem-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  max-width: 1100px;
+  flex: 1;
+  padding: 4rem 0 5rem;
+  font-size: clamp(1.4rem, 3vw, 2.6rem);
+}
+
+/* Enskild uppgift – centrerad stor text */
+.gs-problem-area > span {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700;
+}
+
+/* Textproblem */
+.gs-problem-area .text-problem {
+  font-size: clamp(1rem, 2vw, 1.6rem);
+  line-height: 1.5;
+  max-width: 700px;
+  text-align: center;
+}
+
+/* Answer-box (från plugin showAnswer) */
+.gs-problem-area .answer-box {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  margin-top: 1rem;
+  font-size: 1.3rem;
+}
+
+/* problems-grid i gameshow: anpassa för mörk bakgrund */
+.gs-problem-area .problems-grid {
+  height: auto;
+  color: white;
+}
+
+.gs-problem-area .problem-cell {
+  background: transparent;
+  border-color: rgba(72, 202, 228, 0.2);
+  color: white;
+}
+
+/* Svarslåda: röd → gul i gameshow */
+.gs-problem-area .answer-value,
+.gs-problem-area .open-blank--answered { color: #ffde21 !important; }
+
+.gs-problem-area .answer-box {
+  color: #ffde21;
+  border-color: rgba(72, 202, 228, 0.3);
+  background: rgba(255, 222, 33, 0.08);
+}
+
+/* Uppställningslinjer synliga mot mörk bg */
+.gs-problem-area .uppstallning-line { border-color: rgba(255,255,255,0.5); }
+.gs-problem-area .uppstallning-op { color: rgba(255,255,255,0.7); }
+
+/* Klocka: mörk urtavla-text → ljus */
+.gs-problem-area .clock-number { fill: white; }
+.gs-problem-area .clock-hand { stroke: white; }
+
+/* Open-blank streck synligt */
+.gs-problem-area .open-blank { border-bottom-color: rgba(255,255,255,0.5); }
+
+/* Kontrollknappar */
+.gs-controls {
+  position: absolute;
+  bottom: 2rem;
+  display: flex;
+  gap: 1rem;
+  z-index: 5;
+}
+
+.gs-btn {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 50px;
+  background: #48cae4;
+  color: #0b192c;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(72, 202, 228, 0.4);
+  transition: all 0.2s;
+}
+
+.gs-btn:hover { transform: scale(1.05); background: #90e0ef; }
+.gs-btn:active { transform: scale(0.97); }
+
+.gs-btn--answer {
+  background: transparent;
+  border: 2px solid #ffde21;
+  color: #ffde21;
+  box-shadow: 0 4px 15px rgba(255, 222, 33, 0.2);
+}
+
+.gs-btn--answer:hover { background: #ffde21; color: #0b192c; }
+
+/* Intro-text */
+.gs-intro {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+/* === HÖGER: INSTÄLLNINGAR (infällbar) ===================== */
+
+.gs-settings-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  border: 2px solid #48cae4;
+  background: rgba(11, 25, 44, 0.8);
+  color: #48cae4;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.gs-settings-toggle:hover { background: #48cae4; color: #0b192c; }
+
+body:has(.gs-settings:not(.gs-settings--hidden)) .gs-settings-toggle {
+  right: calc(280px + 1rem);
+}
+
+.gs-settings {
+  width: 280px;
+  background: rgba(11, 25, 44, 0.85);
+  border-left: 2px solid #48cae4;
+  display: flex;
+  flex-direction: column;
+  padding: 1.2rem;
+  box-shadow: -2px 0 15px rgba(0,0,0,0.5);
+  z-index: 150;
+  flex-shrink: 0;
+  overflow-y: auto;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.gs-settings.gs-settings--hidden {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gs-settings h2 {
+  color: #00ffcc;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.4);
+}
+
+.gs-setting-group { margin-bottom: 1rem; }
+
+.gs-setting-group > label {
+  display: block;
+  font-size: 0.75rem;
+  color: #48cae4;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.3rem;
+}
+
+.gs-setting-group select {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(72, 202, 228, 0.4);
+  background: #1a365d;
+  color: white;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+/* Områdesval */
+.gs-areas-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+}
+
+.gs-area-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: #d0d5dd;
+  cursor: pointer;
+  padding: 0.15rem 0;
+}
+
+.gs-area-label input { accent-color: #48cae4; margin: 0; }
+
+.gs-area-category {
+  grid-column: 1 / -1;
+  font-size: 0.65rem;
+  color: #48cae4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.4rem;
+  padding-bottom: 0.15rem;
+  border-bottom: 1px solid rgba(72, 202, 228, 0.2);
+}
+
+.gs-area-category:first-child { margin-top: 0; }
+
+/* Markera / avmarkera allt */
+.gs-area-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.gs-area-action-btn {
+  flex: 1;
+  padding: 0.3rem 0.4rem;
+  font-size: 0.65rem;
+  border: 1px solid rgba(72, 202, 228, 0.4);
+  border-radius: 4px;
+  background: transparent;
+  color: #90cdf4;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.gs-area-action-btn:hover {
+  background: rgba(72, 202, 228, 0.15);
+  border-color: #48cae4;
+  color: #48cae4;
+}
+
+/* Fällbara sub-settings */
+.gs-sub-section {
+  grid-column: 1 / -1;
+  margin: 0.15rem 0 0.3rem;
+}
+
+.gs-sub-toggle {
+  font-size: 0.65rem;
+  color: #90cdf4;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(72, 202, 228, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.gs-sub-toggle::before {
+  content: '▸';
+  font-size: 0.6rem;
+  transition: transform 0.2s;
+}
+
+.gs-sub-toggle:hover { background: rgba(72, 202, 228, 0.18); }
+
+.gs-sub-section--open .gs-sub-toggle::before { transform: rotate(90deg); }
+
+.gs-sub-body {
+  display: none;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.3rem 0 0.1rem 0.8rem;
+}
+
+.gs-sub-section--open .gs-sub-body { display: flex; }
+
+/* Områdes-sektionens body: full bredd */
+.gs-areas-body {
+  width: 100%;
+  padding-left: 0;
+}
+
+.gs-areas-body .gs-area-actions { margin-top: 0.4rem; }
+
+/* Problemlösning-checkbox */
+.gs-checkbox-row {
+  display: flex !important;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem !important;
+  color: #d0d5dd !important;
+  cursor: pointer;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.gs-checkbox-row input { accent-color: #48cae4; margin: 0; }
+
+/* Import-rad */
+.gs-import-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.gs-paste {
+  width: 100%;
+  font-size: 0.75rem;
+  resize: vertical;
+  box-sizing: border-box;
+  background: rgba(255,255,255,0.06);
+  color: white;
+  border: 1px solid rgba(72, 202, 228, 0.3);
+  border-radius: 4px;
+  padding: 0.4rem;
+  margin-top: 0.3rem;
+}
+
+.gs-paste::placeholder { color: rgba(255,255,255,0.3); }
+
+/* Egna uppgifter: importerade set */
+.gs-custom-sets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.gs-custom-empty {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.35);
+  font-style: italic;
+}
+
+.gs-custom-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: #d0d5dd;
+}
+
+.gs-custom-row input { accent-color: #48cae4; margin: 0; flex-shrink: 0; }
+
+.gs-custom-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gs-custom-use {
+  background: none;
+  border: none;
+  color: #00ffcc;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0 0.15rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.gs-custom-use:hover { color: #48cae4; }
+
+.gs-custom-del {
+  background: none;
+  border: none;
+  color: rgba(255,100,100,0.6);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.gs-custom-del:hover { color: #ff6b6b; }
+
+/* === Plugin-specifik styling i gameshow =================== */
+
+/* Svar (röd text från plugins) — ändra till gul i gameshow */
+.gs-problem-area .answer-value { color: #ffde21; }
+.gs-problem-area .open-blank--answered { color: #ffde21; }
+
+/* Klocka */
+.gs-problem-area .clock-container { gap: 0.5rem; }
+.gs-problem-area .clock-question { font-size: clamp(0.9rem, 1.5vw, 1.2rem); }
+
+/* Geometri */
+.gs-problem-area .geometry-question { font-size: clamp(0.9rem, 1.5vw, 1.2rem); }
+
+/* Scrollbar */
+.gs-scoreboard::-webkit-scrollbar,
+.gs-settings::-webkit-scrollbar,
+.gs-teams::-webkit-scrollbar { width: 6px; }
+
+.gs-scoreboard::-webkit-scrollbar-track,
+.gs-settings::-webkit-scrollbar-track,
+.gs-teams::-webkit-scrollbar-track { background: transparent; }
+
+.gs-scoreboard::-webkit-scrollbar-thumb,
+.gs-settings::-webkit-scrollbar-thumb,
+.gs-teams::-webkit-scrollbar-thumb {
+  background: rgba(72, 202, 228, 0.3);
+  border-radius: 4px;
+}

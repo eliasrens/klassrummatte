@@ -89,6 +89,7 @@ const ArbetsbladPL = (() => {
       const reader = new FileReader();
       reader.onload = () => {
         const result = CustomProblems.importFromCsvText(reader.result);
+        if (result.success) Settings.setSessionActiveSetId(result.setId);
         showPLImportStatus(result);
       };
       reader.readAsText(file, 'UTF-8');
@@ -99,6 +100,7 @@ const ArbetsbladPL = (() => {
       const text = document.getElementById('pl-paste')?.value || '';
       if (!text.trim()) return;
       const result = CustomProblems.importFromCsvText(text);
+      if (result.success) Settings.setSessionActiveSetId(result.setId);
       showPLImportStatus(result);
     });
   }
@@ -108,7 +110,7 @@ const ArbetsbladPL = (() => {
     if (!el) return;
     if (result.success) {
       el.className = 'pl-import-status success';
-      el.textContent = `${result.problems.length} uppgifter importerade!`;
+      el.textContent = `${result.problems.length} uppgifter importerade! ★ Aktiv session`;
     } else {
       el.className = 'pl-import-status error';
       el.textContent = result.error;
