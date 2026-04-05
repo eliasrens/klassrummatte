@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klassrummatte – Escape Room (Skapa)</title>
+  <link rel="stylesheet" href="css/escape.css">
+</head>
+<body>
+
+  <div class="es-creator">
+    <header class="es-header">
+      <h1>Escape Room</h1>
+      <p class="es-subtitle">Skapa ett matteäventyr för dina elever</p>
+    </header>
+
+    <!-- ══════ STEG 1: MILJÖ ══════ -->
+    <section class="es-section">
+      <h2 class="es-section-title">1. Välj miljö</h2>
+      <div id="es-rooms" class="es-room-grid"></div>
+    </section>
+
+    <!-- ══════ STEG 2: ÅRSKURS ══════ -->
+    <section class="es-section">
+      <h2 class="es-section-title">2. Årskurs</h2>
+      <select id="es-grade" class="es-select">
+        <option value="1">Åk 1</option>
+        <option value="2">Åk 2</option>
+        <option value="3" selected>Åk 3</option>
+        <option value="4">Åk 4</option>
+        <option value="5">Åk 5</option>
+        <option value="6">Åk 6</option>
+      </select>
+    </section>
+
+    <!-- ══════ STEG 3: UPPGIFTSTYP ══════ -->
+    <section class="es-section">
+      <h2 class="es-section-title">3. Uppgifter</h2>
+
+      <label class="es-problemlosning-label">
+        <input type="checkbox" id="es-problemlosning" checked>
+        <span>
+          <strong>Problemlösning</strong> – gör om uppgifterna till textuppgifter med namn och scenarion
+        </span>
+      </label>
+
+      <details class="es-details">
+        <summary class="es-details-summary">Egna uppgifter (CSV-import)</summary>
+        <div class="es-details-body">
+          <div class="es-area-actions" style="margin-top:0.5rem">
+            <button id="es-import-csv" class="es-small-btn">Importera fil</button>
+            <button id="es-download-template" class="es-small-btn">Ladda ner mall</button>
+          </div>
+          <textarea id="es-paste" class="es-paste" rows="3" placeholder="Klistra in CSV här..."></textarea>
+          <button id="es-import-paste-btn" class="es-small-btn" style="width:100%; margin-top:0.3rem">Importera från text</button>
+          <div id="es-import-status" class="es-import-status"></div>
+          <div id="es-custom-sets" style="margin-top:0.5rem"></div>
+          <label class="es-area-label" style="margin-top:0.5rem">
+            <input type="checkbox" id="es-only-custom">
+            Använd <strong>endast</strong> egna importerade uppgifter
+          </label>
+          <input type="file" id="es-file-input" accept=".csv,.txt" style="display:none">
+        </div>
+      </details>
+
+      <details class="es-details" style="margin-top:0.6rem">
+        <summary class="es-details-summary">Matteområden</summary>
+        <div class="es-details-body">
+          <div class="es-area-actions" style="margin-top:0.5rem">
+            <button id="es-select-all" class="es-small-btn">Markera allt</button>
+            <button id="es-deselect-all" class="es-small-btn">Avmarkera allt</button>
+          </div>
+          <div id="es-areas" class="es-areas-grid"></div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ══════ STEG 4: KODLÄNGD ══════ -->
+    <section class="es-section">
+      <h2 class="es-section-title">4. Antal uppgifter (kodlängd)</h2>
+      <p class="es-hint">Varje löst uppgift ger en siffra till utgångskoden.</p>
+      <div class="es-code-length">
+        <button class="es-len-btn" data-len="3">3</button>
+        <button class="es-len-btn es-len-btn--active" data-len="4">4</button>
+        <button class="es-len-btn" data-len="5">5</button>
+        <button class="es-len-btn" data-len="6">6</button>
+      </div>
+    </section>
+
+    <!-- ══════ GENERERA ══════ -->
+    <section class="es-section es-section--generate">
+      <button id="es-generate" class="es-generate-btn">Generera Escape Room</button>
+    </section>
+
+    <!-- ══════ RESULTAT ══════ -->
+    <section id="es-result" class="es-result hidden">
+      <h2 class="es-section-title">Klart!</h2>
+      <p class="es-result-desc">Dela rumskoden eller länken med eleverna.</p>
+
+      <div class="es-room-code-display">
+        <div class="es-room-code-label">Rumskod</div>
+        <div id="es-room-code" class="es-room-code-value">—</div>
+      </div>
+
+      <div class="es-result-link-row">
+        <input type="text" id="es-link" class="es-link-input" readonly>
+        <button id="es-copy-link" class="es-small-btn">Kopiera</button>
+      </div>
+
+      <button id="es-open-game" class="es-small-btn" style="margin-top:1rem">Öppna spelet</button>
+
+      <!-- Lärarsummering: kod + uppgifter -->
+      <div id="es-teacher-summary" class="es-teacher-summary hidden"></div>
+    </section>
+  </div>
+
+  <!-- Plugin-system (för uppgiftsgenerering) -->
+  <script src="js/plugins/_math-utils.js"></script>
+  <script src="js/plugins/_render-utils.js"></script>
+  <script src="js/plugins/_utils.js"></script>
+  <script src="js/plugins/BasePlugin.js"></script>
+  <script src="js/plugins/PluginManager.js"></script>
+  <script src="js/plugins/addition.js"></script>
+  <script src="js/plugins/subtraktion.js"></script>
+  <script src="js/plugins/multiplikation.js"></script>
+  <script src="js/plugins/division.js"></script>
+  <script src="js/plugins/prioritet.js"></script>
+  <script src="js/plugins/oppna-utsaga.js"></script>
+  <script src="js/plugins/brak.js"></script>
+  <script src="js/plugins/geometri.js"></script>
+  <script src="js/plugins/klocka.js"></script>
+  <script src="js/plugins/matt-langd.js"></script>
+  <script src="js/plugins/matt-volym.js"></script>
+  <script src="js/plugins/matt-vikt.js"></script>
+  <script src="js/plugins/matt-tid.js"></script>
+  <script src="js/plugins/procent.js"></script>
+  <script src="js/plugins/tallinje.js"></script>
+  <script src="js/plugins/talsorter.js"></script>
+  <script src="js/plugins/avrundning.js"></script>
+  <script src="js/plugins/monster.js"></script>
+  <script src="js/plugins/talfoljd.js"></script>
+  <script src="js/plugins/matt-area.js"></script>
+  <script src="js/plugins/negativa-tal.js"></script>
+  <script src="js/plugins/sannolikhet.js"></script>
+  <script src="js/plugins/statistik.js"></script>
+  <script src="js/plugins/koordinatsystem.js"></script>
+  <script src="js/plugins/symmetri.js"></script>
+  <script src="js/plugins/romerska.js"></script>
+  <!-- Fasader -->
+  <script src="js/arbetsblad-config.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/custom-problems.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/problems.js"></script>
+  <!-- Lagringsabstraktion (localStorage nu, Firestore senare) -->
+  <script src="js/escape-store.js"></script>
+  <!-- Skaparlogik -->
+  <script src="js/escape-skapa.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escape Room – Klassrummatte</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/escape.css">
+</head>
+<body class="escape-body">
+
+  <!-- ══════ VÄLKOMSTSKÄRM (visas när ingen kod i URL) ══════ -->
+  <div id="er-entry" class="er-entry hidden">
+    <div class="er-entry-box">
+      <h1 class="er-entry-title">🔐 Escape Room</h1>
+      <p class="er-entry-desc">Skriv in rumskoden du fått av din lärare</p>
+      <div class="er-entry-input-row">
+        <input type="text" id="er-entry-input" class="er-entry-input" placeholder="KLAS-4X7B" autocomplete="off" autocapitalize="characters">
+        <button id="er-entry-submit" class="er-entry-btn">Starta</button>
+      </div>
+      <div id="er-entry-feedback" class="er-entry-feedback"></div>
+    </div>
+  </div>
+
+  <!-- ══════ SPELYTA ══════ -->
+  <div id="escape-room" class="er-room">
+    <!-- Bakgrund + klickbara föremål fylls av JS -->
+  </div>
+
+  <!-- ══════ HUD: insamlade siffror ══════ -->
+  <div id="er-hud" class="er-hud">
+    <div class="er-hud-label">Kod:</div>
+    <div id="er-code-slots" class="er-code-slots">
+      <!-- Fylls av JS: en ruta per siffra -->
+    </div>
+  </div>
+
+  <!-- ══════ MODAL: mattefråga ══════ -->
+  <div id="er-modal" class="er-modal hidden">
+    <div class="er-modal-box">
+      <div id="er-modal-problem" class="er-modal-problem"></div>
+      <div class="er-modal-input-row">
+        <input type="text" id="er-modal-answer" class="er-modal-input" placeholder="Ditt svar..." autocomplete="off">
+        <button id="er-modal-submit" class="er-modal-btn">Svara</button>
+      </div>
+      <div id="er-modal-feedback" class="er-modal-feedback"></div>
+      <button id="er-modal-close" class="er-modal-close">&times;</button>
+    </div>
+  </div>
+
+  <!-- ══════ MODAL: kodlås (dörren) ══════ -->
+  <div id="er-lock" class="er-modal hidden">
+    <div class="er-modal-box er-lock-box">
+      <h2 class="er-lock-title">Kodlås</h2>
+      <p class="er-lock-desc">Skriv in koden du samlat ihop</p>
+      <div class="er-modal-input-row">
+        <input type="text" id="er-lock-input" class="er-modal-input er-lock-input" placeholder="_ _ _ _" autocomplete="off" maxlength="10">
+        <button id="er-lock-submit" class="er-modal-btn">Öppna</button>
+      </div>
+      <div id="er-lock-feedback" class="er-modal-feedback"></div>
+      <button id="er-lock-close" class="er-modal-close">&times;</button>
+    </div>
+  </div>
+
+  <!-- ══════ VINST-SKÄRM ══════ -->
+  <div id="er-win" class="er-win hidden">
+    <div class="er-win-content">
+      <div class="er-win-emoji">🎉</div>
+      <h1 class="er-win-title">Grattis!</h1>
+      <p class="er-win-text">Du klarade dig ut ur rummet!</p>
+      <button id="er-play-again" class="er-win-btn">Spela igen</button>
+    </div>
+  </div>
+
+  <!-- ══════ SCRIPTS ══════ -->
+  <script src="js/escape-store.js"></script>
+  <script src="js/escape-rooms.js"></script>
+  <script src="js/escape.js"></script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700">
+<!--
+  KLASSRUMMET — Escape Room
+  Interaktiva föremål markerade med data-obj="id"
+  Klickbara ytor: <rect class="er-hitbox" .../>
+-->
+<defs>
+  <!-- Golvmönster (parkettliknande) -->
+  <pattern id="floor-pat" width="60" height="20" patternUnits="userSpaceOnUse">
+    <rect width="60" height="20" fill="#c4a265"/>
+    <line x1="0" y1="0" x2="0" y2="20" stroke="#b89555" stroke-width="0.5"/>
+    <line x1="30" y1="10" x2="30" y2="20" stroke="#b89555" stroke-width="0.5"/>
+    <line x1="0" y1="10" x2="60" y2="10" stroke="#b89555" stroke-width="0.3" opacity="0.4"/>
+  </pattern>
+  <!-- Kritskuggning -->
+  <filter id="shadow-sm">
+    <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.15"/>
+  </filter>
+  <filter id="shadow-md">
+    <feDropShadow dx="2" dy="3" stdDeviation="4" flood-opacity="0.2"/>
+  </filter>
+</defs>
+
+<!-- ═══ BAKGRUND ═══ -->
+<!-- Vägg -->
+<rect width="1200" height="700" fill="#f0e8d5"/>
+<!-- Väggpanel (nedre halva) -->
+<rect y="380" width="1200" height="320" fill="#e6dbc5"/>
+<line x1="0" y1="380" x2="1200" y2="380" stroke="#d4c4a0" stroke-width="2"/>
+<!-- Golv -->
+<rect y="540" width="1200" height="160" fill="url(#floor-pat)"/>
+<line x1="0" y1="540" x2="1200" y2="540" stroke="#a08040" stroke-width="3"/>
+<!-- Takrand -->
+<rect y="0" width="1200" height="8" fill="#d4c4a0"/>
+
+<!-- ═══ FÖNSTER (bakgrund, ej klickbart) ═══ -->
+<g transform="translate(520,40)">
+  <rect width="160" height="200" rx="3" fill="#3a5a8c" stroke="#c4a265" stroke-width="6"/>
+  <line x1="80" y1="0" x2="80" y2="200" stroke="#c4a265" stroke-width="3"/>
+  <line x1="0" y1="100" x2="160" y2="100" stroke="#c4a265" stroke-width="3"/>
+  <!-- Himmel + moln -->
+  <rect width="160" height="200" rx="3" fill="#7db8e0" opacity="0.4"/>
+  <ellipse cx="50" cy="60" rx="25" ry="12" fill="white" opacity="0.6"/>
+  <ellipse cx="70" cy="55" rx="20" ry="10" fill="white" opacity="0.5"/>
+  <!-- Gardin vänster -->
+  <path d="M0,0 Q10,100 5,200 L-12,200 L-12,0Z" fill="#b04040" opacity="0.7"/>
+  <!-- Gardin höger -->
+  <path d="M160,0 Q150,100 155,200 L172,200 L172,0Z" fill="#b04040" opacity="0.7"/>
+</g>
+
+<!-- ═══ WHITEBOARD / TAVLA (klickbar) ═══ -->
+<g data-obj="tavla" filter="url(#shadow-md)">
+  <rect x="180" y="60" width="280" height="180" rx="4" fill="#ffffff" stroke="#888" stroke-width="3"/>
+  <!-- Hyllramp -->
+  <rect x="178" y="235" width="284" height="8" rx="2" fill="#888"/>
+  <!-- Text-ledtråd på tavlan -->
+  <text x="320" y="130" text-anchor="middle" font-size="14" fill="#4a90c4" font-family="sans-serif" opacity="0.6">Vad gömmer sig här?</text>
+  <line x1="210" y1="155" x2="390" y2="155" stroke="#aaa" stroke-width="1" stroke-dasharray="4"/>
+  <line x1="210" y1="175" x2="350" y2="175" stroke="#aaa" stroke-width="1" stroke-dasharray="4"/>
+  <line x1="210" y1="195" x2="370" y2="195" stroke="#aaa" stroke-width="1" stroke-dasharray="4"/>
+  <!-- Pennor på hyllan -->
+  <rect x="200" y="228" width="4" height="12" rx="1" fill="#e04040"/>
+  <rect x="208" y="229" width="4" height="11" rx="1" fill="#3070d0"/>
+  <rect x="216" y="228" width="4" height="12" rx="1" fill="#30a040"/>
+</g>
+
+<!-- ═══ BOKHYLLA (klickbar) ═══ -->
+<g data-obj="bokhylla" filter="url(#shadow-md)">
+  <!-- Hylla kropp -->
+  <rect x="30" y="120" width="120" height="310" rx="3" fill="#8B6914" stroke="#6b5010" stroke-width="2"/>
+  <!-- Hyllplan -->
+  <rect x="30" y="120" width="120" height="6" fill="#6b5010"/>
+  <rect x="30" y="220" width="120" height="5" fill="#6b5010"/>
+  <rect x="30" y="315" width="120" height="5" fill="#6b5010"/>
+  <rect x="30" y="425" width="120" height="5" fill="#6b5010"/>
+  <!-- Böcker rad 1 -->
+  <rect x="38" y="128" width="16" height="88" rx="1" fill="#c0392b"/>
+  <rect x="56" y="133" width="14" height="83" rx="1" fill="#2980b9"/>
+  <rect x="72" y="130" width="18" height="86" rx="1" fill="#27ae60"/>
+  <rect x="92" y="128" width="12" height="88" rx="1" fill="#8e44ad"/>
+  <rect x="106" y="135" width="16" height="81" rx="1" fill="#d4a017"/>
+  <rect x="124" y="130" width="14" height="86" rx="1" fill="#e67e22"/>
+  <!-- Böcker rad 2 -->
+  <rect x="40" y="228" width="20" height="82" rx="1" fill="#1abc9c"/>
+  <rect x="62" y="232" width="14" height="78" rx="1" fill="#e74c3c"/>
+  <rect x="78" y="228" width="16" height="82" rx="1" fill="#3498db"/>
+  <rect x="96" y="230" width="18" height="80" rx="1" fill="#9b59b6"/>
+  <rect x="116" y="228" width="16" height="82" rx="1" fill="#f39c12"/>
+  <!-- Rad 3: jordglob + böcker -->
+  <rect x="38" y="323" width="14" height="96" rx="1" fill="#e74c3c"/>
+  <rect x="54" y="327" width="12" height="92" rx="1" fill="#2c3e50"/>
+  <circle cx="110" cy="380" r="25" fill="#4a90c4" opacity="0.5" stroke="#2c6090" stroke-width="1.5"/>
+  <ellipse cx="110" cy="380" rx="25" ry="10" fill="none" stroke="#2c6090" stroke-width="0.5"/>
+</g>
+
+<!-- ═══ KATEDER / LÄRARBORD (klickbar) ═══ -->
+<g data-obj="kateder" filter="url(#shadow-md)">
+  <!-- Bord -->
+  <rect x="760" y="370" width="220" height="10" rx="2" fill="#7a5c30"/>
+  <rect x="770" y="380" width="200" height="100" rx="2" fill="#8B6914" stroke="#6b5010" stroke-width="1.5"/>
+  <!-- Lådfront -->
+  <rect x="785" y="400" width="70" height="50" rx="2" fill="#7a5c30" stroke="#6b5010" stroke-width="1"/>
+  <circle cx="820" cy="425" r="3" fill="#c4a265"/>
+  <!-- Saker på bordet -->
+  <rect x="880" y="355" width="40" height="15" rx="2" fill="#e8e0d0" stroke="#ccc" stroke-width="0.5"/> <!-- papper -->
+  <rect x="930" y="350" width="8" height="20" rx="1" fill="#e04040"/> <!-- penna -->
+  <rect x="780" y="352" width="30" height="18" rx="2" fill="#333" stroke="#555" stroke-width="1"/> <!-- dator -->
+  <rect x="782" y="354" width="26" height="12" rx="1" fill="#4a90c4" opacity="0.6"/>
+</g>
+
+<!-- ═══ ELEVBÄNK FRAM (klickbar) ═══ -->
+<g data-obj="bank-fram" filter="url(#shadow-sm)">
+  <!-- Bordsskiva -->
+  <rect x="250" y="430" width="200" height="8" rx="2" fill="#a08040"/>
+  <!-- Ben -->
+  <rect x="260" y="438" width="6" height="90" fill="#8a6e30"/>
+  <rect x="436" y="438" width="6" height="90" fill="#8a6e30"/>
+  <!-- Saker på bänken -->
+  <rect x="280" y="418" width="50" height="12" rx="1" fill="#e8e0d0"/> <!-- häfte -->
+  <rect x="345" y="420" width="6" height="14" rx="1" fill="#3070d0"/> <!-- penna -->
+  <rect x="370" y="416" width="30" height="14" rx="2" fill="#e04040" opacity="0.7"/> <!-- sudd -->
+</g>
+
+<!-- ═══ ELEVBÄNK BAK (klickbar) ═══ -->
+<g data-obj="bank-bak" filter="url(#shadow-sm)">
+  <rect x="250" y="330" width="200" height="7" rx="2" fill="#a08040"/>
+  <rect x="260" y="337" width="5" height="60" fill="#8a6e30"/>
+  <rect x="440" y="337" width="5" height="60" fill="#8a6e30"/>
+  <!-- Ryggsäck under bänken -->
+  <path d="M290,370 Q290,360 300,358 L320,358 Q330,360 330,370 L330,395 Q330,400 320,400 L300,400 Q290,400 290,395Z" fill="#d04050" stroke="#a03040" stroke-width="1"/>
+  <line x1="300" y1="358" x2="300" y2="350" stroke="#a03040" stroke-width="2"/>
+  <line x1="320" y1="358" x2="320" y2="350" stroke="#a03040" stroke-width="2"/>
+</g>
+
+<!-- ═══ KLOCKA PÅ VÄGGEN (klickbar) ═══ -->
+<g data-obj="klocka" filter="url(#shadow-sm)">
+  <circle cx="870" cy="100" r="40" fill="#fff" stroke="#555" stroke-width="3"/>
+  <circle cx="870" cy="100" r="36" fill="#fafafa"/>
+  <!-- Siffror -->
+  <text x="870" y="72" text-anchor="middle" font-size="10" fill="#333" font-family="sans-serif">12</text>
+  <text x="900" y="104" text-anchor="middle" font-size="10" fill="#333" font-family="sans-serif">3</text>
+  <text x="870" y="134" text-anchor="middle" font-size="10" fill="#333" font-family="sans-serif">6</text>
+  <text x="840" y="104" text-anchor="middle" font-size="10" fill="#333" font-family="sans-serif">9</text>
+  <!-- Visare -->
+  <line x1="870" y1="100" x2="870" y2="72" stroke="#333" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="870" y1="100" x2="895" y2="105" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="870" cy="100" r="3" fill="#333"/>
+</g>
+
+<!-- ═══ SKÅP / GARDEROB (klickbar) ═══ -->
+<g data-obj="skap" filter="url(#shadow-md)">
+  <rect x="1040" y="160" width="120" height="370" rx="3" fill="#7a5c30" stroke="#5a4420" stroke-width="2"/>
+  <!-- Dörrar -->
+  <rect x="1046" y="168" width="52" height="354" rx="2" fill="#8B6914" stroke="#6b5010" stroke-width="1"/>
+  <rect x="1102" y="168" width="52" height="354" rx="2" fill="#8B6914" stroke="#6b5010" stroke-width="1"/>
+  <!-- Handtag -->
+  <circle cx="1092" cy="340" r="4" fill="#c4a265" stroke="#a08040" stroke-width="1"/>
+  <circle cx="1108" cy="340" r="4" fill="#c4a265" stroke="#a08040" stroke-width="1"/>
+</g>
+
+<!-- ═══ PAPPERSKORG (klickbar) ═══ -->
+<g data-obj="papperskorg" filter="url(#shadow-sm)">
+  <path d="M690,485 L680,535 Q680,540 686,540 L730,540 Q736,540 736,535 L726,485Z" fill="#666" stroke="#555" stroke-width="1.5"/>
+  <!-- Skräp -->
+  <rect x="695" y="478" width="20" height="14" rx="2" fill="#e8e0d0" transform="rotate(-15,705,485)"/>
+  <rect x="700" y="482" width="18" height="10" rx="1" fill="#ddd" transform="rotate(10,709,487)"/>
+</g>
+
+<!-- ═══ AFFISCH PÅ VÄGGEN (klickbar) ═══ -->
+<g data-obj="affisch" filter="url(#shadow-sm)">
+  <rect x="740" y="80" width="80" height="100" rx="2" fill="#ffeaa7" stroke="#ddb347" stroke-width="1.5"/>
+  <!-- "Matte"-affisch -->
+  <text x="780" y="110" text-anchor="middle" font-size="11" fill="#555" font-family="sans-serif" font-weight="bold">MATTE</text>
+  <text x="780" y="128" text-anchor="middle" font-size="22" fill="#e04040" font-family="sans-serif">+ - x</text>
+  <text x="780" y="155" text-anchor="middle" font-size="9" fill="#777" font-family="sans-serif">Tänk logiskt!</text>
+  <!-- Häftstift -->
+  <circle cx="780" cy="82" r="4" fill="#e04040"/>
+</g>
+
+<!-- ═══ DÖRR (kodlåset — alltid synlig) ═══ -->
+<g data-obj="dorr">
+  <!-- Dörrpost -->
+  <rect x="1120" y="200" width="80" height="340" rx="2" fill="#5a4420" stroke="#4a3418" stroke-width="2"/>
+  <!-- Dörrpanel -->
+  <rect x="1126" y="208" width="68" height="324" rx="2" fill="#7a5c30"/>
+  <!-- Paneldetaljer -->
+  <rect x="1134" y="220" width="52" height="80" rx="2" fill="none" stroke="#6b5010" stroke-width="1.5"/>
+  <rect x="1134" y="320" width="52" height="80" rx="2" fill="none" stroke="#6b5010" stroke-width="1.5"/>
+  <!-- Handtag -->
+  <circle cx="1180" cy="375" r="6" fill="#c4a265" stroke="#a08040" stroke-width="2"/>
+  <!-- Kodlås (liten ruta) -->
+  <rect x="1145" y="420" width="30" height="25" rx="3" fill="#333" stroke="#555" stroke-width="1"/>
+  <rect x="1150" y="425" width="20" height="10" rx="1" fill="#4a4" opacity="0.6"/>
+  <circle cx="1160" cy="440" r="2" fill="#0f0" opacity="0.8"/>
+</g>
+
+</svg>

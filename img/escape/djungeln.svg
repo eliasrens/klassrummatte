@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700">
+<!--
+  DJUNGELN — Escape Room
+  Tropisk djungel med växter, djur och ruiner.
+-->
+<defs>
+  <linearGradient id="sky-jungle" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#1a5c1a"/>
+    <stop offset="100%" stop-color="#0a3a0a"/>
+  </linearGradient>
+  <filter id="leaf-shadow">
+    <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+  </filter>
+</defs>
+
+<!-- ═══ BAKGRUND ═══ -->
+<rect width="1200" height="700" fill="url(#sky-jungle)"/>
+<!-- Mark -->
+<rect y="520" width="1200" height="180" fill="#2d4a1a"/>
+<path d="M0,520 Q200,500 400,525 Q600,540 800,515 Q1000,500 1200,525 L1200,520 L0,520Z" fill="#3a5a20"/>
+
+<!-- Bakgrundsträd (deko) -->
+<g opacity="0.3" fill="#1a4a10">
+  <path d="M100,520 L70,300 Q100,250 130,300Z"/>
+  <path d="M300,520 L270,280 Q300,230 330,280Z"/>
+  <path d="M900,520 L870,290 Q900,240 930,290Z"/>
+  <path d="M1100,520 L1070,310 Q1100,260 1130,310Z"/>
+</g>
+<!-- Lianer -->
+<path d="M250,0 Q260,150 240,300 Q230,350 250,400" fill="none" stroke="#2a5a10" stroke-width="4" opacity="0.5"/>
+<path d="M800,0 Q790,120 810,250 Q820,320 800,380" fill="none" stroke="#2a5a10" stroke-width="3" opacity="0.4"/>
+
+<!-- ═══ APA I TRÄD (klickbar) ═══ -->
+<g data-obj="apa" filter="url(#leaf-shadow)">
+  <!-- Gren -->
+  <path d="M170,180 Q220,170 280,190" fill="none" stroke="#5a3a1a" stroke-width="8" stroke-linecap="round"/>
+  <!-- Kropp -->
+  <ellipse cx="230" cy="170" rx="18" ry="22" fill="#8a5a30"/>
+  <!-- Huvud -->
+  <circle cx="230" cy="148" r="14" fill="#9a6a40"/>
+  <circle cx="225" cy="145" r="3" fill="#2a1a0a"/>
+  <circle cx="235" cy="145" r="3" fill="#2a1a0a"/>
+  <ellipse cx="230" cy="153" rx="6" ry="4" fill="#c09060"/>
+  <!-- Svans -->
+  <path d="M245,185 Q270,200 265,170 Q260,150 270,140" fill="none" stroke="#8a5a30" stroke-width="3" stroke-linecap="round"/>
+</g>
+
+<!-- ═══ PAPEGOJA (klickbar) ═══ -->
+<g data-obj="papegoja">
+  <!-- Kropp -->
+  <ellipse cx="750" cy="130" rx="15" ry="20" fill="#e04040"/>
+  <!-- Huvud -->
+  <circle cx="750" cy="108" r="12" fill="#e04040"/>
+  <!-- Näbb -->
+  <path d="M762,108 L772,112 L762,114Z" fill="#f0c040"/>
+  <!-- Öga -->
+  <circle cx="755" cy="105" r="3" fill="white"/>
+  <circle cx="756" cy="105" r="1.5" fill="#1a1a1a"/>
+  <!-- Vinge -->
+  <path d="M740,125 Q720,140 735,155 Q740,145 745,140Z" fill="#3070d0"/>
+  <!-- Stjärtfjädrar -->
+  <path d="M745,150 L730,185" stroke="#e04040" stroke-width="3"/>
+  <path d="M750,150 L740,188" stroke="#3070d0" stroke-width="3"/>
+  <path d="M755,150 L750,185" stroke="#f0c040" stroke-width="3"/>
+  <!-- Gren under -->
+  <path d="M720,145 Q750,140 780,148" fill="none" stroke="#5a3a1a" stroke-width="5" stroke-linecap="round"/>
+</g>
+
+<!-- ═══ ORM PÅ MARK (klickbar) ═══ -->
+<g data-obj="orm">
+  <path d="M500,560 Q530,540 560,555 Q590,570 620,550 Q650,530 680,545 Q700,555 710,545"
+    fill="none" stroke="#4a8a30" stroke-width="6" stroke-linecap="round"/>
+  <path d="M500,560 Q530,540 560,555 Q590,570 620,550 Q650,530 680,545 Q700,555 710,545"
+    fill="none" stroke="#6aaa40" stroke-width="4" stroke-linecap="round"/>
+  <!-- Huvud -->
+  <circle cx="710" cy="542" r="6" fill="#4a8a30"/>
+  <circle cx="712" cy="540" r="1.5" fill="#ff4040"/>
+  <!-- Tunga -->
+  <path d="M716,543 L724,540 M716,543 L724,546" stroke="#ff4040" stroke-width="1"/>
+</g>
+
+<!-- ═══ SKATTKISTA (klickbar) ═══ -->
+<g data-obj="skattkista">
+  <rect x="100" y="540" width="100" height="50" rx="3" fill="#5a3a1a" stroke="#4a2a0a" stroke-width="2"/>
+  <path d="M98,540 Q150,520 202,540Z" fill="#6a4a2a" stroke="#4a2a0a" stroke-width="2"/>
+  <rect x="140" y="528" width="20" height="15" rx="2" fill="#c8a040" stroke="#a08020" stroke-width="1.5"/>
+  <!-- Glitter -->
+  <circle cx="120" cy="555" r="3" fill="#ffd700" opacity="0.5"/>
+  <circle cx="170" cy="560" r="2" fill="#ffd700" opacity="0.4"/>
+</g>
+
+<!-- ═══ VATTENFALL (klickbar) ═══ -->
+<g data-obj="vattenfall">
+  <!-- Klippa -->
+  <path d="M380,250 Q360,240 370,200 Q390,180 420,200 Q440,240 420,250Z" fill="#6a6a5a"/>
+  <!-- Vatten -->
+  <path d="M388,250 L385,400 Q395,410 405,400 L402,250Z" fill="#4a90c4" opacity="0.5"/>
+  <path d="M390,250 L388,400 Q395,405 402,400 L400,250Z" fill="#70b8e8" opacity="0.3"/>
+  <!-- Stänk -->
+  <circle cx="395" cy="405" r="15" fill="#70b8e8" opacity="0.15"/>
+  <!-- Sjö -->
+  <ellipse cx="395" cy="420" rx="40" ry="12" fill="#4a90c4" opacity="0.3"/>
+</g>
+
+<!-- ═══ BLOMMA (klickbar) ═══ -->
+<g data-obj="blomma">
+  <!-- Stjälk -->
+  <line x1="1000" y1="420" x2="1000" y2="520" stroke="#2a6a10" stroke-width="4"/>
+  <!-- Blad -->
+  <path d="M1000,470 Q980,460 970,475 Q980,480 1000,470Z" fill="#3a8a20"/>
+  <!-- Kronblad -->
+  <circle cx="1000" cy="410" r="12" fill="#e040a0"/>
+  <circle cx="988" cy="415" r="10" fill="#d030a0"/>
+  <circle cx="1012" cy="415" r="10" fill="#d030a0"/>
+  <circle cx="994" cy="400" r="10" fill="#d030a0"/>
+  <circle cx="1006" cy="400" r="10" fill="#d030a0"/>
+  <!-- Mitt -->
+  <circle cx="1000" cy="410" r="6" fill="#f0c040"/>
+</g>
+
+<!-- ═══ DIAMANT (klickbar) ═══ -->
+<g data-obj="diamant">
+  <polygon points="880,440 865,460 880,490 895,460" fill="#70d8f8" stroke="#50b0d0" stroke-width="1.5"/>
+  <polygon points="880,440 865,460 880,465 895,460" fill="#a0e8ff" opacity="0.6"/>
+  <!-- Gnista -->
+  <line x1="870" y1="435" x2="867" y2="428" stroke="white" stroke-width="1" opacity="0.5"/>
+  <line x1="890" y1="438" x2="894" y2="432" stroke="white" stroke-width="1" opacity="0.5"/>
+</g>
+
+<!-- ═══ STIG UT / DÖRR (kodlåset) ═══ -->
+<g data-obj="dorr">
+  <!-- Stenportal (ruin) -->
+  <rect x="1090" y="300" width="20" height="230" fill="#6a6a5a"/>
+  <rect x="1180" y="300" width="20" height="230" fill="#6a6a5a"/>
+  <path d="M1090,300 Q1145,260 1200,300" fill="#6a6a5a"/>
+  <!-- Öppning (ljus utanför) -->
+  <rect x="1110" y="310" width="70" height="220" fill="#a0d870" opacity="0.3"/>
+  <!-- Lianer runt portalen -->
+  <path d="M1090,280 Q1085,350 1095,400" fill="none" stroke="#2a6a10" stroke-width="4"/>
+  <path d="M1200,280 Q1205,340 1195,400" fill="none" stroke="#2a6a10" stroke-width="3"/>
+  <!-- Kodlås på stenen -->
+  <rect x="1125" y="470" width="40" height="30" rx="4" fill="#4a4a3a" stroke="#6a6a5a" stroke-width="1.5"/>
+  <circle cx="1145" cy="490" r="3" fill="#0f0" opacity="0.7"/>
+</g>
+
+</svg>
