@@ -90,7 +90,7 @@ const EscapeSkapa = (() => {
         const cb = document.createElement('input');
         cb.type = 'checkbox';
         cb.value = area.id;
-        cb.checked = true;
+        cb.checked = false;
         label.appendChild(cb);
         label.append(' ' + area.label);
         container.appendChild(label);

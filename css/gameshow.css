@@ -213,22 +213,7 @@ body.gameshow-body {
   white-space: nowrap;
 }
 
-.gs-fullscreen-btn {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.8rem;
-  border: 2px solid #48cae4;
-  background: transparent;
-  color: #48cae4;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-  z-index: 10;
-}
-
-.gs-fullscreen-btn:hover { background: #48cae4; color: #0b192c; }
+/* (gs-fullscreen-btn styles removed – now uses gs-top-btn in top-right group) */
 
 /* Uppgiftsyta — använder originalets .problems-grid via Renderer */
 .gs-problem-area {
@@ -341,12 +326,11 @@ body.gameshow-body {
   text-align: center;
 }
 
-/* === HÖGER: INSTÄLLNINGAR (infällbar) ===================== */
+/* === HÖGER: TOPP-KNAPPAR (helskärm + inställningar) ======== */
 
-.gs-settings-toggle {
+.gs-top-btn {
   position: fixed;
   top: 1rem;
-  right: 1rem;
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 50%;
@@ -362,11 +346,27 @@ body.gameshow-body {
   transition: all 0.2s;
 }
 
-.gs-settings-toggle:hover { background: #48cae4; color: #0b192c; }
+.gs-top-btn:hover { background: #48cae4; color: #0b192c; }
 
+/* Kugghjul: längst till höger */
+.gs-settings-toggle { right: 1rem; }
+
+/* Helskärm: bredvid kugghjulet */
+.gs-fullscreen-btn { right: calc(1rem + 2.4rem + 0.5rem); }
+
+/* Flytta båda när inställningar är öppna */
 body:has(.gs-settings:not(.gs-settings--hidden)) .gs-settings-toggle {
   right: calc(280px + 1rem);
 }
+body:has(.gs-settings:not(.gs-settings--hidden)) .gs-fullscreen-btn {
+  right: calc(280px + 1rem + 2.4rem + 0.5rem);
+}
+
+/* SVG-ikoner i helskärmsknappen */
+.gs-fullscreen-btn svg { width: 16px; height: 16px; }
+.gs-fs-compress { display: none; }
+.gs-fullscreen-btn.is-fullscreen .gs-fs-expand  { display: none; }
+.gs-fullscreen-btn.is-fullscreen .gs-fs-compress { display: block; }
 
 .gs-settings {
   width: 280px;

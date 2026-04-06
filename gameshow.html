@@ -43,8 +43,6 @@
       <span id="gs-time" class="gs-time-text">60</span>
     </div>
 
-    <button id="gs-fullscreen" class="gs-fullscreen-btn">Helskärm</button>
-
     <div id="gs-problem-display" class="gs-problem-area">
       <div class="gs-intro">Välj inställningar och tryck Ny fråga</div>
     </div>
@@ -56,7 +54,17 @@
   </div>
 
   <!-- ══════ HÖGER: INSTÄLLNINGAR (infällbar) ══════ -->
-  <button id="gs-settings-toggle" class="gs-settings-toggle" title="Inställningar">⚙</button>
+  <button id="gs-fullscreen" class="gs-top-btn gs-fullscreen-btn" title="Helskärm">
+    <svg class="gs-fs-expand" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="5 1 1 1 1 5"/><polyline points="13 1 17 1 17 5"/>
+      <polyline points="5 17 1 17 1 13"/><polyline points="13 17 17 17 17 13"/>
+    </svg>
+    <svg class="gs-fs-compress" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="1 5 5 5 5 1"/><polyline points="17 5 13 5 13 1"/>
+      <polyline points="1 13 5 13 5 17"/><polyline points="17 13 13 13 13 17"/>
+    </svg>
+  </button>
+  <button id="gs-settings-toggle" class="gs-top-btn gs-settings-toggle" title="Inställningar">⚙</button>
 
   <div id="gs-settings" class="gs-settings">
     <h2>Inställningar</h2>

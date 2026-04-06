@@ -375,10 +375,10 @@ const Gameshow = (() => {
   function toggleFullscreen() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
-      els.fullscreenBtn.textContent = 'Avsluta helskärm';
+      els.fullscreenBtn.classList.add('is-fullscreen');
     } else {
       document.exitFullscreen();
-      els.fullscreenBtn.textContent = 'Helskärm';
+      els.fullscreenBtn.classList.remove('is-fullscreen');
     }
   }
 
