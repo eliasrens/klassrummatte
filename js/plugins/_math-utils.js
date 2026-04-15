@@ -80,19 +80,38 @@ const PluginMathUtils = (() => {
     return { a, b };
   }
 
-  function genDecimaler(grade, operator) {
-    const decPlaces = grade >= 5 ? 2 : 1;
+  function genDecimaler(grade, operator, decPlacesOverride) {
+    const decPlaces = Math.max(1, Math.min(3, decPlacesOverride || (grade >= 5 ? 2 : 1)));
     const mult      = Math.pow(10, decPlaces);
     const maxRaw    = grade >= 5 ? 9999 : 999;
+    const round     = v => Math.round(v * mult) / mult;
+
     if (operator === '+') {
       const aRaw = randInt(mult, Math.floor(maxRaw * 0.6));
       const bRaw = randInt(mult, maxRaw - aRaw);
-      return { type: 'addition',   a: aRaw / mult, b: bRaw / mult, operator: '+', answer: (aRaw + bRaw) / mult, mode: 'decimaler', decimalDigits: decPlaces };
-    } else {
+      return { type: 'addition', a: aRaw / mult, b: bRaw / mult, operator: '+', answer: (aRaw + bRaw) / mult, mode: 'decimaler', decimalDigits: decPlaces };
+    }
+    if (operator === '−' || operator === '-') {
       const aRaw = randInt(mult * 2, maxRaw);
       const bRaw = randInt(mult, aRaw - mult);
       return { type: 'subtraktion', a: aRaw / mult, b: bRaw / mult, operator: '−', answer: (aRaw - bRaw) / mult, mode: 'decimaler', decimalDigits: decPlaces };
     }
+    if (operator === '·' || operator === '*' || operator === '×') {
+      const aRaw = randInt(mult, grade >= 5 ? 9999 : 1999);
+      const b    = randInt(2, grade <= 3 ? 5 : grade <= 5 ? 9 : 12);
+      return { type: 'multiplikation', a: aRaw / mult, b, operator: '·', answer: round((aRaw / mult) * b), mode: 'decimaler', decimalDigits: decPlaces };
+    }
+    if (operator === '÷' || operator === '/') {
+      const b         = randInt(2, grade <= 3 ? 5 : grade <= 5 ? 9 : 12);
+      const answerRaw = randInt(mult, grade >= 5 ? 2999 : 999);
+      const aRaw      = answerRaw * b;
+      return { type: 'division', a: aRaw / mult, b, operator: '÷', answer: round((aRaw / mult) / b), mode: 'decimaler', decimalDigits: decPlaces };
+    }
+
+    // fallback: addition
+    const aRaw = randInt(mult, Math.floor(maxRaw * 0.6));
+    const bRaw = randInt(mult, maxRaw - aRaw);
+    return { type: 'addition', a: aRaw / mult, b: bRaw / mult, operator: '+', answer: (aRaw + bRaw) / mult, mode: 'decimaler', decimalDigits: decPlaces };
   }
 
   function genFlersteg(grade) {

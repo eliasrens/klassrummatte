@@ -123,6 +123,12 @@ body.extra-visible #stage {
   text-align: center;
 }
 
+/* Division-rad: bråk + "=" + svar på samma rad */
+.division-row {
+  display: inline-flex;
+  align-items: center;
+}
+
 /* === Bråkvisning === */
 .fraction {
   display: inline-flex;

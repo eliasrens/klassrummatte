@@ -24,6 +24,12 @@ class DivisionPlugin extends BasePlugin {
     const withRest       = settings.divisionRest   || false;
     const mode = PluginUtils.pickRandom(multDivMode);
 
+    if (mode && mode.startsWith('decimaler') && grade >= 4) {
+      const dec = mode === 'decimaler' ? 1 : parseInt(mode.split('-')[1], 10);
+      if ((dec === 2 && grade < 5) || (dec === 3 && grade < 6)) { /* faller igenom */ }
+      else return PluginUtils.genDecimaler(grade, '÷', dec);
+    }
+
     if (mode === 'double-half') {
       const half = PluginUtils.randInt(grade <= 2 ? 1 : 2, grade <= 2 ? 10 : grade <= 4 ? 50 : 500);
       const a = half * 2;
@@ -77,6 +83,10 @@ class DivisionPlugin extends BasePlugin {
   }
 
   render(problem, container) {
+    if (problem.mode === 'decimaler') {
+      PluginUtils.renderDecimaler(problem, container);
+      return;
+    }
     if (problem.questionType === 'half') {
       const wrap = document.createElement('div');
       wrap.className = 'double-half-wrap';
@@ -91,16 +101,19 @@ class DivisionPlugin extends BasePlugin {
       container.appendChild(wrap);
       return;
     }
-    container.appendChild(PluginUtils.buildFractionEl(problem.a, problem.b));
+    const row = document.createElement('span');
+    row.className = 'division-row';
+    row.appendChild(PluginUtils.buildFractionEl(problem.a, problem.b));
     const eq = document.createElement('span');
     eq.textContent = ' = ';
-    container.appendChild(eq);
+    row.appendChild(eq);
     const ans = document.createElement('span');
     ans.className = 'answer-value answer-hidden';
     ans.textContent = problem.hasRemainder
       ? `${problem.answer}, rest ${problem.remainder}`
       : `${problem.answer}`;
-    container.appendChild(ans);
+    row.appendChild(ans);
+    container.appendChild(row);
   }
 
   isSameProblem(a, b) {

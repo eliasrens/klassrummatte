@@ -53,13 +53,15 @@ const PluginRenderUtils = (() => {
 
   function renderDecimaler(problem, container) {
     const d = problem.decimalDigits || 1;
-    function toComma(n) { return n.toFixed(d).replace('.', ','); }
+    const toComma = n => (Number.isInteger(n) ? String(n) : n.toFixed(d).replace('.', ','));
+    const ansStr  = (typeof problem.answer === 'number' && Number.isInteger(problem.answer))
+      ? String(problem.answer) : Number(problem.answer).toFixed(d).replace('.', ',');
     const span = document.createElement('span');
     span.textContent = `${toComma(problem.a)} ${problem.operator} ${toComma(problem.b)} =`;
     container.appendChild(span);
     const ans = document.createElement('span');
     ans.className = 'answer-value answer-hidden';
-    ans.textContent = ` ${toComma(problem.answer)}`;
+    ans.textContent = ` ${ansStr}`;
     container.appendChild(ans);
   }
 

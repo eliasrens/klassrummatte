@@ -21,6 +21,7 @@ const ArbetsbladConfig = (() => {
     { cat: 'Algebra', desc: 'mönster och okända tal', areas: [
       { id: 'prioritet',     label: 'Prioritetsregler', hasSub: true },
       { id: 'oppna-utsagor', label: 'Öppna utsagor' },
+      { id: 'ekvationer',    label: 'Ekvationer', hasSub: true },
       { id: 'talfoljd',      label: 'Talföljd' },
       { id: 'monster',       label: 'Mönster' },
     ]},
@@ -60,7 +61,9 @@ const ArbetsbladConfig = (() => {
       options: [
         { value: 'standard', label: 'Standard', checked: true },
         { value: 'uppstallning', label: 'Uppställning' },
-        { value: 'decimaler', label: 'Decimaler', minGrade: 4 },
+        { value: 'decimaler', label: 'Decimaler (tiondelar)', minGrade: 4 },
+        { value: 'decimaler-2', label: 'Decimaler (hundradelar)', minGrade: 5 },
+        { value: 'decimaler-3', label: 'Decimaler (tusendelar)', minGrade: 6 },
         { value: 'flersteg', label: 'Flerstegsaddition', minGrade: 3 },
       ],
     },
@@ -78,12 +81,23 @@ const ArbetsbladConfig = (() => {
         { value: 'tables-large', label: 'Stora tal (flersiffrigt)' },
         { value: 'double-half', label: 'Dubbelt & hälften' },
         { value: 'bild-mult', label: 'Vilken mult. visar bilden?' },
+        { value: 'decimaler', label: 'Decimaler (tiondelar)', minGrade: 4 },
+        { value: 'decimaler-2', label: 'Decimaler (hundradelar)', minGrade: 5 },
+        { value: 'decimaler-3', label: 'Decimaler (tusendelar)', minGrade: 6 },
       ],
     },
     division: {
       title: 'Multiplikation & division',
       settingsKey: 'multDivMode',
       shared: 'multiplikation',
+    },
+    ekvationer: {
+      title: 'Ekvationer – typ',
+      settingsKey: 'ekvationerMode',
+      options: [
+        { value: 'enstegs',  label: 'Enstegs (ex. x + 5 = 12)', checked: true },
+        { value: 'tvastegs', label: 'Tvåstegs (ex. 2x + 3 = 11)', checked: true, minGrade: 5 },
+      ],
     },
     prioritet: {
       title: 'Prioritet – räknesätt',

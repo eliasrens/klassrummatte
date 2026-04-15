@@ -31,6 +31,7 @@ class GeometriPlugin extends BasePlugin {
     if (gTypes.includes('klassificering') && grade >= 4) shapePool.push('classify');
     if (gTypes.includes('vinklar')        && grade >= 4) shapePool.push('angle');
     if (gTypes.includes('vinklar')        && grade >= 5) shapePool.push('angle-sum');
+    if (gTypes.includes('vinklar')        && grade >= 5) shapePool.push('angle-sum-quad');
     if (gTypes.includes('volym')          && grade >= 5) shapePool.push('cuboid');
     if (shapePool.length === 0) shapePool.push('square', 'rectangle'); // säkerhetsfallback
 
@@ -55,11 +56,24 @@ class GeometriPlugin extends BasePlugin {
       return { type: 'geometri', shape: 'classify', dimensions: { subShape }, geoQuestion: 'classify', answer: NAMES_MAP[subShape] };
     }
 
-    // ── Vinkelsumma ───────────────────────────────────────────
+    // ── Vinkelsumma – triangel ────────────────────────────────
     if (shape === 'angle-sum') {
       const a = PluginUtils.randInt(20, 80);
       const b = PluginUtils.randInt(20, Math.min(80, 159 - a)); // ensure c >= 21
       return { type: 'geometri', shape: 'angle-sum', dimensions: { a, b }, geoQuestion: 'angle-sum', answer: String(180 - a - b) };
+    }
+
+    // ── Vinkelsumma – fyrhörning (360°) ───────────────────────
+    if (shape === 'angle-sum-quad') {
+      // Tre vinklar, sista = 360 - summan. Håll alla mellan 40 och 150.
+      let a, b, c, d4;
+      do {
+        a = PluginUtils.randInt(40, 150);
+        b = PluginUtils.randInt(40, 150);
+        c = PluginUtils.randInt(40, 150);
+        d4 = 360 - a - b - c;
+      } while (d4 < 40 || d4 > 150);
+      return { type: 'geometri', shape: 'angle-sum-quad', dimensions: { a, b, c }, geoQuestion: 'angle-sum-quad', answer: String(d4) };
     }
 
     const maxSide = grade <= 2 ? 5 : grade <= 4 ? 20 : 50;
@@ -151,6 +165,7 @@ class GeometriPlugin extends BasePlugin {
     else if (problem.geoQuestion === 'classify')  qTxt.textContent = 'Vad heter denna figur?';
     else if (problem.geoQuestion === 'identify-body') qTxt.textContent = 'Vad heter denna geometriska kropp?';
     else if (problem.geoQuestion === 'angle-sum') qTxt.textContent = `Vinkeln A\u00a0=\u00a0${problem.dimensions.a}°, vinkeln B\u00a0=\u00a0${problem.dimensions.b}°. Hur stor är vinkeln C?`;
+    else if (problem.geoQuestion === 'angle-sum-quad') qTxt.textContent = `A\u00a0=\u00a0${problem.dimensions.a}°, B\u00a0=\u00a0${problem.dimensions.b}°, C\u00a0=\u00a0${problem.dimensions.c}°. Hur stor är vinkeln D?`;
     else                                          qTxt.textContent = 'Vad är det för typ av vinkel?';
     wrapper.appendChild(qTxt);
     container.appendChild(wrapper);
@@ -162,6 +177,7 @@ class GeometriPlugin extends BasePlugin {
                  : problem.geoQuestion === 'perimeter' ? ' cm'
                  : problem.geoQuestion === 'volume'    ? ' cm³'
                  : problem.geoQuestion === 'angle-sum' ? '°'
+                 : problem.geoQuestion === 'angle-sum-quad' ? '°'
                  : '';
     const prefix = problem.shape === 'circle' ? '\u2248\u00a0' : '';
     PluginUtils.appendAnswerBox(`${prefix}${problem.answer}${unit}`, container);
@@ -401,6 +417,19 @@ function buildShapeSVG(problem) {
       <text x="${bx + 6}" y="${by + 22}" font-size="15" font-weight="700" fill="#e63946">A\u00a0=\u00a0${d.a}\u00b0</text>
       <text x="${ex - 68}" y="${by + 22}" font-size="15" font-weight="700" fill="#457b9d">B\u00a0=\u00a0${d.b}\u00b0</text>
       <text x="${tx - 20}" y="${ty - 12}" font-size="15" font-weight="700" fill="#2a9d8f">C\u00a0=\u00a0?</text>`;
+
+  // ── Vinkelsumma – fyrhörning (oregelbunden) ──────────────
+  } else if (shape === 'angle-sum-quad') {
+    const ax = 48,  ay = 188;   // A – nere vänster
+    const bxq = 288, byq = 188; // B – nere höger
+    const cx = 262, cy = 58;    // C – uppe höger (oregelbunden)
+    const dx = 78,  dy = 38;    // D – uppe vänster
+    inner = `
+      <polygon points="${ax},${ay} ${bxq},${byq} ${cx},${cy} ${dx},${dy}" fill="#fef3c7" stroke="#e9c46a" stroke-width="3"/>
+      <text x="${ax + 6}" y="${ay + 22}" font-size="14" font-weight="700" fill="#e63946">A\u00a0=\u00a0${d.a}\u00b0</text>
+      <text x="${bxq - 68}" y="${byq + 22}" font-size="14" font-weight="700" fill="#457b9d">B\u00a0=\u00a0${d.b}\u00b0</text>
+      <text x="${cx - 40}" y="${cy - 10}" font-size="14" font-weight="700" fill="#2a9d8f">C\u00a0=\u00a0${d.c}\u00b0</text>
+      <text x="${dx - 20}" y="${dy - 10}" font-size="14" font-weight="700" fill="#c2410c">D\u00a0=\u00a0?</text>`;
   }
 
   svg.innerHTML = inner;

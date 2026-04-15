@@ -13,6 +13,12 @@ class MultiplikationPlugin extends BasePlugin {
     const specificTables = settings.specificTables || [1,2,3,4,5,6,7,8,9];
     const mode = PluginUtils.pickRandom(multDivMode);
 
+    if (mode && mode.startsWith('decimaler') && grade >= 4) {
+      const dec = mode === 'decimaler' ? 1 : parseInt(mode.split('-')[1], 10);
+      if ((dec === 2 && grade < 5) || (dec === 3 && grade < 6)) { /* faller igenom */ }
+      else return PluginUtils.genDecimaler(grade, '·', dec);
+    }
+
     if (mode === 'bild-mult') {
       // Visa rutnät, eleven identifierar multiplikationen
       const rows = PluginUtils.randInt(2, grade <= 2 ? 5 : 7);
@@ -74,6 +80,10 @@ class MultiplikationPlugin extends BasePlugin {
       ans.textContent = problem.answer;
       wrap.appendChild(ans);
       container.appendChild(wrap);
+      return;
+    }
+    if (problem.mode === 'decimaler') {
+      PluginUtils.renderDecimaler(problem, container);
       return;
     }
     if (problem.questionType === 'bild-mult') {

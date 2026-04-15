@@ -12,13 +12,18 @@ class AdditionPlugin extends BasePlugin {
     const modes = (settings.addSubMode?.length ? settings.addSubMode : ['standard']).filter(m => {
       if (m === 'uppstallning' && grade < 2) return false;
       if (m === 'decimaler'    && grade < 4) return false;
+      if (m === 'decimaler-2'  && grade < 5) return false;
+      if (m === 'decimaler-3'  && grade < 6) return false;
       if (m === 'flersteg'     && grade < 3) return false;
       return true;
     });
     const mode = modes.length > 0 ? PluginUtils.pickRandom(modes) : 'standard';
 
     if (mode === 'uppstallning') return PluginUtils.genUppstallningAdd(grade, settings.addSubVaxling || ['med']);
-    if (mode === 'decimaler')    return PluginUtils.genDecimaler(grade, '+');
+    if (mode && mode.startsWith('decimaler')) {
+      const dec = mode === 'decimaler' ? 1 : parseInt(mode.split('-')[1], 10);
+      return PluginUtils.genDecimaler(grade, '+', dec);
+    }
     if (mode === 'flersteg')     return PluginUtils.genFlersteg(grade);
 
     const max = c.addMax;
