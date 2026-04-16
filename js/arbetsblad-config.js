@@ -97,6 +97,7 @@ const ArbetsbladConfig = (() => {
       options: [
         { value: 'enstegs',  label: 'Enstegs (ex. x + 5 = 12)', checked: true },
         { value: 'tvastegs', label: 'Tvåstegs (ex. 2x + 3 = 11)', checked: true, minGrade: 5 },
+        { value: 'geometri', label: 'Geometri-problem (sidor från area/omkrets)', checked: true, minGrade: 4 },
       ],
     },
     prioritet: {
@@ -128,7 +129,10 @@ const ArbetsbladConfig = (() => {
       options: [
         { value: 'area', label: 'Area', checked: true },
         { value: 'perimeter', label: 'Omkrets', checked: true },
-        { value: 'volume', label: 'Namnge kroppar', minGrade: 3 },
+        { value: 'kropp', label: 'Namnge kroppar', minGrade: 3 },
+        { value: 'klassificering', label: 'Klassificera figurer', minGrade: 4 },
+        { value: 'vinklar', label: 'Vinklar', minGrade: 4 },
+        { value: 'volym', label: 'Volym (rätblock)', minGrade: 5 },
       ],
     },
     klocka: {

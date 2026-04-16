@@ -18,10 +18,67 @@ class EkvationerPlugin extends BasePlugin {
 
     const userModes = settings.ekvationerMode?.length ? settings.ekvationerMode : null;
     const defaultModes = grade >= 5 ? ['enstegs', 'tvastegs'] : ['enstegs'];
-    const modes = userModes ? userModes.filter(m => grade >= 5 || m === 'enstegs') : defaultModes;
+    const modes = userModes ? userModes.filter(m => {
+      if (m === 'tvastegs' && grade < 5) return false;
+      if (m === 'geometri' && grade < 4) return false;
+      return true;
+    }) : defaultModes;
     const mode = PluginUtils.pickRandom(modes.length ? modes : ['enstegs']);
 
     const R = PluginUtils.randInt, P = PluginUtils.pickRandom;
+
+    if (mode === 'geometri') {
+      const variant = P(['kvadrat-omkrets', 'kvadrat-area', 'rektangel-omkrets', 'rektangel-area']);
+      if (variant === 'kvadrat-omkrets') {
+        const x = R(2, 25);
+        const omkrets = 4 * x;
+        return {
+          type: 'ekvationer',
+          isGeometri: true,
+          questionText: `Omkretsen på en kvadrat är ${omkrets} cm. Hur lång är varje sida?`,
+          equation: `4x = ${omkrets}`,
+          answer: x,
+          unit: 'cm',
+        };
+      }
+      if (variant === 'kvadrat-area') {
+        const x = R(2, 12);
+        const area = x * x;
+        return {
+          type: 'ekvationer',
+          isGeometri: true,
+          questionText: `Arean på en kvadrat är ${area} cm². Hur lång är varje sida?`,
+          equation: `x · x = ${area}`,
+          answer: x,
+          unit: 'cm',
+        };
+      }
+      if (variant === 'rektangel-omkrets') {
+        const lang = R(5, 25);
+        const x = R(2, lang - 1);
+        const omkrets = 2 * (lang + x);
+        return {
+          type: 'ekvationer',
+          isGeometri: true,
+          questionText: `Omkretsen på en rektangel är ${omkrets} cm. Den långa sidan är ${lang} cm. Hur lång är den korta sidan?`,
+          equation: `2(${lang} + x) = ${omkrets}`,
+          answer: x,
+          unit: 'cm',
+        };
+      }
+      // rektangel-area
+      const lang = R(3, 12);
+      const x = R(2, 9);
+      const area = lang * x;
+      return {
+        type: 'ekvationer',
+        isGeometri: true,
+        questionText: `Arean på en rektangel är ${area} cm². Den ena sidan är ${lang} cm. Hur lång är den andra sidan?`,
+        equation: `${lang}x = ${area}`,
+        answer: x,
+        unit: 'cm',
+      };
+    }
 
     if (mode === 'tvastegs') {
       const a = R(2, 9);
@@ -69,6 +126,27 @@ class EkvationerPlugin extends BasePlugin {
   }
 
   render(problem, container) {
+    if (problem.isGeometri) {
+      const wrap = document.createElement('div');
+      wrap.className = 'ekvationer-geo-wrap';
+      const q = document.createElement('p');
+      q.className = 'ekvationer-geo-question';
+      q.textContent = problem.questionText;
+      wrap.appendChild(q);
+      const ansRow = document.createElement('span');
+      ansRow.className = 'ekvationer-row';
+      const lbl = document.createElement('span');
+      lbl.textContent = 'Sidan x\u00a0=\u00a0';
+      ansRow.appendChild(lbl);
+      const ans = document.createElement('span');
+      ans.className = 'answer-value answer-hidden';
+      ans.textContent = `${problem.answer} ${problem.unit || ''}`.trim();
+      ansRow.appendChild(ans);
+      wrap.appendChild(ansRow);
+      container.appendChild(wrap);
+      return;
+    }
+
     const row = document.createElement('span');
     row.className = 'ekvationer-row';
 
@@ -85,7 +163,7 @@ class EkvationerPlugin extends BasePlugin {
   }
 
   isSameProblem(a, b) {
-    return a.equation === b.equation;
+    return a.equation === b.equation && a.questionText === b.questionText;
   }
 }
 
