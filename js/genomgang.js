@@ -161,6 +161,10 @@ const Genomgang = (() => {
     const statistikTypes = [];
     document.querySelectorAll('#gg-statistik-types input:checked').forEach(cb => statistikTypes.push(cb.value));
 
+    // Längd units
+    const langdUnits = [];
+    document.querySelectorAll('#gg-langd-units input:checked').forEach(cb => langdUnits.push(cb.value));
+
     // Volym units & modes
     const volymUnits = [];
     document.querySelectorAll('#gg-volym-units input:checked').forEach(cb => volymUnits.push(cb.value));
@@ -189,6 +193,7 @@ const Genomgang = (() => {
       brakTypes,
       prioritetOps: prioritetOps.length ? prioritetOps : ['mult', 'div'],
       statistikTypes: statistikTypes.length ? statistikTypes : ['bar', 'freq-table', 'pie-chart'],
+      langdUnits: langdUnits.length ? langdUnits : ['mm', 'cm', 'dm', 'm', 'km'],
       volymUnits: volymUnits.length ? volymUnits : ['dl', 'l'],
       volymModes: volymModes.length ? volymModes : ['convert'],
       bildstod,

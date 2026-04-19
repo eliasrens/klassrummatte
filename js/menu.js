@@ -154,6 +154,12 @@ const Menu = (() => {
     document.getElementById('klocka-implicit-hint').classList.toggle('hidden', anyChecked);
   }
 
+  function updateLangdImplicitHint() {
+    const checked = document.querySelectorAll('#langd-unit-checkboxes input:checked').length > 0;
+    const hint = document.getElementById('langd-implicit-hint');
+    if (hint) hint.classList.toggle('hidden', checked);
+  }
+
   function updateVolymImplicitHint() {
     const unitsChecked = document.querySelectorAll('#volym-unit-checkboxes input:checked').length > 0;
     const modesChecked = document.querySelectorAll('#volym-mode-checkboxes input:checked').length > 0;
@@ -328,6 +334,7 @@ const Menu = (() => {
     const showGeometri = areas.includes('geometri');
     const showDivRest  = areas.includes('division');
     const showKlocka    = areas.some(a => a === 'klocka');
+    const showLangd     = areas.includes('matt-langd');
     const showVolym     = areas.includes('matt-volym');
     const showBrak      = areas.includes('brak');
     const showPrioritet = areas.includes('prioritet');
@@ -371,6 +378,7 @@ const Menu = (() => {
     setSection('multdiv-group-label',   'multdiv-section',   showMultDiv);
     setSection('geometri-group-label',  'geometri-section',  showGeometri);
     setSection('klocka-group-label',    'klocka-section',    showKlocka);
+    setSection('langd-group-label',     'langd-section',     showLangd);
     setSection('volym-group-label',     'volym-section',     showVolym);
     setSection('brak-group-label',      'brak-section',      showBrak);
     setSection('prioritet-group-label', 'prioritet-section', showPrioritet);
@@ -503,6 +511,12 @@ const Menu = (() => {
       cb.checked = kTypes.includes(cb.value);
     });
     updateKlockaImplicitHint();
+
+    const lUnits = Settings.getLangdUnits();
+    document.querySelectorAll('#langd-unit-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.checked = lUnits.length > 0 ? lUnits.includes(cb.value) : true;
+    });
+    updateLangdImplicitHint();
 
     const vUnits = Settings.getVolymUnits();
     document.querySelectorAll('#volym-unit-checkboxes input[type=checkbox]').forEach(cb => {
@@ -676,6 +690,14 @@ const Menu = (() => {
       });
     });
 
+    document.querySelectorAll('#langd-unit-checkboxes input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...document.querySelectorAll('#langd-unit-checkboxes input:checked')].map(c => c.value);
+        Settings.setLangdUnits(checked);
+        updateLangdImplicitHint();
+      });
+    });
+
     document.querySelectorAll('#volym-unit-checkboxes input[type=checkbox]').forEach(cb => {
       cb.addEventListener('change', () => {
         const checked = [...document.querySelectorAll('#volym-unit-checkboxes input:checked')].map(c => c.value);
@@ -830,6 +852,9 @@ const Menu = (() => {
 
       document.querySelectorAll('#klocka-type-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setKlockaTypes([]);
+
+      document.querySelectorAll('#langd-unit-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
+      Settings.setLangdUnits([]);
 
       document.querySelectorAll('#volym-unit-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = false; });
       Settings.setVolymUnits([]);

@@ -41,7 +41,7 @@ const ArbetsbladConfig = (() => {
     ]},
     { cat: 'Mått & tid', desc: 'enheter och omvandling', areas: [
       { id: 'klocka',     label: 'Klocka', hasSub: true },
-      { id: 'matt-langd', label: 'Längd' },
+      { id: 'matt-langd', label: 'Längd', hasSub: true },
       { id: 'matt-volym', label: 'Volym' },
       { id: 'matt-vikt',  label: 'Vikt' },
       { id: 'matt-tid',   label: 'Tid' },
@@ -150,6 +150,17 @@ const ArbetsbladConfig = (() => {
         { value: 'bar', label: 'Stapeldiagram', checked: true },
         { value: 'freq-table', label: 'Frekvenstabell', checked: true },
         { value: 'pie-chart', label: 'Cirkeldiagram', checked: true },
+      ],
+    },
+    'matt-langd': {
+      title: 'Längd – enheter',
+      settingsKey: 'langdUnits',
+      options: [
+        { value: 'mm', label: 'mm', checked: true },
+        { value: 'cm', label: 'cm', checked: true },
+        { value: 'dm', label: 'dm', checked: true },
+        { value: 'm',  label: 'm',  checked: true },
+        { value: 'km', label: 'km', checked: true },
       ],
     },
     'matt-volym': {

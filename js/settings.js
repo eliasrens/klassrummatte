@@ -35,6 +35,7 @@ const Settings = (() => {
     statistikTypes: ['bar', 'freq-table', 'pie-chart'],
     timerEnabled: false,
     timerDuration: 20,
+    langdUnits: [],
     volymUnits: [],
     volymModes: [],
   };
@@ -98,6 +99,7 @@ const Settings = (() => {
       prioritetOps:  [...(state.prioritetOps   || ['mult', 'div'])],
       brakTypes:     [...(state.brakTypes      || [])],
       statistikTypes:[...(state.statistikTypes || ['bar', 'freq-table', 'pie-chart'])],
+      langdUnits:    [...(state.langdUnits    || [])],
     };
   }
   function getGrade()          { return state.grade; }
@@ -213,6 +215,8 @@ const Settings = (() => {
   function setDiscussionEnabled(b)     { state.discussionEnabled = !!b; save(); }
   function getStatistikTypes()         { return [...(state.statistikTypes || ['bar', 'freq-table', 'pie-chart'])]; }
   function setStatistikTypes(arr)      { state.statistikTypes = [...arr]; save(); }
+  function getLangdUnits()             { return [...(state.langdUnits || [])]; }
+  function setLangdUnits(arr)          { state.langdUnits = [...arr]; save(); }
   function getVolymUnits()             { return [...(state.volymUnits || [])]; }
   function setVolymUnits(arr)          { state.volymUnits = [...arr]; save(); }
   function getVolymModes()             { return [...(state.volymModes || [])]; }
@@ -242,6 +246,7 @@ const Settings = (() => {
     getSessionLimit, setSessionLimit,
     isDiscussionEnabled, setDiscussionEnabled,
     getStatistikTypes, setStatistikTypes,
+    getLangdUnits, setLangdUnits,
     getVolymUnits, setVolymUnits, getVolymModes, setVolymModes,
     isTimerEnabled, setTimerEnabled, getTimerDuration, setTimerDuration,
   };

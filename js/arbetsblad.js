@@ -251,6 +251,7 @@ const Arbetsblad = (() => {
       klockaTypes:    detail.klockaTypes || ['analog', 'digital'],
       prioritetOps:   detail.prioritetOps || ['mult', 'div'],
       statistikTypes: detail.statistikTypes || ['bar', 'freq-table', 'pie-chart'],
+      langdUnits:     detail.langdUnits || ['mm', 'cm', 'dm', 'm', 'km'],
       volymUnits:     detail.volymUnits || ['dl', 'l'],
       volymModes:     detail.volymModes || ['convert'],
       isArbetsblad:   true,
