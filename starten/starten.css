@@ -1,0 +1,342 @@
+/* Starten – egen, ren styling. Skild från klassrummattes arbetsblad-UI.
+   Lånar bara ark-CSS (.ab-sheet m.fl.) från ../css för matte-arket. */
+
+:root {
+  --reading-font: 'Andika', 'Segoe UI', sans-serif;
+  --ink: #1f2937;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --accent: #2a9d8f;
+  --accent2: #457b9d;
+  --panel-w: min(720px, 50vw);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+.hidden { display: none !important; }
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: var(--ink);
+  background: #eef2f6;
+}
+
+/* ── Toppbar ───────────────────────────────────────────── */
+.st-topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.st-topbar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.st-brand { display: flex; flex-direction: column; line-height: 1.1; }
+.st-brand-title { font-size: 1.4rem; font-weight: 800; letter-spacing: 2px; color: #334155; }
+.st-brand-sub { font-size: 0.8rem; color: var(--muted); }
+
+.st-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.st-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.st-btn--primary { background: var(--accent); color: #fff; }
+.st-btn--primary:hover { background: #248577; }
+.st-btn--ghost { background: #eef2f6; color: #334155; }
+.st-btn--ghost:hover { background: #e2e8f0; }
+.st-btn--print { background: #334155; color: #fff; }
+.st-btn--print:hover { background: #1e293b; }
+
+/* ── Kontroller ────────────────────────────────────────── */
+.st-controls {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.4rem 1.2rem 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  align-items: flex-start;
+}
+.st-control { display: flex; flex-direction: column; gap: 0.3rem; }
+.st-control-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.st-select { border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.35rem 0.5rem; font-size: 0.9rem; }
+.st-checks { display: flex; gap: 0.7rem; flex-wrap: wrap; font-size: 0.88rem; }
+.st-checks label, .st-toggle { display: inline-flex; align-items: center; gap: 0.25rem; cursor: pointer; }
+
+.st-colors { display: flex; gap: 0.4rem; }
+.st-color-btn {
+  width: 1.6rem; height: 1.6rem; border-radius: 50%;
+  border: 2px solid transparent; padding: 2px; cursor: pointer; background: none;
+  transition: border-color 0.15s;
+}
+.st-color-btn span { display: block; width: 100%; height: 100%; border-radius: 50%; }
+.st-color-btn--active { border-color: #334155; }
+.st-color-btn:hover { border-color: #94a3b8; }
+
+/* Rubrikfält i toppbaren */
+.st-title-field { display: flex; flex-direction: column; gap: 0.2rem; }
+.st-title-field label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.st-title-field input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.4rem 0.6rem; font-size: 0.95rem; min-width: 12rem; }
+
+/* Design-del (rubrik + färgtema) i toppbaren */
+.st-design { display: flex; gap: 1.2rem; align-items: flex-end; flex-wrap: wrap; }
+.st-design-colors { display: flex; flex-direction: column; gap: 0.25rem; }
+.st-design-colors label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.st-colors { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+/* Jämna rader: exakt 8 swatches per rad */
+.st-design-colors .st-colors { display: grid; grid-template-columns: repeat(8, 1.6rem); gap: 0.4rem; }
+
+/* Snyggare arkrubrik (mjukare än matte-arkets hårda svarta) */
+.ab-title {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  color: hsl(var(--sh1, 204), 42%, 38%) !important;
+}
+
+/* ── Redigeringspanel (drawer) ─────────────────────────── */
+.st-overlay { display: none !important; } /* ingen mörk skuggning – förhandsvisningen ska synas */
+.st-panel {
+  position: fixed; top: 0; height: 100vh;
+  width: var(--panel-w);
+  background: #fff; z-index: 50;
+  display: flex; flex-direction: column;
+}
+.st-panel--left  { left: 0;  right: auto; box-shadow: 8px 0 40px rgba(0,0,0,0.16); }
+.st-panel--right { right: 0; left: auto;  box-shadow: -8px 0 40px rgba(0,0,0,0.16); }
+.st-panel.hidden { display: none !important; }
+
+/* Skjut undan förhandsvisningen åt motsatt håll så arken syns medan man redigerar */
+body.edit-left  main { padding-left:  var(--panel-w); transition: padding 0.15s; }
+body.edit-right main { padding-right: var(--panel-w); transition: padding 0.15s; }
+
+.st-count { font-size: 0.72rem; }
+.st-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.8rem 1rem; border-bottom: 1px solid var(--line);
+}
+.st-panel-title { font-weight: 700; color: #334155; font-size: 1.05rem; }
+.st-panel-close { border: none; background: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); padding: 0.3rem 0.5rem; }
+.st-panel-body { padding: 0.9rem; overflow-y: auto; flex: 1; }
+.st-pane.hidden { display: none; }
+
+.st-h3 { font-size: 0.95rem; font-weight: 700; color: #334155; margin: 1rem 0 0.5rem; }
+.st-h3:first-child { margin-top: 0; }
+
+/* Dagar */
+.st-days { display: flex; flex-direction: column; gap: 0.5rem; }
+.st-day { border: 1px solid var(--line); border-radius: 9px; padding: 0.5rem 0.6rem; }
+.st-day-head { display: flex; align-items: center; justify-content: space-between; }
+.st-day-btns { display: flex; gap: 0.2rem; }
+.st-day-btns button { border: none; background: #eef2f6; border-radius: 6px; padding: 0.2rem 0.45rem; cursor: pointer; font-size: 0.85rem; }
+.st-day-btns button:hover { background: #e2e8f0; }
+.st-day-prev { font-size: 0.82rem; color: #475569; margin-top: 0.3rem; line-height: 1.35; }
+
+/* Idébank */
+.st-bank-tools { margin-bottom: 0.5rem; }
+.st-bank { display: flex; flex-direction: column; gap: 0.4rem; }
+.st-bank-item { border: 1px solid var(--line); border-radius: 9px; padding: 0.5rem 0.6rem; }
+.st-bank-text { font-size: 0.82rem; color: #334155; line-height: 1.35; }
+.st-bank-actions { display: flex; gap: 0.3rem; margin-top: 0.4rem; align-items: center; }
+.st-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; background: #eef2f6; color: #64748b; border-radius: 999px; padding: 1px 7px; }
+.st-del { border: none; background: none; color: #dc2626; font-weight: 600; cursor: pointer; font-size: 0.8rem; margin-left: auto; }
+
+/* Formulär */
+.st-details { border: 1px solid var(--line); border-radius: 9px; margin-top: 0.6rem; padding: 0.2rem 0.6rem; }
+.st-details summary { cursor: pointer; font-weight: 600; color: #334155; padding: 0.4rem 0; font-size: 0.9rem; }
+.st-form { display: flex; flex-direction: column; gap: 0.55rem; padding: 0.4rem 0 0.6rem; }
+.st-field { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.82rem; font-weight: 600; color: #475569; }
+.st-field.st-row { flex-direction: row; align-items: center; justify-content: space-between; }
+.st-input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.4rem 0.5rem; font: inherit; font-weight: 400; }
+.st-input--sm { padding: 0.25rem 0.4rem; font-size: 0.85rem; }
+.st-mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.78rem; }
+.st-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.st-form-actions { display: flex; align-items: center; gap: 0.6rem; }
+.st-feedback { font-size: 0.8rem; color: var(--muted); }
+.st-feedback--ok { color: #047857; }
+.st-feedback--err { color: #dc2626; }
+.st-muted { color: #94a3b8; font-weight: 400; }
+.st-hint { font-size: 0.8rem; color: var(--muted); margin: 0.4rem 0 0; }
+.st-btn--sm { padding: 0.4rem 0.7rem; font-size: 0.85rem; }
+
+/* ── Svensk-arket (renderas som .ab-sheet) ─────────────── */
+.st-sv-sheet { --sh1: 204; --sh2: 172; }
+
+.st-sv-days {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25cm;
+  flex: 1;
+  min-height: 0;
+}
+/* flex-basis auto = dagen utgår från sitt innehåll och växer för att fylla sidan,
+   så lång text klipps inte men korta dagar fyller ändå ut. */
+.st-sv-day {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.st-sv-left, .st-sv-right {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  padding: 0.25cm 0.35cm;
+  min-width: 0;
+  overflow: hidden;
+}
+/* Kompakt rubrik på svensk-arket så de fem dagarna får mer plats */
+.st-sv-sheet .ab-header { margin-bottom: 0.15cm; padding-bottom: 0.12cm; }
+.st-sv-sheet .ab-sheet-inner { padding-top: 0.5cm; }
+.st-sv-divider { border-left: 2px dashed #94a3b8; margin: 0 0.35cm; }
+
+.st-sv-dayname {
+  align-self: flex-start;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 13px;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 6px;
+  margin-bottom: 7px;
+  background: linear-gradient(135deg, hsl(var(--sh1), 38%, 44%), hsl(var(--sh2), 58%, 39%));
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.st-sv-text {
+  font-family: var(--reading-font);
+  text-align: left;
+  line-height: 1.4;
+  color: var(--ink);
+  margin: 0;
+  font-size: 14px;
+}
+.st-sv-empty { color: #cbd5e1; }
+.st-sv-question {
+  font-family: var(--reading-font);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 2px;
+  font-size: 14px;
+}
+.st-sv-writeline { border-bottom: 2px solid #94a3b8; height: 0.7cm; }
+.st-sv-fixed {
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.25cm 0.3cm;
+  margin-top: auto;
+}
+.st-sv-fixed-label {
+  font-family: var(--reading-font);
+  color: #475569;
+  font-size: 12.5px;
+  margin: 0 0 0.28cm;
+}
+.st-sv-dotted { border-bottom: 2px dashed #94a3b8; height: 0; }
+
+/* Generiskt: accentlinje + rubrik följer temats --sh1 för ALLA mörka teman.
+   (Ljusa teman nedan har egna ::before/.ab-title och vinner via senare källordning.) */
+.ab-sheet[class*="starten-"]::before { background: linear-gradient(90deg, hsl(var(--sh1,204),38%,44%), hsl(var(--sh2,172),58%,39%)); }
+.ab-sheet[class*="starten-"] .ab-title { color: hsl(var(--sh1,204),45%,38%) !important; }
+
+/* Nya mörka teman – motorn färgar dagrutorna automatiskt via --sh1/--sh2 */
+.ab-sheet.starten-plommon, .starten-table.starten-plommon { --sh1: 300; --sh2: 330; }
+.ab-sheet.starten-indigo,  .starten-table.starten-indigo  { --sh1: 235; --sh2: 260; }
+
+/* Duotoner – gradient mellan två tydligt olika kulörer (vit text fungerar) */
+.ab-sheet.starten-sunset, .starten-table.starten-sunset { --sh1: 32;  --sh2: 335; }
+.ab-sheet.starten-eld,    .starten-table.starten-eld    { --sh1: 2;   --sh2: 42; }
+.ab-sheet.starten-citrus, .starten-table.starten-citrus { --sh1: 52;  --sh2: 105; }
+.ab-sheet.starten-tropik, .starten-table.starten-tropik { --sh1: 140; --sh2: 195; }
+.ab-sheet.starten-ocean,  .starten-table.starten-ocean  { --sh1: 205; --sh2: 250; }
+.ab-sheet.starten-galax,  .starten-table.starten-galax  { --sh1: 258; --sh2: 315; }
+.ab-sheet.starten-bar,    .starten-table.starten-bar    { --sh1: 320; --sh2: 358; }
+.ab-sheet.starten-aurora, .starten-table.starten-aurora { --sh1: 160; --sh2: 262; }
+
+/* ── Ljusa, gladare färgteman (egna – matte-arkets teman är mörka) ─────
+   Ljus bakgrund kräver mörk text på dag-etiketterna. */
+.starten-sol .st-sv-dayname,
+.starten-table.starten-sol .starten-day {
+  background: linear-gradient(135deg, hsl(48,95%,72%), hsl(40,95%,60%));
+  color: #5a4500; text-shadow: none;
+}
+.starten-table.starten-sol tr:nth-child(odd) .starten-day { background: linear-gradient(135deg, hsl(48,95%,67%), hsl(40,95%,55%)); }
+.ab-sheet.starten-sol::before { background: linear-gradient(90deg, hsl(48,95%,72%), hsl(40,95%,60%)); }
+.ab-sheet.starten-sol .ab-title { color: hsl(38,75%,38%) !important; }
+
+.starten-mynta .st-sv-dayname,
+.starten-table.starten-mynta .starten-day {
+  background: linear-gradient(135deg, hsl(160,62%,75%), hsl(174,55%,62%));
+  color: #0c3b34; text-shadow: none;
+}
+.starten-table.starten-mynta tr:nth-child(odd) .starten-day { background: linear-gradient(135deg, hsl(160,62%,70%), hsl(174,55%,57%)); }
+.ab-sheet.starten-mynta::before { background: linear-gradient(90deg, hsl(160,62%,75%), hsl(174,55%,62%)); }
+.ab-sheet.starten-mynta .ab-title { color: hsl(170,55%,30%) !important; }
+
+.starten-himmel .st-sv-dayname,
+.starten-table.starten-himmel .starten-day {
+  background: linear-gradient(135deg, hsl(202,85%,78%), hsl(190,78%,66%));
+  color: #0b3b52; text-shadow: none;
+}
+.starten-table.starten-himmel tr:nth-child(odd) .starten-day { background: linear-gradient(135deg, hsl(202,85%,73%), hsl(190,78%,61%)); }
+.ab-sheet.starten-himmel::before { background: linear-gradient(90deg, hsl(202,85%,78%), hsl(190,78%,66%)); }
+.ab-sheet.starten-himmel .ab-title { color: hsl(200,70%,36%) !important; }
+
+.starten-rosenljus .st-sv-dayname,
+.starten-table.starten-rosenljus .starten-day {
+  background: linear-gradient(135deg, hsl(340,90%,84%), hsl(355,90%,75%));
+  color: #5e1330; text-shadow: none;
+}
+.starten-table.starten-rosenljus tr:nth-child(odd) .starten-day { background: linear-gradient(135deg, hsl(340,90%,79%), hsl(355,90%,70%)); }
+.ab-sheet.starten-rosenljus::before { background: linear-gradient(90deg, hsl(340,90%,84%), hsl(355,90%,75%)); }
+.ab-sheet.starten-rosenljus .ab-title { color: hsl(345,65%,45%) !important; }
+
+.starten-persikoljus .st-sv-dayname,
+.starten-table.starten-persikoljus .starten-day { background: linear-gradient(135deg, hsl(28,95%,80%), hsl(14,92%,72%)); color: #5a2400; text-shadow: none; }
+.starten-table.starten-persikoljus tr:nth-child(odd) .starten-day { background: linear-gradient(135deg, hsl(28,95%,75%), hsl(14,92%,67%)); }
+.ab-sheet.starten-persikoljus::before { background: linear-gradient(90deg, hsl(28,95%,80%), hsl(14,92%,72%)); }
+.ab-sheet.starten-persikoljus .ab-title { color: hsl(20,80%,42%) !important; }
+
+.starten-ceriseljus .st-sv-dayname,
+.starten-table.starten-ceriseljus .starten-day { background: linear-gradient(135deg, hsl(320,85%,82%), hsl(340,88%,74%)); color: #4d0f33; text-shadow: none; }
+.starten-table.starten-ceriseljus tr:nth-child(odd) .starten-day { background: linear-gradient(135deg, hsl(320,85%,77%), hsl(340,88%,69%)); }
+.ab-sheet.starten-ceriseljus::before { background: linear-gradient(90deg, hsl(320,85%,82%), hsl(340,88%,74%)); }
+.ab-sheet.starten-ceriseljus .ab-title { color: hsl(330,65%,46%) !important; }
+
+.starten-lavendelljus .st-sv-dayname,
+.starten-table.starten-lavendelljus .starten-day { background: linear-gradient(135deg, hsl(260,75%,84%), hsl(235,75%,76%)); color: #2a1e52; text-shadow: none; }
+.starten-table.starten-lavendelljus tr:nth-child(odd) .starten-day { background: linear-gradient(135deg, hsl(260,75%,79%), hsl(235,75%,71%)); }
+.ab-sheet.starten-lavendelljus::before { background: linear-gradient(90deg, hsl(260,75%,84%), hsl(235,75%,76%)); }
+.ab-sheet.starten-lavendelljus .ab-title { color: hsl(250,55%,52%) !important; }
+
+.starten-limeljus .st-sv-dayname,
+.starten-table.starten-limeljus .starten-day { background: linear-gradient(135deg, hsl(90,65%,76%), hsl(108,55%,66%)); color: #1f3a08; text-shadow: none; }
+.starten-table.starten-limeljus tr:nth-child(odd) .starten-day { background: linear-gradient(135deg, hsl(90,65%,71%), hsl(108,55%,61%)); }
+.ab-sheet.starten-limeljus::before { background: linear-gradient(90deg, hsl(90,65%,76%), hsl(108,55%,66%)); }
+.ab-sheet.starten-limeljus .ab-title { color: hsl(100,55%,30%) !important; }
+
+/* ── Direkt-utskrift (fallback om man kör Ctrl+P på sidan) ─ */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .no-print { display: none !important; }
+  body { background: #fff; }
+  .ab-sheet-wrap { padding: 0 !important; gap: 0 !important; }
+  .ab-sheet { box-shadow: none !important; }
+  .ab-sheet + .ab-sheet { page-break-before: always; }
+}

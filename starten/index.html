@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Starten – morgon</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Andika:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Mattemotorns ark-CSS (delas med klassrummatte) -->
+  <link rel="stylesheet" href="../css/arbetsblad-sheet.css" />
+  <link rel="stylesheet" href="../css/arbetsblad-starten.css" />
+
+  <!-- Egen, ren styling -->
+  <link rel="stylesheet" href="starten.css" />
+</head>
+<body>
+
+  <!-- ── Toppbar ─────────────────────────────────────────── -->
+  <header class="st-topbar no-print">
+    <div class="st-topbar-inner">
+      <div class="st-brand">
+        <span class="st-brand-title">Starten</span>
+        <span class="st-brand-sub">morgon · svenska + matte</span>
+      </div>
+
+      <div class="st-design">
+        <div class="st-title-field">
+          <label for="st-title">Rubrik</label>
+          <input id="st-title" type="text" value="Starten" placeholder="t.ex. Starten v.16" />
+        </div>
+        <div class="st-design-colors">
+          <label>Färgtema</label>
+          <div class="st-colors" id="color-row"></div>
+        </div>
+      </div>
+
+      <div class="st-actions">
+        <button id="btn-create" class="st-btn st-btn--primary" title="Slumpa en helt ny vecka">🌅 Skapa veckans Starten</button>
+        <button id="btn-edit-sv" class="st-btn st-btn--ghost">✏️ Redigera svenska</button>
+        <button id="btn-edit-matte" class="st-btn st-btn--ghost">✏️ Redigera matte</button>
+        <button id="btn-print" class="st-btn st-btn--print">🖨 Skriv ut (2 sidor)</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Förhandsvisning ─────────────────────────────────── -->
+  <main>
+    <div class="ab-sheet-wrap hidden" id="ab-sheet"></div>
+  </main>
+
+  <!-- ── Redigeringspanel (drawer) ───────────────────────── -->
+  <div id="edit-overlay" class="st-overlay hidden no-print"></div>
+  <aside id="edit-panel" class="st-panel hidden no-print" aria-label="Redigera">
+    <div class="st-panel-head">
+      <span id="edit-title" class="st-panel-title">Redigera svenska</span>
+      <button id="edit-close" class="st-panel-close" title="Stäng">✕</button>
+    </div>
+
+    <div class="st-panel-body">
+
+      <!-- ===== Svenska ===== -->
+      <section id="tab-sv" class="st-pane">
+        <details class="st-details" open>
+          <summary>📅 Veckans dagar</summary>
+          <div id="sv-days" class="st-days"></div>
+        </details>
+
+        <details class="st-details">
+          <summary>💡 Idébanken (<span id="sv-bank-count">0</span>)</summary>
+          <div class="st-bank-tools">
+            <select id="sv-bank-filter" class="st-input st-input--sm">
+              <option value="">Alla ämnen</option>
+              <option value="svenska">Svenska</option>
+              <option value="no">NO</option>
+              <option value="so">SO</option>
+              <option value="engelska">Engelska</option>
+            </select>
+          </div>
+          <div id="sv-bank" class="st-bank"></div>
+        </details>
+
+        <details class="st-details">
+          <summary>➕ Lägg till egen text</summary>
+          <div class="st-form">
+            <label class="st-field">Ämne
+              <select id="own-subject" class="st-input">
+                <option value="svenska">Svenska</option>
+                <option value="no">NO</option>
+                <option value="so">SO</option>
+                <option value="engelska">Engelska</option>
+              </select>
+            </label>
+            <label class="st-field">Text
+              <textarea id="own-text" rows="4" class="st-input" maxlength="320"></textarea>
+              <span id="own-count" class="st-muted st-count"></span>
+            </label>
+            <label class="st-field">Fråga
+              <input id="own-question" type="text" class="st-input" />
+            </label>
+            <div class="st-form-actions">
+              <button id="own-add" class="st-btn st-btn--primary st-btn--sm">Lägg till i banken</button>
+              <span id="own-feedback" class="st-feedback"></span>
+            </div>
+          </div>
+        </details>
+
+        <details class="st-details">
+          <summary>🤖 Generera med AI</summary>
+          <div class="st-form">
+            <div class="st-grid2">
+              <label class="st-field">Ämne
+                <select id="gen-subject" class="st-input">
+                  <option value="svenska">Svenska</option>
+                  <option value="no">NO</option>
+                  <option value="so">SO</option>
+                  <option value="engelska">Engelska</option>
+                </select>
+              </label>
+              <label class="st-field">Antal
+                <input id="gen-count" type="number" min="1" max="30" value="5" class="st-input" />
+              </label>
+              <label class="st-field">Frågor/text
+                <input id="gen-questions" type="number" min="1" max="5" value="1" class="st-input" />
+              </label>
+              <label class="st-field">Nivå
+                <input id="gen-age" type="text" value="årskurs 4–6" class="st-input" />
+              </label>
+            </div>
+            <label class="st-field">Vad jobbar ni med? <span class="st-muted">(valfritt)</span>
+              <input id="gen-topic" type="text" placeholder="t.ex. vattnets kretslopp" class="st-input" />
+            </label>
+            <div class="st-form-actions">
+              <button id="copy-prompt" class="st-btn st-btn--ghost st-btn--sm">📋 Kopiera prompt</button>
+            </div>
+            <textarea id="prompt-output" rows="5" readonly class="st-input st-mono"></textarea>
+            <label class="st-field">Klistra in AI:ns JSON-svar
+              <textarea id="import-input" rows="5" class="st-input st-mono" placeholder='[ { "subject": "svenska", "text": "...", "questions": ["..."] } ]'></textarea>
+            </label>
+            <div class="st-form-actions">
+              <button id="import-btn" class="st-btn st-btn--primary st-btn--sm">Importera till banken</button>
+              <span id="import-feedback" class="st-feedback"></span>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ===== Matte ===== -->
+      <section id="tab-matte" class="st-pane hidden">
+        <div class="st-form">
+          <label class="st-field">Årskurs
+            <select id="m-grade" class="m-setting st-input">
+              <option value="1">Åk 1</option><option value="2">Åk 2</option>
+              <option value="3" selected>Åk 3</option><option value="4">Åk 4</option>
+              <option value="5">Åk 5</option><option value="6">Åk 6</option>
+            </select>
+          </label>
+
+          <div class="st-field">
+            <span>Räknesätt (uppställning)</span>
+            <div class="st-checks">
+              <label><input type="checkbox" id="m-add" class="m-setting" checked> Add</label>
+              <label><input type="checkbox" id="m-sub" class="m-setting" checked> Sub</label>
+              <label><input type="checkbox" id="m-mult" class="m-setting" checked> Mult</label>
+              <label><input type="checkbox" id="m-div-cell" class="m-setting"> Div</label>
+            </div>
+          </div>
+
+          <label class="st-field st-row">
+            <span>Divisionskolumn</span>
+            <input type="checkbox" id="m-div-col" class="m-setting" checked>
+          </label>
+
+          <div class="st-field">
+            <span>Växling (add/sub)</span>
+            <div class="st-checks">
+              <label><input type="radio" name="m-vaxling" value="" class="m-setting" checked> Blandad</label>
+              <label><input type="radio" name="m-vaxling" value="utan" class="m-setting"> Utan</label>
+              <label><input type="radio" name="m-vaxling" value="med" class="m-setting"> Med</label>
+            </div>
+          </div>
+
+          <div class="st-form-actions">
+            <button id="btn-rand-matte" class="st-btn st-btn--ghost st-btn--sm">🎲 Nya mattetal</button>
+          </div>
+          <p class="st-hint">💡 Klicka 🔄 på en ruta i förhandsvisningen för att byta just den uppgiften.</p>
+        </div>
+      </section>
+
+    </div>
+  </aside>
+
+  <!-- Firebase (Elias eget projekt, compat-SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
+
+  <!-- Mattemotorn (delade filer) -->
+  <script src="../js/plugins/_math-utils.js"></script>
+  <script src="../js/plugins/_render-utils.js"></script>
+  <script src="../js/plugins/_utils.js"></script>
+  <script src="../js/arbetsblad-config.js"></script>
+  <script src="../js/arbetsblad-starten.js"></script>
+
+  <!-- Starten-sidans egna delar -->
+  <script src="js/prompt.js"></script>
+  <script src="js/svenska.js"></script>
+  <script src="js/starten-app.js"></script>
+</body>
+</html>
