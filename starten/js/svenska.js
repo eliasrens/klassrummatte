@@ -158,11 +158,16 @@ window.StartenSvenska = (function () {
     const inner = document.createElement("div");
     inner.className = "ab-sheet-inner";
 
+    const SUBJ_LABEL = { svenska: "Berättelse", no: "NO", so: "SO", engelska: "Engelska" };
     let daysHtml = "";
     DAYS.forEach(function (dayName, i) {
       const c = week.days[i];
       const text = c ? escapeHtml(c.text) : '<span class="st-sv-empty">— tomt —</span>';
       const fixed = escapeHtml(c ? (c.fixedField || FIXED_SV) : FIXED_SV);
+      const subjLbl = c ? (SUBJ_LABEL[c.subject] || "") : "";
+      const dayLabel = subjLbl
+        ? escapeHtml(dayName) + ' <span class="st-sv-dayname-subj">· ' + escapeHtml(subjLbl) + '</span>'
+        : escapeHtml(dayName);
       const qHtml = c ? c.questions.map(function (q) {
         return '<p class="st-sv-question">' + escapeHtml(q) + "</p>" +
           '<div class="st-sv-writeline"></div><div class="st-sv-writeline"></div>';
@@ -170,7 +175,7 @@ window.StartenSvenska = (function () {
       daysHtml +=
         '<div class="st-sv-day">' +
           '<div class="st-sv-left">' +
-            '<div class="st-sv-dayname">' + escapeHtml(dayName) + "</div>" +
+            '<div class="st-sv-dayname">' + dayLabel + "</div>" +
             '<p class="st-sv-text">' + text + "</p>" +
           "</div>" +
           '<div class="st-sv-divider"></div>' +

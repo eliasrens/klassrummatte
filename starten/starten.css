@@ -35,16 +35,18 @@ body {
   margin: 0 auto;
   padding: 0.8rem 1.2rem;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.st-middle-col {
+  display: flex; flex-direction: column; gap: 0.5rem;
+  min-width: 14rem;
 }
 .st-brand { display: flex; flex-direction: column; line-height: 1.1; }
 .st-brand-title { font-size: 1.4rem; font-weight: 800; letter-spacing: 2px; color: #334155; }
 .st-brand-sub { font-size: 0.8rem; color: var(--muted); }
 
-.st-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.st-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
 .st-btn {
   border: none;
   border-radius: 8px;
@@ -96,9 +98,88 @@ body {
 .st-week-field label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
 .st-week-row { display: flex; gap: 0.35rem; align-items: center; }
 .st-week-row select { border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.4rem 0.5rem; font-size: 0.9rem; min-width: 10rem; background: #fff; }
+.st-new-week-form { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
+.st-new-week-form input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.4rem 0.5rem; font-size: 0.9rem; background: #fff; }
+.st-new-week-form #nw-week { width: 4rem; }
+.st-new-week-form #nw-year { width: 5rem; }
+.st-new-week-form #nw-name { width: 10rem; }
+
+.st-link-btn { background: none; border: none; color: var(--accent2); font-size: 0.8rem; cursor: pointer; padding: 0.2rem 0; text-align: left; }
+.st-link-btn:hover { text-decoration: underline; }
+
+.st-archive-popover {
+  position: absolute; top: 4rem; right: 1.2rem;
+  background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.16);
+  width: 24rem; max-height: 60vh; overflow-y: auto;
+  z-index: 30;
+}
+.st-archive-head { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--line); font-weight: 700; color: #334155; }
+.st-archive-list { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.st-archive-item { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.6rem; background: #f8fafc; border-radius: 6px; font-size: 0.9rem; }
+.st-archive-item .st-restore { background: var(--accent); color: #fff; border: none; border-radius: 5px; padding: 0.3rem 0.6rem; font-size: 0.8rem; cursor: pointer; }
+.st-archive-item .st-restore:hover { background: #248577; }
+.st-archive-btns { display: inline-flex; gap: 0.3rem; align-items: center; }
+.st-archive-item .st-delete { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 1rem; padding: 0.2rem 0.4rem; border-radius: 4px; }
+.st-archive-item .st-delete:hover { background: #fee2e2; }
+.st-archive-empty { padding: 0.6rem; color: var(--muted); font-size: 0.9rem; text-align: center; }
+
+/* Skriv ut-meny */
+.st-print-wrap { position: relative; display: inline-block; }
+.st-print-menu {
+  position: absolute; top: calc(100% + 0.3rem); right: 0;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+  min-width: 14rem;
+  z-index: 25;
+  padding: 0.3rem;
+  display: flex; flex-direction: column;
+}
+.st-print-menu-item {
+  background: none; border: none; text-align: left;
+  padding: 0.55rem 0.7rem; border-radius: 5px; cursor: pointer;
+  font-size: 0.92rem; color: #334155; font-family: inherit;
+}
+.st-print-menu-item:hover { background: #eef2f6; }
+
+/* Klass-utskrift-popover */
+.st-classes-popover {
+  position: absolute; top: 4rem; right: 1.2rem;
+  background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.16);
+  width: 28rem; max-height: 75vh; overflow-y: auto;
+  z-index: 30;
+  padding: 0;
+}
+.st-classes-hint { padding: 0.5rem 0.9rem 0; font-size: 0.82rem; color: var(--muted); margin: 0; }
+.st-classes-list { padding: 0.5rem 0.5rem 0; display: flex; flex-direction: column; gap: 0.35rem; }
+.st-classes-list:empty { display: none; }
+.st-classes-item { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.6rem; background: #f8fafc; border-radius: 6px; font-size: 0.95rem; }
+.st-classes-item .st-class-info { font-weight: 600; color: #334155; }
+.st-classes-item .st-class-meta { color: var(--muted); font-weight: 400; margin-left: 0.4rem; }
+.st-classes-item .st-class-del { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 1rem; padding: 0.2rem 0.4rem; }
+.st-classes-add { display: flex; gap: 0.35rem; padding: 0.7rem 0.5rem; border-top: 1px solid var(--line); }
+.st-classes-add #class-name { flex: 1 1 auto; }
+.st-classes-add #class-students { width: 5rem; }
+.st-classes-actions { padding: 0.5rem 0.5rem 0.7rem; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+
+/* Separator-sida (klass-rubrik i klass-utskrift) */
+.ab-sheet.st-sep-sheet {
+  display: flex !important; align-items: center; justify-content: center;
+  background: #fff !important;
+}
+.ab-sheet.st-sep-sheet::before { display: none !important; }
+.st-sep-text {
+  font-size: 20pt; font-weight: 400; color: #000;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  line-height: 1; letter-spacing: 0.05em;
+}
+/* Tom baksida */
+.ab-sheet.st-blank-sheet { background: #fff !important; }
+.ab-sheet.st-blank-sheet::before { display: none !important; }
 
 /* Design-del (rubrik + färgtema) i toppbaren */
-.st-design { display: flex; gap: 1.2rem; align-items: flex-end; flex-wrap: wrap; }
+.st-design { display: flex; gap: 1.2rem; align-items: flex-start; flex-wrap: wrap; }
 .st-design-colors { display: flex; flex-direction: column; gap: 0.25rem; }
 .st-design-colors label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
 .st-colors { display: flex; flex-wrap: wrap; gap: 0.35rem; }
@@ -224,6 +305,7 @@ body.edit-right main { padding-right: var(--panel-w); transition: padding 0.15s;
   background: linear-gradient(135deg, hsl(var(--sh1), 38%, 44%), hsl(var(--sh2), 58%, 39%));
   text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
+.st-sv-dayname-subj { font-weight: 600; opacity: 0.85; letter-spacing: 0.5px; }
 .st-sv-text {
   font-family: var(--reading-font);
   text-align: left;

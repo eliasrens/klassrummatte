@@ -23,35 +23,77 @@
     <div class="st-topbar-inner">
       <div class="st-brand">
         <span class="st-brand-title">Starten</span>
-        <span class="st-brand-sub">morgon · svenska + matte</span>
+        <span class="st-brand-sub">morgon · läsförståelse + matte</span>
       </div>
 
       <div class="st-design">
         <div class="st-week-field">
           <label for="week-select">Vecka</label>
-          <div class="st-week-row">
+          <div class="st-week-row" id="week-row">
             <select id="week-select" class="st-input st-input--sm" aria-label="Välj vecka"></select>
-            <button id="btn-new-week" class="st-btn st-btn--ghost st-btn--sm" title="Skapa ny vecka">＋ Ny</button>
+            <button id="btn-new-week"      class="st-btn st-btn--ghost st-btn--sm" title="Skapa ny vecka">＋ Ny</button>
+            <button id="btn-archive-week"  class="st-btn st-btn--ghost st-btn--sm" title="Arkivera vald vecka">📁</button>
+            <button id="btn-show-archive"  class="st-link-btn hidden" type="button">Arkiv (<span id="archive-count">0</span>)</button>
+          </div>
+          <div class="st-new-week-form hidden" id="new-week-form">
+            <input type="number" id="nw-week" class="st-input st-input--sm" min="1" max="53" placeholder="Vecka" aria-label="Veckonummer">
+            <input type="number" id="nw-year" class="st-input st-input--sm" min="2024" max="2099" placeholder="År" aria-label="År">
+            <input type="text"   id="nw-name" class="st-input st-input--sm" placeholder="Namn (valfritt)" aria-label="Namn">
+            <button id="nw-save"   class="st-btn st-btn--primary st-btn--sm">Skapa</button>
+            <button id="nw-cancel" class="st-btn st-btn--ghost   st-btn--sm">Avbryt</button>
           </div>
         </div>
-        <div class="st-title-field">
-          <label for="st-title">Rubrik</label>
-          <input id="st-title" type="text" value="Starten" placeholder="t.ex. Starten v.16" />
+        <div class="st-middle-col">
+          <div class="st-title-field">
+            <label for="st-title">Rubrik</label>
+            <input id="st-title" type="text" value="Starten" placeholder="t.ex. Starten v.16" />
+          </div>
+          <div class="st-actions">
+            <button id="btn-edit-sv"    class="st-btn st-btn--ghost st-btn--sm">✏️ Läsförståelse</button>
+            <button id="btn-edit-matte" class="st-btn st-btn--ghost st-btn--sm">✏️ Matte</button>
+            <div class="st-print-wrap">
+              <button id="btn-print" class="st-btn st-btn--print st-btn--sm">🖨 Skriv ut ▾</button>
+              <div id="print-menu" class="st-print-menu hidden">
+                <button id="print-single" class="st-print-menu-item">📄 2 sidor (1 elev)</button>
+                <button id="print-classes-open" class="st-print-menu-item">🏫 För klasser …</button>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="st-design-colors">
           <label>Färgtema</label>
           <div class="st-colors" id="color-row"></div>
         </div>
       </div>
-
-      <div class="st-actions">
-        <button id="btn-create" class="st-btn st-btn--primary" title="Slumpa en helt ny vecka">🌅 Skapa veckans Starten</button>
-        <button id="btn-edit-sv" class="st-btn st-btn--ghost">✏️ Redigera svenska</button>
-        <button id="btn-edit-matte" class="st-btn st-btn--ghost">✏️ Redigera matte</button>
-        <button id="btn-print" class="st-btn st-btn--print">🖨 Skriv ut (2 sidor)</button>
-      </div>
     </div>
   </header>
+
+  <!-- ── Klasser-popover (utskrift per klass med separatorer) ─ -->
+  <div id="classes-popover" class="st-classes-popover hidden no-print">
+    <div class="st-archive-head">
+      <span>Skriv ut för klasser</span>
+      <button id="classes-close" class="st-panel-close" title="Stäng">✕</button>
+    </div>
+    <p class="st-classes-hint">Skriver ut samma Starten-blad för alla elever i varje klass, med en separator-sida före varje klass. Tänkt för dubbelsidig utskrift.</p>
+    <div id="classes-list" class="st-classes-list"></div>
+    <div class="st-classes-add">
+      <input id="class-name"     class="st-input st-input--sm" type="text"   placeholder="Klass (t.ex. 4A)">
+      <input id="class-students" class="st-input st-input--sm" type="number" min="1" max="40" placeholder="Antal">
+      <button id="class-add" class="st-btn st-btn--ghost st-btn--sm">＋ Lägg till</button>
+    </div>
+    <div class="st-classes-actions">
+      <button id="classes-print" class="st-btn st-btn--print">🖨 Skriv ut alla klasser</button>
+    </div>
+  </div>
+
+  <!-- ── Arkiv-popover (lista med arkiverade veckor) ─────── -->
+  <div id="archive-popover" class="st-archive-popover hidden no-print">
+    <div class="st-archive-head">
+      <span>Arkiverade veckor</span>
+      <button id="archive-close" class="st-panel-close" title="Stäng">✕</button>
+    </div>
+    <div id="archive-list" class="st-archive-list"></div>
+  </div>
 
   <!-- ── Förhandsvisning ─────────────────────────────────── -->
   <main>
@@ -62,7 +104,7 @@
   <div id="edit-overlay" class="st-overlay hidden no-print"></div>
   <aside id="edit-panel" class="st-panel hidden no-print" aria-label="Redigera">
     <div class="st-panel-head">
-      <span id="edit-title" class="st-panel-title">Redigera svenska</span>
+      <span id="edit-title" class="st-panel-title">Redigera läsförståelse</span>
       <button id="edit-close" class="st-panel-close" title="Stäng">✕</button>
     </div>
 
@@ -72,6 +114,9 @@
       <section id="tab-sv" class="st-pane">
         <details class="st-details" open>
           <summary>📅 Veckans dagar</summary>
+          <div class="st-form-actions" style="margin-bottom:0.5rem">
+            <button id="btn-rand-sv" class="st-btn st-btn--ghost st-btn--sm">🎲 Nya texter (alla dagar)</button>
+          </div>
           <div id="sv-days" class="st-days"></div>
         </details>
 
@@ -80,7 +125,7 @@
           <div class="st-bank-tools">
             <select id="sv-bank-filter" class="st-input st-input--sm">
               <option value="">Alla ämnen</option>
-              <option value="svenska">Svenska</option>
+              <option value="svenska">Berättelse</option>
               <option value="no">NO</option>
               <option value="so">SO</option>
               <option value="engelska">Engelska</option>
@@ -94,7 +139,7 @@
           <div class="st-form">
             <label class="st-field">Ämne
               <select id="own-subject" class="st-input">
-                <option value="svenska">Svenska</option>
+                <option value="svenska">Berättelse</option>
                 <option value="no">NO</option>
                 <option value="so">SO</option>
                 <option value="engelska">Engelska</option>
@@ -120,7 +165,7 @@
             <div class="st-grid2">
               <label class="st-field">Ämne
                 <select id="gen-subject" class="st-input">
-                  <option value="svenska">Svenska</option>
+                  <option value="svenska">Berättelse</option>
                   <option value="no">NO</option>
                   <option value="so">SO</option>
                   <option value="engelska">Engelska</option>

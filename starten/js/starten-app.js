@@ -10,8 +10,8 @@
     return (s == null ? "" : String(s)).replace(/&/g, "&amp;").replace(/</g, "&lt;")
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
-  const SUBJ = { svenska: "Svenska", no: "NO", so: "SO", engelska: "Engelska" };
-  function subjLabel(s) { return SUBJ[s] || "Svenska"; }
+  const SUBJ = { svenska: "Berättelse", no: "NO", so: "SO", engelska: "Engelska" };
+  function subjLabel(s) { return SUBJ[s] || "Berättelse"; }
 
   // Cachat matte-ark + ev. dag som redigeras inline.
   // matte = { rows, grade } – speglar veckans matte vid render.
@@ -117,31 +117,100 @@
   function renderWeekSelect() {
     const sel = $("#week-select"); if (!sel) return;
     const s = weeksStore(); if (!s) return;
-    const list = s.getList();
+    const list = s.getList(); // exkluderar arkiverade
     const activeId = s.getActiveId();
     sel.innerHTML = list.map(function (w) {
       const label = "v." + w.week + " " + w.year + (w.name ? " – " + w.name : "");
       return '<option value="' + w.id + '"' + (w.id === activeId ? " selected" : "") + ">" + label + "</option>";
     }).join("");
     if (!list.length && activeId) {
-      // Aktiv vecka inte än i listan (precis skapad) – lägg in själv
       sel.innerHTML = '<option value="' + activeId + '" selected>' + activeId + "</option>";
+    }
+
+    // Visa "Arkiverade (N)"-länken om det finns några
+    const archived = s.getArchivedList();
+    const showBtn = $("#btn-show-archive");
+    const countEl = $("#archive-count");
+    if (showBtn && countEl) {
+      if (archived.length) { showBtn.classList.remove("hidden"); countEl.textContent = archived.length; }
+      else { showBtn.classList.add("hidden"); $("#archive-popover").classList.add("hidden"); }
+    }
+    renderArchiveList();
+  }
+
+  function renderArchiveList() {
+    const s = weeksStore(); if (!s) return;
+    const host = $("#archive-list"); if (!host) return;
+    const archived = s.getArchivedList();
+    if (!archived.length) {
+      host.innerHTML = '<div class="st-archive-empty">Inga arkiverade veckor.</div>';
+      return;
+    }
+    host.innerHTML = archived.map(function (w) {
+      const label = "v." + w.week + " " + w.year + (w.name ? " – " + w.name : "");
+      return '<div class="st-archive-item"><span>' + escapeHtml(label) + '</span>' +
+             '<span class="st-archive-btns">' +
+               '<button class="st-restore" data-id="' + w.id + '">Återställ</button>' +
+               '<button class="st-delete"  data-id="' + w.id + '" title="Ta bort permanent">🗑</button>' +
+             '</span></div>';
+    }).join("");
+    host.querySelectorAll(".st-restore").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        s.unarchiveWeek(btn.dataset.id);
+        s.setActive(btn.dataset.id);
+        $("#archive-popover").classList.add("hidden");
+      });
+    });
+    host.querySelectorAll(".st-delete").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const id = btn.dataset.id;
+        const w = s.getArchivedList().find(function (x) { return x.id === id; });
+        const label = w ? ("v." + w.week + " " + w.year + (w.name ? " – " + w.name : "")) : id;
+        if (!confirm('Ta bort "' + label + '" permanent? Detta går inte att ångra.')) return;
+        s.deleteWeek(id);
+      });
+    });
+  }
+
+  function archiveActiveWeek() {
+    const s = weeksStore(); if (!s) return;
+    const cur = s.getActive(); if (!cur || !cur.id) return;
+    const label = "v." + cur.week + " " + cur.year + (cur.name ? " – " + cur.name : "");
+    if (!confirm("Arkivera \"" + label + "\"? Du kan återställa den senare.")) return;
+    s.archiveWeek(cur.id);
+    // Växla till första icke-arkiverade vecka (eller skapa nuvarande ISO)
+    const list = s.getList();
+    if (list.length) { s.setActive(list[0].id); }
+    else {
+      const p = s.currentIsoParts();
+      s.ensureWeek(p.year, p.week, "");
     }
   }
 
-  function promptNewWeek() {
+  function openNewWeekForm() {
     const s = weeksStore(); if (!s) return;
     const cur = s.currentIsoParts();
-    const ans = prompt("Vilken vecka? (t.ex. " + cur.week + ")", String(cur.week));
-    if (ans == null) return;
-    const w = parseInt(String(ans).trim(), 10);
-    if (!w || w < 1 || w > 53) { alert("Ange ett veckonummer mellan 1 och 53."); return; }
-    const yAns = prompt("År:", String(cur.year));
-    if (yAns == null) return;
-    const y = parseInt(String(yAns).trim(), 10);
-    if (!y || y < 2024 || y > 2099) { alert("Ange ett rimligt år."); return; }
-    const name = prompt("Eget namn på veckan (valfritt):", "") || "";
-    s.ensureWeek(y, w, name.trim());
+    $("#nw-week").value = String(cur.week);
+    $("#nw-year").value = String(cur.year);
+    $("#nw-name").value = "";
+    $("#week-row").classList.add("hidden");
+    $("#new-week-form").classList.remove("hidden");
+    $("#nw-week").focus();
+    $("#nw-week").select();
+  }
+  function closeNewWeekForm() {
+    $("#new-week-form").classList.add("hidden");
+    $("#week-row").classList.remove("hidden");
+  }
+  function saveNewWeekForm() {
+    const s = weeksStore(); if (!s) return;
+    const w = parseInt(($("#nw-week").value || "").trim(), 10);
+    const y = parseInt(($("#nw-year").value || "").trim(), 10);
+    const name = ($("#nw-name").value || "").trim();
+    if (!w || w < 1 || w > 53) { $("#nw-week").focus(); return; }
+    if (!y || y < 2024 || y > 2099) { $("#nw-year").focus(); return; }
+    s.ensureWeek(y, w, name);
+    closeNewWeekForm();
   }
 
   function onWeekChanged(week) {
@@ -196,6 +265,95 @@
 
   function onWeeksListChanged() { renderWeekSelect(); }
 
+  /* ── Klass-lista (global, localStorage) ──────────────── */
+  const KEY_CLASSES = "starten.classes.v1";
+  function readJson(key, fb) { try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fb; } catch (e) { return fb; } }
+  function writeJson(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
+  function getClasses() { return readJson(KEY_CLASSES, []); }
+  function setClasses(list) { writeJson(KEY_CLASSES, list); }
+
+  function renderClassesList() {
+    const host = $("#classes-list"); if (!host) return;
+    const list = getClasses();
+    if (!list.length) { host.innerHTML = ""; return; }
+    host.innerHTML = list.map(function (c, i) {
+      return '<div class="st-classes-item">' +
+        '<span><span class="st-class-info">' + escapeHtml(c.name) + '</span>' +
+        '<span class="st-class-meta">' + c.students + ' elever</span></span>' +
+        '<button class="st-class-del" data-i="' + i + '" title="Ta bort">✕</button>' +
+        '</div>';
+    }).join("");
+    host.querySelectorAll(".st-class-del").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const arr = getClasses();
+        arr.splice(parseInt(btn.dataset.i, 10), 1);
+        setClasses(arr);
+        renderClassesList();
+      });
+    });
+  }
+
+  function addClass() {
+    const name = ($("#class-name").value || "").trim();
+    const students = parseInt(($("#class-students").value || "").trim(), 10);
+    if (!name) { $("#class-name").focus(); return; }
+    if (!students || students < 1 || students > 40) { $("#class-students").focus(); return; }
+    const arr = getClasses();
+    arr.push({ name: name, students: students });
+    setClasses(arr);
+    $("#class-name").value = "";
+    $("#class-students").value = "";
+    $("#class-name").focus();
+    renderClassesList();
+  }
+
+  /* ── Klass-utskrift: separator + N elever per klass ──── */
+  function printClasses() {
+    const classes = getClasses();
+    if (!classes.length) { alert("Lägg till minst en klass först."); return; }
+    const w = wrap();
+    if (!w || w.classList.contains("hidden") || !w.children.length) render();
+    const sheetContent = wrap().innerHTML; // svenska + matte för en elev
+
+    // Bygg printable HTML: per klass = separator + tom + (svenska + matte) × N elever
+    let content = "";
+    classes.forEach(function (c) {
+      content += '<div class="ab-sheet st-sep-sheet"><div class="st-sep-text">' + escapeHtml(c.name) + '</div></div>';
+      content += '<div class="ab-sheet st-blank-sheet"></div>';
+      for (let i = 0; i < c.students; i++) content += sheetContent;
+    });
+
+    let iframe = document.getElementById("print-iframe");
+    if (!iframe) {
+      iframe = document.createElement("iframe");
+      iframe.id = "print-iframe";
+      iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none;";
+      document.body.appendChild(iframe);
+    }
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html lang="sv"><head><meta charset="UTF-8">' +
+      '<base href="' + document.baseURI + '">' +
+      '<link rel="stylesheet" href="../css/arbetsblad-sheet.css">' +
+      '<link rel="stylesheet" href="../css/arbetsblad-starten.css">' +
+      '<link rel="stylesheet" href="starten.css">' +
+      '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+      '<link href="https://fonts.googleapis.com/css2?family=Andika:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">' +
+      '<style>' +
+      '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}' +
+      'html,body{margin:0;padding:0;background:#fff!important;height:100%!important;overflow:visible!important;}' +
+      '.ab-sheet-wrap{display:block!important;padding:0!important;height:100%;}' +
+      '.ab-sheet{display:flex!important;flex-direction:column!important;width:100%!important;height:100vh!important;box-shadow:none!important;overflow:hidden!important;}' +
+      '.ab-sheet::before{flex-shrink:0!important;}' +
+      '.ab-sheet-inner{display:flex!important;flex-direction:column!important;flex:1!important;overflow:hidden!important;}' +
+      '.ab-sheet + .ab-sheet{page-break-before:always!important;break-before:page!important;margin-top:0!important;}' +
+      '.no-print{display:none!important;}' +
+      '@page{size:A4 portrait;margin:0.4cm;}' +
+      '</style></head><body><div class="ab-sheet-wrap">' + content + '</div></body></html>');
+    doc.close();
+    iframe.onload = function () { iframe.contentWindow.focus(); iframe.contentWindow.print(); };
+  }
+
   /* ── Tvåsidig utskrift ───────────────────────────────── */
   function printBoth() {
     const w = wrap();
@@ -236,7 +394,7 @@
   function openEditor(which) {
     const isSv = which === "sv";
     const panel = $("#edit-panel");
-    $("#edit-title").textContent = isSv ? "Redigera svenska" : "Redigera matte";
+    $("#edit-title").textContent = isSv ? "Redigera läsförståelse" : "Redigera matte";
     panel.classList.toggle("st-panel--left", isSv);
     panel.classList.toggle("st-panel--right", !isSv);
     $("#tab-sv").classList.toggle("hidden", !isSv);
@@ -283,13 +441,15 @@
       row.className = "st-day";
 
       if (state.editingDay === i) {
+        const maxC = StartenSvenska.MAX_CHARS;
         row.innerHTML =
           '<div class="st-day-head"><strong>' + dayName + "</strong></div>" +
           '<div class="st-form">' +
             '<select class="ed-subject st-input st-input--sm">' +
-              '<option value="svenska">Svenska</option><option value="no">NO</option>' +
+              '<option value="svenska">Berättelse</option><option value="no">NO</option>' +
               '<option value="so">SO</option><option value="engelska">Engelska</option></select>' +
-            '<textarea class="ed-text st-input" rows="3" placeholder="Text"></textarea>' +
+            '<textarea class="ed-text st-input" rows="3" placeholder="Text" maxlength="' + maxC + '"></textarea>' +
+            '<span class="ed-count st-muted st-count"></span>' +
             '<input class="ed-question st-input" type="text" placeholder="Fråga">' +
             '<div class="st-form-actions"><button class="ed-save st-btn st-btn--primary st-btn--sm">Spara</button>' +
             '<button class="ed-cancel st-btn st-btn--ghost st-btn--sm">Avbryt</button></div>' +
@@ -299,8 +459,17 @@
           row.querySelector(".ed-text").value = c.text || "";
           row.querySelector(".ed-question").value = (c.questions && c.questions[0]) || "";
         }
+        const textEl = row.querySelector(".ed-text");
+        const countEl = row.querySelector(".ed-count");
+        function updateCount() {
+          const n = textEl.value.length;
+          countEl.textContent = n + " / " + maxC + " tecken";
+          countEl.style.color = n >= maxC ? "#dc2626" : "";
+        }
+        textEl.addEventListener("input", updateCount);
+        updateCount();
         row.querySelector(".ed-save").addEventListener("click", function () {
-          const text = row.querySelector(".ed-text").value.trim();
+          const text = textEl.value.trim();
           const q = row.querySelector(".ed-question").value.trim();
           if (!text || !q) { alert("Fyll i både text och fråga."); return; }
           StartenSvenska.setDay(i, { subject: row.querySelector(".ed-subject").value, text: text, questions: [q], source: "manual" });
@@ -482,10 +651,9 @@
       s.init();
     }
 
-    $("#btn-create").addEventListener("click", createWeek);
     $("#btn-edit-sv").addEventListener("click", function () { openEditor("sv"); });
     $("#btn-edit-matte").addEventListener("click", function () { openEditor("matte"); });
-    $("#btn-print").addEventListener("click", printBoth);
+    $("#btn-rand-sv").addEventListener("click", randomizeSvenska);
 
     $("#edit-close").addEventListener("click", closePanel);
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePanel(); });
@@ -513,7 +681,51 @@
       });
     }
     const newBtn = $("#btn-new-week");
-    if (newBtn) newBtn.addEventListener("click", promptNewWeek);
+    if (newBtn) newBtn.addEventListener("click", openNewWeekForm);
+    const archBtn = $("#btn-archive-week");
+    if (archBtn) archBtn.addEventListener("click", archiveActiveWeek);
+    const showArchBtn = $("#btn-show-archive");
+    if (showArchBtn) showArchBtn.addEventListener("click", function () {
+      $("#archive-popover").classList.toggle("hidden");
+    });
+    $("#archive-close").addEventListener("click", function () { $("#archive-popover").classList.add("hidden"); });
+    $("#nw-save").addEventListener("click", saveNewWeekForm);
+    $("#nw-cancel").addEventListener("click", closeNewWeekForm);
+
+    // Skriv ut-meny
+    $("#btn-print").addEventListener("click", function (e) {
+      e.stopPropagation();
+      $("#print-menu").classList.toggle("hidden");
+    });
+    $("#print-single").addEventListener("click", function () {
+      $("#print-menu").classList.add("hidden");
+      printBoth();
+    });
+    $("#print-classes-open").addEventListener("click", function () {
+      $("#print-menu").classList.add("hidden");
+      renderClassesList();
+      $("#classes-popover").classList.remove("hidden");
+    });
+    // Stäng menyn vid klick utanför
+    document.addEventListener("click", function (e) {
+      const wrap = e.target.closest(".st-print-wrap");
+      if (!wrap) $("#print-menu").classList.add("hidden");
+    });
+
+    // Klass-popover
+    $("#classes-close").addEventListener("click", function () { $("#classes-popover").classList.add("hidden"); });
+    $("#class-add").addEventListener("click", addClass);
+    ["#class-name", "#class-students"].forEach(function (sel) {
+      $(sel).addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addClass(); } });
+    });
+    $("#classes-print").addEventListener("click", printClasses);
+    // Enter i formulärfälten = spara, Escape = avbryt
+    ["#nw-week", "#nw-year", "#nw-name"].forEach(function (sel) {
+      $(sel).addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); saveNewWeekForm(); }
+        else if (e.key === "Escape") { e.preventDefault(); closeNewWeekForm(); }
+      });
+    });
 
     // Matte
     $("#btn-rand-matte").addEventListener("click", randomizeMatte);
