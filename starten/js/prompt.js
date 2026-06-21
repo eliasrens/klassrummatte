@@ -31,14 +31,19 @@ window.StartenPrompt = (function () {
           ? "- Variera innehållet inom ämnesområdet.\n"
           : "- Ge varje text ett eget tema (äventyr, vardag, natur, teknik, mysterium, sport, mat).\n");
     const qWord = numQuestions > 1 ? "frågor" : "fråga";
-    const maxChars = (window.STARTEN_MAX_CHARS || 320);
-    const maxWords = Math.round(maxChars / 6.3);
+    const maxChars = (window.STARTEN_MAX_CHARS || 290);
+    // Sikta på övre tredjedelen av intervallet så texterna utnyttjar utrymmet på arket.
+    const targetLow  = Math.round(maxChars * 0.86); // ~250 vid 290
+    const targetHigh = Math.round(maxChars * 0.97); // ~280 vid 290
+    const targetWords = Math.round(((targetLow + targetHigh) / 2) / 6.3);
 
     return (
       "Du skapar " + SUBJECT_DESC[subject] + " för svensk grundskola (" + age + ").\n\n" +
-      "Skapa " + count + " korta texter. Varje text ska:\n" +
-      "- vara 3–5 meningar lång och engagerande,\n" +
-      "- vara HÖGST " + maxChars + " tecken lång (ungefär " + maxWords + " ord) så att den får plats i rutan,\n" +
+      "Skapa " + count + " texter. Varje text ska:\n" +
+      "- vara 4–6 meningar lång, engagerande och innehållsrik,\n" +
+      "- sikta på " + targetLow + "–" + targetHigh + " tecken (ungefär " + targetWords + " ord). " +
+        "Det är VIKTIGT att texten är så här lång – kortare texter är försiktiga och slösar plats. " +
+        "Absolut tak: " + maxChars + " tecken.\n" +
       langNote + topicLine +
       "- följas av " + numQuestions + " läsförståelse" + qWord + " som kräver att man förstått texten.\n\n" +
       "Svara ENDAST med giltig JSON – en array i exakt detta format, utan inledande text, " +

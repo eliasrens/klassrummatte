@@ -27,6 +27,13 @@
       </div>
 
       <div class="st-design">
+        <div class="st-week-field">
+          <label for="week-select">Vecka</label>
+          <div class="st-week-row">
+            <select id="week-select" class="st-input st-input--sm" aria-label="Välj vecka"></select>
+            <button id="btn-new-week" class="st-btn st-btn--ghost st-btn--sm" title="Skapa ny vecka">＋ Ny</button>
+          </div>
+        </div>
         <div class="st-title-field">
           <label for="st-title">Rubrik</label>
           <input id="st-title" type="text" value="Starten" placeholder="t.ex. Starten v.16" />
@@ -94,7 +101,7 @@
               </select>
             </label>
             <label class="st-field">Text
-              <textarea id="own-text" rows="4" class="st-input" maxlength="320"></textarea>
+              <textarea id="own-text" rows="4" class="st-input" maxlength="290"></textarea>
               <span id="own-count" class="st-muted st-count"></span>
             </label>
             <label class="st-field">Fråga
@@ -121,9 +128,6 @@
               </label>
               <label class="st-field">Antal
                 <input id="gen-count" type="number" min="1" max="30" value="5" class="st-input" />
-              </label>
-              <label class="st-field">Frågor/text
-                <input id="gen-questions" type="number" min="1" max="5" value="1" class="st-input" />
               </label>
               <label class="st-field">Nivå
                 <input id="gen-age" type="text" value="årskurs 4–6" class="st-input" />
@@ -206,6 +210,7 @@
 
   <!-- Starten-sidans egna delar -->
   <script src="js/prompt.js"></script>
+  <script src="js/weeks-store.js"></script>
   <script src="js/svenska.js"></script>
   <script src="js/starten-app.js"></script>
 </body>

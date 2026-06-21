@@ -5,14 +5,14 @@ window.StartenSvenska = (function () {
   "use strict";
 
   const DAYS = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"];
-  // Teckengräns per text – avstämd så att en hel sida med maxlånga texter ryms.
-  const MAX_CHARS = 320;
+  // Teckengräns per text – avstämd så att en hel sida med maxlånga texter ryms vid 16px.
+  const MAX_CHARS = 290;
   window.STARTEN_MAX_CHARS = MAX_CHARS;
-  const FIXED_SV = "Välj ut ett svårt ord från texten som du skulle vilja lära dig:";
-  const FIXED_EN = "Choose a difficult word from the text that you would like to learn:";
+  const FIXED_SV = "Ett ord från texten som jag vill lära mig:";
+  const FIXED_EN = "A word from the text I want to learn:";
 
   const KEY_BANK = "starten.bank.v1";
-  const KEY_WEEK = "starten.week.v1";
+  // KEY_WEEK (legacy) hanteras nu av StartenWeeksStore (migreras till `weeks`-collection).
 
   const SEED = [
     { subject: "svenska", text: "Djupt inne i den täta skogen stod ett gammalt, övergivet trätorn. Ingen hade bott där på över hundra år, men i morse syntes plötsligt en tunn strimma rök stiga från skorstenen. Fåglarna tystnade som om de väntade på något.", questions: ["Vad hände vid tornet i morse som var ovanligt?"] },
@@ -42,7 +42,8 @@ window.StartenSvenska = (function () {
       id: raw.id || uid(),
       subject: ["svenska", "no", "so", "engelska"].indexOf(subject) !== -1 ? subject : "svenska",
       text: text, questions: qs,
-      fixedField: raw.fixedField || fixedFor(subject),
+      // Alltid nuvarande version – gamla bank-poster får ny label automatiskt.
+      fixedField: fixedFor(subject),
       source: source || raw.source || "manual",
       createdAt: raw.createdAt || new Date().toISOString()
     };
@@ -100,23 +101,31 @@ window.StartenSvenska = (function () {
     else { bankCache = bankCache.filter(function (x) { return x.id !== id; }); emitBank(); }
   }
 
-  /* ---- Vecka ---- */
-  function getWeek() { return read(KEY_WEEK, { weekLabel: defaultWeekLabel(), days: [null, null, null, null, null] }); }
-  function saveWeek(w) { write(KEY_WEEK, w); }
-  function defaultWeekLabel() {
-    const now = new Date();
-    const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-    const dayNum = (d.getUTCDay() + 6) % 7;
-    d.setUTCDate(d.getUTCDate() - dayNum + 3);
-    const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
-    const week = 1 + Math.round(((d - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
-    return "v." + week + " " + d.getUTCFullYear();
+  /* ---- Vecka (delegerar till StartenWeeksStore) ---- */
+  // EMPTY_DAYS används bara som return-fallback innan WeeksStore har laddat.
+  const EMPTY_WEEK = { id: "", weekLabel: "", days: [null, null, null, null, null], title: "Starten", color: "", matte: null };
+
+  function store() { return window.StartenWeeksStore || null; }
+
+  function getWeek() {
+    const s = store();
+    const w = s && s.getActive();
+    if (!w) return Object.assign({}, EMPTY_WEEK);
+    // Backåtkomp: ge weekLabel om läsare letar efter det fältet.
+    if (!w.weekLabel) w.weekLabel = s.weekLabel({ year: w.year, week: w.week });
+    return w;
+  }
+  function saveWeek(w) {
+    const s = store();
+    if (!s) return;
+    s.save(w);
   }
 
   function randomizeWeek() {
     const pool = getBank().slice();
     for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
     const week = getWeek();
+    if (!week.id) return week;
     week.days = DAYS.map(function (_, i) { return pool.length ? Object.assign({}, pool[i % pool.length]) : null; });
     saveWeek(week);
     return week;
@@ -124,6 +133,7 @@ window.StartenSvenska = (function () {
 
   function setDay(i, raw) {
     const week = getWeek();
+    if (!week.id) return;
     week.days[i] = raw ? normalize(raw, raw.source) : null;
     saveWeek(week);
   }
@@ -133,10 +143,7 @@ window.StartenSvenska = (function () {
   function seedIfEmpty() {
     // Bank: i molnläge seedas den av subscribeBank (tom collection). Lokalt läge:
     if (!cloudDb() && !bankCache.length) { addToBank(SEED, null); }
-    // Vecka: skapa tom om ingen finns (fylls när banken laddats).
-    if (!localStorage.getItem(KEY_WEEK)) {
-      saveWeek({ weekLabel: defaultWeekLabel(), days: [null, null, null, null, null] });
-    }
+    // Vecka hanteras av StartenWeeksStore (init skapar nuvarande ISO-vecka vid behov).
   }
 
   /* ---- Ark-rendering (som .ab-sheet) ---- */

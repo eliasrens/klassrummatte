@@ -91,6 +91,12 @@ body {
 .st-title-field label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
 .st-title-field input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.4rem 0.6rem; font-size: 0.95rem; min-width: 12rem; }
 
+/* Vecko-väljare i toppbaren */
+.st-week-field { display: flex; flex-direction: column; gap: 0.2rem; }
+.st-week-field label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.st-week-row { display: flex; gap: 0.35rem; align-items: center; }
+.st-week-row select { border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.4rem 0.5rem; font-size: 0.9rem; min-width: 10rem; background: #fff; }
+
 /* Design-del (rubrik + färgtema) i toppbaren */
 .st-design { display: flex; gap: 1.2rem; align-items: flex-end; flex-wrap: wrap; }
 .st-design-colors { display: flex; flex-direction: column; gap: 0.25rem; }
@@ -224,7 +230,7 @@ body.edit-right main { padding-right: var(--panel-w); transition: padding 0.15s;
   line-height: 1.4;
   color: var(--ink);
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
 }
 .st-sv-empty { color: #cbd5e1; }
 .st-sv-question {
@@ -234,19 +240,19 @@ body.edit-right main { padding-right: var(--panel-w); transition: padding 0.15s;
   margin: 0 0 2px;
   font-size: 14px;
 }
-.st-sv-writeline { border-bottom: 2px solid #94a3b8; height: 0.7cm; }
+.st-sv-writeline { border-bottom: 2px solid #94a3b8; height: 1.1cm; }
 .st-sv-fixed {
   background: #f8fafc;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 0.25cm 0.3cm;
+  padding: 0.3cm 0.3cm 0.3cm;
   margin-top: auto;
 }
 .st-sv-fixed-label {
   font-family: var(--reading-font);
   color: #475569;
-  font-size: 12.5px;
-  margin: 0 0 0.28cm;
+  font-size: 14px;
+  margin: 0 0 0.85cm;
 }
 .st-sv-dotted { border-bottom: 2px dashed #94a3b8; height: 0; }
 

@@ -14,7 +14,10 @@
   function subjLabel(s) { return SUBJ[s] || "Svenska"; }
 
   // Cachat matte-ark + ev. dag som redigeras inline.
-  const state = { matte: null, editingDay: null };
+  // matte = { rows, grade } – speglar veckans matte vid render.
+  const state = { matte: null, editingDay: null, savingFromWeek: false };
+
+  function weeksStore() { return window.StartenWeeksStore || null; }
 
   /* ── Avläsning av kontroller ─────────────────────────── */
   function currentColor() { const b = document.querySelector(".st-color-btn--active"); return b ? (b.dataset.theme || "") : ""; }
@@ -39,8 +42,10 @@
     const m = readMatteSettings();
     state.matte = {
       rows: ArbetsbladStarten.generateStartenProblemsWithOps(m.grade, m.ops, m.showDiv, m.vaxling),
-      grade: m.grade
+      grade: m.grade,
+      ops: m.ops, showDiv: m.showDiv, vaxling: m.vaxling
     };
+    persistMatteToWeek();
   }
 
   function regenCell(sheetIdx, d, cellIdx) {
@@ -57,7 +62,24 @@
       const divisor = PluginUtils.randInt(2, 9), quotient = PluginUtils.randInt(2, 9);
       row.brak = { dividend: divisor * quotient, divisor: divisor, quotient: quotient };
     }
+    persistMatteToWeek();
     render();
+  }
+
+  function persistMatteToWeek() {
+    const s = weeksStore();
+    if (!s || state.savingFromWeek || !state.matte) return;
+    const w = s.getActive();
+    if (!w || !w.id) return;
+    s.patchActive({
+      matte: {
+        grade: state.matte.grade,
+        ops: state.matte.ops || [],
+        showDiv: !!state.matte.showDiv,
+        vaxling: state.matte.vaxling || null,
+        rows: state.matte.rows || []
+      }
+    });
   }
 
   /* ── Rendera båda sidorna ────────────────────────────── */
@@ -91,6 +113,86 @@
   function randomizeSvenska() { StartenSvenska.randomizeWeek(); render(); refreshSv(); }
   function randomizeMatte() { regenerateMatte(); render(); }
 
+  /* ── Vecko-väljare ───────────────────────────────────── */
+  function renderWeekSelect() {
+    const sel = $("#week-select"); if (!sel) return;
+    const s = weeksStore(); if (!s) return;
+    const list = s.getList();
+    const activeId = s.getActiveId();
+    sel.innerHTML = list.map(function (w) {
+      const label = "v." + w.week + " " + w.year + (w.name ? " – " + w.name : "");
+      return '<option value="' + w.id + '"' + (w.id === activeId ? " selected" : "") + ">" + label + "</option>";
+    }).join("");
+    if (!list.length && activeId) {
+      // Aktiv vecka inte än i listan (precis skapad) – lägg in själv
+      sel.innerHTML = '<option value="' + activeId + '" selected>' + activeId + "</option>";
+    }
+  }
+
+  function promptNewWeek() {
+    const s = weeksStore(); if (!s) return;
+    const cur = s.currentIsoParts();
+    const ans = prompt("Vilken vecka? (t.ex. " + cur.week + ")", String(cur.week));
+    if (ans == null) return;
+    const w = parseInt(String(ans).trim(), 10);
+    if (!w || w < 1 || w > 53) { alert("Ange ett veckonummer mellan 1 och 53."); return; }
+    const yAns = prompt("År:", String(cur.year));
+    if (yAns == null) return;
+    const y = parseInt(String(yAns).trim(), 10);
+    if (!y || y < 2024 || y > 2099) { alert("Ange ett rimligt år."); return; }
+    const name = prompt("Eget namn på veckan (valfritt):", "") || "";
+    s.ensureWeek(y, w, name.trim());
+  }
+
+  function onWeekChanged(week) {
+    // Veckan har laddats/uppdaterats från moln (eller lokal cache). Synka UI och re-rendera.
+    state.savingFromWeek = true;
+    let needRegenerate = false;
+    try {
+      // Titel
+      const t = $("#st-title");
+      if (t && week && typeof week.title === "string") t.value = week.title;
+      // Färg
+      if (week && typeof week.color === "string") {
+        document.querySelectorAll(".st-color-btn").forEach(function (b) {
+          b.classList.toggle("st-color-btn--active", (b.dataset.theme || "") === (week.color || ""));
+        });
+      }
+      // Matte: om veckan har sparad matte, ladda den; annars regenerera enligt UI
+      if (week && week.matte && Array.isArray(week.matte.rows) && week.matte.rows.length) {
+        state.matte = {
+          rows: week.matte.rows,
+          grade: week.matte.grade || 3,
+          ops: week.matte.ops || [],
+          showDiv: !!week.matte.showDiv,
+          vaxling: week.matte.vaxling || null
+        };
+        // Synka matte-kontrollerna
+        const gradeEl = $("#m-grade"); if (gradeEl) gradeEl.value = String(state.matte.grade);
+        const ops = state.matte.ops || [];
+        $("#m-add").checked = ops.indexOf("add") !== -1;
+        $("#m-sub").checked = ops.indexOf("sub") !== -1;
+        $("#m-mult").checked = ops.indexOf("mult") !== -1;
+        $("#m-div-cell").checked = ops.indexOf("div") !== -1;
+        $("#m-div-col").checked = !!state.matte.showDiv;
+        const vax = state.matte.vaxling || "";
+        const r = document.querySelector('input[name="m-vaxling"][value="' + vax + '"]');
+        if (r) r.checked = true;
+      } else {
+        // Veckan saknar matte – flagga för att regenerera EFTER att savingFromWeek nollställts.
+        needRegenerate = true;
+      }
+      renderWeekSelect();
+    } finally {
+      state.savingFromWeek = false;
+    }
+    if (needRegenerate) regenerateMatte(); // sparar matten på veckan
+    render();
+    refreshSv();
+  }
+
+  function onWeeksListChanged() { renderWeekSelect(); }
+
   /* ── Tvåsidig utskrift ───────────────────────────────── */
   function printBoth() {
     const w = wrap();
@@ -121,7 +223,7 @@
       '.ab-sheet-inner{display:flex!important;flex-direction:column!important;flex:1!important;overflow:hidden!important;}' +
       '.ab-sheet + .ab-sheet{page-break-before:always!important;break-before:page!important;margin-top:0!important;}' +
       '.no-print{display:none!important;}' +
-      '@page{size:A4 portrait;margin:1cm 1.5cm;}' +
+      '@page{size:A4 portrait;margin:0.4cm;}' +
       '</style></head><body><div class="ab-sheet-wrap">' + content + '</div></body></html>');
     doc.close();
     iframe.onload = function () { iframe.contentWindow.focus(); iframe.contentWindow.print(); };
@@ -279,7 +381,7 @@
   function refreshPrompt() {
     $("#prompt-output").value = StartenPrompt.build({
       subject: $("#gen-subject").value, count: $("#gen-count").value,
-      numQuestions: $("#gen-questions").value, age: $("#gen-age").value, topic: $("#gen-topic").value
+      numQuestions: 1, age: $("#gen-age").value, topic: $("#gen-topic").value
     });
   }
   function copyPrompt() {
@@ -353,6 +455,9 @@
         document.querySelectorAll(".st-color-btn").forEach(function (b) {
           b.classList.toggle("st-color-btn--active", (b.dataset.theme || "") === theme);
         });
+        // Spara på aktiv vecka (skippa vid laddning från moln för att slippa eko-loop)
+        const s = weeksStore();
+        if (s && !state.savingFromWeek) s.patchActive({ color: theme });
         render();
       });
     });
@@ -366,6 +471,14 @@
     buildColorButtons();
     initColors();
 
+    // Veckostore: prenumerera först, init sist (så onChange fyller UI vid första lyft)
+    const s = weeksStore();
+    if (s) {
+      s.onChange(onWeekChanged);
+      s.onListChange(onWeeksListChanged);
+      s.init();
+    }
+
     $("#btn-create").addEventListener("click", createWeek);
     $("#btn-edit-sv").addEventListener("click", function () { openEditor("sv"); });
     $("#btn-edit-matte").addEventListener("click", function () { openEditor("matte"); });
@@ -374,7 +487,22 @@
     $("#edit-close").addEventListener("click", closePanel);
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePanel(); });
 
-    $("#st-title").addEventListener("input", render);
+    $("#st-title").addEventListener("input", function () {
+      const s2 = weeksStore();
+      if (s2 && !state.savingFromWeek) s2.patchActive({ title: currentTitle() });
+      render();
+    });
+
+    // Vecko-väljare
+    const wsel = $("#week-select");
+    if (wsel) {
+      wsel.addEventListener("change", function () {
+        const s2 = weeksStore(); if (!s2) return;
+        s2.setActive(wsel.value || null);
+      });
+    }
+    const newBtn = $("#btn-new-week");
+    if (newBtn) newBtn.addEventListener("click", promptNewWeek);
 
     // Matte
     $("#btn-rand-matte").addEventListener("click", randomizeMatte);
@@ -388,11 +516,12 @@
     $("#own-text").addEventListener("input", updateOwnCount);
     updateOwnCount();
     $("#own-add").addEventListener("click", addOwn);
-    ["#gen-subject", "#gen-count", "#gen-questions", "#gen-age", "#gen-topic"].forEach(function (s) { $(s).addEventListener("input", refreshPrompt); });
+    ["#gen-subject", "#gen-count", "#gen-age", "#gen-topic"].forEach(function (s) { $(s).addEventListener("input", refreshPrompt); });
     $("#copy-prompt").addEventListener("click", copyPrompt);
     $("#import-btn").addEventListener("click", importResponse);
 
-    render();
+    // Om ingen WeeksStore finns: rendera ändå (fallback)
+    if (!s) render();
   }
 
   document.addEventListener("DOMContentLoaded", init);
