@@ -18,6 +18,20 @@
 </head>
 <body>
 
+  <!-- ── Inloggnings-gate (visas tills rätt lösenord matas in) ─ -->
+  <div id="auth-gate" class="st-auth-gate hidden" aria-modal="true" role="dialog" aria-labelledby="auth-title">
+    <div class="st-auth-card">
+      <div class="st-auth-brand">Starten</div>
+      <h2 id="auth-title" class="st-auth-title">Logga in</h2>
+      <p class="st-auth-sub">Skriv in det delade lösenordet för att fortsätta.</p>
+      <form id="auth-form">
+        <input id="auth-input" type="password" class="st-auth-input" placeholder="Lösenord" autocomplete="current-password" required>
+        <button type="submit" class="st-btn st-btn--primary st-auth-btn">Logga in</button>
+        <p id="auth-error" class="st-auth-error"></p>
+      </form>
+    </div>
+  </div>
+
   <!-- ── Toppbar ─────────────────────────────────────────── -->
   <header class="st-topbar no-print">
     <div class="st-topbar-inner">
@@ -240,6 +254,9 @@
 
     </div>
   </aside>
+
+  <!-- Inloggnings-gate (kör först så hela sidan döljs tills man loggar in) -->
+  <script src="js/auth.js"></script>
 
   <!-- Firebase (Elias eget projekt, compat-SDK) -->
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>

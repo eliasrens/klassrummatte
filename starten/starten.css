@@ -14,6 +14,43 @@
 *, *::before, *::after { box-sizing: border-box; }
 .hidden { display: none !important; }
 
+/* ── Inloggnings-gate ─────────────────────────────────── */
+.st-auth-gate {
+  position: fixed; inset: 0;
+  background: linear-gradient(135deg, hsl(204,42%,38%), hsl(172,42%,32%));
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+body.auth-locked { overflow: hidden; }
+.st-auth-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem 2.2rem;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.28);
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+.st-auth-brand {
+  font-size: 0.8rem; font-weight: 800; letter-spacing: 3px;
+  color: hsl(204,42%,38%); text-transform: uppercase; margin-bottom: 0.4rem;
+}
+.st-auth-title { margin: 0 0 0.4rem; color: #1e293b; font-size: 1.5rem; }
+.st-auth-sub { color: var(--muted); margin: 0 0 1.2rem; font-size: 0.92rem; }
+.st-auth-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  font-size: 1rem;
+  margin-bottom: 0.6rem;
+  font-family: inherit;
+}
+.st-auth-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(42,157,143,0.18); }
+.st-auth-btn { width: 100%; padding: 0.7rem; font-size: 1rem; }
+.st-auth-error { color: #dc2626; font-size: 0.88rem; min-height: 1.2rem; margin: 0.6rem 0 0; }
+
 body {
   margin: 0;
   font-family: 'Segoe UI', system-ui, sans-serif;
