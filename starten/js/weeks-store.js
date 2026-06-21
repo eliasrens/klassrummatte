@@ -73,8 +73,11 @@ window.StartenWeeksStore = (function () {
       return;
     }
     if (unsubscribeList) unsubscribeList();
+    // Visa cachelistan direkt så väljaren inte är tom medan vi väntar på molnet
+    const cached = read("starten.weekList.v1", []);
+    if (cached.length) { allWeeks = cached; emitList(); }
     unsubscribeList = db.collection("weeks").onSnapshot(function (snap) {
-      allWeeks = snap.docs
+      const cloudWeeks = snap.docs
         .map(function (d) {
           const data = d.data() || {};
           return {
@@ -84,11 +87,15 @@ window.StartenWeeksStore = (function () {
             name: data.name || "",
             title: data.title || "Starten",
           };
-        })
-        .sort(function (a, b) {
-          if (a.year !== b.year) return b.year - a.year;
-          return b.week - a.week;
         });
+      // Slå ihop med lokalt cachade veckor som ännu inte synkat upp till molnet
+      const localOnly = listLocalWeeks().filter(function (w) {
+        return !cloudWeeks.some(function (c) { return c.id === w.id; });
+      });
+      allWeeks = cloudWeeks.concat(localOnly).sort(function (a, b) {
+        if (a.year !== b.year) return b.year - a.year;
+        return b.week - a.week;
+      });
       // Spegla metadata lokalt så list är snabb även offline nästa gång
       write("starten.weekList.v1", allWeeks);
       emitList();
@@ -96,9 +103,7 @@ window.StartenWeeksStore = (function () {
   }
 
   function listLocalWeeks() {
-    // I lokalt läge: scan localStorage efter cachade veckor
-    const cached = read("starten.weekList.v1", []);
-    if (cached.length) return cached;
+    // Scan localStorage efter cachade veckor (varje vecka ligger i `starten.week.<id>`)
     const out = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
@@ -164,8 +169,8 @@ window.StartenWeeksStore = (function () {
     const fresh = emptyWeek(id, name || "");
     write(localKey(id), fresh);
     if (db) db.collection("weeks").doc(id).set(stripId(fresh));
-    // I lokalt läge: lägg till i listan så väljaren uppdateras
-    if (!db && !allWeeks.some(function (w) { return w.id === id; })) {
+    // Lägg alltid till i listan omedelbart (cloud-snapshot kommer ikapp senare)
+    if (!allWeeks.some(function (w) { return w.id === id; })) {
       allWeeks.push({ id: id, year: fresh.year, week: fresh.week, name: fresh.name || "", title: fresh.title });
       allWeeks.sort(function (a, b) {
         if (a.year !== b.year) return b.year - a.year;

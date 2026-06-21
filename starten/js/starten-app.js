@@ -149,9 +149,12 @@
     state.savingFromWeek = true;
     let needRegenerate = false;
     try {
-      // Titel
+      // Titel – uppdatera bara om värdet faktiskt skiljer sig och användaren inte skriver
       const t = $("#st-title");
-      if (t && week && typeof week.title === "string") t.value = week.title;
+      if (t && week && typeof week.title === "string" &&
+          document.activeElement !== t && t.value !== week.title) {
+        t.value = week.title;
+      }
       // Färg
       if (week && typeof week.color === "string") {
         document.querySelectorAll(".st-color-btn").forEach(function (b) {
@@ -487,10 +490,18 @@
     $("#edit-close").addEventListener("click", closePanel);
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePanel(); });
 
+    let titleSaveTimer = null;
+    let titleRenderTimer = null;
     $("#st-title").addEventListener("input", function () {
-      const s2 = weeksStore();
-      if (s2 && !state.savingFromWeek) s2.patchActive({ title: currentTitle() });
-      render();
+      // Debounce moln-spar så vi inte ekar tillbaka mitt i att användaren skriver
+      if (titleSaveTimer) clearTimeout(titleSaveTimer);
+      titleSaveTimer = setTimeout(function () {
+        const s2 = weeksStore();
+        if (s2 && !state.savingFromWeek) s2.patchActive({ title: currentTitle() });
+      }, 400);
+      // Debounce re-render också för smidigare typing
+      if (titleRenderTimer) clearTimeout(titleRenderTimer);
+      titleRenderTimer = setTimeout(render, 150);
     });
 
     // Vecko-väljare
