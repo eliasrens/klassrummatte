@@ -138,6 +138,43 @@
   white-space: nowrap;
 }
 
+/* Text-baserad uppgift (bråk, prioritet, klocka m.fl.) – tillåt radbrytning,
+   skrivyta i samma storlek som siffer-griden så cellramen blir identisk. */
+.starten-problem--text .starten-problem-text {
+  white-space: normal;
+  text-align: center;
+  font-size: 0.95rem;
+  margin-bottom: 0.12cm;
+}
+.starten-answer-area {
+  width: 100%;
+  height: 3.4cm;            /* matchar 4 grid-rader á ~8.5mm */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.starten-answer-line {
+  width: 70%;
+  height: 0;
+  border-bottom: 2px solid #1a1a2e;
+}
+
+/* Klocka i Starten-cell: skala SVG:n så den ryms i cellramen */
+.starten-problem--klocka { vertical-align: middle; padding: 0.15cm; }
+.starten-problem--klocka .clock-container {
+  display: flex; flex-direction: column; align-items: center; gap: 0.1cm;
+}
+.starten-problem--klocka .clock-svg { width: 2.4cm; height: 2.4cm; }
+.starten-problem--klocka .clock-question {
+  font-size: 0.78rem;
+  margin: 0;
+  text-align: center;
+  color: #1a1a2e;
+}
+.starten-problem--klocka .starten-answer-line {
+  margin: 0.2cm auto 0;
+}
+
 /* Rutnät i uppställningscell */
 .starten-grid {
   border-spacing: 0;

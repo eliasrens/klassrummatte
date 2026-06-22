@@ -221,7 +221,16 @@
             </select>
           </label>
 
-          <div class="st-field">
+          <label class="st-field">Uppgiftstyp
+            <select id="m-type" class="m-setting st-input">
+              <option value="raknesatt" selected>Räknesätt (uppställning)</option>
+              <option value="brak">Bråk</option>
+              <option value="prioritet">Prioritetsregler</option>
+              <option value="klocka">Klocka</option>
+            </select>
+          </label>
+
+          <div class="st-field" id="m-raknesatt-wrap">
             <span>Räknesätt (uppställning)</span>
             <div class="st-checks">
               <label><input type="checkbox" id="m-add" class="m-setting" checked> Add</label>
@@ -231,12 +240,12 @@
             </div>
           </div>
 
-          <label class="st-field st-row">
+          <label class="st-field st-row" id="m-div-col-wrap">
             <span>Divisionskolumn</span>
             <input type="checkbox" id="m-div-col" class="m-setting" checked>
           </label>
 
-          <div class="st-field">
+          <div class="st-field" id="m-vaxling-wrap">
             <span>Växling (add/sub)</span>
             <div class="st-checks">
               <label><input type="radio" name="m-vaxling" value="" class="m-setting" checked> Blandad</label>
@@ -267,6 +276,11 @@
   <script src="../js/plugins/_math-utils.js"></script>
   <script src="../js/plugins/_render-utils.js"></script>
   <script src="../js/plugins/_utils.js"></script>
+  <script src="../js/plugins/BasePlugin.js"></script>
+  <script src="../js/plugins/PluginManager.js"></script>
+  <script src="../js/plugins/brak.js"></script>
+  <script src="../js/plugins/prioritet.js"></script>
+  <script src="../js/plugins/klocka.js"></script>
   <script src="../js/arbetsblad-config.js"></script>
   <script src="../js/arbetsblad-starten.js"></script>
 

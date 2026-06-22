@@ -527,7 +527,7 @@ const Arbetsblad = (() => {
     const fields = document.createElement('div');
     fields.className = 'ab-header-fields';
     fields.innerHTML =
-      `<div><div class="ab-field-label">Namn</div><div class="ab-field-line">&nbsp;</div></div>`;
+      `<div><div class="ab-field-label">Namn:</div><div class="ab-field-line">&nbsp;</div></div>`;
 
     header.append(left, fields);
     return header;
@@ -755,7 +755,7 @@ const Arbetsblad = (() => {
     left.append(titleEl, sub);
     const fields = document.createElement('div');
     fields.className = 'ab-header-fields';
-    fields.innerHTML = '<div><div class="ab-field-label">Namn</div><div class="ab-field-line">&nbsp;</div></div>';
+    fields.innerHTML = '<div><div class="ab-field-label">Namn:</div><div class="ab-field-line">&nbsp;</div></div>';
     header.append(left, fields);
     inner.appendChild(header);
 

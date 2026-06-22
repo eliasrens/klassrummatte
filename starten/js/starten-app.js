@@ -23,6 +23,7 @@
   function currentColor() { const b = document.querySelector(".st-color-btn--active"); return b ? (b.dataset.theme || "") : ""; }
   function currentTitle() { const v = ($("#st-title").value || "").trim(); return v || "Starten"; }
   function currentVaxling() { const el = document.querySelector('input[name="m-vaxling"]:checked'); return el && el.value ? el.value : null; }
+  function currentUppgiftstyp() { const el = $("#m-type"); return (el && el.value) || "raknesatt"; }
   function readMatteSettings() {
     const ops = [];
     if ($("#m-add").checked) ops.push("add");
@@ -30,6 +31,7 @@
     if ($("#m-mult").checked) ops.push("mult");
     if ($("#m-div-cell").checked) ops.push("div");
     return {
+      uppgiftstyp: currentUppgiftstyp(),
       ops: ops.length ? ops : ["add", "sub", "mult"],
       showDiv: $("#m-div-col").checked,
       vaxling: currentVaxling(),
@@ -37,12 +39,83 @@
     };
   }
 
+  /* ── Generera problem för icke-räknesätt-typer (plugin-baserat) ─ */
+  function brakToDisplayText(p) {
+    // Konvertera BrakPlugin-resultat till en visnings-sträng som passar i en Starten-cell.
+    const qt = p.questionType;
+    if (qt === "add-same-den") return p.a + "/" + p.denominator + " + " + p.b + "/" + p.denominator + " =";
+    if (qt === "sub-same-den") return p.a + "/" + p.denominator + " − " + p.b + "/" + p.denominator + " =";
+    if (qt === "add-diff-den") return p.a.numerator + "/" + p.a.denominator + " + " + p.b.numerator + "/" + p.b.denominator + " =";
+    if (qt === "sub-diff-den") return p.a.numerator + "/" + p.a.denominator + " − " + p.b.numerator + "/" + p.b.denominator + " =";
+    if (qt === "compare")      return p.a.numerator + "/" + p.a.denominator + "  ?  " + p.b.numerator + "/" + p.b.denominator;
+    if (qt === "simplify")     return "Förkorta: " + p.numerator + "/" + p.denominator;
+    if (qt === "fraction-of-whole") return p.numerator + "/" + p.denominator + " av " + p.whole + " =";
+    if (qt === "to-mixed")     return "Blandat tal: " + p.numerator + "/" + p.denominator;
+    if (qt === "name")         return p.nameStyle === "frac-to-word" ? "Vad heter " + p.numerator + "/" + p.denominator + "?" : "Skriv som bråk: " + p.wordName;
+    if (qt === "order-same-den" || qt === "order-diff-den") {
+      return "Sortera: " + (p.fractions || []).map(function (f) { return f.numerator + "/" + f.denominator; }).join(", ");
+    }
+    // Fallback: BrakPlugin gav addition (för låga årskurser)
+    if (p.operator && p.a != null && p.b != null) return p.a + " " + p.operator + " " + p.b + " =";
+    return "Bråk-uppgift";
+  }
+  function genSingleProblem(type, grade) {
+    if (type === "brak" && typeof PluginManager !== "undefined") {
+      const plug = PluginManager.get("brak"); if (!plug) return null;
+      const p = plug.generate({ grade: grade, brakTypes: [] });
+      p.displayText = brakToDisplayText(p);
+      p.type = "brak";
+      return p;
+    }
+    if (type === "prioritet" && typeof PluginManager !== "undefined") {
+      const plug = PluginManager.get("prioritet"); if (!plug) return null;
+      const p = plug.generate({ grade: grade, prioritetOps: ["mult", "div"] });
+      p.displayText = (p.expression || "") + "  =";
+      p.type = "prioritet";
+      return p;
+    }
+    if (type === "klocka" && typeof PluginManager !== "undefined") {
+      const plug = PluginManager.get("klocka"); if (!plug) return null;
+      // Generera tills vi får en hanterbar frågetyp för Starten (skippa "diff" som är texttung)
+      let p;
+      for (let tries = 0; tries < 10; tries++) {
+        p = plug.generate({ grade: grade, klockaTypes: ["analog"] });
+        if (p && (p.questionType === "read" || p.questionType === "add-minutes")) break;
+      }
+      if (!p) return null;
+      p.type = "klocka";
+      p.displayMode = "analog";
+      return p;
+    }
+    return null;
+  }
+  function generateStartenProblemsForType(type, grade) {
+    const rows = [];
+    for (let d = 0; d < 5; d++) {
+      const upp = [];
+      for (let i = 0; i < 4; i++) {
+        const p = genSingleProblem(type, grade);
+        if (p) upp.push(p);
+      }
+      // För icke-räknesätt fyller vi alla 4 platser i uppstallningar och har ingen brak-kolumn
+      rows.push({ uppstallningar: upp });
+    }
+    return rows;
+  }
+
   /* ── Matte: generera / byt enskild ruta ──────────────── */
   function regenerateMatte() {
     const m = readMatteSettings();
+    let rows;
+    if (m.uppgiftstyp === "raknesatt") {
+      rows = ArbetsbladStarten.generateStartenProblemsWithOps(m.grade, m.ops, m.showDiv, m.vaxling);
+    } else {
+      rows = generateStartenProblemsForType(m.uppgiftstyp, m.grade);
+    }
     state.matte = {
-      rows: ArbetsbladStarten.generateStartenProblemsWithOps(m.grade, m.ops, m.showDiv, m.vaxling),
+      rows: rows,
       grade: m.grade,
+      uppgiftstyp: m.uppgiftstyp,
       ops: m.ops, showDiv: m.showDiv, vaxling: m.vaxling
     };
     persistMatteToWeek();
@@ -51,16 +124,23 @@
   function regenCell(sheetIdx, d, cellIdx) {
     if (!state.matte) return;
     const row = state.matte.rows[d];
-    const c = PluginUtils.cfg(state.matte.grade);
-    const vax = currentVaxling();
-    const opts = vax ? { vaxling: vax } : null;
-    if (cellIdx < row.uppstallningar.length) {
-      const map = { "uppstallning-add": "add", "uppstallning-sub": "sub", "uppstallning-mult": "mult", "uppstallning-div": "div" };
-      const sub = map[row.uppstallningar[cellIdx].type] || "mult";
-      row.uppstallningar[cellIdx] = PluginUtils.genUppstallning(sub, c, opts);
-    } else if (row.brak) {
-      const divisor = PluginUtils.randInt(2, 9), quotient = PluginUtils.randInt(2, 9);
-      row.brak = { dividend: divisor * quotient, divisor: divisor, quotient: quotient };
+    const typ = state.matte.uppgiftstyp || "raknesatt";
+    if (typ === "raknesatt") {
+      const c = PluginUtils.cfg(state.matte.grade);
+      const vax = currentVaxling();
+      const opts = vax ? { vaxling: vax } : null;
+      if (cellIdx < row.uppstallningar.length) {
+        const map = { "uppstallning-add": "add", "uppstallning-sub": "sub", "uppstallning-mult": "mult", "uppstallning-div": "div" };
+        const sub = map[row.uppstallningar[cellIdx].type] || "mult";
+        row.uppstallningar[cellIdx] = PluginUtils.genUppstallning(sub, c, opts);
+      } else if (row.brak) {
+        const divisor = PluginUtils.randInt(2, 9), quotient = PluginUtils.randInt(2, 9);
+        row.brak = { dividend: divisor * quotient, divisor: divisor, quotient: quotient };
+      }
+    } else {
+      // Icke-räknesätt: generera ny enskild uppgift av samma typ
+      const p = genSingleProblem(typ, state.matte.grade);
+      if (p && cellIdx < row.uppstallningar.length) row.uppstallningar[cellIdx] = p;
     }
     persistMatteToWeek();
     render();
@@ -74,12 +154,22 @@
     s.patchActive({
       matte: {
         grade: state.matte.grade,
+        uppgiftstyp: state.matte.uppgiftstyp || "raknesatt",
         ops: state.matte.ops || [],
         showDiv: !!state.matte.showDiv,
         vaxling: state.matte.vaxling || null,
         rows: state.matte.rows || []
       }
     });
+  }
+
+  /* ── Visa rätt sub-settings beroende på uppgiftstyp ────── */
+  function syncMatteTypeUI() {
+    const typ = currentUppgiftstyp();
+    const isRakn = typ === "raknesatt";
+    const r = $("#m-raknesatt-wrap"); if (r) r.style.display = isRakn ? "" : "none";
+    const d = $("#m-div-col-wrap");   if (d) d.style.display = isRakn ? "" : "none";
+    const v = $("#m-vaxling-wrap");   if (v) v.style.display = isRakn ? "" : "none";
   }
 
   /* ── Rendera båda sidorna ────────────────────────────── */
@@ -235,12 +325,14 @@
         state.matte = {
           rows: week.matte.rows,
           grade: week.matte.grade || 3,
+          uppgiftstyp: week.matte.uppgiftstyp || "raknesatt",
           ops: week.matte.ops || [],
           showDiv: !!week.matte.showDiv,
           vaxling: week.matte.vaxling || null
         };
         // Synka matte-kontrollerna
         const gradeEl = $("#m-grade"); if (gradeEl) gradeEl.value = String(state.matte.grade);
+        const typeEl = $("#m-type");   if (typeEl)  typeEl.value  = state.matte.uppgiftstyp;
         const ops = state.matte.ops || [];
         $("#m-add").checked = ops.indexOf("add") !== -1;
         $("#m-sub").checked = ops.indexOf("sub") !== -1;
@@ -250,6 +342,7 @@
         const vax = state.matte.vaxling || "";
         const r = document.querySelector('input[name="m-vaxling"][value="' + vax + '"]');
         if (r) r.checked = true;
+        syncMatteTypeUI();
       } else {
         // Veckan saknar matte – flagga för att regenerera EFTER att savingFromWeek nollställts.
         needRegenerate = true;
@@ -730,8 +823,9 @@
     // Matte
     $("#btn-rand-matte").addEventListener("click", randomizeMatte);
     document.querySelectorAll(".m-setting").forEach(function (el) {
-      el.addEventListener("change", function () { regenerateMatte(); render(); });
+      el.addEventListener("change", function () { syncMatteTypeUI(); regenerateMatte(); render(); });
     });
+    syncMatteTypeUI();
 
     // Svenska
     $("#sv-bank-filter").addEventListener("change", renderSvBank);

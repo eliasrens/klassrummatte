@@ -189,7 +189,7 @@ window.StartenSvenska = (function () {
     inner.innerHTML =
       '<header class="ab-header starten-header">' +
         '<div class="ab-header-left"><div class="ab-title">' + title + "</div></div>" +
-        '<div class="ab-header-fields"><div><div class="ab-field-label">Namn</div><div class="ab-field-line">&nbsp;</div></div></div>' +
+        '<div class="ab-header-fields"><div><div class="ab-field-label">Namn:</div><div class="ab-field-line">&nbsp;</div></div></div>' +
       "</header>" +
       '<div class="st-sv-days">' + daysHtml + "</div>";
 

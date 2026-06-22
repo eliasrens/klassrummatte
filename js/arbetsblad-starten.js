@@ -199,6 +199,22 @@ const ArbetsbladStarten = (() => {
         `</span>` +
         `<span class="starten-eq">=</span>`;
       td.appendChild(line);
+    } else if (problem.type === 'klocka' && typeof PluginManager !== 'undefined' && PluginManager.get('klocka')) {
+      // Visa riktig klock-SVG via klocka-pluginen i samma cellstorlek
+      td.className = 'starten-problem starten-problem--klocka';
+      PluginManager.get('klocka').render(problem, td);
+    } else if (problem.displayText) {
+      // Plugin-genererad uppgift (bråk, prioritet m.fl.) – ingen siffer-grid,
+      // men SAMMA cellstorlek: en tom skrivyta för handskriften.
+      td.className = 'starten-problem starten-problem--text';
+      const text = document.createElement('div');
+      text.className = 'starten-problem-text';
+      text.textContent = problem.displayText;
+      td.appendChild(text);
+
+      const ansArea = document.createElement('div');
+      ansArea.className = 'starten-answer-area';
+      td.appendChild(ansArea);
     } else {
       td.className = 'starten-problem';
       const text = document.createElement('div');
@@ -269,7 +285,7 @@ const ArbetsbladStarten = (() => {
     left.append(titleEl, sub);
     const fields = document.createElement('div');
     fields.className = 'ab-header-fields';
-    fields.innerHTML = '<div><div class="ab-field-label">Namn</div><div class="ab-field-line">&nbsp;</div></div>';
+    fields.innerHTML = '<div><div class="ab-field-label">Namn:</div><div class="ab-field-line">&nbsp;</div></div>';
     header.append(left, fields);
     inner.appendChild(header);
 
