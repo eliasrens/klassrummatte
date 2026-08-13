@@ -42,7 +42,14 @@
 
       <div class="st-design">
         <div class="st-week-field">
-          <label for="week-select">Vecka</label>
+          <div class="st-week-label-row">
+            <label for="week-select">Vecka</label>
+            <select id="grade-select" class="st-grade-select" aria-label="Välj årskurs">
+              <option value="3">Åk 3</option>
+              <option value="4" selected>Åk 4</option>
+              <option value="5">Åk 5</option>
+            </select>
+          </div>
           <div class="st-week-row" id="week-row">
             <select id="week-select" class="st-input st-input--sm" aria-label="Välj vecka"></select>
             <button id="btn-new-week"      class="st-btn st-btn--ghost st-btn--sm" title="Skapa ny vecka">＋ Ny</button>
@@ -52,6 +59,9 @@
           <div class="st-new-week-form hidden" id="new-week-form">
             <input type="number" id="nw-week" class="st-input st-input--sm" min="1" max="53" placeholder="Vecka" aria-label="Veckonummer">
             <input type="number" id="nw-year" class="st-input st-input--sm" min="2024" max="2099" placeholder="År" aria-label="År">
+            <select id="nw-grade" class="st-input st-input--sm" aria-label="Årskurs">
+              <option value="3">Åk 3</option><option value="4">Åk 4</option><option value="5">Åk 5</option>
+            </select>
             <input type="text"   id="nw-name" class="st-input st-input--sm" placeholder="Namn (valfritt)" aria-label="Namn">
             <button id="nw-save"   class="st-btn st-btn--primary st-btn--sm">Skapa</button>
             <button id="nw-cancel" class="st-btn st-btn--ghost   st-btn--sm">Avbryt</button>
@@ -137,13 +147,16 @@
         <details class="st-details">
           <summary>💡 Idébanken (<span id="sv-bank-count">0</span>)</summary>
           <div class="st-bank-tools">
-            <select id="sv-bank-filter" class="st-input st-input--sm">
-              <option value="">Alla ämnen</option>
-              <option value="svenska">Berättelse</option>
-              <option value="no">NO</option>
-              <option value="so">SO</option>
-              <option value="engelska">Engelska</option>
-            </select>
+            <div id="sv-bank-filters" class="st-filter-grid">
+              <label><input type="checkbox" value="svenska"> Berättelse</label>
+              <label><input type="checkbox" value="no"> NO</label>
+              <label><input type="checkbox" value="so"> SO</label>
+              <label><input type="checkbox" value="engelska"> Engelska</label>
+            </div>
+            <div class="st-bank-tools-foot">
+              <span class="st-muted st-filter-hint">Inget ikryssat = alla visas</span>
+              <button id="sv-bank-clear" class="st-link-btn hidden" type="button">Rensa filter</button>
+            </div>
           </div>
           <div id="sv-bank" class="st-bank"></div>
         </details>

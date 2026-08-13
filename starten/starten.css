@@ -137,9 +137,20 @@ body {
 .st-week-row select { border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.4rem 0.5rem; font-size: 0.9rem; min-width: 10rem; background: #fff; }
 .st-new-week-form { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
 .st-new-week-form input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.4rem 0.5rem; font-size: 0.9rem; background: #fff; }
+.st-new-week-form select { border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.4rem 0.5rem; font-size: 0.9rem; background: #fff; }
 .st-new-week-form #nw-week { width: 4rem; }
 .st-new-week-form #nw-year { width: 5rem; }
+.st-new-week-form #nw-grade { width: 5.5rem; }
 .st-new-week-form #nw-name { width: 10rem; }
+
+/* Årskurs-väljare på etikettraden (filtrerar vilka veckor som syns).
+   Ligger i etikettens lediga utrymme så toppbarens kolumnbredder är oförändrade. */
+.st-week-label-row { display: flex; align-items: center; gap: 0.5rem; }
+.st-grade-select {
+  border: 1px solid #cbd5e1; border-radius: 5px; padding: 0.05rem 0.3rem;
+  font-size: 0.75rem; font-weight: 700; background: #fff; color: #334155;
+  cursor: pointer;
+}
 
 .st-link-btn { background: none; border: none; color: var(--accent2); font-size: 0.8rem; cursor: pointer; padding: 0.2rem 0; text-align: left; }
 .st-link-btn:hover { text-decoration: underline; }
@@ -271,6 +282,23 @@ body.edit-right main { padding-right: var(--panel-w); transition: padding 0.15s;
 
 /* Idébank */
 .st-bank-tools { margin-bottom: 0.5rem; }
+/* Ämnesfilter som rutnät – inget ikryssat betyder "visa alla" */
+.st-filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem 0.6rem; }
+.st-filter-grid label {
+  display: flex; align-items: center; gap: 0.35rem; cursor: pointer;
+  font-size: 0.82rem; color: #475569;
+  border: 1px solid var(--line); border-radius: 7px; padding: 0.28rem 0.45rem;
+}
+.st-filter-grid label:hover { background: #f8fafc; }
+.st-filter-grid input { margin: 0; }
+.st-bank-tools-foot { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.35rem; }
+.st-filter-hint { font-size: 0.75rem; }
+/* Datumrubrik mellan grupperna i idébanken */
+.st-bank-date {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--muted); padding: 0.5rem 0 0.1rem; border-bottom: 1px solid var(--line);
+}
+.st-bank-date:first-child { padding-top: 0.1rem; }
 .st-bank { display: flex; flex-direction: column; gap: 0.4rem; }
 .st-bank-item { border: 1px solid var(--line); border-radius: 9px; padding: 0.5rem 0.6rem; }
 .st-bank-text { font-size: 0.82rem; color: #334155; line-height: 1.35; }

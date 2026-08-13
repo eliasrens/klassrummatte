@@ -204,17 +204,25 @@
   function randomizeMatte() { regenerateMatte(); render(); }
 
   /* ── Vecko-väljare ───────────────────────────────────── */
+  function weekLabelFor(w) {
+    return "v." + w.week + " " + w.year + (w.name ? " – " + w.name : "");
+  }
+
   function renderWeekSelect() {
     const sel = $("#week-select"); if (!sel) return;
     const s = weeksStore(); if (!s) return;
-    const list = s.getList(); // exkluderar arkiverade
+    const list = s.getList(); // exkluderar arkiverade + filtrerar på vald årskurs
     const activeId = s.getActiveId();
+
+    const gsel = $("#grade-select");
+    if (gsel && document.activeElement !== gsel) gsel.value = String(s.getGrade());
+
     sel.innerHTML = list.map(function (w) {
-      const label = "v." + w.week + " " + w.year + (w.name ? " – " + w.name : "");
-      return '<option value="' + w.id + '"' + (w.id === activeId ? " selected" : "") + ">" + label + "</option>";
+      return '<option value="' + w.id + '"' + (w.id === activeId ? " selected" : "") + ">" +
+             escapeHtml(weekLabelFor(w)) + "</option>";
     }).join("");
-    if (!list.length && activeId) {
-      sel.innerHTML = '<option value="' + activeId + '" selected>' + activeId + "</option>";
+    if (!list.length) {
+      sel.innerHTML = '<option value="">Ingen vecka för åk ' + s.getGrade() + "</option>";
     }
 
     // Visa "Arkiverade (N)"-länken om det finns några
@@ -237,8 +245,7 @@
       return;
     }
     host.innerHTML = archived.map(function (w) {
-      const label = "v." + w.week + " " + w.year + (w.name ? " – " + w.name : "");
-      return '<div class="st-archive-item"><span>' + escapeHtml(label) + '</span>' +
+      return '<div class="st-archive-item"><span>' + escapeHtml(weekLabelFor(w)) + '</span>' +
              '<span class="st-archive-btns">' +
                '<button class="st-restore" data-id="' + w.id + '">Återställ</button>' +
                '<button class="st-delete"  data-id="' + w.id + '" title="Ta bort permanent">🗑</button>' +
@@ -255,7 +262,7 @@
       btn.addEventListener("click", function () {
         const id = btn.dataset.id;
         const w = s.getArchivedList().find(function (x) { return x.id === id; });
-        const label = w ? ("v." + w.week + " " + w.year + (w.name ? " – " + w.name : "")) : id;
+        const label = w ? weekLabelFor(w) : id;
         if (!confirm('Ta bort "' + label + '" permanent? Detta går inte att ångra.')) return;
         s.deleteWeek(id);
       });
@@ -265,8 +272,7 @@
   function archiveActiveWeek() {
     const s = weeksStore(); if (!s) return;
     const cur = s.getActive(); if (!cur || !cur.id) return;
-    const label = "v." + cur.week + " " + cur.year + (cur.name ? " – " + cur.name : "");
-    if (!confirm("Arkivera \"" + label + "\"? Du kan återställa den senare.")) return;
+    if (!confirm("Arkivera \"" + weekLabelFor(cur) + "\"? Du kan återställa den senare.")) return;
     s.archiveWeek(cur.id);
     // Växla till första icke-arkiverade vecka (eller skapa nuvarande ISO)
     const list = s.getList();
@@ -282,6 +288,7 @@
     const cur = s.currentIsoParts();
     $("#nw-week").value = String(cur.week);
     $("#nw-year").value = String(cur.year);
+    $("#nw-grade").value = String(s.getGrade());
     $("#nw-name").value = "";
     $("#week-row").classList.add("hidden");
     $("#new-week-form").classList.remove("hidden");
@@ -296,10 +303,14 @@
     const s = weeksStore(); if (!s) return;
     const w = parseInt(($("#nw-week").value || "").trim(), 10);
     const y = parseInt(($("#nw-year").value || "").trim(), 10);
+    const g = parseInt($("#nw-grade").value, 10) || s.getGrade();
     const name = ($("#nw-name").value || "").trim();
     if (!w || w < 1 || w > 53) { $("#nw-week").focus(); return; }
     if (!y || y < 2024 || y > 2099) { $("#nw-year").focus(); return; }
-    s.ensureWeek(y, w, name);
+    // Skapa först – då finns veckan i listan när vyn byter årskurs, så setGrade
+    // behåller den i stället för att auto-skapa en tom vecka för den nya årskursen.
+    s.ensureWeek(y, w, name, g);
+    s.setGrade(g);
     closeNewWeekForm();
   }
 
@@ -344,7 +355,12 @@
         if (r) r.checked = true;
         syncMatteTypeUI();
       } else {
-        // Veckan saknar matte – flagga för att regenerera EFTER att savingFromWeek nollställts.
+        // Veckan saknar matte – låt veckans årskurs sätta mattenivån som utgångspunkt.
+        const s2 = weeksStore();
+        const wg = (s2 && week) ? s2.weekGrade(week) : null;
+        const gEl = $("#m-grade");
+        if (wg && gEl) gEl.value = String(wg);
+        // Flagga för att regenerera EFTER att savingFromWeek nollställts.
         needRegenerate = true;
       }
       renderWeekSelect();
@@ -591,14 +607,54 @@
   }
 
   /* ── Svenska: idébank ────────────────────────────────── */
+  // Ikryssade ämnen i rutnätsfiltret. Tom lista = inget filter = allt visas.
+  function bankFilterSubjects() {
+    const boxes = document.querySelectorAll("#sv-bank-filters input:checked");
+    return Array.prototype.map.call(boxes, function (b) { return b.value; });
+  }
+
+  function dayKey(iso) { return String(iso || "").slice(0, 10); }
+
+  function dateHeading(iso) {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "Utan datum";
+    const midnight = function (x) { return new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(); };
+    const diff = Math.round((midnight(new Date()) - midnight(d)) / 86400000);
+    if (diff === 0) return "Idag";
+    if (diff === 1) return "Igår";
+    return d.toLocaleDateString("sv-SE", { day: "numeric", month: "long", year: "numeric" });
+  }
+
   function renderSvBank() {
-    const filter = $("#sv-bank-filter").value;
+    const subjects = bankFilterSubjects();
     const all = StartenSvenska.getBank();
-    const bank = all.filter(function (e) { return !filter || e.subject === filter; });
+    const bank = subjects.length
+      ? all.filter(function (e) { return subjects.indexOf(e.subject) !== -1; })
+      : all.slice();
+    // Nyast först – createdAt är ISO-strängar, så lexikografisk jämförelse räcker.
+    bank.sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });
+
     $("#sv-bank-count").textContent = all.length;
+    const clearBtn = $("#sv-bank-clear");
+    if (clearBtn) clearBtn.classList.toggle("hidden", !subjects.length);
+    const hint = document.querySelector(".st-filter-hint");
+    if (hint) hint.textContent = subjects.length
+      ? bank.length + " av " + all.length + " visas"
+      : "Inget ikryssat = alla visas";
+
     const host = $("#sv-bank"); host.innerHTML = "";
     if (!bank.length) { host.innerHTML = '<p class="st-muted">Inga texter.</p>'; return; }
+
+    let lastDay = null;
     bank.forEach(function (e) {
+      const key = dayKey(e.createdAt);
+      if (key !== lastDay) {
+        lastDay = key;
+        const head = document.createElement("div");
+        head.className = "st-bank-date";
+        head.textContent = dateHeading(e.createdAt);
+        host.appendChild(head);
+      }
       const item = document.createElement("div");
       item.className = "st-bank-item";
       const dayOpts = StartenSvenska.DAYS.map(function (d, i) { return '<option value="' + i + '">' + d + "</option>"; }).join("");
@@ -769,8 +825,15 @@
     const wsel = $("#week-select");
     if (wsel) {
       wsel.addEventListener("change", function () {
+        const s2 = weeksStore(); if (!s2 || !wsel.value) return;
+        s2.setActive(wsel.value);
+      });
+    }
+    const gsel = $("#grade-select");
+    if (gsel) {
+      gsel.addEventListener("change", function () {
         const s2 = weeksStore(); if (!s2) return;
-        s2.setActive(wsel.value || null);
+        s2.setGrade(gsel.value);
       });
     }
     const newBtn = $("#btn-new-week");
@@ -828,7 +891,11 @@
     syncMatteTypeUI();
 
     // Svenska
-    $("#sv-bank-filter").addEventListener("change", renderSvBank);
+    $("#sv-bank-filters").addEventListener("change", renderSvBank);
+    $("#sv-bank-clear").addEventListener("click", function () {
+      document.querySelectorAll("#sv-bank-filters input:checked").forEach(function (b) { b.checked = false; });
+      renderSvBank();
+    });
     $("#own-text").setAttribute("maxlength", String(StartenSvenska.MAX_CHARS));
     $("#own-text").addEventListener("input", updateOwnCount);
     updateOwnCount();
