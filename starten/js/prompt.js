@@ -31,10 +31,10 @@ window.StartenPrompt = (function () {
           ? "- Variera innehållet inom ämnesområdet.\n"
           : "- Ge varje text ett eget tema (äventyr, vardag, natur, teknik, mysterium, sport, mat).\n");
     const qWord = numQuestions > 1 ? "frågor" : "fråga";
-    const maxChars = (window.STARTEN_MAX_CHARS || 290);
+    const maxChars = (window.STARTEN_MAX_CHARS || 250);
     // Sikta på övre tredjedelen av intervallet så texterna utnyttjar utrymmet på arket.
-    const targetLow  = Math.round(maxChars * 0.86); // ~250 vid 290
-    const targetHigh = Math.round(maxChars * 0.97); // ~280 vid 290
+    const targetLow  = Math.round(maxChars * 0.86); // ~215 vid 250
+    const targetHigh = Math.round(maxChars * 0.97); // ~243 vid 250
     const targetWords = Math.round(((targetLow + targetHigh) / 2) / 6.3);
 
     return (

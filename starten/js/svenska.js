@@ -6,7 +6,7 @@ window.StartenSvenska = (function () {
 
   const DAYS = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"];
   // Teckengräns per text – avstämd så att en hel sida med maxlånga texter ryms vid 16px.
-  const MAX_CHARS = 290;
+  const MAX_CHARS = 250;
   window.STARTEN_MAX_CHARS = MAX_CHARS;
   const FIXED_SV = "Ett ord från texten som jag vill lära mig:";
   const FIXED_EN = "A word from the text I want to learn:";
