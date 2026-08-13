@@ -12,6 +12,14 @@ window.StartenWeeksStore = (function () {
   const DEFAULT_GRADE = 4;
 
   function cloudDb() { return (window.StartenFirebase && window.StartenFirebase.db) || null; }
+  // Molnskrivningar måste alltid logga fel – annars ser en avvisad
+  // säkerhetsregel ut som att allt sparats (fungerar lokalt, borta vid omladdning).
+  function cloudFail(what, id) {
+    return function (err) {
+      console.error("[Starten] " + what + " kunde inte sparas i molnet (" + id + "):",
+        (err && err.code) || "", (err && err.message) || err);
+    };
+  }
   function read(key, fb) { try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fb; } catch (e) { return fb; } }
   function write(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
   function del(key)      { try { localStorage.removeItem(key); } catch (e) {} }
@@ -156,10 +164,14 @@ window.StartenWeeksStore = (function () {
     unsubscribeActive = db.collection("weeks").doc(id).onSnapshot(function (snap) {
       if (snap.exists) {
         activeWeek = Object.assign({ id: id }, snap.data());
-      } else {
+        write(localKey(id), activeWeek);
+      } else if (!activeWeek) {
+        // Veckan finns varken i molnet eller lokalt – först nu är den tom.
+        // Har vi en lokal kopia behålls den, så en skrivning som inte gått
+        // igenom inte raderar innehållet vid nästa omladdning.
         activeWeek = emptyWeek(id);
+        write(localKey(id), activeWeek);
       }
-      write(localKey(id), activeWeek);
       emitChange();
     }, function (err) { console.warn("[Starten] week-prenumeration fel:", err); });
   }
@@ -253,7 +265,7 @@ window.StartenWeeksStore = (function () {
     }
     const fresh = emptyWeek(id, name || "");
     write(localKey(id), fresh);
-    if (db) db.collection("weeks").doc(id).set(stripId(fresh));
+    if (db) db.collection("weeks").doc(id).set(stripId(fresh)).catch(cloudFail("Ny vecka", id));
     // Lägg alltid till i listan omedelbart (cloud-snapshot kommer ikapp senare)
     if (!allWeeks.some(function (w) { return w.id === id; })) {
       allWeeks.push({ id: id, year: fresh.year, week: fresh.week, grade: fresh.grade, name: fresh.name || "", title: fresh.title });
@@ -279,7 +291,7 @@ window.StartenWeeksStore = (function () {
     week.updatedAt = new Date().toISOString();
     write(localKey(week.id), week);
     const db = cloudDb();
-    if (db) db.collection("weeks").doc(week.id).set(stripId(week), { merge: true });
+    if (db) db.collection("weeks").doc(week.id).set(stripId(week), { merge: true }).catch(cloudFail("Vecka", week.id));
     if (activeWeek && activeWeek.id === week.id) {
       activeWeek = week;
       emitChange();
@@ -305,7 +317,7 @@ window.StartenWeeksStore = (function () {
     if (legacy.weekLabel) fresh.name = legacy.weekLabel;
     write(localKey(id), fresh);
     const db = cloudDb();
-    if (db) db.collection("weeks").doc(id).set(stripId(fresh), { merge: true });
+    if (db) db.collection("weeks").doc(id).set(stripId(fresh), { merge: true }).catch(cloudFail("Migrerad vecka", id));
     del(KEY_LEGACY_WEEK);
     return id;
   }

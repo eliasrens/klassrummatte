@@ -32,6 +32,12 @@ Reglerna ligger i `firestore.rules`. **De måste aktiveras via Firebase Console
 eller Firebase CLI** för att börja gälla — testläget tickar annars ut efter 30
 dagar och allt faller.
 
+> ⚠️ **Reglerna gäller inte förrän de publicerats.** Ändrar man doc-id-format
+> eller lägger till fält i koden måste `firestore.rules` publiceras om, annars
+> avvisar Firestore skrivningarna. Symtomet är lömskt: allt ser ut att fungera
+> (localStorage-cachen svarar) men är borta efter en omladdning. Kolla alltid
+> webbläsarkonsolen efter `[Starten] ... kunde inte sparas i molnet`.
+
 ### Aktivera via webben (enklast)
 
 1. Gå till https://console.firebase.google.com/project/starten-ba789/firestore/rules
@@ -56,7 +62,8 @@ firebase deploy --only firestore:rules
   ta bort, men data måste matcha schemat (max 6 fält, text max 500 tecken, 1-5
   frågor osv).
 - **`weeks/`** (per-vecka data): samma princip + doc-id måste matcha mönstret
-  `YYYY-vWW`.
+  `YYYY-vWW-akN` (åk-suffixet är valfritt – veckor skapade före årskursvalet
+  saknar det och räknas som åk 4).
 - Alla andra collections: **nekas helt**.
 
 Det här ger:
