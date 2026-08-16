@@ -19,7 +19,7 @@ service cloud.firestore {
       allow read: if true;
 
       function bankValid(d) {
-        return d.size() <= 6
+        return d.size() <= 8
           && d.subject is string
           && d.subject.size() <= 16
           && d.text is string
@@ -30,7 +30,8 @@ service cloud.firestore {
           && d.questions.size() <= 5
           && (!('fixedField' in d) || d.fixedField is string)
           && (!('source'     in d) || d.source     is string)
-          && (!('createdAt'  in d) || d.createdAt  is string);
+          && (!('createdAt'  in d) || d.createdAt  is string)
+          && (!('usage'      in d) || (d.usage is list && d.usage.size() <= 12));
       }
 
       allow create, update: if bankValid(request.resource.data);

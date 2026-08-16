@@ -45,7 +45,10 @@ window.StartenSvenska = (function () {
       // Alltid nuvarande version – gamla bank-poster får ny label automatiskt.
       fixedField: fixedFor(subject),
       source: source || raw.source || "manual",
-      createdAt: raw.createdAt || new Date().toISOString()
+      createdAt: raw.createdAt || new Date().toISOString(),
+      // [{ grade, year, week }] – var texten redan använts. Måste med här,
+      // annars strippas fältet bort när bank-snapshoten normaliseras.
+      usage: Array.isArray(raw.usage) ? raw.usage : []
     };
   }
 
@@ -79,20 +82,78 @@ window.StartenSvenska = (function () {
     }, function (err) { console.warn("[Starten] bank-prenumeration fel:", err); });
   }
 
+  // Returnerar de poster som faktiskt lades till (inte bara antalet), så anropare
+  // kan följa upp med t.ex. markUsed. Doc-id sätts explicit till postens id –
+  // annars är id:t okänt tills snapshoten kommit tillbaka.
   function addToBank(rawList, source) {
     const db = cloudDb();
     const seen = new Set(bankCache.map(function (e) { return e.text.trim().toLowerCase(); }));
-    let added = 0;
+    const added = [];
     rawList.forEach(function (raw) {
       const e = normalize(raw, source); if (!e) return;
       const fp = e.text.trim().toLowerCase(); if (seen.has(fp)) return;
-      seen.add(fp); added++;
+      seen.add(fp); added.push(e);
       const payload = { subject: e.subject, text: e.text, questions: e.questions, fixedField: e.fixedField, source: e.source, createdAt: e.createdAt };
-      if (db) { db.collection("bank").doc().set(payload); } // snapshot uppdaterar cachen
-      else { bankCache.push(e); }
+      if (db) { // snapshot uppdaterar cachen
+        db.collection("bank").doc(e.id).set(payload)
+          .catch(function (err) { console.error("[Starten] text kunde inte sparas i banken:", (err && err.code) || "", err); });
+      } else { bankCache.push(e); }
     });
-    if (!db && added) emitBank();
+    if (!db && added.length) emitBank();
     return added;
+  }
+
+  // Lägger texterna i banken vid behov och returnerar motsvarande bankposter,
+  // även för texter som redan fanns (dedupas på texten).
+  function bankAndResolve(rawList, source) {
+    const added = addToBank(rawList, source);
+    const byText = {};
+    bankCache.concat(added).forEach(function (e) { byText[e.text.trim().toLowerCase()] = e; });
+    return rawList.map(function (raw) {
+      const n = normalize(raw, source);
+      return n ? (byText[n.text.trim().toLowerCase()] || null) : null;
+    });
+  }
+
+  // Antecknar att texten använts av en viss årskurs en viss vecka.
+  // Dubbletter på (årskurs, år, vecka) hoppas över så listan inte växer vid omtryck.
+  function markUsed(ids, stampIn) {
+    if (!stampIn || !ids || !ids.length) return;
+    const db = cloudDb();
+    const stamp = {
+      grade: stampIn.grade || null,
+      year: parseInt(stampIn.year, 10) || 0,
+      week: parseInt(stampIn.week, 10) || 0
+    };
+    let touchedLocal = false;
+    ids.filter(Boolean).forEach(function (id) {
+      const e = bankCache.filter(function (x) { return x.id === id; })[0];
+      const list = (e && Array.isArray(e.usage)) ? e.usage.slice() : [];
+      const dup = list.some(function (u) {
+        return u.grade === stamp.grade && u.year === stamp.year && u.week === stamp.week;
+      });
+      if (dup) return;
+      list.push(stamp);
+      if (list.length > 12) list.splice(0, list.length - 12); // tak – reglerna har storleksgräns
+      if (db) {
+        db.collection("bank").doc(id).set({ usage: list }, { merge: true })
+          .catch(function (err) { console.error("[Starten] användning kunde inte sparas:", (err && err.code) || "", err); });
+      } else if (e) { e.usage = list; touchedLocal = true; }
+    });
+    if (touchedLocal) emitBank();
+  }
+
+  // Nollställer användningsmarkeringen. Behövs eftersom anteckningen inte är
+  // kopplad till veckodokumentet och alltså överlever att veckan raderas.
+  function clearUsage(id) {
+    const db = cloudDb();
+    if (db) {
+      db.collection("bank").doc(id).set({ usage: [] }, { merge: true })
+        .catch(function (err) { console.error("[Starten] kunde inte rensa användning:", (err && err.code) || "", err); });
+    } else {
+      const e = bankCache.filter(function (x) { return x.id === id; })[0];
+      if (e) { e.usage = []; emitBank(); }
+    }
   }
 
   function removeFromBank(id) {
@@ -136,6 +197,20 @@ window.StartenSvenska = (function () {
     if (!week.id) return;
     week.days[i] = raw ? normalize(raw, raw.source) : null;
     saveWeek(week);
+  }
+
+  // Sätter flera dagar från början i EN skrivning. Att loopa setDay hade gett
+  // en molnskrivning och en omrendering per dag. Överskjutande texter ignoreras.
+  // Returnerar antalet dagar som fylldes.
+  function setDays(list, source) {
+    const week = getWeek();
+    if (!week.id) return 0;
+    const n = Math.min((list || []).length, DAYS.length);
+    for (let i = 0; i < n; i++) {
+      week.days[i] = list[i] ? normalize(list[i], list[i].source || source || null) : null;
+    }
+    saveWeek(week);
+    return n;
   }
 
   function init() { subscribeBank(); }
@@ -203,7 +278,8 @@ window.StartenSvenska = (function () {
     MAX_CHARS: MAX_CHARS,
     init: init, onBankChange: onBankChange,
     getBank: getBank, addToBank: addToBank, removeFromBank: removeFromBank,
-    getWeek: getWeek, randomizeWeek: randomizeWeek, setDay: setDay,
+    bankAndResolve: bankAndResolve, markUsed: markUsed, clearUsage: clearUsage,
+    getWeek: getWeek, randomizeWeek: randomizeWeek, setDay: setDay, setDays: setDays,
     renderSheet: renderSheet
   };
 })();

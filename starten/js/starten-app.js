@@ -615,6 +615,30 @@
 
   function dayKey(iso) { return String(iso || "").slice(0, 10); }
 
+  // Vilken vecka/årskurs en text ska antecknas på när den placeras på en dag.
+  function currentWeekStamp() {
+    const s = weeksStore();
+    const w = s && s.getActive();
+    if (!w || !w.id) return null;
+    return { grade: s.weekGrade(w), year: w.year, week: w.week };
+  }
+
+  // Bara den egna årskursen visas. Att en annan årskurs använt texten säger
+  // inget om de här eleverna, och skulle märka upp nästan hela banken med tiden.
+  // Blå ◆ = redan använd i veckan man står i (risk för samma text två dagar).
+  // Röd ● = använd av samma årskurs en annan vecka – information, inget hinder.
+  function usageMark(usage, stamp) {
+    if (!usage.length || !stamp) return "";
+    const mine = usage.filter(function (u) { return u.grade === stamp.grade; });
+    if (!mine.length) return "";
+    const here = mine.some(function (u) { return u.year === stamp.year && u.week === stamp.week; });
+    const all = mine.map(function (u) { return "v." + u.week + " " + u.year; }).join(", ");
+    const title = (here ? "Redan använd den här veckan · " : "Använd av åk " + stamp.grade + ": ") +
+      all + " — klicka för att rensa";
+    return '<span class="st-used' + (here ? " st-used--here" : "") + '" title="' +
+      escapeHtml(title) + '">' + (here ? "◆" : "●") + "</span>";
+  }
+
   function dateHeading(iso) {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return "Utan datum";
@@ -645,6 +669,7 @@
     const host = $("#sv-bank"); host.innerHTML = "";
     if (!bank.length) { host.innerHTML = '<p class="st-muted">Inga texter.</p>'; return; }
 
+    const stamp = currentWeekStamp();
     let lastDay = null;
     bank.forEach(function (e) {
       const key = dayKey(e.createdAt);
@@ -658,8 +683,9 @@
       const item = document.createElement("div");
       item.className = "st-bank-item";
       const dayOpts = StartenSvenska.DAYS.map(function (d, i) { return '<option value="' + i + '">' + d + "</option>"; }).join("");
+      const usedMark = usageMark(Array.isArray(e.usage) ? e.usage : [], stamp);
       item.innerHTML =
-        '<div class="st-bank-text"><span class="st-badge">' + subjLabel(e.subject) + "</span> " + escapeHtml(e.text) + "</div>" +
+        '<div class="st-bank-text">' + usedMark + '<span class="st-badge">' + subjLabel(e.subject) + "</span> " + escapeHtml(e.text) + "</div>" +
         '<div class="st-bank-actions">' +
           '<select class="use-day st-input st-input--sm">' + dayOpts + "</select>" +
           '<button data-act="use" class="st-btn st-btn--ghost st-btn--sm">Använd</button>' +
@@ -667,10 +693,17 @@
         "</div>";
       item.querySelector('[data-act="use"]').addEventListener("click", function () {
         const i = parseInt(item.querySelector(".use-day").value, 10);
-        StartenSvenska.setDay(i, e); render(); renderSvDays();
+        StartenSvenska.setDay(i, e);
+        StartenSvenska.markUsed([e.id], currentWeekStamp());
+        render(); renderSvDays(); renderSvBank();
       });
       item.querySelector('[data-act="del"]').addEventListener("click", function () {
         StartenSvenska.removeFromBank(e.id); renderSvBank();
+      });
+      const usedEl = item.querySelector(".st-used");
+      if (usedEl) usedEl.addEventListener("click", function () {
+        if (!confirm("Rensa markeringen om att den här texten redan använts?")) return;
+        StartenSvenska.clearUsage(e.id); renderSvBank();
       });
       host.appendChild(item);
     });
@@ -690,7 +723,7 @@
     const text = $("#own-text").value.trim();
     const q = $("#own-question").value.trim();
     if (!text || !q) { fb.textContent = "Fyll i text och fråga."; fb.className = "st-feedback st-feedback--err"; return; }
-    const added = StartenSvenska.addToBank([{ subject: $("#own-subject").value, text: text, questions: [q], source: "manual" }], "manual");
+    const added = StartenSvenska.addToBank([{ subject: $("#own-subject").value, text: text, questions: [q], source: "manual" }], "manual").length;
     if (added) {
       $("#own-text").value = ""; $("#own-question").value = "";
       fb.textContent = "Tillagd!"; fb.className = "st-feedback st-feedback--ok";
@@ -716,12 +749,53 @@
     const fb = $("#import-feedback");
     const parsed = StartenPrompt.parseResponse($("#import-input").value);
     if (!parsed.length) { fb.textContent = "Kunde inte tolka svaret (förväntar JSON)."; fb.className = "st-feedback st-feedback--err"; return; }
-    const added = StartenSvenska.addToBank(parsed, "ai");
+    const added = StartenSvenska.addToBank(parsed, "ai").length;
     const skipped = parsed.length - added;
     fb.textContent = "Importerade " + added + (skipped ? " (" + skipped + " dubbletter)" : "") + ".";
     fb.className = "st-feedback st-feedback--ok";
     if (added) $("#import-input").value = "";
     renderSvBank();
+  }
+
+  // Genvägen: AI-svaret rakt ner på måndag–fredag utan omvägen via banken.
+  function importToDays() {
+    const fb = $("#import-feedback");
+    const parsed = StartenPrompt.parseResponse($("#import-input").value);
+    if (!parsed.length) {
+      fb.textContent = "Kunde inte tolka svaret (förväntar JSON).";
+      fb.className = "st-feedback st-feedback--err";
+      return;
+    }
+    const s = weeksStore();
+    const active = s && s.getActive();
+    if (!active || !active.id) {
+      fb.textContent = "Ingen vecka är vald.";
+      fb.className = "st-feedback st-feedback--err";
+      return;
+    }
+    const days = StartenSvenska.DAYS;
+    const use = parsed.slice(0, days.length);
+    // Skriv inte över befintliga texter utan att fråga.
+    const week = StartenSvenska.getWeek();
+    const occupied = (week.days || []).slice(0, use.length).some(Boolean);
+    if (occupied && !confirm("Det finns redan texter på de dagarna. Ersätta dem?")) return;
+
+    // Texterna sparas även i banken, så de går att återanvända av en annan
+    // årskurs – och kan märkas som använda den här veckan.
+    const entries = StartenSvenska.bankAndResolve(use, "ai");
+    const n = StartenSvenska.setDays(entries.map(function (e, i) { return e || use[i]; }), "ai");
+    StartenSvenska.markUsed(entries.slice(0, n).map(function (e) { return e && e.id; }), currentWeekStamp());
+
+    const range = n === 1
+      ? days[0].toLowerCase()
+      : days[0].toLowerCase() + "–" + days[n - 1].toLowerCase();
+    const over = parsed.length - n;
+    fb.textContent = "Lade " + n + (n === 1 ? " text på " : " texter på ") + range +
+      " och sparade dem i banken" + (over ? " (" + over + " över, används inte)" : "") + ".";
+    fb.className = "st-feedback st-feedback--ok";
+    $("#import-input").value = "";
+    refreshSv();
+    render();
   }
 
   /* ── Färgteman ───────────────────────────────────────── */
@@ -902,6 +976,7 @@
     $("#own-add").addEventListener("click", addOwn);
     ["#gen-subject", "#gen-count", "#gen-age", "#gen-topic"].forEach(function (s) { $(s).addEventListener("input", refreshPrompt); });
     $("#copy-prompt").addEventListener("click", copyPrompt);
+    $("#import-days-btn").addEventListener("click", importToDays);
     $("#import-btn").addEventListener("click", importResponse);
 
     // Om ingen WeeksStore finns: rendera ändå (fallback)

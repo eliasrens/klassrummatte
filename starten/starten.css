@@ -304,6 +304,12 @@ body.edit-right main { padding-right: var(--panel-w); transition: padding 0.15s;
 .st-bank-text { font-size: 0.82rem; color: #334155; line-height: 1.35; }
 .st-bank-actions { display: flex; gap: 0.3rem; margin-top: 0.4rem; align-items: center; }
 .st-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; background: #eef2f6; color: #64748b; border-radius: 999px; padding: 1px 7px; }
+/* Markering för text som redan använts någon vecka – detaljerna i title-attributet */
+.st-used { color: #dc2626; font-size: 0.6rem; margin-right: 0.3rem; cursor: pointer; vertical-align: middle; }
+.st-used:hover { color: #991b1b; }
+/* Blå = redan använd i den vecka man står i just nu */
+.st-used--here { color: #2563eb; font-size: 0.7rem; }
+.st-used--here:hover { color: #1d4ed8; }
 .st-del { border: none; background: none; color: #dc2626; font-weight: 600; cursor: pointer; font-size: 0.8rem; margin-left: auto; }
 
 /* Formulär */
