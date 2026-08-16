@@ -136,7 +136,31 @@
 
       <!-- ===== Svenska ===== -->
       <section id="tab-sv" class="st-pane">
-        <details class="st-details" open>
+        <div class="st-field st-sida1-switch">
+          <span>Läsförståelse</span>
+          <div class="st-checks">
+            <label><input type="radio" name="sv-format" value="dag" checked> En text per dag</label>
+            <label><input type="radio" name="sv-format" value="vecka"> En text per vecka</label>
+          </div>
+        </div>
+
+        <details class="st-details st-vt-only hidden" id="sv-vt-details" open>
+          <summary>📖 Veckans text</summary>
+          <label class="st-field">Rubrik
+            <input id="vt-title" type="text" class="st-input" maxlength="60" placeholder="t.ex. Fyrvaktarens sista natt">
+          </label>
+          <label class="st-field">Text
+            <textarea id="vt-text" rows="10" class="st-input" maxlength="1400"
+              placeholder="Hela veckans text. Lämna en tom rad mellan styckena."></textarea>
+            <span id="vt-count" class="st-hint"></span>
+          </label>
+          <div class="st-field">
+            <span>En fråga per dag</span>
+            <div id="vt-questions" class="st-vt-questions"></div>
+          </div>
+        </details>
+
+        <details class="st-details st-dag-only" open>
           <summary>📅 Veckans dagar</summary>
           <div class="st-form-actions" style="margin-bottom:0.5rem">
             <button id="btn-rand-sv" class="st-btn st-btn--ghost st-btn--sm">🎲 Nya texter (alla dagar)</button>
@@ -144,7 +168,7 @@
           <div id="sv-days" class="st-days"></div>
         </details>
 
-        <details class="st-details">
+        <details class="st-details st-dag-only">
           <summary>💡 Idébanken (<span id="sv-bank-count">0</span>)</summary>
           <div class="st-bank-tools">
             <div id="sv-bank-filters" class="st-filter-grid">
@@ -161,7 +185,7 @@
           <div id="sv-bank" class="st-bank"></div>
         </details>
 
-        <details class="st-details">
+        <details class="st-details st-dag-only">
           <summary>➕ Lägg till egen text</summary>
           <div class="st-form">
             <label class="st-field">Ämne
@@ -198,7 +222,7 @@
                   <option value="engelska">Engelska</option>
                 </select>
               </label>
-              <label class="st-field">Antal
+              <label class="st-field st-dag-only">Antal
                 <input id="gen-count" type="number" min="1" max="30" value="5" class="st-input" />
               </label>
               <label class="st-field">Nivå
@@ -216,8 +240,9 @@
               <textarea id="import-input" rows="5" class="st-input st-mono" placeholder='[ { "subject": "svenska", "text": "...", "questions": ["..."] } ]'></textarea>
             </label>
             <div class="st-form-actions">
-              <button id="import-days-btn" class="st-btn st-btn--primary st-btn--sm">Lägg på veckans dagar</button>
-              <button id="import-btn" class="st-btn st-btn--ghost st-btn--sm">Importera till banken</button>
+              <button id="import-days-btn" class="st-btn st-btn--primary st-btn--sm st-dag-only">Lägg på veckans dagar</button>
+              <button id="import-btn" class="st-btn st-btn--ghost st-btn--sm st-dag-only">Importera till banken</button>
+              <button id="import-vt-btn" class="st-btn st-btn--primary st-btn--sm st-vt-only hidden">Lägg in veckans text</button>
               <span id="import-feedback" class="st-feedback"></span>
             </div>
           </div>

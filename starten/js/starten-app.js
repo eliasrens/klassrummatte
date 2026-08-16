@@ -331,6 +331,11 @@
           b.classList.toggle("st-color-btn--active", (b.dataset.theme || "") === (week.color || ""));
         });
       }
+      // Läsförståelsens format: en text per dag eller en per vecka
+      const fmt = (week && week.svFormat === "vecka") ? "vecka" : "dag";
+      const fmtEl = document.querySelector('input[name="sv-format"][value="' + fmt + '"]');
+      if (fmtEl) fmtEl.checked = true;
+      syncSvFormatUI();
       // Matte: om veckan har sparad matte, ladda den; annars regenerera enligt UI
       if (week && week.matte && Array.isArray(week.matte.rows) && week.matte.rows.length) {
         state.matte = {
@@ -370,6 +375,7 @@
     if (needRegenerate) regenerateMatte(); // sparar matten på veckan
     render();
     refreshSv();
+    refreshVt();
   }
 
   function onWeeksListChanged() { renderWeekSelect(); }
@@ -512,12 +518,100 @@
     // Skjut förhandsvisningen åt motsatt håll så arken syns medan man redigerar
     document.body.classList.toggle("edit-left", isSv);
     document.body.classList.toggle("edit-right", !isSv);
-    if (isSv) { refreshSv(); refreshPrompt(); }
+    if (isSv) { syncSvFormatUI(); refreshSv(); refreshVt(); refreshPrompt(); }
   }
   function closePanel() {
     $("#edit-panel").classList.add("hidden");
     document.body.classList.remove("edit-left", "edit-right");
     state.editingDay = null;
+  }
+
+  /* ── Läsförståelse: dag- eller veckoformat ───────────── */
+  function currentSvFormat() {
+    const el = document.querySelector('input[name="sv-format"]:checked');
+    return (el && el.value === "vecka") ? "vecka" : "dag";
+  }
+
+  function syncSvFormatUI() {
+    const isWeek = currentSvFormat() === "vecka";
+    document.querySelectorAll(".st-dag-only").forEach(function (el) { el.classList.toggle("hidden", isWeek); });
+    document.querySelectorAll(".st-vt-only").forEach(function (el) { el.classList.toggle("hidden", !isWeek); });
+    refreshPrompt();
+  }
+
+  let vtSaveTimer = null;
+
+  function renderVtQuestions() {
+    const host = $("#vt-questions"); if (!host) return;
+    const vt = StartenSvenska.getWeekText();
+    host.innerHTML = StartenSvenska.DAYS.map(function (d, i) {
+      return '<label class="st-vt-qrow"><span class="st-vt-qday">' + d + "</span>" +
+        '<input type="text" class="st-input st-input--sm vt-q" maxlength="140" value="' +
+        escapeHtml(vt.questions[i] || "") + '"></label>';
+    }).join("");
+    host.querySelectorAll(".vt-q").forEach(function (inp) {
+      inp.addEventListener("input", scheduleVtSave);
+    });
+  }
+
+  function updateVtCount() {
+    const max = StartenSvenska.WEEK_MAX_CHARS;
+    const n = ($("#vt-text").value || "").length;
+    const paras = ($("#vt-text").value || "").split(/\n\s*\n/).filter(function (p) { return p.trim(); }).length;
+    $("#vt-count").textContent = n + " / " + max + " tecken · " + paras + " stycken";
+    $("#vt-count").style.color = n >= max ? "#dc2626" : "";
+  }
+
+  // Debounce – annars blir varje tangenttryck en molnskrivning.
+  function scheduleVtSave() {
+    updateVtCount();
+    if (vtSaveTimer) clearTimeout(vtSaveTimer);
+    vtSaveTimer = setTimeout(function () {
+      StartenSvenska.setWeekText({
+        title: $("#vt-title").value,
+        text: $("#vt-text").value,
+        questions: Array.prototype.map.call(
+          document.querySelectorAll("#vt-questions .vt-q"),
+          function (i) { return i.value; })
+      });
+      render();
+    }, 400);
+  }
+
+  // Bygg inte om fälten medan användaren skriver i dem.
+  function refreshVt() {
+    const sec = $("#sv-vt-details");
+    if (sec && sec.contains(document.activeElement)) { updateVtCount(); return; }
+    const vt = StartenSvenska.getWeekText();
+    $("#vt-title").value = vt.title;
+    $("#vt-text").value = vt.text;
+    renderVtQuestions();
+    updateVtCount();
+  }
+
+  function importWeekText() {
+    const fb = $("#import-feedback");
+    const vt = StartenPrompt.parseWeekResponse($("#import-input").value);
+    if (!vt || !vt.text) {
+      fb.textContent = "Kunde inte tolka svaret (förväntar JSON med text och questions).";
+      fb.className = "st-feedback st-feedback--err";
+      return;
+    }
+    const s = weeksStore();
+    if (!s || !s.getActive() || !s.getActive().id) {
+      fb.textContent = "Ingen vecka är vald.";
+      fb.className = "st-feedback st-feedback--err";
+      return;
+    }
+    const over = vt.text.length - StartenSvenska.WEEK_MAX_CHARS;
+    StartenSvenska.setWeekText(vt);
+    fb.textContent = "Veckans text inlagd (" + Math.min(vt.text.length, StartenSvenska.WEEK_MAX_CHARS) +
+      " tecken, " + vt.questions.length + " frågor)" +
+      (over > 0 ? " – texten var " + over + " tecken för lång och kortades" : "") + ".";
+    fb.className = over > 0 ? "st-feedback" : "st-feedback st-feedback--ok";
+    $("#import-input").value = "";
+    refreshVt();
+    render();
   }
 
   /* ── Svenska: dagar ──────────────────────────────────── */
@@ -733,10 +827,13 @@
 
   /* ── Svenska: AI ─────────────────────────────────────── */
   function refreshPrompt() {
-    $("#prompt-output").value = StartenPrompt.build({
+    const opts = {
       subject: $("#gen-subject").value, count: $("#gen-count").value,
       numQuestions: 1, age: $("#gen-age").value, topic: $("#gen-topic").value
-    });
+    };
+    $("#prompt-output").value = currentSvFormat() === "vecka"
+      ? StartenPrompt.buildWeek(opts)
+      : StartenPrompt.build(opts);
   }
   function copyPrompt() {
     const ta = $("#prompt-output");
@@ -978,6 +1075,19 @@
     $("#copy-prompt").addEventListener("click", copyPrompt);
     $("#import-days-btn").addEventListener("click", importToDays);
     $("#import-btn").addEventListener("click", importResponse);
+    $("#import-vt-btn").addEventListener("click", importWeekText);
+
+    // Läsförståelsens format (dag / vecka)
+    document.querySelectorAll('input[name="sv-format"]').forEach(function (r) {
+      r.addEventListener("change", function () {
+        syncSvFormatUI();
+        if (!state.savingFromWeek) StartenSvenska.setSvFormat(currentSvFormat());
+        refreshVt();
+        render();
+      });
+    });
+    $("#vt-title").addEventListener("input", scheduleVtSave);
+    $("#vt-text").addEventListener("input", scheduleVtSave);
 
     // Om ingen WeeksStore finns: rendera ändå (fallback)
     if (!s) render();

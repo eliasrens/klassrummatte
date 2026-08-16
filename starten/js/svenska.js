@@ -10,6 +10,11 @@ window.StartenSvenska = (function () {
   window.STARTEN_MAX_CHARS = MAX_CHARS;
   const FIXED_SV = "Ett ord från texten som jag vill lära mig:";
   const FIXED_EN = "A word from the text I want to learn:";
+  // Veckotext-läget: EN text för hela veckan. Kortare etikett eftersom den
+  // upprepas fem gånger i en smalare spalt. Teckentaket är uppmätt mot arket.
+  const WEEK_FIXED = "Ett ord jag vill lära mig:";
+  const WEEK_MAX_CHARS = 1400;
+  window.STARTEN_WEEK_MAX_CHARS = WEEK_MAX_CHARS;
 
   const KEY_BANK = "starten.bank.v1";
   // KEY_WEEK (legacy) hanteras nu av StartenWeeksStore (migreras till `weeks`-collection).
@@ -213,6 +218,36 @@ window.StartenSvenska = (function () {
     return n;
   }
 
+  /* ---- Veckotext-läget (en text/vecka) ---- */
+  function getSvFormat() {
+    const w = getWeek();
+    return w && w.svFormat === "vecka" ? "vecka" : "dag";
+  }
+  function setSvFormat(f) {
+    const s = store(); if (!s) return;
+    const w = getWeek(); if (!w.id) return;
+    s.patchActive({ svFormat: f === "vecka" ? "vecka" : "dag" });
+  }
+  function getWeekText() {
+    const vt = (getWeek() || {}).veckotext || {};
+    const qs = Array.isArray(vt.questions) ? vt.questions.slice(0, DAYS.length) : [];
+    while (qs.length < DAYS.length) qs.push("");
+    return { title: String(vt.title || ""), text: String(vt.text || ""), questions: qs };
+  }
+  function setWeekText(patch) {
+    const s = store(); if (!s) return;
+    const w = getWeek(); if (!w.id) return;
+    const cur = getWeekText();
+    const next = {
+      title: String(patch.title != null ? patch.title : cur.title).slice(0, 60),
+      text: String(patch.text != null ? patch.text : cur.text).slice(0, WEEK_MAX_CHARS),
+      questions: (patch.questions != null ? patch.questions : cur.questions)
+        .slice(0, DAYS.length).map(function (q) { return String(q || ""); })
+    };
+    while (next.questions.length < DAYS.length) next.questions.push("");
+    s.patchActive({ veckotext: next });
+  }
+
   function init() { subscribeBank(); }
 
   function seedIfEmpty() {
@@ -222,8 +257,62 @@ window.StartenSvenska = (function () {
   }
 
   /* ---- Ark-rendering (som .ab-sheet) ---- */
+  function sheetHeader(title) {
+    return '<header class="ab-header starten-header">' +
+      '<div class="ab-header-left"><div class="ab-title">' + escapeHtml(title || "Starten") + "</div></div>" +
+      '<div class="ab-header-fields"><div><div class="ab-field-label">Namn:</div>' +
+      '<div class="ab-field-line">&nbsp;</div></div></div>' +
+      "</header>";
+  }
+
+  // Veckotext: hela veckans text i vänsterspalten, en fråga + en ordrad per dag
+  // till höger. Dagblocken delar höjden lika så ordraderna hamnar jämnt.
+  function renderWeekTextSheet(wrap, opts) {
+    const vt = getWeekText();
+    const color = opts.color || "";
+
+    const sheet = document.createElement("div");
+    sheet.className = "ab-sheet st-vt-sheet" + (color ? " starten-" + color : "");
+    const inner = document.createElement("div");
+    inner.className = "ab-sheet-inner";
+
+    const paras = vt.text.split(/\n+/).map(function (p) { return p.trim(); }).filter(Boolean);
+    const textHtml = paras.length
+      ? paras.map(function (p) { return "<p>" + escapeHtml(p) + "</p>"; }).join("")
+      : '<p class="st-sv-empty">— ingen text ännu —</p>';
+
+    let daysHtml = "";
+    DAYS.forEach(function (dayName, i) {
+      const q = vt.questions[i]
+        ? escapeHtml(vt.questions[i])
+        : '<span class="st-sv-empty">— ingen fråga —</span>';
+      daysHtml +=
+        '<div class="st-vt-day">' +
+          '<div class="st-sv-dayname">' + escapeHtml(dayName) + "</div>" +
+          '<p class="st-sv-question">' + q + "</p>" +
+          '<div class="st-sv-writeline"></div><div class="st-sv-writeline"></div>' +
+          '<div class="st-vt-word"><span class="st-vt-word-label">' + escapeHtml(WEEK_FIXED) +
+            '</span><span class="st-vt-word-line"></span></div>' +
+        "</div>";
+    });
+
+    inner.innerHTML = sheetHeader(opts.title) +
+      '<div class="st-vt-body">' +
+        '<div class="st-vt-textcol">' +
+          (vt.title ? '<h2 class="st-vt-heading">' + escapeHtml(vt.title) + "</h2>" : "") +
+          '<div class="st-vt-text">' + textHtml + "</div>" +
+        "</div>" +
+        '<div class="st-sv-divider"></div>' +
+        '<div class="st-vt-daycol">' + daysHtml + "</div>" +
+      "</div>";
+
+    sheet.appendChild(inner);
+    wrap.appendChild(sheet);
+  }
+
   function renderSheet(wrap, opts) {
     opts = opts || {};
+    if (getSvFormat() === "vecka") return renderWeekTextSheet(wrap, opts);
     const week = getWeek();
     const color = opts.color || "";
 
@@ -280,6 +369,9 @@ window.StartenSvenska = (function () {
     getBank: getBank, addToBank: addToBank, removeFromBank: removeFromBank,
     bankAndResolve: bankAndResolve, markUsed: markUsed, clearUsage: clearUsage,
     getWeek: getWeek, randomizeWeek: randomizeWeek, setDay: setDay, setDays: setDays,
+    WEEK_MAX_CHARS: WEEK_MAX_CHARS,
+    getSvFormat: getSvFormat, setSvFormat: setSvFormat,
+    getWeekText: getWeekText, setWeekText: setWeekText,
     renderSheet: renderSheet
   };
 })();

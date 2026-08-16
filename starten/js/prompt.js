@@ -55,6 +55,70 @@ window.StartenPrompt = (function () {
     );
   }
 
+  /* ── Veckotext: EN längre text för hela veckan + en fråga per dag ──
+     Teckentaket är uppmätt mot arket. Antalet stycken måste också begränsas
+     eftersom varje styckesbrytning kostar höjd – bara ett teckentak släpper
+     igenom texter som ändå svämmar över spalten. */
+  // Ämnesbeskrivningar för veckoformatet. SUBJECT_DESC duger inte här –
+  // den säger "korta texter", vilket är raka motsatsen till en veckotext.
+  const WEEK_SUBJECT_DESC = {
+    svenska: "en längre läsförståelsetext på svenska",
+    no: "en längre faktatext inom naturorienterande ämnen (biologi, fysik, kemi, teknik)",
+    so: "en längre faktatext inom samhällsorienterande ämnen (historia, geografi, samhällskunskap, religion)",
+    engelska: "en längre läsförståelsetext på engelska"
+  };
+
+  function buildWeek(opts) {
+    const subject = WEEK_SUBJECT_DESC[opts.subject] ? opts.subject : "svenska";
+    const age = opts.age || "årskurs 4–6";
+    const topic = (opts.topic || "").trim();
+    const isEnglish = subject === "engelska";
+    // Berättande bara för svenska/engelska. NO och SO ska vara faktatext –
+    // annars blandas riktiga fakta med påhittad handling.
+    const isStory = (subject === "svenska" || subject === "engelska");
+    const max = window.STARTEN_WEEK_MAX_CHARS || 1400;
+    const low = Math.round(max * 0.93);
+    const words = Math.round(((low + max) / 2) / 6.3);
+
+    const langNote = isEnglish
+      ? "- Skriv BÅDE texten och frågorna på engelska, anpassat för " + age + " som lär sig engelska.\n"
+      : "- Skriv på korrekt, åldersanpassad svenska för " + age + ".\n";
+    const formNote = isStory
+      ? "- Skriv en berättande text med en handling som utvecklas, och avsluta gärna med något olöst.\n"
+      : "- Skriv en sammanhängande faktatext som förklarar ämnet steg för steg. Hitta INTE på någon " +
+        "berättelse eller påhittade personer – allt innehåll ska vara korrekt och gå att lita på. " +
+        "Konkreta exempel, jämförelser och siffror gör texten intressant.\n";
+    const topicLine = topic
+      ? "- Texten ska utgå från det vi jobbar med just nu: " + topic + ".\n"
+      : (isStory
+          ? "- Välj ett eget tema som håller hela veckan (äventyr, mysterium, vardag, natur, teknik).\n"
+          : "- Välj ett tydligt avgränsat område inom ämnet, tillräckligt rikt för en hel veckas frågor.\n");
+
+    return (
+      "Du skapar " + WEEK_SUBJECT_DESC[subject] + " för svensk grundskola (" + age + ").\n" +
+      "Texten används hela veckan: eleverna läser samma text varje dag och svarar på en ny fråga per dag.\n\n" +
+      "Krav på texten:\n" +
+      "- " + low + "–" + max + " tecken (ungefär " + words + " ord). Det är VIKTIGT att texten är så här lång – " +
+        "kortare texter slösar bort utrymmet på arket och ger för lite att arbeta med under en vecka. " +
+        "Absolut tak: " + max + " tecken.\n" +
+      "- Dela upp den i 7–9 stycken om 2–4 meningar vardera, åtskilda med dubbla radbrytningar (\\n\\n). " +
+        "Undvik många enmeningsstycken – de äter upp plats utan att ge mer innehåll.\n" +
+      formNote + langNote + topicLine +
+      "- Ge texten en kort titel på högst 40 tecken.\n\n" +
+      "Krav på frågorna:\n" +
+      "- Exakt 5 frågor, en för varje dag måndag till fredag.\n" +
+      "- Ordna dem så att de blir svårare under veckan: börja med sådant som står direkt i texten " +
+        "och avsluta med frågor som kräver att man drar egna slutsatser.\n" +
+      "- Varje fråga ska gå att besvara på två skrivrader.\n\n" +
+      "Svara ENDAST med giltig JSON i exakt detta format, utan förklaringar och utan markdown-kodstaket:\n\n" +
+      '{\n  "title": "Textens titel",\n  "text": "Första stycket ...\\n\\nAndra stycket ...",\n' +
+      '  "questions": ["Fråga måndag", "Fråga tisdag", "Fråga onsdag", "Fråga torsdag", "Fråga fredag"]\n}\n\n' +
+      "Regler:\n- Ett enda objekt, inte en array.\n" +
+      "- Styckesbrytningar skrivs som \\n\\n inuti \"text\".\n" +
+      "- Använd inga citattecken inuti texten som bryter JSON.\n"
+    );
+  }
+
   function extractJsonObjects(str) {
     const objs = []; let depth = 0, start = -1, inStr = false, esc = false;
     for (let i = 0; i < str.length; i++) {
@@ -93,5 +157,19 @@ window.StartenPrompt = (function () {
     return out;
   }
 
-  return { build: build, parseResponse: parseResponse };
+  // Plockar ut veckotext-objektet ur ett AI-svar. Accepterar både ett ensamt
+  // objekt och en array med ett objekt i.
+  function parseWeekResponse(raw) {
+    const list = parseResponse(raw);
+    const o = list.length ? list[0] : null;
+    if (!o || !o.text) return null;
+    const qs = Array.isArray(o.questions) ? o.questions : (o.question ? [o.question] : []);
+    return {
+      title: String(o.title || o.rubrik || "").trim(),
+      text: String(o.text).trim(),
+      questions: qs.map(function (q) { return String(q || "").trim(); }).filter(Boolean).slice(0, 5)
+    };
+  }
+
+  return { build: build, buildWeek: buildWeek, parseResponse: parseResponse, parseWeekResponse: parseWeekResponse };
 })();

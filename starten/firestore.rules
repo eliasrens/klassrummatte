@@ -44,10 +44,12 @@ service cloud.firestore {
       allow read: if true;
 
       function weekValid(d) {
-        return d.size() <= 12
+        return d.size() <= 16
           && d.year is int && d.year >= 2024 && d.year <= 2099
           && d.week is int && d.week >= 1    && d.week <= 53
           && (!('grade'     in d) || d.grade == null || (d.grade is int && d.grade >= 1 && d.grade <= 9))
+          && (!('svFormat'  in d) || d.svFormat  is string && d.svFormat.size()  <= 8)
+          && (!('veckotext' in d) || d.veckotext is map)
           && (!('name'      in d) || d.name      is string && d.name.size()      <= 80)
           && (!('title'     in d) || d.title     is string && d.title.size()     <= 80)
           && (!('color'     in d) || d.color     is string && d.color.size()     <= 32)
