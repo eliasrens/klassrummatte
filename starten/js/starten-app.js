@@ -335,6 +335,8 @@
       const fmt = (week && week.svFormat === "vecka") ? "vecka" : "dag";
       const fmtEl = document.querySelector('input[name="sv-format"][value="' + fmt + '"]');
       if (fmtEl) fmtEl.checked = true;
+      const ordradEl = $("#sv-ordrad");
+      if (ordradEl) ordradEl.checked = !(week && week.visaOrdrad === false);
       syncSvFormatUI();
       // Matte: om veckan har sparad matte, ladda den; annars regenerera enligt UI
       if (week && week.matte && Array.isArray(week.matte.rows) && week.matte.rows.length) {
@@ -1088,6 +1090,12 @@
     });
     $("#vt-title").addEventListener("input", scheduleVtSave);
     $("#vt-text").addEventListener("input", scheduleVtSave);
+
+    // Ordraden av/på – ersätts av en extra skrivrad när den bockas ur
+    $("#sv-ordrad").addEventListener("change", function () {
+      if (!state.savingFromWeek) StartenSvenska.setVisaOrdrad($("#sv-ordrad").checked);
+      render();
+    });
 
     // Om ingen WeeksStore finns: rendera ändå (fallback)
     if (!s) render();

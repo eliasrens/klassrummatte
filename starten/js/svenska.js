@@ -228,6 +228,18 @@ window.StartenSvenska = (function () {
     const w = getWeek(); if (!w.id) return;
     s.patchActive({ svFormat: f === "vecka" ? "vecka" : "dag" });
   }
+  // Ordraden ("Ett ord från texten …") är på som standard. Bockas den ur
+  // ersätts den av en extra skrivrad – inga andra mått ändras.
+  function getVisaOrdrad() {
+    const w = getWeek();
+    return !(w && w.visaOrdrad === false);
+  }
+  function setVisaOrdrad(on) {
+    const s = store(); if (!s) return;
+    const w = getWeek(); if (!w.id) return;
+    s.patchActive({ visaOrdrad: !!on });
+  }
+
   function getWeekText() {
     const vt = (getWeek() || {}).veckotext || {};
     const qs = Array.isArray(vt.questions) ? vt.questions.slice(0, DAYS.length) : [];
@@ -281,6 +293,12 @@ window.StartenSvenska = (function () {
       ? paras.map(function (p) { return "<p>" + escapeHtml(p) + "</p>"; }).join("")
       : '<p class="st-sv-empty">— ingen text ännu —</p>';
 
+    const ordrad = getVisaOrdrad();
+    const tail = ordrad
+      ? '<div class="st-vt-word"><span class="st-vt-word-label">' + escapeHtml(WEEK_FIXED) +
+        '</span><span class="st-vt-word-line"></span></div>'
+      : '<div class="st-sv-writeline"></div>';
+
     let daysHtml = "";
     DAYS.forEach(function (dayName, i) {
       const q = vt.questions[i]
@@ -291,8 +309,7 @@ window.StartenSvenska = (function () {
           '<div class="st-sv-dayname">' + escapeHtml(dayName) + "</div>" +
           '<p class="st-sv-question">' + q + "</p>" +
           '<div class="st-sv-writeline"></div><div class="st-sv-writeline"></div>' +
-          '<div class="st-vt-word"><span class="st-vt-word-label">' + escapeHtml(WEEK_FIXED) +
-            '</span><span class="st-vt-word-line"></span></div>' +
+          tail +
         "</div>";
     });
 
@@ -323,6 +340,7 @@ window.StartenSvenska = (function () {
     inner.className = "ab-sheet-inner";
 
     const SUBJ_LABEL = { svenska: "Berättelse", no: "NO", so: "SO", engelska: "Engelska" };
+    const ordradOn = getVisaOrdrad();
     let daysHtml = "";
     DAYS.forEach(function (dayName, i) {
       const c = week.days[i];
@@ -336,6 +354,9 @@ window.StartenSvenska = (function () {
         return '<p class="st-sv-question">' + escapeHtml(q) + "</p>" +
           '<div class="st-sv-writeline"></div><div class="st-sv-writeline"></div>';
       }).join("") : "";
+      const dayTail = ordradOn
+        ? '<div class="st-sv-fixed"><p class="st-sv-fixed-label">' + fixed + '</p><div class="st-sv-dotted"></div></div>'
+        : '<div class="st-sv-writeline"></div>';
       daysHtml +=
         '<div class="st-sv-day">' +
           '<div class="st-sv-left">' +
@@ -343,8 +364,7 @@ window.StartenSvenska = (function () {
             '<p class="st-sv-text">' + text + "</p>" +
           "</div>" +
           '<div class="st-sv-divider"></div>' +
-          '<div class="st-sv-right">' + qHtml +
-            '<div class="st-sv-fixed"><p class="st-sv-fixed-label">' + fixed + "</p><div class=\"st-sv-dotted\"></div></div>" +
+          '<div class="st-sv-right">' + qHtml + dayTail +
           "</div>" +
         "</div>";
     });
@@ -371,6 +391,7 @@ window.StartenSvenska = (function () {
     getWeek: getWeek, randomizeWeek: randomizeWeek, setDay: setDay, setDays: setDays,
     WEEK_MAX_CHARS: WEEK_MAX_CHARS,
     getSvFormat: getSvFormat, setSvFormat: setSvFormat,
+    getVisaOrdrad: getVisaOrdrad, setVisaOrdrad: setVisaOrdrad,
     getWeekText: getWeekText, setWeekText: setWeekText,
     renderSheet: renderSheet
   };

@@ -50,6 +50,7 @@ service cloud.firestore {
           && (!('grade'     in d) || d.grade == null || (d.grade is int && d.grade >= 1 && d.grade <= 9))
           && (!('svFormat'  in d) || d.svFormat  is string && d.svFormat.size()  <= 8)
           && (!('veckotext' in d) || d.veckotext is map)
+          && (!('visaOrdrad' in d) || d.visaOrdrad is bool)
           && (!('name'      in d) || d.name      is string && d.name.size()      <= 80)
           && (!('title'     in d) || d.title     is string && d.title.size()     <= 80)
           && (!('color'     in d) || d.color     is string && d.color.size()     <= 32)
