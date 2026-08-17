@@ -114,6 +114,9 @@ window.StartenWeeksStore = (function () {
           grade: data.grade || null,
           name: data.name || "",
           title: data.title || "Starten",
+          // Orden följer med i listan så "använd tidigare vecka" kan slås upp
+          // utan extra läsningar – snapshoten innehåller dem redan.
+          ord: Array.isArray(data.ord) ? data.ord : [],
           archived: !!data.archived,
         };
       });
@@ -138,6 +141,7 @@ window.StartenWeeksStore = (function () {
             id: w.id, year: w.year || 0, week: w.week || 0,
             grade: w.grade || null,
             name: w.name || "", title: w.title || "Starten",
+            ord: Array.isArray(w.ord) ? w.ord : [],
             archived: !!w.archived
           });
         } catch (e) {}

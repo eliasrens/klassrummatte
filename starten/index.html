@@ -69,7 +69,13 @@
         </div>
         <div class="st-middle-col">
           <div class="st-title-field">
-            <label for="st-title">Rubrik</label>
+            <div class="st-title-label-row">
+              <label for="st-title">Rubrik</label>
+              <div class="st-seg" role="group" aria-label="Vad sida 1 visar">
+                <label><input type="radio" name="sida1-typ" value="las" checked><span>Läsförståelse</span></label>
+                <label><input type="radio" name="sida1-typ" value="ord"><span>Veckans ord</span></label>
+              </div>
+            </div>
             <input id="st-title" type="text" value="Starten" placeholder="t.ex. Starten v.16" />
           </div>
           <div class="st-actions">
@@ -78,8 +84,11 @@
             <div class="st-print-wrap">
               <button id="btn-print" class="st-btn st-btn--print st-btn--sm">🖨 Skriv ut ▾</button>
               <div id="print-menu" class="st-print-menu hidden">
-                <button id="print-single" class="st-print-menu-item">📄 2 sidor (1 elev)</button>
-                <button id="print-classes-open" class="st-print-menu-item">🏫 För klasser …</button>
+                <button id="print-single" class="st-print-menu-item st-las-only">📄 2 sidor (1 elev)</button>
+                <button id="print-classes-open" class="st-print-menu-item st-las-only">🏫 För klasser …</button>
+                <button id="print-ord" class="st-print-menu-item st-ordark-only hidden">📄 Veckans ord (liggande)</button>
+                <button id="print-matte" class="st-print-menu-item st-ordark-only hidden">📄 Mattesidan (stående)</button>
+                <div class="st-print-note st-ordark-only hidden">Skrivs ut var för sig – formaten skiljer sig.</div>
               </div>
             </div>
           </div>
@@ -136,7 +145,17 @@
 
       <!-- ===== Svenska ===== -->
       <section id="tab-sv" class="st-pane">
-        <div class="st-field st-sida1-switch">
+        <details class="st-details st-ordark-only hidden" id="sv-ordark-details" open>
+          <summary>🔤 Veckans ord</summary>
+          <label class="st-field">Orden <span class="st-muted">(ett per rad, eller separerade med komma)</span>
+            <textarea id="ord-input" rows="10" class="st-input"
+              placeholder="glass&#10;gunga&#10;regnbåge"></textarea>
+            <span id="ord-count" class="st-hint"></span>
+          </label>
+          <div id="ord-preview" class="st-ord-preview"></div>
+        </details>
+
+        <div class="st-field st-sida1-switch st-las-only">
           <span>Läsförståelse</span>
           <div class="st-checks">
             <label><input type="radio" name="sv-format" value="dag" checked> En text per dag</label>
@@ -144,7 +163,7 @@
           </div>
         </div>
 
-        <label class="st-field st-row">
+        <label class="st-field st-row st-las-only">
           <span>Ordrad <span class="st-muted">("Ett ord från texten …")</span></span>
           <input type="checkbox" id="sv-ordrad" checked>
         </label>
@@ -219,7 +238,7 @@
           <summary>🤖 Generera med AI</summary>
           <div class="st-form">
             <div class="st-grid2">
-              <label class="st-field">Ämne
+              <label class="st-field st-las-only">Ämne
                 <select id="gen-subject" class="st-input">
                   <option value="svenska">Berättelse</option>
                   <option value="no">NO</option>
@@ -248,6 +267,7 @@
               <button id="import-days-btn" class="st-btn st-btn--primary st-btn--sm st-dag-only">Lägg på veckans dagar</button>
               <button id="import-btn" class="st-btn st-btn--ghost st-btn--sm st-dag-only">Importera till banken</button>
               <button id="import-vt-btn" class="st-btn st-btn--primary st-btn--sm st-vt-only hidden">Lägg in veckans text</button>
+              <button id="import-ord-btn" class="st-btn st-btn--primary st-btn--sm st-ordark-only hidden">Lägg in orden</button>
               <span id="import-feedback" class="st-feedback"></span>
             </div>
           </div>
@@ -332,6 +352,7 @@
   <script src="js/prompt.js"></script>
   <script src="js/weeks-store.js"></script>
   <script src="js/svenska.js"></script>
+  <script src="js/ord.js"></script>
   <script src="js/starten-app.js"></script>
 </body>
 </html>

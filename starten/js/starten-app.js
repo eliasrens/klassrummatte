@@ -182,8 +182,13 @@
     w.innerHTML = "";
     w.classList.remove("hidden");
 
-    // Sida 1 – svenska
-    StartenSvenska.renderSheet(w, { color: color, title: title });
+    // Sida 1 – läsförståelse eller veckans ord (det senare är liggande)
+    if (currentSida1Typ() === "ord") {
+      StartenOrd.renderSheet(w, { color: color, title: title });
+      StartenOrd.fitWhenReady(w);
+    } else {
+      StartenSvenska.renderSheet(w, { color: color, title: title });
+    }
 
     // Sida 2 – matte (cachade uppgifter + byt-ruta-knappar)
     ArbetsbladStarten.renderSingleStartenSheet(
@@ -337,7 +342,11 @@
       if (fmtEl) fmtEl.checked = true;
       const ordradEl = $("#sv-ordrad");
       if (ordradEl) ordradEl.checked = !(week && week.visaOrdrad === false);
-      syncSvFormatUI();
+      // Sida 1: läsförståelse eller veckans ord
+      const s1 = (week && week.sida1Typ === "ord") ? "ord" : "las";
+      const s1El = document.querySelector('input[name="sida1-typ"][value="' + s1 + '"]');
+      if (s1El) s1El.checked = true;
+      syncSida1TypUI();
       // Matte: om veckan har sparad matte, ladda den; annars regenerera enligt UI
       if (week && week.matte && Array.isArray(week.matte.rows) && week.matte.rows.length) {
         state.matte = {
@@ -378,6 +387,7 @@
     render();
     refreshSv();
     refreshVt();
+    refreshOrdArk();
   }
 
   function onWeeksListChanged() { renderWeekSelect(); }
@@ -425,6 +435,58 @@
   }
 
   /* ── Klass-utskrift: separator + N elever per klass ──── */
+  /* ── Utskrift ────────────────────────────────────────── */
+  // Delad av alla utskriftsvägar så reglerna inte kan glida isär.
+  // Sidformatet skickas in: ordarket är liggande, allt annat stående.
+  const PRINT_CSS =
+    '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}' +
+    'html,body{margin:0;padding:0;background:#fff!important;height:100%!important;overflow:visible!important;}' +
+    '.ab-sheet-wrap{display:block!important;padding:0!important;height:100%;}' +
+    '.ab-sheet{display:flex!important;flex-direction:column!important;width:100%!important;height:100vh!important;box-shadow:none!important;overflow:hidden!important;}' +
+    '.ab-sheet::before{flex-shrink:0!important;}' +
+    '.ab-sheet-inner{display:flex!important;flex-direction:column!important;flex:1!important;overflow:hidden!important;}' +
+    '.ab-sheet + .ab-sheet{page-break-before:always!important;break-before:page!important;margin-top:0!important;}' +
+    '.no-print{display:none!important;}' +
+    // Använd-markeringen är lärarens planeringsstöd, inte elevens papper
+    '.st-ord-used{display:none!important;}';
+
+  function printDoc(content, landscape) {
+    let iframe = document.getElementById("print-iframe");
+    if (!iframe) {
+      iframe = document.createElement("iframe");
+      iframe.id = "print-iframe";
+      iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none;";
+      document.body.appendChild(iframe);
+    }
+    const page = landscape
+      ? "@page{size:A4 landscape;margin:0.4cm;}"
+      : "@page{size:A4 portrait;margin:0.4cm;}";
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html lang="sv"><head><meta charset="UTF-8">' +
+      '<base href="' + document.baseURI + '">' +
+      '<link rel="stylesheet" href="../css/arbetsblad-sheet.css">' +
+      '<link rel="stylesheet" href="../css/arbetsblad-starten.css">' +
+      '<link rel="stylesheet" href="starten.css">' +
+      '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+      '<link href="https://fonts.googleapis.com/css2?family=Andika:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">' +
+      "<style>" + PRINT_CSS + page + "</style></head><body>" +
+      '<div class="ab-sheet-wrap">' + content + "</div></body></html>");
+    doc.close();
+    iframe.onload = function () { iframe.contentWindow.focus(); iframe.contentWindow.print(); };
+  }
+
+  // Ordarket och mattearket skrivs ut var för sig – de har olika sidformat
+  // och går därför inte att slå ihop till ett dubbelsidigt blad.
+  function sheetHtml(index) {
+    const w = wrap();
+    if (!w || !w.children.length) render();
+    const el = wrap().children[index];
+    return el ? el.outerHTML : "";
+  }
+  function printOrdSheet() { printDoc(sheetHtml(0), true); }
+  function printMatteSheet() { printDoc(sheetHtml(1), false); }
+
   function printClasses() {
     const classes = getClasses();
     if (!classes.length) { alert("Lägg till minst en klass först."); return; }
@@ -440,71 +502,14 @@
       for (let i = 0; i < c.students; i++) content += sheetContent;
     });
 
-    let iframe = document.getElementById("print-iframe");
-    if (!iframe) {
-      iframe = document.createElement("iframe");
-      iframe.id = "print-iframe";
-      iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none;";
-      document.body.appendChild(iframe);
-    }
-    const doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open();
-    doc.write('<!DOCTYPE html><html lang="sv"><head><meta charset="UTF-8">' +
-      '<base href="' + document.baseURI + '">' +
-      '<link rel="stylesheet" href="../css/arbetsblad-sheet.css">' +
-      '<link rel="stylesheet" href="../css/arbetsblad-starten.css">' +
-      '<link rel="stylesheet" href="starten.css">' +
-      '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-      '<link href="https://fonts.googleapis.com/css2?family=Andika:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">' +
-      '<style>' +
-      '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}' +
-      'html,body{margin:0;padding:0;background:#fff!important;height:100%!important;overflow:visible!important;}' +
-      '.ab-sheet-wrap{display:block!important;padding:0!important;height:100%;}' +
-      '.ab-sheet{display:flex!important;flex-direction:column!important;width:100%!important;height:100vh!important;box-shadow:none!important;overflow:hidden!important;}' +
-      '.ab-sheet::before{flex-shrink:0!important;}' +
-      '.ab-sheet-inner{display:flex!important;flex-direction:column!important;flex:1!important;overflow:hidden!important;}' +
-      '.ab-sheet + .ab-sheet{page-break-before:always!important;break-before:page!important;margin-top:0!important;}' +
-      '.no-print{display:none!important;}' +
-      '@page{size:A4 portrait;margin:0.4cm;}' +
-      '</style></head><body><div class="ab-sheet-wrap">' + content + '</div></body></html>');
-    doc.close();
-    iframe.onload = function () { iframe.contentWindow.focus(); iframe.contentWindow.print(); };
+    printDoc(content, false);
   }
 
   /* ── Tvåsidig utskrift ───────────────────────────────── */
   function printBoth() {
     const w = wrap();
     if (!w || w.classList.contains("hidden") || !w.children.length) render();
-    const content = wrap().innerHTML;
-    let iframe = document.getElementById("print-iframe");
-    if (!iframe) {
-      iframe = document.createElement("iframe");
-      iframe.id = "print-iframe";
-      iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none;";
-      document.body.appendChild(iframe);
-    }
-    const doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open();
-    doc.write('<!DOCTYPE html><html lang="sv"><head><meta charset="UTF-8">' +
-      '<base href="' + document.baseURI + '">' +
-      '<link rel="stylesheet" href="../css/arbetsblad-sheet.css">' +
-      '<link rel="stylesheet" href="../css/arbetsblad-starten.css">' +
-      '<link rel="stylesheet" href="starten.css">' +
-      '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-      '<link href="https://fonts.googleapis.com/css2?family=Andika:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">' +
-      '<style>' +
-      '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}' +
-      'html,body{margin:0;padding:0;background:#fff!important;height:100%!important;overflow:visible!important;}' +
-      '.ab-sheet-wrap{display:block!important;padding:0!important;height:100%;}' +
-      '.ab-sheet{display:flex!important;flex-direction:column!important;width:100%!important;height:100vh!important;box-shadow:none!important;overflow:hidden!important;}' +
-      '.ab-sheet::before{flex-shrink:0!important;}' +
-      '.ab-sheet-inner{display:flex!important;flex-direction:column!important;flex:1!important;overflow:hidden!important;}' +
-      '.ab-sheet + .ab-sheet{page-break-before:always!important;break-before:page!important;margin-top:0!important;}' +
-      '.no-print{display:none!important;}' +
-      '@page{size:A4 portrait;margin:0.4cm;}' +
-      '</style></head><body><div class="ab-sheet-wrap">' + content + '</div></body></html>');
-    doc.close();
-    iframe.onload = function () { iframe.contentWindow.focus(); iframe.contentWindow.print(); };
+    printDoc(wrap().innerHTML, false);
   }
 
   /* ── Redigeringspanel (svenska = vänster, matte = höger) ── */
@@ -520,12 +525,91 @@
     // Skjut förhandsvisningen åt motsatt håll så arken syns medan man redigerar
     document.body.classList.toggle("edit-left", isSv);
     document.body.classList.toggle("edit-right", !isSv);
-    if (isSv) { syncSvFormatUI(); refreshSv(); refreshVt(); refreshPrompt(); }
+    if (isSv) { syncSida1TypUI(); refreshSv(); refreshVt(); refreshOrdArk(); refreshPrompt(); }
   }
   function closePanel() {
     $("#edit-panel").classList.add("hidden");
     document.body.classList.remove("edit-left", "edit-right");
     state.editingDay = null;
+  }
+
+  /* ── Sida 1: läsförståelse eller veckans ord ─────────── */
+  function currentSida1Typ() {
+    const el = document.querySelector('input[name="sida1-typ"]:checked');
+    return (el && el.value === "ord") ? "ord" : "las";
+  }
+
+  function syncSida1TypUI() {
+    const isOrd = currentSida1Typ() === "ord";
+    document.querySelectorAll(".st-las-only").forEach(function (el) { el.classList.toggle("hidden", isOrd); });
+    document.querySelectorAll(".st-ordark-only").forEach(function (el) { el.classList.toggle("hidden", !isOrd); });
+    const btn = $("#btn-edit-sv");
+    if (btn) btn.textContent = isOrd ? "✏️ Veckans ord" : "✏️ Läsförståelse";
+    const t = $("#edit-title");
+    if (t && !$("#tab-sv").classList.contains("hidden")) {
+      t.textContent = isOrd ? "Redigera veckans ord" : "Redigera läsförståelse";
+    }
+    if (isOrd) {
+      // Allt som hör till läsförståelsen göms – annars ligger t.ex.
+      // "Veckans text" kvar under ordläget.
+      document.querySelectorAll(".st-dag-only, .st-vt-only").forEach(function (el) {
+        el.classList.add("hidden");
+      });
+      refreshPrompt();
+    } else {
+      syncSvFormatUI();   // återställer dag/vecka-synligheten
+    }
+  }
+
+  /* ── Veckans ord: redigering ─────────────────────────── */
+  let ordSaveTimer = null;
+
+  function renderOrdPreview() {
+    const host = $("#ord-preview"); if (!host) return;
+    const words = StartenOrd.parseWords($("#ord-input").value);
+    $("#ord-count").textContent = words.length + " / " + StartenOrd.WORD_COUNT + " ord";
+    $("#ord-count").style.color = words.length > StartenOrd.WORD_COUNT ? "#dc2626" : "";
+    host.innerHTML = words.map(function (w) {
+      const used = StartenOrd.usedBefore(w);
+      return '<span class="st-ord-chip' + (used.length ? " st-ord-chip--used" : "") + '" title="' +
+        escapeHtml(used.length ? StartenOrd.usageTitle(used) : "Inte använt tidigare") + '">' +
+        (used.length ? "<b>●</b>" : "") + escapeHtml(w) + "</span>";
+    }).join("");
+  }
+
+  // Debounce – annars blir varje tangenttryck en molnskrivning.
+  function scheduleOrdSave() {
+    renderOrdPreview();
+    if (ordSaveTimer) clearTimeout(ordSaveTimer);
+    ordSaveTimer = setTimeout(function () {
+      StartenOrd.setWords(StartenOrd.parseWords($("#ord-input").value));
+      render();
+    }, 400);
+  }
+
+  // Bygg inte om rutan medan användaren skriver i den.
+  function refreshOrdArk() {
+    const ta = $("#ord-input"); if (!ta) return;
+    if (document.activeElement !== ta) ta.value = StartenOrd.wordsToText(StartenOrd.getWords());
+    renderOrdPreview();
+  }
+
+  function importWords() {
+    const fb = $("#import-feedback");
+    const words = StartenPrompt.parseWordsResponse($("#import-input").value)
+      .slice(0, StartenOrd.WORD_COUNT);
+    if (!words.length) {
+      fb.textContent = "Kunde inte tolka svaret (förväntar JSON med en ord-lista).";
+      fb.className = "st-feedback st-feedback--err";
+      return;
+    }
+    $("#ord-input").value = words.join("\n");
+    StartenOrd.setWords(words);
+    fb.textContent = "Lade in " + words.length + " ord.";
+    fb.className = "st-feedback st-feedback--ok";
+    $("#import-input").value = "";
+    refreshOrdArk();
+    render();
   }
 
   /* ── Läsförståelse: dag- eller veckoformat ───────────── */
@@ -833,6 +917,12 @@
       subject: $("#gen-subject").value, count: $("#gen-count").value,
       numQuestions: 1, age: $("#gen-age").value, topic: $("#gen-topic").value
     };
+    if (currentSida1Typ() === "ord") {
+      $("#prompt-output").value = StartenPrompt.buildWords({
+        age: opts.age, topic: opts.topic, count: StartenOrd.WORD_COUNT
+      });
+      return;
+    }
     $("#prompt-output").value = currentSvFormat() === "vecka"
       ? StartenPrompt.buildWeek(opts)
       : StartenPrompt.build(opts);
@@ -1078,6 +1168,20 @@
     $("#import-days-btn").addEventListener("click", importToDays);
     $("#import-btn").addEventListener("click", importResponse);
     $("#import-vt-btn").addEventListener("click", importWeekText);
+    $("#import-ord-btn").addEventListener("click", importWords);
+
+    // Sida 1: läsförståelse eller veckans ord
+    document.querySelectorAll('input[name="sida1-typ"]').forEach(function (r) {
+      r.addEventListener("change", function () {
+        syncSida1TypUI();
+        if (!state.savingFromWeek) StartenOrd.setSida1(currentSida1Typ());
+        refreshOrdArk();
+        render();
+      });
+    });
+    $("#ord-input").addEventListener("input", scheduleOrdSave);
+    $("#print-ord").addEventListener("click", function () { $("#print-menu").classList.add("hidden"); printOrdSheet(); });
+    $("#print-matte").addEventListener("click", function () { $("#print-menu").classList.add("hidden"); printMatteSheet(); });
 
     // Läsförståelsens format (dag / vecka)
     document.querySelectorAll('input[name="sv-format"]').forEach(function (r) {

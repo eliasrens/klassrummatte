@@ -189,6 +189,29 @@ body {
   font-size: 0.92rem; color: #334155; font-family: inherit;
 }
 .st-print-menu-item:hover { background: #eef2f6; }
+.st-print-note { font-size: 0.75rem; color: var(--muted); padding: 0.4rem 0.75rem 0.3rem; line-height: 1.4; }
+.st-sida1-switch { margin: 0.3rem 0 0.1rem; }
+
+/* Segmentväljare på Rubrik-etikettens rad (läsförståelse / veckans ord).
+   Ligger i etikettradens lediga utrymme så toppbarens kolumnbredder
+   är oförändrade – annars wrappar färgtemat ner på egen rad. */
+.st-title-label-row { display: flex; align-items: center; gap: 0.6rem; }
+.st-seg {
+  display: inline-flex; background: #fff;
+  border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden;
+}
+.st-seg label { display: block; position: relative; }
+.st-seg input { position: absolute; opacity: 0; pointer-events: none; }
+.st-seg span {
+  display: block; padding: 0.1rem 0.45rem;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.02em; color: #475569;
+  cursor: pointer; white-space: nowrap; transition: background 0.12s, color 0.12s;
+}
+.st-seg label + label span { border-left: 1px solid #e2e8f0; }
+.st-seg span:hover { background: #f1f5f9; }
+.st-seg input:checked + span { background: var(--accent2); color: #fff; }
+.st-seg input:checked + span:hover { background: var(--accent2); }
+.st-seg input:focus-visible + span { outline: 2px solid var(--accent2); outline-offset: -2px; }
 
 /* Klass-utskrift-popover */
 .st-classes-popover {
@@ -448,6 +471,97 @@ body.edit-right main { padding-right: var(--panel-w); transition: padding 0.15s;
   font-size: 12px; color: #475569; white-space: nowrap;
 }
 .st-vt-word-line { flex: 1; border-bottom: 2px dashed #94a3b8; height: 0.45cm; }
+
+/* ── "Veckans ord"-arket (liggande, skrivs ut separat) ── */
+.st-ord-sheet {
+  --sh1: 204; --sh2: 172;
+  width: 297mm;
+  height: 210mm;
+}
+.st-ord-sheet .ab-sheet-inner { padding: 0.7cm 0.9cm 0.5cm; }
+.st-ord-sheet .ab-header { margin-bottom: 0.3cm; padding-bottom: 0.15cm; }
+
+.st-ord-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 3px solid hsl(var(--sh1, 204), 62%, 45%);
+  flex: 1 1 auto;
+}
+.st-ord-table th,
+.st-ord-table td { border: 1.5px solid #1f2937; }
+
+/* De ljusa temana sätter inte --sh1, utan har egna färgregler. Ramen måste
+   därför pekas ut explicit för dem – annars blir den kvar på standardblå. */
+.starten-rosenljus    .st-ord-table { border-color: hsl(355, 80%, 62%); }
+.starten-persikoljus  .st-ord-table { border-color: hsl(14,  85%, 62%); }
+.starten-sol          .st-ord-table { border-color: hsl(40,  90%, 48%); }
+.starten-limeljus     .st-ord-table { border-color: hsl(108, 50%, 45%); }
+.starten-mynta        .st-ord-table { border-color: hsl(174, 55%, 42%); }
+.starten-himmel       .st-ord-table { border-color: hsl(190, 75%, 45%); }
+.starten-lavendelljus .st-ord-table { border-color: hsl(235, 70%, 66%); }
+.starten-ceriseljus   .st-ord-table { border-color: hsl(340, 80%, 62%); }
+.st-ord-table th {
+  font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+  font-weight: 700; font-size: 16px;
+  text-align: left; color: #111;
+  padding: 0.2cm 0.3cm;
+  white-space: nowrap;
+}
+
+/* Fyra skrivlinjer i varje ruta: tak, mitt, bas, källare.
+   Linjerna går kant i kant så de löper obrutet tvärs över arket.
+   Baslinjen är mörkast – det är den man skriver på. */
+.st-ord-table td { padding: 0; vertical-align: top; }
+.st-ord-cell {
+  --row-h: 1.62cm;
+  --tak: 0.41cm;
+  --mitt: 0.59cm;
+  --bas: 1.03cm;
+  --kallare: 1.35cm;      /* dagsrutor: drygt 3 mm att skriva stapeln på */
+  --nudge: 0.12em;        /* i em så baslinjen följer med om ordet krymps */
+  position: relative; height: var(--row-h);
+  overflow: hidden;       /* sista skyddsnät mot ord som spiller över */
+}
+/* Förlagan: källarlinjen ligger där typsnittets stapel faktiskt slutar,
+   så det tryckta ordet nuddar sina linjer. Tak, mitt och bas är samma
+   som i dagsrutorna och löper därför obrutna tvärs över arket. */
+.st-ord-table td:first-child .st-ord-cell { --kallare: 1.22cm; }
+
+.st-ord-tak, .st-ord-mid, .st-ord-base, .st-ord-kallare {
+  position: absolute; left: 0; right: 0;
+}
+.st-ord-tak     { top: var(--tak);     border-top: 1px dashed #c4cdd8; }
+.st-ord-mid     { top: var(--mitt);    border-top: 1px solid  #c4cdd8; }
+.st-ord-base    { top: var(--bas);     border-top: 1px solid  #8f9bab; }
+.st-ord-kallare { top: var(--kallare); border-top: 1px dashed #c4cdd8; }
+
+.st-ord-word {
+  position: absolute;
+  left: 0.28cm;
+  bottom: calc(var(--row-h) - var(--bas) - var(--nudge));
+  font-family: 'Andika', var(--reading-font);
+  font-size: 32px; line-height: 1;
+  color: #1f2937; white-space: nowrap;
+}
+/* Planeringsstöd för läraren – aldrig på elevens papper (se @media print) */
+.st-ord-used {
+  position: absolute; right: 0.18cm; bottom: 0.42cm;
+  color: #dc2626; font-size: 10px;
+  font-family: 'Segoe UI', sans-serif;
+  cursor: help;
+}
+
+/* Redigering av orden i panelen */
+#ord-input { font-family: var(--reading-font); line-height: 1.5; }
+.st-ord-preview { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+.st-ord-chip {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 0.15rem 0.55rem; font-size: 0.8rem; color: #334155;
+}
+.st-ord-chip--used { border-color: #fecaca; background: #fef2f2; }
+.st-ord-chip b { color: #dc2626; font-weight: 700; }
 
 /* Redigering av veckotexten i panelen */
 .st-vt-questions { display: flex; flex-direction: column; gap: 0.3rem; }

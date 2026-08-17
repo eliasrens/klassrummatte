@@ -157,6 +157,52 @@ window.StartenPrompt = (function () {
     return out;
   }
 
+  /* ── Veckans ord: 10 träningsord ──
+     Orden ska rymmas i en 4,8 cm bred ruta, därav längdgränsen. */
+  function buildWords(opts) {
+    const age = opts.age || "årskurs 4–6";
+    const topic = (opts.topic || "").trim();
+    const count = opts.count || 10;
+
+    return (
+      "Du väljer ut " + count + " svenska träningsord för rättstavning (" + age + ").\n" +
+      "Eleverna skriver av varje ord en gång per dag, måndag till fredag.\n\n" +
+      "Krav:\n" +
+      "- Exakt " + count + " ord.\n" +
+      "- Varje ord högst 13 bokstäver – längre ord får inte plats i rutan.\n" +
+      "- Blanda svårighetsgrad: några lätta, några som utmanar.\n" +
+      "- Ta gärna med ord som brukar stavas fel (dubbelteckning, sj- och tj-ljud, " +
+        "ng-ljud, stumt h, ord på -ig eller -lig).\n" +
+      (topic
+        ? "- Utgå från detta tema: " + topic + ".\n"
+        : "- Välj vardagsnära ord som eleverna känner igen.\n") +
+      "- Skriv orden i grundform med liten begynnelsebokstav, utom egennamn.\n\n" +
+      "Svara ENDAST med giltig JSON, utan förklaringar och utan markdown-kodstaket:\n\n" +
+      '{ "ord": ["ord1", "ord2", "ord3"] }\n'
+    );
+  }
+
+  // Plockar ut ordlistan ur ett AI-svar. Accepterar { ord: [...] },
+  // { words: [...] }, en ren array, eller radbruten text som sista utväg.
+  function parseWordsResponse(raw) {
+    const text = (raw || "").trim();
+    if (!text) return [];
+    const cleaned = text.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
+    let data = null;
+    try { data = JSON.parse(cleaned); } catch (e) {}
+    let list = null;
+    if (Array.isArray(data)) list = data;
+    else if (data && Array.isArray(data.ord)) list = data.ord;
+    else if (data && Array.isArray(data.words)) list = data.words;
+    if (!list) {
+      const m = cleaned.match(/\[[^\]]*\]/);
+      if (m) { try { list = JSON.parse(m[0]); } catch (e) {} }
+    }
+    if (!list) list = cleaned.split(/[\n,;]+/);
+    return list.map(function (x) { return String(x || "").replace(/^[-*\d.\s"]+|["\s]+$/g, "").trim(); })
+      .filter(Boolean);
+  }
+
   // Plockar ut veckotext-objektet ur ett AI-svar. Accepterar både ett ensamt
   // objekt och en array med ett objekt i.
   function parseWeekResponse(raw) {
@@ -171,5 +217,9 @@ window.StartenPrompt = (function () {
     };
   }
 
-  return { build: build, buildWeek: buildWeek, parseResponse: parseResponse, parseWeekResponse: parseWeekResponse };
+  return {
+    build: build, buildWeek: buildWeek, buildWords: buildWords,
+    parseResponse: parseResponse, parseWeekResponse: parseWeekResponse,
+    parseWordsResponse: parseWordsResponse
+  };
 })();
