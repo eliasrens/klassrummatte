@@ -176,9 +176,9 @@ window.StartenPrompt = (function () {
       (topic
         ? "- Utgå från detta tema: " + topic + ".\n"
         : "- Välj vardagsnära ord som eleverna känner igen.\n") +
-      "- Skriv orden i grundform med liten begynnelsebokstav, utom egennamn.\n\n" +
+      "- Skriv varje ord i grundform och med STOR begynnelsebokstav.\n\n" +
       "Svara ENDAST med giltig JSON, utan förklaringar och utan markdown-kodstaket:\n\n" +
-      '{ "ord": ["ord1", "ord2", "ord3"] }\n'
+      '{ "ord": ["Glass", "Regnbåge", "Köttbullar"] }\n'
     );
   }
 
@@ -200,7 +200,9 @@ window.StartenPrompt = (function () {
     }
     if (!list) list = cleaned.split(/[\n,;]+/);
     return list.map(function (x) { return String(x || "").replace(/^[-*\d.\s"]+|["\s]+$/g, "").trim(); })
-      .filter(Boolean);
+      .filter(Boolean)
+      // Prompten ber om stor begynnelsebokstav, men modellen glömmer ibland.
+      .map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); });
   }
 
   // Plockar ut veckotext-objektet ur ett AI-svar. Accepterar både ett ensamt
