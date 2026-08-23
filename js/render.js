@@ -66,25 +66,47 @@ const Renderer = (() => {
     if (plugin) plugin.render(problem, cell);
   }
 
-  function renderProblem(problem, container) {
+  // Numrering (valfritt läge): nr identifierar skärmen – 1., 2., 3. – och när
+  // flera uppgifter visas samtidigt får cellerna a), b), c) inom den skärmen.
+  // Eleverna skriver samma beteckning i sitt rutade block.
+  const LETTERS = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+  function _nrEl(text) {
+    const el = document.createElement('div');
+    el.className = 'problem-nr';
+    el.textContent = text;
+    return el;
+  }
+
+  function renderProblem(problem, container, nr) {
     container.innerHTML = '';
     container.className = 'hidden';
+    if (nr) container.appendChild(_nrEl(nr + '.'));
     _renderContent(problem, container);
   }
 
-  function renderMultiple(problems, container) {
+  function renderMultiple(problems, container, nr) {
     container.innerHTML = '';
     container.className = 'hidden';
+    if (nr) container.appendChild(_nrEl(nr + '.'));
     const grid = document.createElement('div');
     grid.className = `problems-grid problems-grid--${problems.length}`;
-    problems.forEach(problem => {
+    problems.forEach((problem, i) => {
       const cell = document.createElement('div');
       cell.className = 'problem-cell';
       _renderContent(problem, cell);
       // Right-align cells whose immediate child is a span (arithmetic expressions)
-      // so that = signs align vertically within each grid column
+      // so that = signs align vertically within each grid column.
+      // Måste göras FÖRE bokstavsetiketten läggs in – annars är det alltid
+      // etiketten som ligger först och alla celler skulle högerjusteras.
       if (cell.firstElementChild && cell.firstElementChild.tagName === 'SPAN') {
         cell.classList.add('arithmetic-cell');
+      }
+      if (nr) {
+        const letter = document.createElement('span');
+        letter.className = 'problem-letter';
+        letter.textContent = (LETTERS[i] || String(i + 1)) + ')';
+        cell.insertBefore(letter, cell.firstChild);
       }
       grid.appendChild(cell);
     });

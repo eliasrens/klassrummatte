@@ -33,6 +33,7 @@ const App = (() => {
   let sessionCurrent       = 0;
   let problemHistory       = [];   // historik för bakåtnavigering
   let historyIndex         = -1;   // -1 = ingen historik visas
+  let problemNumber        = 0;    // löpnummer för numreringsläget, nollställs vid sidladdning
 
   // Timer-state
   let timerInterval        = null;
@@ -264,11 +265,15 @@ const App = (() => {
 
     const settings = Settings.get();
 
+    // Numret hör till skärmen, inte till den enskilda uppgiften: i flera-
+    // uppgifter-läget får skärmen ett nummer och cellerna a), b), c).
+    const nr = settings.numbering ? ++problemNumber : 0;
+
     if (settings.multipleProblems) {
       problemDisplay.classList.add('multi-mode');
       currentProblems = Problems.generateMultipleProblems(settings);
       currentProblem  = null;
-      Renderer.renderMultiple(currentProblems, problemDisplay);
+      Renderer.renderMultiple(currentProblems, problemDisplay, nr);
       window.KlassrumsSession.currentProblem = null;
     } else {
       problemDisplay.classList.remove('multi-mode');
@@ -282,15 +287,17 @@ const App = (() => {
       lastProblem    = problem;
       currentProblem = problem;
       currentProblems = [];
-      Renderer.renderProblem(problem, problemDisplay);
+      Renderer.renderProblem(problem, problemDisplay, nr);
       window.KlassrumsSession.currentProblem = currentProblem;
     }
 
-    // Spara i historik
+    // Spara i historik. Numret sparas per post – historiken kapas vid 50
+    // poster, så längden går inte att använda som löpnummer.
     problemHistory.push({
       problem: currentProblem,
       problems: currentProblems.length > 0 ? currentProblems.slice() : null,
       multi: settings.multipleProblems,
+      nr: nr,
     });
     if (problemHistory.length > 50) problemHistory.shift();
     historyIndex = -1;
@@ -405,12 +412,12 @@ const App = (() => {
       problemDisplay.classList.add('multi-mode');
       currentProblems = entry.problems;
       currentProblem  = null;
-      Renderer.renderMultiple(currentProblems, problemDisplay);
+      Renderer.renderMultiple(currentProblems, problemDisplay, entry.nr);
     } else {
       problemDisplay.classList.remove('multi-mode');
       currentProblem  = entry.problem;
       currentProblems = [];
-      Renderer.renderProblem(currentProblem, problemDisplay);
+      Renderer.renderProblem(currentProblem, problemDisplay, entry.nr);
     }
 
     showAnswerBtn.disabled    = false;

@@ -105,6 +105,7 @@ const Menu = (() => {
     { id: 'bildstod-check', name: 'Bildstöd' },
     { id: 'problemlosning-check', name: 'Problemlösning' },
     { id: 'multiple-check', name: 'Flera uppgifter' },
+    { id: 'numbering-check', name: 'Numrering' },
     { id: 'discussion-check', name: 'Diskussionsstöd' },
     { id: 'timer-check', name: 'Timer' },
     { id: 'extra-enabled-check', name: 'Extrauppgift' },
@@ -538,6 +539,7 @@ const Menu = (() => {
     document.getElementById('division-rest-check').checked  = s.divisionRest || false;
     document.getElementById('multiple-check').checked       = s.multipleProblems || false;
     document.getElementById('multiple-count-select').value  = s.multipleCount || 2;
+    document.getElementById('numbering-check').checked      = s.numbering || false;
     document.getElementById('multiple-count-wrap').classList.toggle('hidden', !s.multipleProblems);
     document.getElementById('discussion-check').checked     = s.discussionEnabled || false;
     document.getElementById('timer-check').checked          = s.timerEnabled || false;
@@ -755,6 +757,11 @@ const Menu = (() => {
       Settings.setMultipleCount(e.target.value);
     });
 
+    document.getElementById('numbering-check').addEventListener('change', e => {
+      Settings.setNumbering(e.target.checked);
+      updateSelectedToolTags();
+    });
+
     document.getElementById('discussion-check').addEventListener('change', e => {
       Settings.setDiscussionEnabled(e.target.checked);
       updateSelectedToolTags();
@@ -888,6 +895,9 @@ const Menu = (() => {
       document.getElementById('multiple-check').checked = false;
       Settings.setMultipleProblems(false);
       document.getElementById('multiple-count-wrap').classList.add('hidden');
+
+      document.getElementById('numbering-check').checked = false;
+      Settings.setNumbering(false);
 
       updateAreaImplicitHint();
       updateConditionalSections();

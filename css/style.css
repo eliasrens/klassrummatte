@@ -1625,3 +1625,33 @@ body.extra-visible .stage-timer {
   margin: 0.2em 0 0;
   letter-spacing: 0.03em;
 }
+
+/* ── Numrering av uppgifter (valfritt läge) ─────────────────
+   Skärmen får ett nummer, och när flera uppgifter visas samtidigt
+   får varje ruta en bokstav. Eleverna skriver samma beteckning i
+   sitt rutade block och kan sedan dra linjer mellan uppgifterna.
+   Båda ligger absolut positionerade så uppgiftens centrering inte
+   rubbas. Färgen ärvs och tonas ner, så den följer temat. */
+.problem-nr {
+  position: absolute;
+  top:  clamp(0.3rem, 1.2vh, 1rem);
+  left: clamp(0.5rem, 1.5vw, 1.6rem);
+  font-size: clamp(1.1rem, 2.1vw, 2rem);
+  font-weight: 800;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.problem-letter {
+  position: absolute;
+  top:  clamp(0.25rem, 1vh, 0.8rem);
+  left: clamp(0.4rem, 1vw, 1rem);
+  font-size: clamp(0.85rem, 1.5vw, 1.4rem);
+  font-weight: 800;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.45;
+  pointer-events: none;
+}

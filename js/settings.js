@@ -29,6 +29,7 @@ const Settings = (() => {
     flersteg: false,
     multipleProblems: false,
     multipleCount: 2,
+    numbering: false,
     klockaTypes: ['analog', 'digital'],
     sessionLimit: 'unlimited',
     discussionEnabled: false,
@@ -207,6 +208,8 @@ const Settings = (() => {
   function setGradeSelected(b)     { state.gradeSelected = !!b; save(); }
   function setMultipleProblems(b)  { state.multipleProblems = !!b; save(); }
   function setMultipleCount(n)         { state.multipleCount = parseInt(n, 10); save(); }
+  // Numrering av uppgifterna (1., 2., ...) plus a) b) c) i flera-uppgifter-läget
+  function setNumbering(b)             { state.numbering = !!b; save(); }
   function getKlockaTypes()            { return [...(state.klockaTypes || ['analog', 'digital'])]; }
   function setKlockaTypes(arr)         { state.klockaTypes = [...arr]; save(); }
   function getSessionLimit()           { return state.sessionLimit || 'unlimited'; }
@@ -241,7 +244,7 @@ const Settings = (() => {
     setGrade, setAreas, setExtraEnabled, setExtraType, setExtraDelay, setProblemlosning,
     setBildstod, setBildstodDelay, setDivisionRest, setGeometriTypes,
     setMultDivMode, setSpecificTables, setAddSubMode, setAddSubVaxling, setPrioritetOps, setBrakTypes, setFlersteg,
-    setGradeSelected, setMultipleProblems, setMultipleCount,
+    setGradeSelected, setMultipleProblems, setMultipleCount, setNumbering,
     getKlockaTypes, setKlockaTypes,
     getSessionLimit, setSessionLimit,
     isDiscussionEnabled, setDiscussionEnabled,
